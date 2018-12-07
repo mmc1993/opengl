@@ -1,20 +1,10 @@
 #include "core/timer/timer.h"
-
-Timer timer;
-
-void onTimer()
-{
-    auto id = timer.Add(16, std::bind(&onTimer));
-    timer.Del(id);
-    std::cout << "onTimer" << std::endl;
-}
+#include "core/window/window.h"
 
 int main()
 {
-    timer.Add(16, std::bind(&onTimer));
-    while (true)
-    {
-        timer.Update(std::chrono::high_resolution_clock::now());
-    }
+    Window window;
+    window.Create("xxx", 800, 600);
+    window.Loop();
     return 0;
 }
