@@ -2,6 +2,7 @@
 
 #pragma comment(lib, "lib/glew32.lib")
 #pragma comment(lib, "lib/glfw3.lib")
+#pragma comment(lib, "OpenGL32.lib")
 
 Window::Window()
     : _window(nullptr)
@@ -26,6 +27,14 @@ bool Window::Create(const std::string & title, size_t w, size_t h)
     }
     glfwMakeContextCurrent(_window);
     glfwSetWindowUserPointer(_window, this);
+
+    //  ≥ı ºªØGLEW
+    if (GLEW_OK != glewInit())
+    {
+        _window = nullptr;
+        glfwTerminate();
+        return false;
+    }
     return true;
 }
 
@@ -85,47 +94,58 @@ size_t Window::GetH() const
 
 void Window::Loop()
 {
+    glClearColor(0, 0, 0, 1);
+
+    //  ∞Û∂®Input
     glfwSetKeyCallback(_window, Window::OnKey);
     glfwSetCursorPosCallback(_window, Window::OnCur);
     glfwSetWindowSizeCallback(_window, Window::OnSize);
     glfwSetMouseButtonCallback(_window, Window::OnBtn);
     glfwSetWindowCloseCallback(_window, Window::OnClose);
+
     while (!glfwWindowShouldClose(_window))
     {
         glfwPollEvents();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glfwSwapBuffers(_window);
     }
+
     _window = nullptr;
+
     glfwTerminate();
 }
 
 void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
 {
-    std::cout 
-        << "onBtn "
-        << btn << " " 
-        << act << " "
-        << stat << std::endl;
+    EventMouse::Param param;
+    param.act = act;
+    param.btn = btn;
+    param.stat = stat;
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventMouse::kBUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
 {
-    std::cout
-        << "OnCur"
-        << x << " "
-        << y << std::endl;
+    EventMouse::Param param;
+    param.x = static_cast<float>(x);
+    param.y = static_cast<float>(y);
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventMouse::kMOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
 {
-    std::cout
-        << "OnKey"
-        << key << " "
-        << act << " "
-        << stat << std::endl;
+    EventKey::Param param;
+    param.key = key;
+    param.act = act;
+    param.stat = stat;
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventKey::kKEY, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)
 {
+    glViewport(0, 0, w, h);
 }
 
 void Window::OnClose(GLFWwindow * window)

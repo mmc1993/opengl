@@ -3,6 +3,7 @@
 #include "../include.h"
 #include "../third/glew.h"
 #include "../third/glfw3.h"
+#include "../event/event.h"
 
 class Window {
 public:
@@ -19,6 +20,11 @@ public:
     size_t GetH() const;
     void Loop();
 
+    EventDispatcher & RefEventDispatcher()
+    {
+        return _eventDispatcher;
+    }
+
 private:
     static void OnBtn(GLFWwindow * window, int btn, int act, int stat);
     static void OnCur(GLFWwindow * window, double x, double y);
@@ -28,4 +34,6 @@ private:
 
 private:
     GLFWwindow * _window;
+
+    EventDispatcher _eventDispatcher;
 };
