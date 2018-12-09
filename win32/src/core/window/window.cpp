@@ -13,13 +13,13 @@ Window::~Window()
 {
 }
 
-bool Window::Create(const std::string & title, size_t w, size_t h)
+bool Window::Create(const std::string & title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    _window = glfwCreateWindow(w, h, title.c_str(), nullptr, nullptr);
+    _window = glfwCreateWindow(CW_DEFAULT, CW_DEFAULT, title.c_str(), nullptr, nullptr);
     if (nullptr == _window)
     {
         glfwTerminate();

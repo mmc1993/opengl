@@ -4,7 +4,8 @@
 int main()
 {
     Window window;
-    window.Create("xxx", 800, 600);
+    window.Create("xxx");
+    window.Move(200, 100, 800, 600);
     window.Loop();
     return 0;
 }

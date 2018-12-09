@@ -9,7 +9,7 @@ class Window {
 public:
     Window();
     ~Window();
-    bool Create(const std::string & title, size_t w, size_t h);
+    bool Create(const std::string & title);
     void Move(size_t x);
     void Move(size_t x, size_t y);
     void Move(size_t x, size_t y, size_t w);

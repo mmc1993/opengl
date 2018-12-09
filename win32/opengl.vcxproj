@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\asset\bitmap.h" />
+    <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
     <ClInclude Include="src\core\third\glew.h" />

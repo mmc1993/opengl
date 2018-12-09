@@ -56,5 +56,8 @@
     <ClInclude Include="src\core\asset\bitmap.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\asset\texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
