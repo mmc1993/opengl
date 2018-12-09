@@ -117,8 +117,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\asset\bitmap.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
+    <ClCompile Include="src\core\node\node.cpp" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -126,8 +126,10 @@
   <ItemGroup>
     <ClInclude Include="src\core\asset\bitmap.h" />
     <ClInclude Include="src\core\asset\texture.h" />
+    <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
+    <ClInclude Include="src\core\node\node.h" />
     <ClInclude Include="src\core\third\glew.h" />
     <ClInclude Include="src\core\third\glfw3.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
