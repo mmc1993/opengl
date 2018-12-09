@@ -12,7 +12,7 @@ Node::~Node()
 {
 }
 
-void Node::Update(float dt)
+void Node::OnUpdate(float dt)
 {
 }
 
@@ -64,13 +64,20 @@ std::vector<Node*>& Node::GetChilds()
 void Node::AddComponent(Component * component)
 {
     _components.push_back(component);
+    component->SetOwner(this);
+    component->OnAdd();
 }
 
 void Node::DelComponent(const std::type_info & type)
 {
     auto it = std::find_if(_components.begin(), _components.end(),
         [&type](Component * component) { return typeid(*component) == type; });
-    if (it != _components.end()) { _components.erase(it); }
+    if (it != _components.end()) 
+    {
+        _components.erase(it);
+        (*it)->OnDel();
+        delete *it;
+    }
 }
 
 std::vector<Component*>& Node::GetComponents()
@@ -104,6 +111,27 @@ void Node::SetActive(bool active)
 bool Node::IsActive() const
 {
     return _active;
+}
+
+void Node::Update(float dt)
+{
+    if (IsActive())
+    {
+        OnUpdate(dt);
+
+        for (auto component : _components)
+        {
+            if (component->IsActive())
+            {
+                component->OnUpdate(dt);
+            }
+        }
+
+        for (auto child : _childs)
+        {
+            child->Update(dt);
+        }
+    }
 }
 
 void Node::SetParent(Node * parent)

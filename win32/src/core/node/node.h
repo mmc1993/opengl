@@ -9,7 +9,7 @@ public:
     Node();
     virtual ~Node();
 
-    virtual void Update(float dt);
+    virtual void OnUpdate(float dt);
 
     void AddChild(Node * child, size_t tag = std::numeric_limits<size_t>::max());
     void DelChild(Node * child);
@@ -27,6 +27,7 @@ public:
     
     void SetActive(bool active);
     bool IsActive() const;
+    void Update(float dt);
 
     void SetParent(Node * parent);
     Node * GetParent();
