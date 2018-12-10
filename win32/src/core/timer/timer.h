@@ -72,6 +72,7 @@ public:
         _tasks.emplace_back(Timer::s_countID, func, 
             std::chrono::high_resolution_clock::now() + 
             std::chrono::milliseconds(ms));
+        std::push_heap(_tasks.begin(), _tasks.end());
         return Timer::s_countID++;
     }
 
