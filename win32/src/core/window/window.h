@@ -4,8 +4,18 @@
 #include "../third/glew.h"
 #include "../third/glfw3.h"
 #include "../event/event.h"
+#include "../timer/timer.h"
+#include "../node/node.h"
 
 class Window {
+public:
+    struct RenderInfo {
+        //  下一次渲染时间
+        std::chrono::high_resolution_clock::time_point renderTM;
+        //  每帧渲染CD
+        std::chrono::milliseconds renderCD;
+    };
+
 public:
     Window();
     ~Window();
@@ -20,10 +30,14 @@ public:
     size_t GetH() const;
     void Loop();
 
-    EventDispatcher & RefEventDispatcher()
-    {
-        return _eventDispatcher;
-    }
+    EventDispatcher & GefEventDispatcher();
+    Timer & GetTimer();
+    Node & GetRoot();
+
+    void SetFPS(size_t ms);
+
+private:
+    void Update();
 
 private:
     static void OnBtn(GLFWwindow * window, int btn, int act, int stat);
@@ -33,7 +47,13 @@ private:
     static void OnClose(GLFWwindow * window);
 
 private:
+    Node _root;
+
+    Timer _timer;
+
     GLFWwindow * _window;
+
+    RenderInfo _renderInfo;
 
     EventDispatcher _eventDispatcher;
 };

@@ -103,18 +103,58 @@ void Window::Loop()
     glfwSetMouseButtonCallback(_window, Window::OnBtn);
     glfwSetWindowCloseCallback(_window, Window::OnClose);
 
+    //  初始化各项数据
+    _renderInfo.renderTM = std::chrono::high_resolution_clock::now();
+
     while (!glfwWindowShouldClose(_window))
     {
-        glfwPollEvents();
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        glfwSwapBuffers(_window);
+        Update();
     }
 
     _window = nullptr;
 
     glfwTerminate();
+}
+
+EventDispatcher & Window::GefEventDispatcher()
+{
+    return _eventDispatcher;
+}
+
+Timer & Window::GetTimer()
+{
+    return _timer;
+}
+
+Node & Window::GetRoot()
+{
+    return _root;
+}
+
+void Window::SetFPS(size_t ms)
+{
+    _renderInfo.renderCD = std::chrono::milliseconds(1000 / ms);
+}
+
+void Window::Update()
+{
+    auto now = std::chrono::high_resolution_clock::now();
+    if (now >= _renderInfo.renderTM)
+    {
+        glfwPollEvents();
+
+        auto diffTM= now - _renderInfo.renderTM;
+        diffTM += std::chrono::milliseconds(16);
+        _renderInfo.renderTM += _renderInfo.renderCD;
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        _root.Update(std::chrono::duration_cast
+            <std::chrono::milliseconds>
+            (diffTM).count() * 0.001f);
+
+        glfwSwapBuffers(_window);
+    }
 }
 
 void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
@@ -123,7 +163,7 @@ void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
     param.act = act;
     param.btn = btn;
     param.stat = stat;
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventMouse::kBUTTON, param);
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventMouse::kBUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
@@ -131,7 +171,7 @@ void Window::OnCur(GLFWwindow * window, double x, double y)
     EventMouse::Param param;
     param.x = static_cast<float>(x);
     param.y = static_cast<float>(y);
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventMouse::kMOVEED, param);
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventMouse::kMOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
@@ -140,7 +180,7 @@ void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
     param.key = key;
     param.act = act;
     param.stat = stat;
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->RefEventDispatcher().Post(EventKey::kKEY, param);
+    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventKey::kKEY, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)
