@@ -7,18 +7,17 @@ private:
     static size_t s_countID;
 
 public:
-    using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
-    using TaskCall = std::function<void()>;
-
     struct Task {
         size_t mID;
-        TaskCall mCall;
-        TimePoint mTime;
+        std::function<void()> mCall;
+        std::chrono::time_point<std::chrono::high_resolution_clock> mTime;
 
         Task()
         { }
 
-        Task(size_t id, const TaskCall & call, const TimePoint & time)
+        Task(size_t id, 
+            const std::function<void()> & call, 
+            const std::chrono::time_point<std::chrono::high_resolution_clock> & time)
             : mID(id), mCall(call), mTime(time)
         { }
 
@@ -55,7 +54,7 @@ public:
     ~Timer()
     { }
     
-    void Update(const TimePoint & time)
+    void Update(const std::chrono::time_point<std::chrono::high_resolution_clock> & time)
     {
         while (!_tasks.empty() && _tasks.front().mTime <= time)
         {
