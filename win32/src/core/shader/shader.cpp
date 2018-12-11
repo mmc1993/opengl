@@ -89,12 +89,12 @@ void Shader::SetUniform(size_t idx, float val)
 
 void Shader::SetUniform(size_t idx, const Vec4 & val)
 {
-    glUniform4f(idx, val.x, val.y, val.z, val.w);
+    glUniform4f(idx, val.x(), val.y(), val.z(), val.w());
 }
 
-void Shader::SetUniform(size_t idx, const Texture * val)
+void Shader::SetUniform(size_t idx, const Texture & val)
 {
-    glUniform1i(idx, val->GetBitmap()->GetGLID());
+    glUniform1i(idx, val.GetBitmap()->GetGLID());
 }
 
 void Shader::SetUniform(const std::string & key, int val)
@@ -112,7 +112,7 @@ void Shader::SetUniform(const std::string & key, const Vec4 & val)
     SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 
-void Shader::SetUniform(const std::string & key, const Texture * val)
+void Shader::SetUniform(const std::string & key, const Texture & val)
 {
     SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }

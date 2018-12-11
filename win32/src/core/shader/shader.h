@@ -25,12 +25,12 @@ public:
     void SetUniform(size_t idx, int val);
     void SetUniform(size_t idx, float val);
     void SetUniform(size_t idx, const Vec4 & val);
-    void SetUniform(size_t idx, const Texture * val);
+    void SetUniform(size_t idx, const Texture & val);
 
     void SetUniform(const std::string & key, int val);
     void SetUniform(const std::string & key, float val);
     void SetUniform(const std::string & key, const Vec4 & val);
-    void SetUniform(const std::string & key, const Texture * val);
+    void SetUniform(const std::string & key, const Texture & val);
 
     GLuint GetGLID() const { return _GLID; }
 

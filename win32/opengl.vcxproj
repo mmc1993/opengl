@@ -132,6 +132,8 @@
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
+    <ClInclude Include="src\core\math\math.h" />
+    <ClInclude Include="src\core\math\matrix.h" />
     <ClInclude Include="src\core\math\vec4.h" />
     <ClInclude Include="src\core\object\object.h" />
     <ClInclude Include="src\core\third\glew.h" />
