@@ -17,8 +17,6 @@ void Camera::Init(float fov, float wdivh, float near, float far)
 void Camera::LookAt(const glm::vec3 & eye, const glm::vec3 & pos, const glm::vec3 & up)
 {
     _view = glm::lookAt(eye, pos, up);
-
-    _transform.Translate(eye);
 }
 
 const glm::vec3 & Camera::GetUp() const

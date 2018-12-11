@@ -22,5 +22,6 @@ private:
     glm::mat4 _view;
     glm::mat4 _project;
     glm::vec3 _eye, _pos, _up;
+    //  TODO: ±∏”√
     Transform _transform;
 };
