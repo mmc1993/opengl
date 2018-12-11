@@ -1,74 +1,74 @@
-#include "node.h"
+#include "object.h"
 #include "../component/component.h"
 
-Node::Node()
+Object::Object()
     : _tag(std::numeric_limits<size_t>::max())
     , _active(true)
     , _parent(nullptr)
 {
 }
 
-Node::~Node()
+Object::~Object()
 {
 }
 
-void Node::OnUpdate(float dt)
+void Object::OnUpdate(float dt)
 {
 }
 
-void Node::AddChild(Node * child, size_t tag)
+void Object::AddChild(Object * child, size_t tag)
 {
     child->_tag = tag;
     child->_parent = this;
     _childs.push_back(child);
 }
 
-void Node::DelChild(Node * child)
+void Object::DelChild(Object * child)
 {
     DelChild(child, true);
 }
 
-void Node::DelChildIdx(size_t idx)
+void Object::DelChildIdx(size_t idx)
 {
     DelChild(idx, true);
 }
 
-void Node::DelChildTag(size_t tag)
+void Object::DelChildTag(size_t tag)
 {
     auto it = std::find_if(_childs.begin(), _childs.end(), 
-        [tag](Node * child) { return child->_tag == tag; });
+        [tag](Object * child) { return child->_tag == tag; });
     if (it != _childs.end())
     {
         DelChild(std::distance(_childs.begin(), it), true);
     }
 }
 
-Node * Node::GetChildTag(size_t tag)
+Object * Object::GetChildTag(size_t tag)
 {
     auto it = std::find_if(_childs.begin(), _childs.end(),
-        [tag](Node * child) { return child->_tag == tag; });
+        [tag](Object * child) { return child->_tag == tag; });
     return it != _childs.end() ? *it : nullptr;
 }
 
-Node * Node::GetChildIdx(size_t idx)
+Object * Object::GetChildIdx(size_t idx)
 {
     assert(idx < _childs.size());
     return *std::next(_childs.begin(), idx);
 }
 
-std::vector<Node*>& Node::GetChilds()
+std::vector<Object*>& Object::GetChilds()
 {
     return _childs;
 }
 
-void Node::AddComponent(Component * component)
+void Object::AddComponent(Component * component)
 {
     _components.push_back(component);
     component->SetOwner(this);
     component->OnAdd();
 }
 
-void Node::DelComponent(const std::type_info & type)
+void Object::DelComponent(const std::type_info & type)
 {
     auto it = std::find_if(_components.begin(), _components.end(),
         [&type](Component * component) { return typeid(*component) == type; });
@@ -80,19 +80,19 @@ void Node::DelComponent(const std::type_info & type)
     }
 }
 
-std::vector<Component*>& Node::GetComponents()
+std::vector<Component*>& Object::GetComponents()
 {
     return _components;
 }
 
-Component * Node::GetComponent(const std::type_info & type)
+Component * Object::GetComponent(const std::type_info & type)
 {
     auto it = std::find_if(_components.begin(), _components.end(),
         [&type](Component * component) { return typeid(*component) == type; });
     return it != _components.end() ? *it : nullptr;
 }
 
-std::vector<Component*> && Node::GetComponentsInChilds(const std::type_info & type)
+std::vector<Component*> && Object::GetComponentsInChilds(const std::type_info & type)
 {
     std::vector<Component*> result{ GetComponent(type) };
     for (auto child : _childs)
@@ -103,17 +103,17 @@ std::vector<Component*> && Node::GetComponentsInChilds(const std::type_info & ty
     return std::move(result);
 }
 
-void Node::SetActive(bool active)
+void Object::SetActive(bool active)
 {
     _active = active;
 }
 
-bool Node::IsActive() const
+bool Object::IsActive() const
 {
     return _active;
 }
 
-void Node::Update(float dt)
+void Object::Update(float dt)
 {
     if (IsActive())
     {
@@ -134,7 +134,7 @@ void Node::Update(float dt)
     }
 }
 
-void Node::SetParent(Node * parent)
+void Object::SetParent(Object * parent)
 {
     if (nullptr != _parent)
     {
@@ -146,12 +146,12 @@ void Node::SetParent(Node * parent)
     }
 }
 
-Node * Node::GetParent()
+Object * Object::GetParent()
 {
     return _parent;
 }
 
-void Node::DelChild(size_t idx, bool del)
+void Object::DelChild(size_t idx, bool del)
 {
     assert(idx < _childs.size());
     auto it = std::next(_childs.begin(), idx);
@@ -160,7 +160,7 @@ void Node::DelChild(size_t idx, bool del)
     _childs.erase(it);
 }
 
-void Node::DelChild(Node * child, bool del)
+void Object::DelChild(Object * child, bool del)
 {
     auto it = std::find(_childs.begin(), _childs.end(), child);
     assert(it != _childs.end());

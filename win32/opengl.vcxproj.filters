@@ -27,10 +27,10 @@
     <ClCompile Include="src\core\event\event.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\node\node.cpp">
+    <ClCompile Include="src\core\component\component.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\component\component.cpp">
+    <ClCompile Include="src\core\object\object.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClInclude Include="src\core\asset\texture.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\node\node.h">
+    <ClInclude Include="src\core\component\component.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\component\component.h">
+    <ClInclude Include="src\core\object\object.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 
 #include "../include.h"
 
-class Node;
+class Object;
 
 class Component {
 public:
@@ -15,10 +15,10 @@ public:
     bool IsActive() const;
     void SetActive(bool active);
 
-    void SetOwner(Node * owner);
-    Node * GetOwner();
+    void SetOwner(Object * owner);
+    Object * GetOwner();
 
 private:
     bool _active;
-    Node *_owner;
+    Object *_owner;
 };

@@ -126,7 +126,7 @@ Timer & Window::GetTimer()
     return _timer;
 }
 
-Node & Window::GetRoot()
+Object & Window::GetRoot()
 {
     return _root;
 }

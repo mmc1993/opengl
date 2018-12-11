@@ -19,12 +19,12 @@ void Component::SetActive(bool active)
     _active = active;
 }
 
-void Component::SetOwner(Node * owner)
+void Component::SetOwner(Object * owner)
 {
     _owner = owner;
 }
 
-Node * Component::GetOwner()
+Object * Component::GetOwner()
 {
     return _owner;
 }

@@ -4,20 +4,20 @@
 
 class Component;
 
-class Node {
+class Object {
 public:
-    Node();
-    virtual ~Node();
+    Object();
+    virtual ~Object();
 
     virtual void OnUpdate(float dt);
 
-    void AddChild(Node * child, size_t tag = std::numeric_limits<size_t>::max());
-    void DelChild(Node * child);
+    void AddChild(Object * child, size_t tag = std::numeric_limits<size_t>::max());
+    void DelChild(Object * child);
     void DelChildIdx(size_t idx);
     void DelChildTag(size_t tag);
-    Node * GetChildTag(size_t tag);
-    Node * GetChildIdx(size_t idx);
-    std::vector<Node *> & GetChilds();
+    Object * GetChildTag(size_t tag);
+    Object * GetChildIdx(size_t idx);
+    std::vector<Object *> & GetChilds();
 
     void AddComponent(Component * component);
     void DelComponent(const std::type_info & type);
@@ -29,17 +29,17 @@ public:
     bool IsActive() const;
     void Update(float dt);
 
-    void SetParent(Node * parent);
-    Node * GetParent();
+    void SetParent(Object * parent);
+    Object * GetParent();
 
 protected:
     void DelChild(size_t idx, bool del);
-    void DelChild(Node * child, bool del);
+    void DelChild(Object * child, bool del);
 
 private:
     size_t _tag;
     bool _active;
-    Node*_parent;
-    std::vector<Node *> _childs;
+    Object * _parent;
+    std::vector<Object *> _childs;
     std::vector<Component *> _components;
 };

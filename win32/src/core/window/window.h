@@ -5,7 +5,7 @@
 #include "../third/glfw3.h"
 #include "../event/event.h"
 #include "../timer/timer.h"
-#include "../node/node.h"
+#include "../object/object.h"
 
 class Window {
 public:
@@ -32,7 +32,7 @@ public:
 
     EventDispatcher & GefEventDispatcher();
     Timer & GetTimer();
-    Node & GetRoot();
+    Object & GetRoot();
 
     void SetFPS(size_t ms);
 
@@ -47,7 +47,7 @@ private:
     static void OnClose(GLFWwindow * window);
 
 private:
-    Node _root;
+    Object _root;
 
     Timer _timer;
 
