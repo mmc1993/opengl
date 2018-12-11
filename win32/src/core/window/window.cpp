@@ -1,9 +1,5 @@
 #include "window.h"
 
-#pragma comment(lib, "lib/glew32.lib")
-#pragma comment(lib, "lib/glfw3.lib")
-#pragma comment(lib, "OpenGL32.lib")
-
 Window::Window()
     : _window(nullptr)
 {
@@ -56,8 +52,8 @@ void Window::Move(size_t x, size_t y, size_t w)
 void Window::Move(size_t x, size_t y, size_t w, size_t h)
 {
     assert(nullptr != _window);
-    glfwSetWindowPos(_window, x, y);
-    glfwSetWindowSize(_window, w, h);
+    glfwSetWindowPos(_window, static_cast<int>(x), static_cast<int>(y));
+    glfwSetWindowSize(_window, static_cast<int>(w), static_cast<int>(h));
 }
 
 size_t Window::GetX() const

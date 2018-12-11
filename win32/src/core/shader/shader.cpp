@@ -79,27 +79,27 @@ void Shader::Bind()
 
 void Shader::SetUniform(size_t idx, int val)
 {
-    glUniform1i(idx, val);
+    glUniform1i(static_cast<GLint>(idx), val);
 }
 
 void Shader::SetUniform(size_t idx, float val)
 {
-    glUniform1f(idx, val);
+    glUniform1f(static_cast<GLint>(idx), val);
 }
 
 void Shader::SetUniform(size_t idx, const Eigen::Vector3f & val)
 {
-    glUniform3f(idx, val.x(), val.y(), val.z());
+    glUniform3f(static_cast<GLint>(idx), val.x(), val.y(), val.z());
 }
 
 void Shader::SetUniform(size_t idx, const Eigen::Vector4f & val)
 {
-    glUniform4f(idx, val.x(), val.y(), val.z(), val.w());
+    glUniform4f(static_cast<GLint>(idx), val.x(), val.y(), val.z(), val.w());
 }
 
 void Shader::SetUniform(size_t idx, const Texture & val)
 {
-    glUniform1i(idx, val.GetBitmap()->GetGLID());
+    glUniform1i(static_cast<GLint>(idx), val.GetBitmap()->GetGLID());
 }
 
 void Shader::SetUniform(const std::string & key, int val)

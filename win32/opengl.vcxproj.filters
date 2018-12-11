@@ -107,5 +107,821 @@
     <ClInclude Include="src\core\component\transform.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Cholesky\LDLT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Cholesky\LLT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Cholesky\LLT_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\CholmodSupport\CholmodSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AltiVec\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AltiVec\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AltiVec\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX\TypeCasting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX512\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\AVX512\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\Half.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\PacketMathHalf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\CUDA\TypeCasting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\Default\ConjHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\Default\Settings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\NEON\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\NEON\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\NEON\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\SSE\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\SSE\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\SSE\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\SSE\TypeCasting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\ZVector\Complex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\ZVector\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\arch\ZVector\PacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\AssignmentFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\BinaryFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\NullaryFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\StlFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\TernaryFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\functors\UnaryFunctors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralBlockPanelKernel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixMatrix_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixMatrixTriangular.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixMatrixTriangular_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\GeneralMatrixVector_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\Parallelizer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointMatrixMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointMatrixMatrix_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointMatrixVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointMatrixVector_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\SelfadjointRank2Update.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularMatrixMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularMatrixMatrix_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularMatrixVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularMatrixVector_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularSolverMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularSolverMatrix_BLAS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\products\TriangularSolverVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\BlasUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\Constants.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\DisableStupidWarnings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\ForwardDeclarations.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\Macros.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\Memory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\Meta.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\MKL_support.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\NonMPL2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\ReenableStupidWarnings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\StaticAssert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\util\XprHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Array.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ArrayBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ArrayWrapper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Assign.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Assign_MKL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\AssignEvaluator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\BandMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Block.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\BooleanRedux.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CommaInitializer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ConditionEstimator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CoreEvaluators.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CoreIterators.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CwiseBinaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CwiseNullaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CwiseTernaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CwiseUnaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\CwiseUnaryView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\DenseBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\DenseCoeffsBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\DenseStorage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Diagonal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\DiagonalMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\DiagonalProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Dot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\EigenBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ForceAlignedAccess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Fuzzy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\GeneralProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\GenericPacketMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\GlobalFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Inverse.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\IO.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Map.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\MapBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\MathFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\MathFunctionsImpl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\MatrixBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\NestByValue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\NoAlias.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\NumTraits.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\PermutationMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\PlainObjectBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Product.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ProductEvaluators.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Random.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Redux.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Ref.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Replicate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\ReturnByValue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Reverse.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Select.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\SelfAdjointView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\SelfCwiseBinaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Solve.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\SolverBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\SolveTriangular.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\StableNorm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Stride.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Swap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Transpose.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Transpositions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\TriangularMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\VectorBlock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\VectorwiseOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Core\Visitor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\ComplexEigenSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\ComplexSchur.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\ComplexSchur_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\EigenSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\GeneralizedEigenSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\GeneralizedSelfAdjointEigenSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\HessenbergDecomposition.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\MatrixBaseEigenvalues.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\RealQZ.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\RealSchur.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\RealSchur_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\SelfAdjointEigenSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\SelfAdjointEigenSolver_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Eigenvalues\Tridiagonalization.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\arch\Geometry_SSE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\AlignedBox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\AngleAxis.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\EulerAngles.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Homogeneous.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Hyperplane.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\OrthoMethods.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\ParametrizedLine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Quaternion.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Rotation2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\RotationBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Scaling.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Transform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Translation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Geometry\Umeyama.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Householder\BlockHouseholder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Householder\Householder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Householder\HouseholderSequence.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\BasicPreconditioners.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\BiCGSTAB.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\ConjugateGradient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\IncompleteCholesky.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\IncompleteLUT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\IterativeSolverBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\LeastSquareConjugateGradient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\IterativeLinearSolvers\SolveWithGuess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\Jacobi\Jacobi.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\arch\Inverse_SSE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\Determinant.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\FullPivLU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\InverseImpl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\PartialPivLU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\LU\PartialPivLU_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\MetisSupport\MetisSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\blas.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\Image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\Kernel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\lapack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\lapacke.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\lapacke_mangling.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\misc\RealSvd2x2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\OrderingMethods\Amd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\OrderingMethods\Eigen_Colamd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\OrderingMethods\Ordering.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\PardisoSupport\PardisoSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\PaStiXSupport\PaStiXSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\ArrayCwiseBinaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\ArrayCwiseUnaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\BlockMethods.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\CommonCwiseBinaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\CommonCwiseUnaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\MatrixCwiseBinaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\plugins\MatrixCwiseUnaryOps.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\ColPivHouseholderQR.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\ColPivHouseholderQR_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\CompleteOrthogonalDecomposition.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\FullPivHouseholderQR.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\HouseholderQR.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\QR\HouseholderQR_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCholesky\SimplicialCholesky.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCholesky\SimplicialCholesky_impl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\AmbiVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\CompressedStorage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\ConservativeSparseSparseProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\MappedSparseMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseAssign.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseBlock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseColEtree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseCompressedBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseCwiseBinaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseCwiseUnaryOp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseDenseProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseDiagonalProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseDot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseFuzzy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseMap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseMatrixBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparsePermutation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseProduct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseRedux.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseRef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseSelfAdjointView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseSolverBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseSparseProductWithPruning.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseTranspose.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseTriangularView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\SparseView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseCore\TriangularSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_column_bmod.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_column_dfs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_copy_to_ucol.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_gemm_kernel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_heap_relax_snode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_kernel_bmod.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_Memory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_panel_bmod.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_panel_dfs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_pivotL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_pruneL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_relax_snode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_Structs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_SupernodalMatrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLU_Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseLU\SparseLUImpl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SparseQR\SparseQR.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SPQRSupport\SuiteSparseQRSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\StlSupport\details.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\StlSupport\StdDeque.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\StlSupport\StdList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\StlSupport\StdVector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SuperLUSupport\SuperLUSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SVD\BDCSVD.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SVD\JacobiSVD.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SVD\JacobiSVD_LAPACKE.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SVD\SVDBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\SVD\UpperBidiagonalization.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\Eigen\src\UmfPackSupport\UmfPackSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

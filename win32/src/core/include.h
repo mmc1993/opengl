@@ -23,3 +23,7 @@
 
 #include "../third/glew.h"
 #include "../third/glfw3.h"
+
+#pragma comment(lib, "lib/glew32.lib")
+#pragma comment(lib, "lib/glfw3.lib")
+#pragma comment(lib, "OpenGL32.lib")
