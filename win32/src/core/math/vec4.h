@@ -3,13 +3,13 @@
 #include "math.h"
 
 namespace math {
-    inline Eigen::Vector3f Lerp(const Eigen::Vector3f & v1, const Eigen::Vector3f & v2, float p)
+    inline glm::vec3 Lerp(const glm::vec3 & v1, const glm::vec3 & v2, float p)
     {
         return (v2 - v1) * p + v1;
     }
 
-    inline float Unlerp(const Eigen::Vector3f & v1, const Eigen::Vector3f & v2, const Eigen::Vector3f & v3)
+    inline float Unlerp(const glm::vec3 & v1, const glm::vec3 & v2, const glm::vec3 & v3)
     {
-        return (v3 - v1).norm() / (v2 - v1).norm();
+        return glm::length(v3 - v1) / glm::length(v2 - v1);
     }
 }

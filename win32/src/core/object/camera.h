@@ -11,6 +11,4 @@ public:
     ~Camera();
 
     void Init(float fov, float wdivh, float near, float far);
-    void LookAt(const Eigen::Vector3f & pos);
-    void LookAt(float x, float y, float z);
 };

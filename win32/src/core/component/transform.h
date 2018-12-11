@@ -11,45 +11,45 @@ public:
     virtual void OnUpdate(float dt) override;
 
     void Translate(float x, float y, float z);
-    void Translate(const Eigen::Vector3f & vec);
-    void Translate(const Eigen::Vector4f & vec);
+    void Translate(const glm::vec3 & vec);
+    void Translate(const glm::vec4 & vec);
 
-    void Rotate(const Eigen::Quaternionf & rotate);
+    void Rotate(const glm::quat & rotate);
+    void Rotate(const glm::vec3 & vec, float a);
     void Rotate(float x, float y, float z, float a);
-    void Rotate(const Eigen::Vector3f & vec, float a);
 
     void Scale(float x, float y, float z);
-    void Scale(const Eigen::Vector3f & vec);
-    void Scale(const Eigen::Vector4f & vec);
+    void Scale(const glm::vec3 & vec);
+    void Scale(const glm::vec4 & vec);
 
     Transform & AddTranslate(float x, float y, float z);
-    Transform & AddTranslate(const Eigen::Vector3f & vec);
-    Transform & AddTranslate(const Eigen::Vector4f & vec);
+    Transform & AddTranslate(const glm::vec3 & vec);
+    Transform & AddTranslate(const glm::vec4 & vec);
 
-    Transform & AddRotate(const Eigen::Quaternionf & rotate);
+    Transform & AddRotate(const glm::quat & rotate);
+    Transform & AddRotate(const glm::vec3 & vec, float a);
     Transform & AddRotate(float x, float y, float z, float a);
-    Transform & AddRotate(const Eigen::Vector3f & vec, float a);
 
     Transform & AddScale(float x, float y, float z);
-    Transform & AddScale(const Eigen::Vector3f & vec);
-    Transform & AddScale(const Eigen::Vector4f & vec);
+    Transform & AddScale(const glm::vec3 & vec);
+    Transform & AddScale(const glm::vec4 & vec);
 
-    const Eigen::Quaternionf & GetRotateQuat() const;
-    const Eigen::Vector3f & GetPosition() const;
-    const Eigen::Vector3f & GetScale() const;
-    Eigen::Vector3f GetRotate() const;
+    const glm::quat & GetRotateQuat() const;
+    const glm::vec3 & GetPosition() const;
+    const glm::vec3 & GetScale() const;
+    glm::vec3 GetRotate() const;
 
-    const Matrix & GetMatrix() const { return _matrix; }
+    const glm::mat4 & GetMatrix() const { return _matrix; }
 
-    Matrix GetMatrixFrom(const Object * target = nullptr);
+    glm::mat4 GetMatrixFrom(const Object * target = nullptr);
 
 private:
     void UpdateMatrix();
 
 private:
-    Eigen::Quaternionf _rotate;
-    Eigen::Vector3f _translate;
-    Eigen::Vector3f _scale;
-    Matrix _matrix;
+    glm::vec3 _scale;
+    glm::quat _rotate;
+    glm::vec3 _translate;
+    glm::mat4 _matrix;
     bool _isChange;
 };
