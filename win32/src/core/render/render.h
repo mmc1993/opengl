@@ -26,6 +26,7 @@ public:
 
 public:
     Render();
+
     ~Render();
 
     void PostCommand(Shader * shader, const std::function<void ()> & callfn);

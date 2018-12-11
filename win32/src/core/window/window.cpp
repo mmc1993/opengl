@@ -105,14 +105,8 @@ void Window::Loop()
 
     //  初始化各项数据
     _renderInfo.renderTM = std::chrono::high_resolution_clock::now();
-
-    while (!glfwWindowShouldClose(_window))
-    {
-        Update();
-    }
-
+    while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
-
     glfwTerminate();
 }
 
