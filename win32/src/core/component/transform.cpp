@@ -40,11 +40,7 @@ void Transform::Rotate(const Eigen::Quaternionf & rotate)
 
 void Transform::Rotate(float x, float y, float z, float a)
 {
-    Rotate(Eigen::Quaternionf(
-        std::cos(a * 0.5f),
-        std::sin(a * 0.5f) * x,
-        std::sin(a * 0.5f) * y,
-        std::sin(a * 0.5f) * z));
+    Rotate(Eigen::Quaternionf(Eigen::AngleAxisf(a, Eigen::Vector3f(x, y, z))));
 }
 
 void Transform::Rotate(const Eigen::Vector3f & vec4, float a)
@@ -70,6 +66,54 @@ void Transform::Scale(const Eigen::Vector4f & vec)
     Scale(vec.x(), vec.y(), vec.z());
 }
 
+Transform & Transform::AddTranslate(float x, float y, float z)
+{
+    Translate(_translate.x() + x, _translate.y() + y, _translate.z() + z);
+    return *this;
+}
+
+Transform & Transform::AddTranslate(const Eigen::Vector3f & vec)
+{
+    return AddTranslate(vec.x(), vec.y(), vec.z());
+}
+
+Transform & Transform::AddTranslate(const Eigen::Vector4f & vec)
+{
+    return AddTranslate(vec.x(), vec.y(), vec.z());
+}
+
+Transform & Transform::AddRotate(const Eigen::Quaternionf & rotate)
+{
+    Rotate(_rotate * rotate);
+    return *this;
+}
+
+Transform & Transform::AddRotate(float x, float y, float z, float a)
+{
+    return AddRotate(Eigen::Vector3f(x, y, z), a);
+}
+
+Transform & Transform::AddRotate(const Eigen::Vector3f & vec, float a)
+{
+    return AddRotate(Eigen::Quaternionf(Eigen::AngleAxisf(a, vec)));
+}
+
+Transform & Transform::AddScale(float x, float y, float z)
+{
+    Scale(_scale.x() + x, _scale.y() + y, _scale.z() + z);
+    return *this;
+}
+
+Transform & Transform::AddScale(const Eigen::Vector3f & vec)
+{
+    return AddScale(vec.x(), vec.y(), vec.z());
+}
+
+Transform & Transform::AddScale(const Eigen::Vector4f & vec)
+{
+    return AddScale(vec.x(), vec.y(), vec.z());
+}
+
 const Eigen::Quaternionf & Transform::GetRotateQuat() const
 {
     return _rotate;
@@ -87,11 +131,7 @@ const Eigen::Vector3f & Transform::GetScale() const
 
 Eigen::Vector3f Transform::GetRotate() const
 {
-    auto a = std::acos(_rotate.w()) * 2.0f;
-    return Eigen::Vector3f(
-        _rotate.x() / (std::asin(a * 0.5f) * 2.0f),
-        _rotate.y() / (std::asin(a * 0.5f) * 2.0f),
-        _rotate.z() / (std::asin(a * 0.5f) * 2.0f));
+    return _rotate.matrix().eulerAngles(0, 1, 2);
 }
 
 Matrix Transform::GetMatrixFrom(const Object * target)

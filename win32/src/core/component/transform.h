@@ -14,13 +14,25 @@ public:
     void Translate(const Eigen::Vector3f & vec);
     void Translate(const Eigen::Vector4f & vec);
 
-    void Rotate(const Eigen::Quaternionf & quat);
+    void Rotate(const Eigen::Quaternionf & rotate);
     void Rotate(float x, float y, float z, float a);
     void Rotate(const Eigen::Vector3f & vec, float a);
 
     void Scale(float x, float y, float z);
     void Scale(const Eigen::Vector3f & vec);
     void Scale(const Eigen::Vector4f & vec);
+
+    Transform & AddTranslate(float x, float y, float z);
+    Transform & AddTranslate(const Eigen::Vector3f & vec);
+    Transform & AddTranslate(const Eigen::Vector4f & vec);
+
+    Transform & AddRotate(const Eigen::Quaternionf & rotate);
+    Transform & AddRotate(float x, float y, float z, float a);
+    Transform & AddRotate(const Eigen::Vector3f & vec, float a);
+
+    Transform & AddScale(float x, float y, float z);
+    Transform & AddScale(const Eigen::Vector3f & vec);
+    Transform & AddScale(const Eigen::Vector4f & vec);
 
     const Eigen::Quaternionf & GetRotateQuat() const;
     const Eigen::Vector3f & GetPosition() const;

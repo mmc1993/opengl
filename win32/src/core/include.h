@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
-#include <cmath>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -20,9 +19,12 @@
 #include <optional>
 #include <fstream>
 #include <sstream>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <cmath>
 
-#include "../third/glew.h"
-#include "../third/glfw3.h"
+#include "third/glew.h"
+#include "third/glfw3.h"
 
 #pragma comment(lib, "lib/glew32.lib")
 #pragma comment(lib, "lib/glfw3.lib")
