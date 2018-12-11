@@ -88,7 +88,8 @@ public:
             char value[64] = { 0 };
             for (auto i = 0; *string >= '0' && 
                              *string <= '9' || 
-                             *string == '.'; ++i, ++string)
+                             *string == '.' ||
+                             *string == '-'; ++i, ++string)
             {
                 value[i] = *string;
             }

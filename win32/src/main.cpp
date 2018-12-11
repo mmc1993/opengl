@@ -2,12 +2,16 @@
 #include "core/window/window.h"
 #include "core/component/transform.h"
 
+class AppWindow : public Window {
+
+};
+
 int main()
 {
-    Window window;
-    window.Create("xxx");
-    window.Move(200, 100, 800, 600);
-    window.SetFPS(60);
-    window.Loop();
+    AppWindow app;
+    app.Create("xxx");
+    app.Move(200, 100, 800, 600);
+    app.SetFPS(60);
+    app.Loop();
     return 0;
 }
