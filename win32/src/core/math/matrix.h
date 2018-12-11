@@ -2,4 +2,4 @@
 
 #include "math.h"
 
-using Matrix = Eigen::Matrix4f;
+using Matrix = Eigen::Affine3f;

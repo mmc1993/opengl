@@ -29,7 +29,7 @@ public:
 
     const Matrix & GetMatrix() const { return _matrix; }
 
-    Matrix GetMatrixFrom(const Object * target);
+    Matrix GetMatrixFrom(const Object * target = nullptr);
 
 private:
     void UpdateMatrix();

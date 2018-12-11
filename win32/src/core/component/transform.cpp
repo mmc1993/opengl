@@ -11,6 +11,7 @@ void Transform::OnDel()
 
 void Transform::OnUpdate(float dt)
 {
+    UpdateMatrix();
 }
 
 void Transform::Translate(float x, float y, float z)
@@ -88,37 +89,35 @@ Eigen::Vector3f Transform::GetRotate() const
 {
     auto a = std::acos(_rotate.w()) * 2.0f;
     return Eigen::Vector3f(
-        _rotate.x() / std::asin(_rotate.x()) * 2.0f,
-        _rotate.y() / std::asin(_rotate.y()) * 2.0f,
-        _rotate.z() / std::asin(_rotate.z()) * 2.0f);
+        _rotate.x() / (std::asin(a * 0.5f) * 2.0f),
+        _rotate.y() / (std::asin(a * 0.5f) * 2.0f),
+        _rotate.z() / (std::asin(a * 0.5f) * 2.0f));
 }
 
 Matrix Transform::GetMatrixFrom(const Object * target)
 {
-    UpdateMatrix();
-    return Matrix();
+    auto matrix = Matrix::Identity();
+    for (auto owner = GetOwner()->GetParent(); 
+        owner != target && owner != nullptr; 
+        owner = owner->GetParent())
+    {
+        auto transform = owner->GetComponent<Transform>();
+        if (transform != nullptr)
+        {
+            matrix = transform->GetMatrix() * matrix;
+        }
+    }
+    return matrix * _matrix;
 }
 
 void Transform::UpdateMatrix()
 {
-    //  ²¹¹¦¿Î
     if (_isChange)
     {
         _isChange = false;
-        _matrix.setIdentity();
-        auto owner = GetOwner();
-        while (owner != nullptr)
-        {
-             
-        }
-        if (owner == nullptr) { return; }
-
-
-
-        Eigen::Translation3f(_translate);
-        Eigen::Scaling(_scale);
-        //Eigen::AngleAxisd()
-        //Eigen::Isometry3d
-        //Matrix::
+        _matrix = Eigen::Translation3f(_translate)
+            * _rotate.toRotationMatrix()
+            * Eigen::Scaling(_scale);
+        _matrix = GetMatrixFrom();
     }
 }

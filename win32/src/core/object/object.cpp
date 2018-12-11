@@ -85,24 +85,6 @@ std::vector<Component*>& Object::GetComponents()
     return _components;
 }
 
-Component * Object::GetComponent(const std::type_info & type)
-{
-    auto it = std::find_if(_components.begin(), _components.end(),
-        [&type](Component * component) { return typeid(*component) == type; });
-    return it != _components.end() ? *it : nullptr;
-}
-
-std::vector<Component*> && Object::GetComponentsInChilds(const std::type_info & type)
-{
-    std::vector<Component*> result{ GetComponent(type) };
-    for (auto child : _childs)
-    {
-        auto ret = std::move(child->GetComponentsInChilds(type));
-        result.insert(result.end(), ret.begin(), ret.end());
-    }
-    return std::move(result);
-}
-
 void Object::SetActive(bool active)
 {
     _active = active;

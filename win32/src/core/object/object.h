@@ -22,8 +22,34 @@ public:
     void AddComponent(Component * component);
     void DelComponent(const std::type_info & type);
     std::vector<Component *> & GetComponents();
-    Component * GetComponent(const std::type_info & type);
-    std::vector<Component *> && GetComponentsInChilds(const std::type_info & type);
+
+    template <class T>
+    T * GetComponent()
+    {
+        auto iter = std::find_if(_components.begin(), _components.end(),
+            [](Component * component) 
+            { 
+                return typeid(*component) == typeid(T); 
+            });
+        return reinterpret_cast<T *>(iter != _components.end() ? *iter : nullptr);
+    }
+
+    template <class T>
+    std::vector<T *> && GetComponentsInChilds()
+    {
+        std::vector<T *> result{};
+        auto self = GetComponent<T>();
+        if (self != nullptr)
+        {
+            result.push_back(self);
+        }
+        for (auto child : _childs)
+        {
+            auto ret = std::move(child->GetComponentsInChilds<T>());
+            result.insert(result.end(), ret.begin(), ret.end());
+        }
+        return std::move(result);
+    }
     
     void SetActive(bool active);
     bool IsActive() const;
