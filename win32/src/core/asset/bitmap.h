@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../include.h"
-#include "../third/glew.h"
-#include "../third/glfw3.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third/stb_image.h"
 

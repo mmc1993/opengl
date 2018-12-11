@@ -120,6 +120,7 @@
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
+    <ClCompile Include="src\core\shader\shader.cpp" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -130,9 +131,13 @@
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
+    <ClInclude Include="src\core\math\vec4.h" />
     <ClInclude Include="src\core\object\object.h" />
     <ClInclude Include="src\core\third\glew.h" />
     <ClInclude Include="src\core\third\glfw3.h" />
+    <ClInclude Include="src\core\shader\shader.h" />
+    <ClInclude Include="src\core\third\json.h" />
+    <ClInclude Include="src\core\third\sformat.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
     <ClInclude Include="src\core\timer\timer.h" />
     <ClInclude Include="src\core\window\window.h" />

@@ -18,3 +18,8 @@
 #include <set>
 #include <any>
 #include <optional>
+#include <fstream>
+#include <sstream>
+
+#include "../third/glew.h"
+#include "../third/glfw3.h"

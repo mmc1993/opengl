@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../include.h"
-#include "../third/glew.h"
-#include "../third/glfw3.h"
 #include "../event/event.h"
 #include "../timer/timer.h"
 #include "../object/object.h"
