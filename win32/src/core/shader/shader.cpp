@@ -2,7 +2,7 @@
 #include "../third/sformat.h"
 
 Shader::Shader()
-    : _ID(std::numeric_limits<GLuint>::max())
+    : _GLID(std::numeric_limits<GLuint>::max())
 {
 }
 
@@ -45,11 +45,11 @@ bool Shader::Init(const char * vs, const char * fs)
     glGetShaderiv(fshader, GL_COMPILE_STATUS, &fret);
     if (vret != 0 && fret != 0)
     {
-        _ID = glCreateProgram();
-        glAttachShader(_ID, vshader);
-        glAttachShader(_ID, fshader);
-        glLinkProgram(_ID);
-        glGetProgramiv(_ID, GL_LINK_STATUS, &pret);
+        _GLID = glCreateProgram();
+        glAttachShader(_GLID, vshader);
+        glAttachShader(_GLID, fshader);
+        glLinkProgram(_GLID);
+        glGetProgramiv(_GLID, GL_LINK_STATUS, &pret);
     }
     if (vret == 0)
     {
@@ -63,7 +63,7 @@ bool Shader::Init(const char * vs, const char * fs)
     }
     if (pret == 0)
     {
-        glGetProgramInfoLog(_ID, sizeof(logtxt), nullptr, logtxt);
+        glGetProgramInfoLog(_GLID, sizeof(logtxt), nullptr, logtxt);
         std::cout << SFormat("Shader Init Program Shader Failed: {0}", logtxt);
     }
     glDeleteShader(vshader);
@@ -73,8 +73,8 @@ bool Shader::Init(const char * vs, const char * fs)
 
 void Shader::Bind()
 {
-    assert(_ID != std::numeric_limits<GLuint>::max());
-    glUseProgram(_ID);
+    assert(_GLID != std::numeric_limits<GLuint>::max());
+    glUseProgram(_GLID);
 }
 
 void Shader::SetUniform(size_t idx, int val)
@@ -92,18 +92,28 @@ void Shader::SetUniform(size_t idx, const Vec4 & val)
     glUniform4f(idx, val.x, val.y, val.z, val.w);
 }
 
+void Shader::SetUniform(size_t idx, const Texture * val)
+{
+    glUniform1i(idx, val->GetBitmap()->GetGLID());
+}
+
 void Shader::SetUniform(const std::string & key, int val)
 {
-    SetUniform(glGetUniformLocation(_ID, key.c_str()), val);
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 
 void Shader::SetUniform(const std::string & key, float val)
 {
-    SetUniform(glGetUniformLocation(_ID, key.c_str()), val);
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 
 void Shader::SetUniform(const std::string & key, const Vec4 & val)
 {
-    SetUniform(glGetUniformLocation(_ID, key.c_str()), val);
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
+}
+
+void Shader::SetUniform(const std::string & key, const Texture * val)
+{
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 

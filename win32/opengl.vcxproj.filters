@@ -83,5 +83,8 @@
     <ClInclude Include="src\core\third\sformat.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\camera\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

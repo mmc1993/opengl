@@ -2,6 +2,7 @@
 
 #include "../include.h"
 #include "../math/vec4.h"
+#include "../asset/texture.h"
 
 class Shader {
 public:
@@ -24,16 +25,18 @@ public:
     void SetUniform(size_t idx, int val);
     void SetUniform(size_t idx, float val);
     void SetUniform(size_t idx, const Vec4 & val);
+    void SetUniform(size_t idx, const Texture * val);
 
     void SetUniform(const std::string & key, int val);
     void SetUniform(const std::string & key, float val);
     void SetUniform(const std::string & key, const Vec4 & val);
+    void SetUniform(const std::string & key, const Texture * val);
 
-    GLuint GetID() const { return _ID; }
+    GLuint GetGLID() const { return _GLID; }
 
     Info & GetInfo() { return _info; }
 
 private:
-    GLuint _ID;
+    GLuint _GLID;
     Info _info;
 };
