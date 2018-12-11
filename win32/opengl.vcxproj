@@ -117,9 +117,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\camera\camera.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
+    <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\shader\shader.cpp" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />
@@ -136,6 +138,7 @@
     <ClInclude Include="src\core\math\matrix.h" />
     <ClInclude Include="src\core\math\vec4.h" />
     <ClInclude Include="src\core\object\object.h" />
+    <ClInclude Include="src\core\render\render.h" />
     <ClInclude Include="src\core\third\glew.h" />
     <ClInclude Include="src\core\third\glfw3.h" />
     <ClInclude Include="src\core\shader\shader.h" />

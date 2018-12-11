@@ -148,11 +148,11 @@ void Window::Update()
         _renderInfo.renderTM += _renderInfo.renderCD;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
         _root.Update(std::chrono::duration_cast
             <std::chrono::milliseconds>
             (diffTM).count() * 0.001f);
-
+        _timer.Update(now);
+        _render.DoRender();
         glfwSwapBuffers(_window);
     }
 }

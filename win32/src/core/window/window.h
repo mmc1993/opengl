@@ -4,6 +4,7 @@
 #include "../event/event.h"
 #include "../timer/timer.h"
 #include "../object/object.h"
+#include "../render/render.h"
 
 class Window {
 public:
@@ -48,6 +49,8 @@ private:
     Object _root;
 
     Timer _timer;
+
+    Render _render;
 
     GLFWwindow * _window;
 

@@ -3,6 +3,7 @@
 #include "../include.h"
 #include "../math/vec4.h"
 #include "../asset/texture.h"
+#include "../render/render.h"
 
 class Shader {
 public:
@@ -11,6 +12,7 @@ public:
         bool mIsDWrite;
         bool mIsZTest;
         bool mIsZWrite;
+        Render::RenderQueueFlag mRenderFlag;
     };
 
 public:
@@ -35,7 +37,6 @@ public:
     GLuint GetGLID() const { return _GLID; }
 
     Info & GetInfo() { return _info; }
-
 private:
     GLuint _GLID;
     Info _info;

@@ -36,6 +36,12 @@
     <ClCompile Include="src\core\shader\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\camera\camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\render.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\timer\timer.h">
@@ -90,6 +96,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\math\matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
