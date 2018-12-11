@@ -3,8 +3,9 @@
 #include "../include.h"
 #include "../math/vec4.h"
 #include "../math/matrix.h"
+#include "object.h"
 
-class Camera {
+class Camera: public Object {
 public:
     Camera();
     ~Camera();

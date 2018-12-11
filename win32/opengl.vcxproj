@@ -119,7 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\camera\camera.cpp" />
+    <ClCompile Include="src\core\object\camera.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
@@ -133,7 +133,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\asset\bitmap.h" />
     <ClInclude Include="src\core\asset\texture.h" />
-    <ClInclude Include="src\core\camera\camera.h" />
+    <ClInclude Include="src\core\object\camera.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\transform.h" />
     <ClInclude Include="src\core\event\event.h" />

@@ -36,13 +36,13 @@
     <ClCompile Include="src\core\shader\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\camera\camera.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\render\render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\transform.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\object\camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,9 +90,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\third\sformat.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\camera\camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\math\math.h">
@@ -921,6 +918,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\third\Eigen\src\UmfPackSupport\UmfPackSupport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\object\camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
