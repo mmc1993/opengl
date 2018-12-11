@@ -13,7 +13,7 @@ void Camera::Init(float fov, float wdivh, float near, float far)
 
 }
 
-void Camera::LookAt(const Vec4 & pos)
+void Camera::LookAt(const Eigen::Vector3f & pos)
 {
 }
 
