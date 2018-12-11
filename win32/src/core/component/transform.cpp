@@ -136,6 +136,7 @@ glm::vec3 Transform::GetRotate() const
 
 glm::mat4 Transform::GetMatrixFrom(const Object * target)
 {
+    //  TODO: BUG, ÖØÐ´
     glm::mat4 matrix(1.0f);
     for (auto owner = GetOwner()->GetParent(); 
         owner != target && owner != nullptr; 
