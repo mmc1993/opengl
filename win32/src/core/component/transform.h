@@ -33,15 +33,13 @@ public:
     Transform & AddScale(float x, float y, float z);
     Transform & AddScale(const glm::vec3 & vec);
     Transform & AddScale(const glm::vec4 & vec);
-
+    
     const glm::quat & GetRotateQuat() const;
     const glm::vec3 & GetPosition() const;
     const glm::vec3 & GetScale() const;
     glm::vec3 GetRotate() const;
 
-    const glm::mat4 & GetMatrix() const { return _matrix; }
-
-    glm::mat4 GetMatrixFrom(const Object * target = nullptr);
+    const glm::mat4 & GetMatrix();
 
 private:
     void UpdateMatrix();

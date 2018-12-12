@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../include.h"
-
-class Object;
+#include "../object/object.h"
 
 class Component {
 public:
@@ -17,6 +16,23 @@ public:
 
     void SetOwner(Object * owner);
     Object * GetOwner();
+
+    template <class T>
+    T * GetParent()
+    {
+        assert(GetOwner() != nullptr);
+        auto parent = GetOwner()->GetParent();
+        while (parent != nullptr)
+        {
+            auto comp = parent->GetComponent<T>();
+            if (comp != nullptr)
+            {
+                return comp;
+            }
+            parent = parent->GetParent();
+        }
+        return nullptr;
+    }
 
 private:
     bool _active;

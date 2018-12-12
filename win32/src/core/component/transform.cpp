@@ -134,21 +134,10 @@ glm::vec3 Transform::GetRotate() const
     return glm::eulerAngles(_rotate);
 }
 
-glm::mat4 Transform::GetMatrixFrom(const Object * target)
-{
-    //  TODO: BUG, ÖØÐ´
-    glm::mat4 matrix(1.0f);
-    for (auto owner = GetOwner()->GetParent(); 
-        owner != target && owner != nullptr; 
-        owner = owner->GetParent())
-    {
-        auto transform = owner->GetComponent<Transform>();
-        if (transform != nullptr)
-        {
-            matrix = transform->GetMatrix() * matrix;
-        }
-    }
-    return matrix * _matrix;
+inline const glm::mat4 & Transform::GetMatrix()
+{ 
+    UpdateMatrix();
+    return _matrix; 
 }
 
 void Transform::UpdateMatrix()
@@ -161,6 +150,10 @@ void Transform::UpdateMatrix()
         glm::scale(s, _scale);
         glm::translate(t, _translate);
         _matrix = t * (glm::mat4)_rotate * s;
-        _matrix = GetMatrixFrom();
+        auto parent = GetParent<Transform>();
+        if (parent != nullptr)
+        {
+            _matrix = parent->GetMatrix() * _matrix;
+        }
     }
 }
