@@ -3,6 +3,7 @@
 #include "../include.h"
 
 class Component;
+class Transform;
 
 class Object {
 public:
@@ -50,6 +51,8 @@ public:
         }
         return std::move(result);
     }
+
+    Transform * GetTransform();
     
     void SetActive(bool active);
     bool IsActive() const;
@@ -66,6 +69,7 @@ private:
     size_t _tag;
     bool _active;
     Object * _parent;
+    Transform * _transform;
     std::vector<Object *> _childs;
     std::vector<Component *> _components;
 };

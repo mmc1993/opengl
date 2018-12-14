@@ -1,11 +1,14 @@
 #include "object.h"
 #include "../component/component.h"
+#include "../component/transform.h"
 
 Object::Object()
     : _tag(std::numeric_limits<size_t>::max())
     , _active(true)
     , _parent(nullptr)
 {
+    _transform = new Transform();
+    AddComponent(_transform);
 }
 
 Object::~Object()
@@ -83,6 +86,11 @@ void Object::DelComponent(const std::type_info & type)
 std::vector<Component*>& Object::GetComponents()
 {
     return _components;
+}
+
+Transform * Object::GetTransform()
+{
+    return _transform;
 }
 
 void Object::SetActive(bool active)
