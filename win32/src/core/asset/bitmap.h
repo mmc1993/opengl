@@ -21,7 +21,7 @@ public:
 
     ~Bitmap()
     {
-        assert(_GLID == 0);
+        glDeleteTextures(1, &_GLID);
     }
 
     bool Load(const std::string & url)
@@ -44,11 +44,6 @@ public:
             return true;
         }
         return false;
-    }
-
-    void Free()
-    {
-        glDeleteTextures(1, &_GLID);
     }
 
     int GetW() const

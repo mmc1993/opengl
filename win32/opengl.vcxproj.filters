@@ -48,6 +48,9 @@
     <ClCompile Include="src\core\third\glm\detail\glm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\mmc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\timer\timer.h">
@@ -828,6 +831,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\third\glm\vector_relational.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\mmc.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

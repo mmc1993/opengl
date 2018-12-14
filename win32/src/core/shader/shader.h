@@ -12,7 +12,7 @@ public:
         bool mIsDWrite;
         bool mIsZTest;
         bool mIsZWrite;
-        Render::RenderQueueFlag mRenderFlag;
+        Render::QueueType mQueueType;
     };
 
 public:

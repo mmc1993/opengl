@@ -1,4 +1,10 @@
 #include "window.h"
+#include "../mmc.h"
+#include "../event/event.h"
+#include "../timer/timer.h"
+#include "../render/render.h"
+#include "../object/object.h"
+#include "../shader/shader.h"
 
 Window::Window()
     : _window(nullptr)
@@ -52,8 +58,14 @@ void Window::Move(size_t x, size_t y, size_t w)
 void Window::Move(size_t x, size_t y, size_t w, size_t h)
 {
     assert(nullptr != _window);
+    OnSize(_window, w, h);
     glfwSetWindowPos(_window, static_cast<int>(x), static_cast<int>(y));
     glfwSetWindowSize(_window, static_cast<int>(w), static_cast<int>(h));
+}
+
+void Window::SetFPS(size_t ms)
+{
+    _renderInfo.renderCD = std::chrono::milliseconds(1000 / ms);
 }
 
 size_t Window::GetX() const
@@ -106,26 +118,6 @@ void Window::Loop()
     glfwTerminate();
 }
 
-EventDispatcher & Window::GefEventDispatcher()
-{
-    return _eventDispatcher;
-}
-
-Timer & Window::GetTimer()
-{
-    return _timer;
-}
-
-Object & Window::GetRoot()
-{
-    return _root;
-}
-
-void Window::SetFPS(size_t ms)
-{
-    _renderInfo.renderCD = std::chrono::milliseconds(1000 / ms);
-}
-
 void Window::Update()
 {
     auto now = std::chrono::high_resolution_clock::now();
@@ -138,11 +130,44 @@ void Window::Update()
         _renderInfo.renderTM += _renderInfo.renderCD;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        _root.Update(std::chrono::duration_cast
+        mmc::mRoot.Update(std::chrono::duration_cast
             <std::chrono::milliseconds>
             (diffTM).count() * 0.001f);
-        _timer.Update(now);
-        _render.DoRender();
+        mmc::mTimer.Update(now);
+        mmc::mRender.DoRender();
+
+        //float vertices[] = {
+        //    -0.5f, -0.5f, 0.0f,
+        //    0.5f, -0.5f, 0.0f,
+        //    0.0f,  0.5f, 0.0f
+        //};
+
+        //Shader shader;
+        //auto ret = shader.InitFromFile("res/shader/1.vsh", "res/shader/1.fsh");
+        //shader.Bind();
+
+        //unsigned int vao;
+        //glGenVertexArrays(1, &vao);
+        //auto r = glGetError();
+        //glBindVertexArray(vao);
+        //r = glGetError();
+
+        //GLuint vbo;
+        //glGenBuffers(1, &vbo);
+        //r = glGetError();
+        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        //r = glGetError();
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        //r = glGetError();
+
+        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        //r = glGetError();
+        //glEnableVertexAttribArray(0);
+        //r = glGetError();
+
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        //r = glGetError();
+
         glfwSwapBuffers(_window);
     }
 }
@@ -153,7 +178,7 @@ void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
     param.act = act;
     param.btn = btn;
     param.stat = stat;
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventMouse::kBUTTON, param);
+    mmc::mEvent.Post(EventMouse::kBUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
@@ -161,7 +186,7 @@ void Window::OnCur(GLFWwindow * window, double x, double y)
     EventMouse::Param param;
     param.x = static_cast<float>(x);
     param.y = static_cast<float>(y);
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventMouse::kMOVEED, param);
+    mmc::mEvent.Post(EventMouse::kMOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
@@ -170,7 +195,7 @@ void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
     param.key = key;
     param.act = act;
     param.stat = stat;
-    reinterpret_cast<Window *>(glfwGetWindowUserPointer(window))->GefEventDispatcher().Post(EventKey::kKEY, param);
+    mmc::mEvent.Post(EventKey::kKEY, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)

@@ -8,6 +8,7 @@ Shader::Shader()
 
 Shader::~Shader()
 {
+    glDeleteProgram(_GLID);
 }
 
 bool Shader::InitFromFile(const std::string & vs, const std::string & fs)

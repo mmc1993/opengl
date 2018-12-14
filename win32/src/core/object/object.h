@@ -2,6 +2,7 @@
 
 #include "../include.h"
 
+class Window;
 class Component;
 class Transform;
 
@@ -52,11 +53,13 @@ public:
         return std::move(result);
     }
 
+    void Update(float dt);
+
     Transform * GetTransform();
-    
+    size_t GetCameraID() const;
+    void SetCameraID(size_t id);
     void SetActive(bool active);
     bool IsActive() const;
-    void Update(float dt);
 
     void SetParent(Object * parent);
     Object * GetParent();
@@ -66,8 +69,13 @@ protected:
     void DelChild(Object * child, bool del);
 
 private:
+    void PushTransform();
+    void PopTransform();
+
+private:
     size_t _tag;
     bool _active;
+    size_t _cameraID;
     Object * _parent;
     Transform * _transform;
     std::vector<Object *> _childs;

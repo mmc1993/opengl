@@ -7,7 +7,8 @@ class Shader;
 
 class Render {
 public:
-    enum RenderQueueFlag {
+    //  队列类型
+    enum QueueType {
         //  背景
         kBACKGROUND,
         //  集合
@@ -17,7 +18,15 @@ public:
         //  顶层
         kOVERLAY,
         //  标记最大值
+        kNONE,
         MAX,
+    };
+
+    enum CommandType {
+        //  渲染
+        kRENDER,
+        //  矩阵变化
+        kTRANSFORM,
     };
 
     struct CameraInfo {
@@ -51,10 +60,33 @@ public:
         }
     };
 
+    //  变换命令
+    struct CommandTransform {
+        const bool mIsPush;
+        const glm::mat4 * mMatrix;
+
+        CommandTransform(
+            const bool ispush, 
+            const glm::mat4 * mat4)
+            : mIsPush(ispush), mMatrix(mat4)
+        { }
+
+        void operator ()();
+    };
+
+    //  渲染命令
+    struct CommandRender {
+        //void operator ()();
+    };
+
     struct Command {
         size_t mCameraID;
         Shader * mShader;
+        CommandType mType;
         std::function<void()> mCallFn;
+
+        Command(): mCameraID(0), mShader(nullptr)
+        { }
     };
 
 public:
@@ -70,7 +102,6 @@ public:
     void DoRender();
 
 private:
-    void RenderCameras();
     void RenderObjects(CameraInfo & camera);
 
 private:

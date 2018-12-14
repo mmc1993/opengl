@@ -25,6 +25,9 @@
 
 #include "third/glew.h"
 #include "third/glfw3.h"
+#include "third/glm/glm.hpp"
+#include "third/glm/gtc/type_ptr.hpp"
+#include "third/glm/gtc/matrix_transform.hpp"
 
 #pragma comment(lib, "lib/glew32.lib")
 #pragma comment(lib, "lib/glfw3.lib")

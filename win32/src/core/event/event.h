@@ -2,17 +2,17 @@
 
 #include "../include.h"
 
-class EventDispatcher {
+class Event {
 private:
     static size_t s_coundID;
 
 public:
     using func_t = std::function<void(const std::any &)>;
 
-    struct Event {
+    struct Event_t {
         size_t mID;
         func_t mFunc;
-        Event(size_t id, const func_t & func): mID(id), mFunc(func)
+        Event_t(size_t id, const func_t & func): mID(id), mFunc(func)
         { }
 
         bool operator ==(size_t id) const
@@ -22,17 +22,17 @@ public:
     };
 
 public:
-    EventDispatcher()
+    Event()
     { }
 
-    ~EventDispatcher()
+    ~Event()
     { }
 
     size_t Add(size_t type, const func_t & func)
     {
-        auto insert = _events.insert(std::make_pair(type, std::vector<Event>()));
-        insert.first->second.emplace_back(EventDispatcher::s_coundID, func);
-        return EventDispatcher::s_coundID++;
+        auto insert = _events.insert(std::make_pair(type, std::vector<Event_t>()));
+        insert.first->second.emplace_back(Event::s_coundID, func);
+        return Event::s_coundID++;
     }
 
     void Del(size_t id)
@@ -61,7 +61,7 @@ public:
     }
 
 private:
-    std::map<size_t, std::vector<Event>> _events;
+    std::map<size_t, std::vector<Event_t>> _events;
 };
 
 class EventMouse {

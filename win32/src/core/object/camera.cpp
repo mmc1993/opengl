@@ -36,5 +36,9 @@ const glm::vec3 & Camera::GetPos() const
 
 void Camera::Apply()
 {
+	//	TODO MMC
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glMultMatrixf(&_project[0][0]);
 }
 
