@@ -851,6 +851,15 @@
     <ClInclude Include="src\core\asset\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\tools\debug_tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\asset_core.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\asset.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\third\glm\detail\func_common.inl">

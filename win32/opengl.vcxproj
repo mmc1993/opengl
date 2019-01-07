@@ -134,6 +134,8 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\asset\asset.h" />
+    <ClInclude Include="src\core\asset\asset_core.h" />
     <ClInclude Include="src\core\asset\bitmap.h" />
     <ClInclude Include="src\core\asset\file.h" />
     <ClInclude Include="src\core\asset\material.h" />
@@ -397,6 +399,7 @@
     <ClInclude Include="src\core\third\sformat.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
     <ClInclude Include="src\core\timer\timer.h" />
+    <ClInclude Include="src\core\tools\debug_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>

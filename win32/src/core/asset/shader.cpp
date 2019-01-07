@@ -57,19 +57,6 @@ Shader::~Shader()
     glDeleteProgram(_GLID);
 }
 
-bool Shader::InitFromFile(const std::string & vs, const std::string & fs)
-{
-    std::ifstream vfile(vs);
-    std::ifstream ffile(fs);
-    if (!vfile || !ffile) { return false; }
-    std::stringstream vss, fss;
-    vss << vfile.rdbuf();
-    fss << ffile.rdbuf();
-    vfile.close();
-    ffile.close();
-    return Init(vss.str(), fss.str());
-}
-
 void Shader::Bind()
 {
     assert(_GLID != 0);

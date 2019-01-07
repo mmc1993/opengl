@@ -31,31 +31,31 @@ void Object::OnUpdate(float dt)
             0.0f,  0.5f, 0.0f
         };
 
-        Shader shader;
-        auto ret = shader.InitFromFile("res/shader/1.vsh", "res/shader/1.fsh");
-        shader.Bind();
+        //Shader shader;
+        //auto ret = shader.InitFromFile("res/shader/1.vsh", "res/shader/1.fsh");
+        //shader.Bind();
 
-        unsigned int vao;
-        glGenVertexArrays(1, &vao);
-        auto r = glGetError();
-        glBindVertexArray(vao);
-        r = glGetError();
+        //unsigned int vao;
+        //glGenVertexArrays(1, &vao);
+        //auto r = glGetError();
+        //glBindVertexArray(vao);
+        //r = glGetError();
 
-        GLuint vbo;
-        glGenBuffers(1, &vbo);
-        r = glGetError();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        r = glGetError();
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        r = glGetError();
+        //GLuint vbo;
+        //glGenBuffers(1, &vbo);
+        //r = glGetError();
+        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        //r = glGetError();
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        //r = glGetError();
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        r = glGetError();
-        glEnableVertexAttribArray(0);
-        r = glGetError();
+        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        //r = glGetError();
+        //glEnableVertexAttribArray(0);
+        //r = glGetError();
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        r = glGetError();
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        //r = glGetError();
     };
     mmc::mRender.PostCommand(command);
 }

@@ -20,9 +20,7 @@ public:
 	Shader(const char * vs, const char * fs);
     ~Shader();
 
-    bool InitFromFile(const std::string & vs, const std::string & fs);
     void Bind();
-
     void SetUniform(size_t idx, int val);
     void SetUniform(size_t idx, float val);
     void SetUniform(size_t idx, const glm::vec3 & val);
