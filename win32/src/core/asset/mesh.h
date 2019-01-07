@@ -14,7 +14,8 @@ public:
 
 public:
 	Mesh(std::vector<Vertex> && vertexs) 
-		: _vertexs(std::move(vertexs)), _vao(0), _vbo(0)
+		: _vertexs(std::move(vertexs))
+		, _vao(0), _vbo(0)
 	{
 		glGenVertexArrays(1, &_vao);
 		glBindVertexArray(_vao);
