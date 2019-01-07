@@ -55,7 +55,6 @@ Mesh * File::LoadMesh(const std::string & url)
 		vertex.v.x = vs.at((size_t)f.x - 1).x;
 		vertex.v.y = vs.at((size_t)f.x - 1).y;
 		vertex.v.z = vs.at((size_t)f.x - 1).z;
-		vertex.v.w = 1.0f;
 		vertex.uv.u = vts.at((size_t)f.y - 1).x;
 		vertex.uv.v = vts.at((size_t)f.y - 1).y;
 		vertexs.push_back(vertex);
