@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\asset\file.cpp" />
     <ClCompile Include="src\core\mmc.cpp" />
     <ClCompile Include="src\core\object\camera.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
@@ -126,7 +127,7 @@
     <ClCompile Include="src\core\event\event.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
-    <ClCompile Include="src\core\shader\shader.cpp" />
+    <ClCompile Include="src\core\asset\shader.cpp" />
     <ClCompile Include="src\core\third\glm\detail\glm.cpp" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />
@@ -134,6 +135,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\asset\bitmap.h" />
+    <ClInclude Include="src\core\asset\file.h" />
+    <ClInclude Include="src\core\asset\material.h" />
+    <ClInclude Include="src\core\asset\mesh.h" />
     <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\mmc.h" />
     <ClInclude Include="src\core\object\camera.h" />
@@ -148,7 +152,7 @@
     <ClInclude Include="src\core\render\render.h" />
     <ClInclude Include="src\core\third\glew.h" />
     <ClInclude Include="src\core\third\glfw3.h" />
-    <ClInclude Include="src\core\shader\shader.h" />
+    <ClInclude Include="src\core\asset\shader.h" />
     <ClInclude Include="src\core\third\glm\common.hpp" />
     <ClInclude Include="src\core\third\glm\detail\compute_common.hpp" />
     <ClInclude Include="src\core\third\glm\detail\compute_vector_relational.hpp" />
@@ -393,6 +397,7 @@
     <ClInclude Include="src\core\third\sformat.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
     <ClInclude Include="src\core\timer\timer.h" />
+    <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
