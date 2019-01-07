@@ -1,5 +1,4 @@
 res/model/1/model.obj
 res/model/1/normal.png
 res/model/1/texture.png
-res/shader/1.vsh
-res/shader/1.fsh
+res/shader/1.shader
