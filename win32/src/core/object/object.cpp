@@ -1,7 +1,7 @@
 #include "object.h"
 #include "../mmc.h"
+#include "../asset/shader.h"
 #include "../render/render.h"
-#include "../shader/shader.h"
 #include "../component/component.h"
 #include "../component/transform.h"
 
