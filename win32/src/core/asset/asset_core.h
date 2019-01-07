@@ -29,6 +29,11 @@ public:
 		return reinterpret_cast<T *>(ret);
 	}
 
+	const std::map<std::string, Asset *> & Gets()
+	{
+		return _assets;
+	}
+
 private:
 	std::map<std::string, Asset *> _assets;
 };
