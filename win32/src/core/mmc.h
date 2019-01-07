@@ -9,10 +9,12 @@ class Event;
 class Timer;
 class Object;
 class Render;
+class AssetCore;
 
 namespace mmc {
     extern Event mEvent;
     extern Timer mTimer;
     extern Object mRoot;
     extern Render mRender;
+	extern AssetCore mAssetCore;
 }
