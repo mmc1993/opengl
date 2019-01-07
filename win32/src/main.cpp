@@ -3,7 +3,9 @@
 #include "core/window/window.h"
 #include "core/object/camera.h"
 #include "core/render/render.h"
-#include "core/component/transform.h"
+#include "core/asset/asset_core.h"
+#include "core/tools/debug_tool.h"
+#include "core/asset/file.h"
 
 class AppWindow : public Window {
 public:
@@ -16,6 +18,8 @@ public:
             glm::vec3(0, 0, 0), 
             glm::vec3(0, 1, 0));
         mmc::mRender.AddCamera(camera, 0);
+
+		auto material = File::LoadMaterial("res/material/1.txt");
     }
 };
 

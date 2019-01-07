@@ -3,7 +3,7 @@
 #include "../include.h"
 
 namespace string_tool {
-	inline std::vector<std::string_view> && Split(
+	inline std::vector<std::string_view> Split(
 		const std::string_view & str, 
 		const std::string_view & sep)
 	{

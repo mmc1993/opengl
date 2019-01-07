@@ -37,7 +37,7 @@ public:
     }
 
     template <class T>
-    std::vector<T *> && GetComponentsInChilds()
+    std::vector<T *> GetComponentsInChilds()
     {
         std::vector<T *> result{};
         auto self = GetComponent<T>();

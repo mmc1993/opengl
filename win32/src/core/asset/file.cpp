@@ -30,6 +30,7 @@ Mesh * File::LoadMesh(const std::string & url)
 		else if (key == "f")
 		{
 			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
+			assert(split.size() == 3);
 			for (const auto & view : split)
 			{
 				glm::vec2 f;
@@ -51,12 +52,12 @@ Mesh * File::LoadMesh(const std::string & url)
 	for (const auto & f : fs)
 	{
 		Mesh::Vertex vertex;
-		vertex.v.x = vs.at((size_t)f.x).x;
-		vertex.v.y = vs.at((size_t)f.x).y;
-		vertex.v.z = vs.at((size_t)f.x).z;
+		vertex.v.x = vs.at((size_t)f.x - 1).x;
+		vertex.v.y = vs.at((size_t)f.x - 1).y;
+		vertex.v.z = vs.at((size_t)f.x - 1).z;
 		vertex.v.w = 1.0f;
-		vertex.uv.u = vts.at((size_t)f.y).x;
-		vertex.uv.v = vts.at((size_t)f.y).y;
+		vertex.uv.u = vts.at((size_t)f.y - 1).x;
+		vertex.uv.v = vts.at((size_t)f.y - 1).y;
 		vertexs.push_back(vertex);
 	}
 	auto mesh = new Mesh(std::move(vertexs));
@@ -109,7 +110,7 @@ Texture File::LoadTexture(const std::string & url)
 
 Material * File::LoadMaterial(const std::string & url)
 {
-	CHECK_RET(mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Material>(url));
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Material>(url));
 
 	std::ifstream ifile(url);
 	if (ifile)
