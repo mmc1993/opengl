@@ -1,11 +1,8 @@
 #pragma once
 
-#include "../include.h"
+#include "asset.h"
 
-class Shader;
-class Texture;
-
-class Mesh {
+class Mesh: public Asset {
 public:
 	struct Vertex {
 		struct {
@@ -16,7 +13,8 @@ public:
 	};
 
 public:
-	Mesh(std::vector<Vertex> && vertexs) : _vertexs(std::move(vertexs))
+	Mesh(std::vector<Vertex> && vertexs) 
+		: _vertexs(std::move(vertexs))
 	{
 	}
 

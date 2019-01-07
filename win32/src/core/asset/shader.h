@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../include.h"
+#include "asset.h"
 #include "../math/vec4.h"
 #include "../asset/texture.h"
 #include "../render/render.h"
 
-class Shader {
+class Shader: public Asset {
 public:
     struct Info {
         bool mIsDTest;
@@ -16,12 +16,11 @@ public:
     };
 
 public:
-    Shader();
+    Shader(const std::string & vs, const std::string & fs);
+	Shader(const char * vs, const char * fs);
     ~Shader();
 
     bool InitFromFile(const std::string & vs, const std::string & fs);
-    bool Init(const std::string & vs, const std::string & fs);
-    bool Init(const char * vs, const char * fs);
     void Bind();
 
     void SetUniform(size_t idx, int val);
@@ -37,7 +36,6 @@ public:
     void SetUniform(const std::string & key, const Texture & val);
 
     GLuint GetGLID() const { return _GLID; }
-
     Info & GetInfo() { return _info; }
 private:
     GLuint _GLID;

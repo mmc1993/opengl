@@ -2,12 +2,18 @@
 
 #include "../include.h"
 #include "material.h"
+#include "texture.h"
+#include "bitmap.h"
+#include "shader.h"
 #include "mesh.h"
 
 class File {
 public:
-	static std::vector<Mesh::Vertex> && LoadMesh(const std::string & fname);
-	static Material::Data && LoadMaterial(const std::string & fname);
+	static Mesh * LoadMesh(const std::string & url);
+	static Shader * LoadShader(const std::string & url);
+	static Bitmap * LoadBitmap(const std::string & url);
+	static Texture LoadTexture(const std::string & url);
+	static Material * LoadMaterial(const std::string & url);
 private:
 	static std::string_view FindSubStrUntil(
 		const std::string_view & str, 

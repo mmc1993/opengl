@@ -1,16 +1,19 @@
 #include "file.h"
+#include "../mmc.h"
+#include "asset_core.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
 
-std::vector<Mesh::Vertex>&& File::LoadMesh(const std::string & fname)
+Mesh * File::LoadMesh(const std::string & url)
 {
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Mesh>(url));
+
+	std::string line;
+	std::ifstream ifile(url);
 	std::vector<glm::vec3> vs;
 	std::vector<glm::vec2> fs;
 	std::vector<glm::vec2> vts;
 	std::vector<Mesh::Vertex> vertexs;
-
-	std::string line;
-	std::ifstream ifile(fname);
 	while (std::getline(ifile, line))
 	{
 		std::string_view view(line);
@@ -56,32 +59,75 @@ std::vector<Mesh::Vertex>&& File::LoadMesh(const std::string & fname)
 		vertex.uv.v = vts.at((size_t)f.y).y;
 		vertexs.push_back(vertex);
 	}
-	return std::move(vertexs);
+	auto mesh = new Mesh(std::move(vertexs));
+	mmc::mAssetCore.Reg(url, mesh);
+	return mesh;
 }
 
-Material::Data && File::LoadMaterial(const std::string & fname)
+Shader * File::LoadShader(const std::string & url)
 {
-	Material::Data data;
-	std::ifstream ifile(fname);
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Shader>(url));
+
+	auto vs = url + ".vs";
+	auto fs = url + ".fs";
+	std::ifstream vfile(vs);
+	std::ifstream ffile(fs);
+	CHECK_RET(vfile && ffile, nullptr);
+	std::stringstream vss, fss;
+	vss << vfile.rdbuf();
+	fss << ffile.rdbuf();
+	vfile.close();
+	ffile.close();
+	auto shader = new Shader(vss.str(), fss.str());
+	mmc::mAssetCore.Reg(url, shader);
+	return shader;
+}
+
+Bitmap * File::LoadBitmap(const std::string & url)
+{
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Bitmap>(url));
+	
+	stbi_set_flip_vertically_on_load(1);
+	auto w = 0, h = 0, c = 0;
+	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
+	CHECK_RET(buffer != nullptr, nullptr);
+	Bitmap::Data data;
+	data.channel = c;
+	data.url = url;
+	data.w = w;
+	data.h = h;
+	auto bitmap = new Bitmap(std::move(data), buffer);
+	mmc::mAssetCore.Reg(url, bitmap);
+	stbi_image_free(buffer);
+	return bitmap;
+}
+
+Texture File::LoadTexture(const std::string & url)
+{
+	return Texture(File::LoadBitmap(url));
+}
+
+Material * File::LoadMaterial(const std::string & url)
+{
+	CHECK_RET(mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Material>(url));
+
+	std::ifstream ifile(url);
 	if (ifile)
 	{
-		std::string meshURL;
-		CHECK_RET(std::getline(ifile, meshURL), std::move(data));
-		std::string normalURL;
-		CHECK_RET(std::getline(ifile, normalURL), std::move(data));
-		std::string textureURL;
-		CHECK_RET(std::getline(ifile, textureURL), std::move(data));
-		std::string shadervURL;
-		CHECK_RET(std::getline(ifile, shadervURL), std::move(data));
-		std::string shaderfURL;
-		CHECK_RET(std::getline(ifile, shaderfURL), std::move(data));
-
-		//	TODO mmc
-		//	暂时不考虑重用，第一版本简单粗暴实现
-		auto mesh = new Mesh(File::LoadMesh(meshURL));
-		
+		Material::Data data;
+		CHECK_RET(std::getline(ifile, data.mMeshURL), nullptr);
+		CHECK_RET(std::getline(ifile, data.mNormalURL), nullptr);
+		CHECK_RET(std::getline(ifile, data.mTextureURL), nullptr);
+		CHECK_RET(std::getline(ifile, data.mShaderURL), nullptr);
+		data.mMesh = File::LoadMesh(data.mMeshURL);
+		data.mShader = File::LoadShader(data.mShaderURL);
+		data.mNormal = File::LoadTexture(data.mNormalURL);
+		data.mTexture = File::LoadTexture(data.mTextureURL);
+		auto material = new Material(std::move(data));
+		mmc::mAssetCore.Reg(url, material);
+		return material;
 	}
-	return Material::Data && ();
+	return nullptr;
 }
 
 std::string_view File::FindSubStrUntil(

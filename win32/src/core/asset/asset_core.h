@@ -17,7 +17,12 @@ public:
 
 	void Del(const std::string & url)
 	{
-		_assets.erase(url);
+		auto it = _assets.find(url);
+		if (it != _assets.end())
+		{
+			delete it->second;
+			_assets.erase(it);
+		}
 	}
 
 	template <class T>
