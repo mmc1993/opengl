@@ -24,13 +24,13 @@ Render::Render()
 Render::~Render()
 { }
 
-void Render::AddCamera(Camera * camera, size_t id)
+void Render::AddCamera(::Camera * camera, size_t id)
 {
     assert(std::count(_cameras.begin(), _cameras.end(), id) == 0);
     auto it = std::lower_bound(
         _cameras.begin(), 
         _cameras.end(), id);
-    _cameras.insert(it, CameraInfo(camera, id));
+    _cameras.insert(it, Camera(camera, id));
 }
 
 void Render::DelCamera(size_t id)
@@ -52,7 +52,7 @@ void Render::PostCommand(const Command & command)
     }
     else
     {
-        _renderQueue.at(QueueType::kNONE).push_back(command);
+        //_renderQueue.at(QueueType::kNONE).push_back(command);
     }
 }
 
@@ -64,7 +64,7 @@ void Render::DoRender()
     }
 }
 
-void Render::RenderObjects(CameraInfo & camera)
+void Render::RenderObjects(Camera & camera)
 {
     camera.mCamera->Apply();
     glMatrixMode(GL_MODELVIEW);

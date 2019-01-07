@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stack>
 #include <list>
 #include <iterator>
 #include <algorithm>

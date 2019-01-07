@@ -7,57 +7,87 @@ class Shader;
 
 class Render {
 public:
-    //  队列类型
-    enum QueueType {
-        //  背景
-        kBACKGROUND,
-        //  集合
-        kGEOMETRY,
-        //  透明
-        kOPATCIY,
-        //  顶层
-        kOVERLAY,
-        //  标记最大值
-        kNONE,
-        MAX,
-    };
+	//  渲染队列
+	enum QueueType {
+		//  背景
+		kBACKGROUND,
+		//  几何
+		kGEOMETRY,
+		//  透明
+		kOPATCIY,
+		//  顶层
+		kOVERLAY,
+		MAX,
+	};
 
-    enum CommandType {
-        //  渲染
-        kRENDER,
-        //  矩阵变化
-        kTRANSFORM,
-    };
+	enum CommandType {
+		//  渲染
+		kRENDER,
+		//  矩阵变化
+		kTRANSFORM,
+	};
 
-    struct CameraInfo {
-        Camera * mCamera;
-        size_t mID;
+	class Matrix {
+	public:
+		enum ModeType { kPROJECT, kMODELVIEW, };
 
-        CameraInfo(): mCamera(nullptr), mID(0)
-        { }
+	public:
+		Matrix()
+		{ }
 
-        CameraInfo(Camera * camera, size_t id): mCamera(camera), mID(id)
-        { }
+		~Matrix()
+		{ }
 
-        bool operator ==(size_t id) const
-        {
-            return mID == id;
-        }
+		void Pop(ModeType mode)
+		{
+			GetStack(mode).pop();
+		}
 
-        bool operator !=(size_t id) const
-        {
-            return mID != id;
-        }
+		void Push(ModeType mode)
+		{
+			GetStack(mode).push(GetStack(mode).top());
+		}
 
-        bool operator <(size_t id) const
-        {
-            return mID < id;
-        }
+		void Identity(ModeType mode)
+		{
+			GetStack(mode).top() = glm::identity<glm::mat4>();
+		}
 
-        bool operator >(size_t id) const
-        {
-            return mID > id;
-        }
+		void Mul(ModeType mode, const glm::mat4 & mat)
+		{
+			GetStack(mode).top() *= mat;
+		}
+
+		const glm::mat4 & Top(ModeType mode) const
+		{
+			return GetStack(mode).top();
+		}
+
+	private:
+		std::stack<glm::mat4> & GetStack(ModeType mode)
+		{
+			return ModeType::kPROJECT == mode
+				? _project : _modelview;
+		}
+
+		const std::stack<glm::mat4> & GetStack(ModeType mode) const
+		{
+			return const_cast<Matrix *>(this)->GetStack(mode);
+		}
+
+	private:
+		std::stack<glm::mat4> _project;
+		std::stack<glm::mat4> _modelview;
+	};
+
+    struct Camera {
+		size_t mID;
+		::Camera * mCamera;
+        Camera(): mCamera(nullptr), mID(0) { }
+        Camera(::Camera * camera, size_t id)
+			: mCamera(camera), mID(id) { }
+        bool operator ==(size_t id) const { return mID == id; }
+        bool operator <(size_t id) const { return mID < id; }
     };
 
     //  变换命令
@@ -91,21 +121,27 @@ public:
 
 public:
     Render();
-
     ~Render();
 
-    void AddCamera(Camera * camera, size_t id);
+    void AddCamera(::Camera * camera, size_t id);
     void DelCamera(size_t id);
+
+	Matrix & GetMatrix()
+	{
+		return _matrix;
+	}
 
     void PostCommand(const Command & command);
 
     void DoRender();
 
 private:
-    void RenderObjects(CameraInfo & camera);
+    void RenderObjects(Camera & camera);
 
 private:
-    std::vector<CameraInfo> _cameras;
+	Matrix _matrix;
+
+    std::vector<Camera> _cameras;
 
     std::vector<std::vector<Command>> _renderQueue;
 };
