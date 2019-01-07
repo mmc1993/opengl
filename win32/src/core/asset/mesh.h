@@ -14,7 +14,7 @@ public:
 
 public:
 	Mesh(std::vector<Vertex> && vertexs) 
-		: _vertexs(std::move(vertexs))
+		: _vertexs(std::move(vertexs)), _vao(0), _vbo(0)
 	{
 		glGenVertexArrays(1, &_vao);
 		glBindVertexArray(_vao);
@@ -41,7 +41,12 @@ public:
 		return _vertexs;
 	}
 
-	GLuint GetVAO() const { return _vao; }
+	void Bind() 
+	{
+		assert(_vao != 0);
+		assert(_vbo != 0);
+		glBindVertexArray(_vao);
+	}
 
 private:
 	GLuint _vao;
