@@ -15,14 +15,11 @@ public:
     const glm::vec3 & GetUp() const;
     const glm::vec3 & GetEye() const;
     const glm::vec3 & GetPos() const;
-
-    void Apply();
+	void Apply();
+	void Free();
 
 private:
-    bool _isChange;
-    glm::mat4 _view;
     glm::mat4 _project;
-    glm::vec3 _eye, _pos, _up;
-    //  TODO: ±∏”√
-    Transform _transform;
+	glm::mat4 _modelview;
+	glm::vec3 _eye, _pos, _up;
 };

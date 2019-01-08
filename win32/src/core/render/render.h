@@ -20,13 +20,6 @@ public:
 		MAX,
 	};
 
-	enum CommandType {
-		//  ‰÷»æ
-		kRENDER,
-		//  æÿ’Û±‰ªØ
-		kTRANSFORM,
-	};
-
 	class Matrix {
 	public:
 		enum ModeType { kPROJECT, kMODELVIEW, };
@@ -50,7 +43,11 @@ public:
 
 		void Identity(ModeType mode)
 		{
-			GetStack(mode).top() = glm::identity<glm::mat4>();
+			auto & stack = GetStack(mode);
+			if (stack.empty())
+			{ stack.push(glm::mat4(1)); }
+			else
+			{ stack.top() = glm::mat4(1); }
 		}
 
 		void Mul(ModeType mode, const glm::mat4 & mat)
@@ -92,31 +89,14 @@ public:
 
     //  ±‰ªª√¸¡Ó
     struct CommandTransform {
-        const bool mIsPush;
-        const glm::mat4 * mMatrix;
-
-        CommandTransform(
-            const bool ispush, 
-            const glm::mat4 * mat4)
-            : mIsPush(ispush), mMatrix(mat4)
-        { }
-
-        void operator ()();
-    };
-
-    //  ‰÷»æ√¸¡Ó
-    struct CommandRender {
-        //void operator ()();
+		static void Push(const glm::mat4 & mat);
+		static void Pop();
     };
 
     struct Command {
         size_t mCameraID;
-        Shader * mShader;
-        CommandType mType;
         std::function<void()> mCallFn;
-
-        Command(): mCameraID(0), mShader(nullptr)
-        { }
+        Command(): mCameraID(0) { }
     };
 
 public:
@@ -125,18 +105,15 @@ public:
 
     void AddCamera(::Camera * camera, size_t id);
     void DelCamera(size_t id);
-
-	Matrix & GetMatrix()
-	{
-		return _matrix;
-	}
-
-    void PostCommand(const Command & command);
-
-    void DoRender();
+    
+	void PostCommand(QueueType queue, const Command & command);
+	
+	Matrix & GetMatrix();
+    
+	void RenderOnce();
 
 private:
-    void RenderObjects(Camera & camera);
+	void OnRenderCamera(Camera & camera);
 
 private:
 	Matrix _matrix;

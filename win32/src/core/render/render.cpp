@@ -2,20 +2,6 @@
 #include "../asset/shader.h"
 #include "../object/camera.h"
 
-void Render::CommandTransform::operator()()
-{
-    if (mIsPush)
-    {
-        glPushMatrix();
-        glMultMatrixf(&(*mMatrix)[0][0]);
-    }
-    else
-    {
-        glPopMatrix();
-    }
-}
-
-
 Render::Render()
 {
     _renderQueue.resize(QueueType::MAX);
@@ -42,43 +28,42 @@ void Render::DelCamera(size_t id)
     }
 }
 
-void Render::PostCommand(const Command & command)
+void Render::PostCommand(QueueType queue, const Command & command)
 {
     assert(command.mCallFn != nullptr);
-    if (command.mType == CommandType::kRENDER)
-    {
-        assert(command.mShader != nullptr);
-        _renderQueue.at(command.mShader->GetInfo().mQueueType).push_back(command);
-    }
-    else
-    {
-        //_renderQueue.at(QueueType::kNONE).push_back(command);
-    }
+	_renderQueue.at(queue).push_back(command);
 }
 
-void Render::DoRender()
+Render::Matrix & Render::GetMatrix()
+{
+	return _matrix;
+}
+
+void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
     {
-        RenderObjects(camera);
+		camera.mCamera->Apply();
+		OnRenderCamera(camera);
+		camera.mCamera->Free();
     }
+	for (auto & queue : _renderQueue)
+	{
+		queue.clear();
+	}
 }
 
-void Render::RenderObjects(Camera & camera)
+void Render::OnRenderCamera(Camera & camera)
 {
-    camera.mCamera->Apply();
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     for (auto & queue : _renderQueue)
     {
         for (auto & command : queue)
         {
-            if (camera.mID == command.mCameraID)
+            if (command.mCameraID == camera.mID)
             {
                 command.mCallFn();
             }
         }
     }
-    glFlush();
 }
 

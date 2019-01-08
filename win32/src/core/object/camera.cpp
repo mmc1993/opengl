@@ -1,7 +1,8 @@
 #include "camera.h"
+#include "../mmc.h"
+#include "../render/render.h"
 
 Camera::Camera()
-    : _isChange(true)
 {
 }
 
@@ -16,7 +17,7 @@ void Camera::Init(float fov, float wdivh, float near, float far)
 
 void Camera::LookAt(const glm::vec3 & eye, const glm::vec3 & pos, const glm::vec3 & up)
 {
-    _view = glm::lookAt(eye, pos, up);
+    _modelview = glm::lookAt(eye, pos, up);
 }
 
 const glm::vec3 & Camera::GetUp() const
@@ -36,9 +37,14 @@ const glm::vec3 & Camera::GetPos() const
 
 void Camera::Apply()
 {
-	//	TODO MMC
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glMultMatrixf(&_project[0][0]);
+	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, _project);
+	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODELVIEW);
+	mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, _modelview);
 }
 
+void Camera::Free()
+{
+	mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+	mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
+}
