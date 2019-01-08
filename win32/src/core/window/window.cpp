@@ -134,8 +134,7 @@ void Window::Update()
             <std::chrono::milliseconds>
             (diffTM).count() * 0.001f);
         mmc::mTimer.Update(now);
-        mmc::mRender.DoRender();
-
+        mmc::mRender.RenderOnce();
         glfwSwapBuffers(_window);
     }
 }
