@@ -23,7 +23,7 @@ public:
 		object->GetTransform()->Translate(10, 10, 200);
 		mmc::mRoot.AddChild(object);
 
-		//auto material = File::LoadMaterial("res/material/1.txt");
+		auto material = File::LoadMaterial("res/material/1.txt");
     }
 };
 

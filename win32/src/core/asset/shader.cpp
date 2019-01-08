@@ -9,10 +9,10 @@ std::string Shader::s_back_fs_code;
 
 bool Shader::InitShader()
 {
-	CHECK_RET(!s_head_vs_code.empty() &&
-			  !s_head_fs_code.empty() &&
-			  !s_back_vs_code.empty() &&
-			  !s_back_fs_code.empty(), true);
+	CHECK_RET(s_head_vs_code.empty() &&
+			  s_head_fs_code.empty() &&
+			  s_back_vs_code.empty() &&
+			  s_back_fs_code.empty(), true);
 	std::ifstream fHeadvs("res/shader/head.vs.shader");
 	std::ifstream fHeadfs("res/shader/head.fs.shader");
 	std::ifstream fBackvs("res/shader/back.vs.shader");
