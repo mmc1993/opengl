@@ -13,9 +13,15 @@ public:
         bool mIsZWrite;
     };
 
+private:
+	static std::string s_head_vs_code;
+	static std::string s_head_fs_code;
+	static std::string s_back_vs_code;
+	static std::string s_back_fs_code;
+	static bool InitShader();
+
 public:
     Shader(const std::string & vs, const std::string & fs);
-	Shader(const char * vs, const char * fs);
     ~Shader();
 
     void Bind();
@@ -33,6 +39,10 @@ public:
 
     GLuint GetGLID() const { return _GLID; }
     Info & GetInfo() { return _info; }
+
+private:
+	Shader(const char * vs, const char * fs);
+
 private:
     GLuint _GLID;
     Info _info;
