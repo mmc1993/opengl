@@ -7,19 +7,6 @@ class Shader;
 
 class Render {
 public:
-	//  ‰÷»æ∂”¡–
-	enum QueueType {
-		//  ±≥æ∞
-		kBACKGROUND,
-		//  º∏∫Œ
-		kGEOMETRY,
-		//  Õ∏√˜
-		kOPATCIY,
-		//  ∂•≤„
-		kOVERLAY,
-		MAX,
-	};
-
 	class Matrix {
 	public:
 		enum ModeType { kPROJECT, kMODELVIEW, };
@@ -52,7 +39,7 @@ public:
 
 		void Mul(ModeType mode, const glm::mat4 & mat)
 		{
-			GetStack(mode).top() *= mat;
+			GetStack(mode).top() = mat * GetStack(mode).top();
 		}
 
 		const glm::mat4 & Top(ModeType mode) const
@@ -89,8 +76,8 @@ public:
 
     //  ±‰ªª√¸¡Ó
     struct CommandTransform {
-		static void Push(const glm::mat4 & mat);
-		static void Pop();
+		static void Post(size_t cameraID, const glm::mat4 & mat);
+		static void Free(size_t cameraID);
     };
 
     struct Command {
@@ -106,7 +93,7 @@ public:
     void AddCamera(::Camera * camera, size_t id);
     void DelCamera(size_t id);
     
-	void PostCommand(QueueType queue, const Command & command);
+	void PostCommand(const Command & command);
 	
 	Matrix & GetMatrix();
     
@@ -120,5 +107,5 @@ private:
 
     std::vector<Camera> _cameras;
 
-    std::vector<std::vector<Command>> _renderQueue;
+    std::vector<Command> _commands;
 };

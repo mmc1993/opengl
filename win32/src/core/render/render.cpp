@@ -1,11 +1,10 @@
 #include "render.h"
+#include "../mmc.h"
 #include "../asset/shader.h"
 #include "../object/camera.h"
 
 Render::Render()
-{
-    _renderQueue.resize(QueueType::MAX);
-}
+{ }
 
 Render::~Render()
 { }
@@ -28,10 +27,10 @@ void Render::DelCamera(size_t id)
     }
 }
 
-void Render::PostCommand(QueueType queue, const Command & command)
+void Render::PostCommand(const Command & command)
 {
     assert(command.mCallFn != nullptr);
-	_renderQueue.at(queue).push_back(command);
+	_commands.push_back(command);
 }
 
 Render::Matrix & Render::GetMatrix()
@@ -47,23 +46,37 @@ void Render::RenderOnce()
 		OnRenderCamera(camera);
 		camera.mCamera->Free();
     }
-	for (auto & queue : _renderQueue)
-	{
-		queue.clear();
-	}
+	_commands.clear();
 }
 
 void Render::OnRenderCamera(Camera & camera)
 {
-    for (auto & queue : _renderQueue)
+    for (auto & command : _commands)
     {
-        for (auto & command : queue)
+        if (command.mCameraID == camera.mID)
         {
-            if (command.mCameraID == camera.mID)
-            {
-                command.mCallFn();
-            }
-        }
+			command.mCallFn();
+		}
     }
 }
 
+void Render::CommandTransform::Post(size_t cameraID, const glm::mat4 & mat)
+{
+	Command command;
+	command.mCameraID = cameraID;
+	command.mCallFn = [mat]() {
+		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODELVIEW);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, mat);
+	};
+	mmc::mRender.PostCommand(command);
+}
+
+void Render::CommandTransform::Free(size_t cameraID)
+{
+	Command command;
+	command.mCameraID = cameraID;
+	command.mCallFn = []() {
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
+	};
+	mmc::mRender.PostCommand(command);
+}

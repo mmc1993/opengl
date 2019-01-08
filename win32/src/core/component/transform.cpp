@@ -1,6 +1,17 @@
 #include "transform.h"
 #include "../object/object.h"
 
+Transform::Transform()
+	: _isChange(true)
+	, _scale(1, 1, 1)
+	, _translate(0, 0, 0)
+{
+}
+
+Transform::~Transform()
+{
+}
+
 void Transform::OnAdd()
 {
 }
@@ -145,10 +156,8 @@ void Transform::UpdateMatrix()
     if (_isChange)
     {
         _isChange = false;
-        glm::mat4 t;
-        glm::mat4 s;
-        glm::scale(s, _scale);
-        glm::translate(t, _translate);
+        auto s = glm::scale(glm::mat4(1) , _scale);
+        auto t = glm::translate(glm::mat4(1), _translate);
         _matrix = t * (glm::mat4)_rotate * s;
         auto parent = GetParent<Transform>();
         if (parent != nullptr)

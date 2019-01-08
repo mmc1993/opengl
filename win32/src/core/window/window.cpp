@@ -115,7 +115,9 @@ void Window::Loop()
     _renderInfo.renderTM = std::chrono::high_resolution_clock::now();
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
-    glfwTerminate();
+	//	TODO mmc
+	//	不知道为啥，加上这句会挂掉。
+    //glfwTerminate();
 }
 
 void Window::Update()

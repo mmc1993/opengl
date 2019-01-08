@@ -69,10 +69,6 @@ protected:
     void DelChild(Object * child, bool del);
 
 private:
-    void PushTransform();
-    void PopTransform();
-
-private:
     size_t _tag;
     bool _active;
     size_t _cameraID;

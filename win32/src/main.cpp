@@ -12,14 +12,18 @@ public:
     void InitGame()
     {
         auto camera = new Camera();
-        camera->Init(60, (float)GetW() / (float)GetH(), 1, 800);
+        camera->Init(60, (float)GetW() / (float)GetH(), 100, 800);
         camera->LookAt(
             glm::vec3(0, 0, -1), 
             glm::vec3(0, 0, 0), 
             glm::vec3(0, 1, 0));
         mmc::mRender.AddCamera(camera, 0);
 
-		auto material = File::LoadMaterial("res/material/1.txt");
+		auto object = new Object();
+		object->GetTransform()->Translate(10, 10, 200);
+		mmc::mRoot.AddChild(object);
+
+		//auto material = File::LoadMaterial("res/material/1.txt");
     }
 };
 

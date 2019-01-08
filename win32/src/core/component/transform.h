@@ -6,6 +6,8 @@
 
 class Transform : public Component {
 public:
+	Transform();
+	~Transform();
     virtual void OnAdd() override;
     virtual void OnDel() override;
     virtual void OnUpdate(float dt) override;

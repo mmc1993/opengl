@@ -3,7 +3,6 @@
 #include "asset.h"
 #include "../math/vec4.h"
 #include "../asset/texture.h"
-#include "../render/render.h"
 
 class Shader: public Asset {
 public:
@@ -12,7 +11,6 @@ public:
         bool mIsDWrite;
         bool mIsZTest;
         bool mIsZWrite;
-        Render::QueueType mQueueType;
     };
 
 public:

@@ -20,44 +20,6 @@ Object::~Object()
 
 void Object::OnUpdate(float dt)
 {
-	//	TODO MMC
-    Render::Command command;
-    command.mType = Render::CommandType::kTRANSFORM;
-    command.mCameraID = GetCameraID();
-    command.mCallFn = []() {
-        float vertices[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f,  0.5f, 0.0f
-        };
-
-        //Shader shader;
-        //auto ret = shader.InitFromFile("res/shader/1.vsh", "res/shader/1.fsh");
-        //shader.Bind();
-
-        //unsigned int vao;
-        //glGenVertexArrays(1, &vao);
-        //auto r = glGetError();
-        //glBindVertexArray(vao);
-        //r = glGetError();
-
-        //GLuint vbo;
-        //glGenBuffers(1, &vbo);
-        //r = glGetError();
-        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        //r = glGetError();
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        //r = glGetError();
-
-        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        //r = glGetError();
-        //glEnableVertexAttribArray(0);
-        //r = glGetError();
-
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
-        //r = glGetError();
-    };
-    mmc::mRender.PostCommand(command);
 }
 
 void Object::AddChild(Object * child, size_t tag)
@@ -156,26 +118,27 @@ bool Object::IsActive() const
 
 void Object::Update(float dt)
 {
-    if (IsActive())
-    {
-        OnUpdate(dt);
+	OnUpdate(dt);
 
-        for (auto component : _components)
-        {
-            if (component->IsActive())
-            {
-                component->OnUpdate(dt);
-            }
-        }
+	Render::CommandTransform::Post(GetCameraID(), GetTransform()->GetMatrix());
 
-		//	TODO MMC
-        PushTransform();
-        for (auto child : _childs)
-        {
-            child->Update(dt);
-        }
-        PopTransform();
-    }
+	for (auto component : _components)
+	{
+		if (component->IsActive())
+		{
+			component->OnUpdate(dt);
+		}
+	}
+
+	for (auto child : _childs)
+	{
+		if (child->IsActive())
+		{
+			child->Update(dt);
+		}
+	}
+
+	Render::CommandTransform::Free(GetCameraID());
 }
 
 void Object::SetParent(Object * parent)
@@ -209,22 +172,4 @@ void Object::DelChild(Object * child, bool del)
     auto it = std::find(_childs.begin(), _childs.end(), child);
     assert(it != _childs.end());
     DelChild(std::distance(_childs.begin(), it), del);
-}
-
-void Object::PushTransform()
-{
-    Render::Command cmdBefore;
-    cmdBefore.mCameraID = _cameraID;
-    cmdBefore.mType = Render::CommandType::kTRANSFORM;
-    cmdBefore.mCallFn = Render::CommandTransform(true, &GetTransform()->GetMatrix());
-    mmc::mRender.PostCommand(cmdBefore);
-}
-
-void Object::PopTransform()
-{
-    Render::Command cmdAfter;
-    cmdAfter.mCameraID = _cameraID;
-    cmdAfter.mType = Render::CommandType::kTRANSFORM;
-    cmdAfter.mCallFn = Render::CommandTransform(false, nullptr);
-    mmc::mRender.PostCommand(cmdAfter);
 }
