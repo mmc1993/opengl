@@ -42,14 +42,18 @@ public:
     glm::vec3 GetRotate() const;
 
     const glm::mat4 & GetMatrix();
+	const glm::mat4 & GetMatrixSelf();
+	glm::mat4 GetMatrixOnlyRotate();
 
 private:
-    void UpdateMatrix();
+    bool UpdateMatrix();
+	bool UpdateMatrixSelf();
 
 private:
     glm::vec3 _scale;
     glm::quat _rotate;
     glm::vec3 _translate;
-    glm::mat4 _matrix;
+	glm::mat4 _transform;
+    glm::mat4 _transformSelf;
     bool _isChange;
 };

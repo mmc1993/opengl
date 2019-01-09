@@ -14,8 +14,13 @@ class AppWindow : public Window {
 public:
     void InitGame()
     {
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+
         auto camera = new Camera();
-        camera->Init(90, (float)GetW() / (float)GetH(), 100, 800);
+        camera->Init(90, (float)GetW() / (float)GetH(), 1, 10000);
         camera->LookAt(
             glm::vec3(0, 0, -1), 
             glm::vec3(0, 0, 0), 
@@ -30,19 +35,46 @@ public:
 
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [](const std::any & event) {
 			auto param = std::any_cast<Window::EventKeyParam>(event);
-			if (param.act != 0)
+			if (param.act != 2)
 			{
 				return;
 			}
 
+			const auto angle = 0.1f;
+
 			switch (param.key)
 			{
 			case 265:
-				mmc::mRoot.GetTransform()->AddScale(0.5, 0.5, 0.5);
-				//mmc::mRoot.GetTransform()->AddRotate(1, 0, 0, -0.1f);
+				{
+					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					rotate = glm::inverse(rotate);
+					auto aixs = glm::vec4(1, 0, 0, 1);
+					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
+				}
 				break;
 			case 264:
-				mmc::mRoot.GetTransform()->AddRotate(1, 0, 0, 0.1f);
+				{
+					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					rotate = glm::inverse(rotate);
+					auto aixs = glm::vec4(1, 0, 0, 1);
+					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);
+				}
+				break;
+			case 263:
+				{
+					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					rotate = glm::inverse(rotate);
+					auto aixs = glm::vec4(0, 1, 0, 1);
+					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
+				}
+				break;
+			case 262:
+				{
+					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					rotate = glm::inverse(rotate);
+					auto aixs = glm::vec4(0, 1, 0, 1);
+					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);
+				}
 				break;
 			}
 			std::cout

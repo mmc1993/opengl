@@ -5,6 +5,7 @@ Transform::Transform()
 	: _isChange(true)
 	, _scale(1, 1, 1)
 	, _translate(0, 0, 0)
+	, _rotate(glm::vec3(0, 0, 0))
 {
 }
 
@@ -145,24 +146,56 @@ glm::vec3 Transform::GetRotate() const
     return glm::eulerAngles(_rotate);
 }
 
-inline const glm::mat4 & Transform::GetMatrix()
+const glm::mat4 & Transform::GetMatrix()
 { 
     UpdateMatrix();
-    return _matrix; 
+    return _transform; 
 }
 
-void Transform::UpdateMatrix()
+const glm::mat4 & Transform::GetMatrixSelf()
 {
-    if (_isChange)
-    {
-        _isChange = false;
-        auto s = glm::scale(glm::mat4(1) , _scale);
-        auto t = glm::translate(glm::mat4(1), _translate);
-        _matrix = t * (glm::mat4)_rotate * s;
-        auto parent = GetParent<Transform>();
-        if (parent != nullptr)
-        {
-            _matrix = parent->GetMatrix() * _matrix;
-        }
-    }
+	UpdateMatrixSelf();
+	return _transformSelf;
+}
+
+glm::mat4 Transform::GetMatrixOnlyRotate()
+{
+	auto result = _rotate;
+	auto parent = GetOwner()->GetParent();
+	while (parent != nullptr)
+	{
+		result = parent->GetTransform()->GetRotateQuat() * result;
+		parent = parent->GetParent();
+	}
+	return (glm::mat4)result;
+}
+
+bool Transform::UpdateMatrix()
+{
+	auto parent = GetOwner()->GetParent();
+	if (UpdateMatrixSelf())
+	{
+		_transform = parent != nullptr 
+			? parent->GetTransform()->GetMatrix() * _transformSelf : _transformSelf;
+		return true;
+	}
+	else if (parent != nullptr && parent->GetTransform()->UpdateMatrix())
+	{
+		_transform = parent->GetTransform()->GetMatrix() * _transformSelf;
+		return true;
+	}
+	return false;
+}
+
+bool Transform::UpdateMatrixSelf()
+{
+	if (_isChange)
+	{
+		_isChange = false;
+		auto t = glm::translate(glm::mat4(1), _translate);
+		auto s = glm::scale(glm::mat4(1), _scale);
+		_transformSelf = t * (glm::mat4)_rotate * s;
+		return true;
+	}
+	return false;
 }
