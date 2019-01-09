@@ -44,7 +44,7 @@ public:
     Info & GetInfo() { return _info; }
 
 private:
-	Shader(const char * vs, const char * fs);
+	bool Init(const char * vs, const char * fs);
 
 private:
     GLuint _GLID;

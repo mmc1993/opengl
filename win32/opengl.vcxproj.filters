@@ -54,6 +54,12 @@
     <ClCompile Include="src\core\asset\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\component\sprite.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\asset\material.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\timer\timer.h">
@@ -858,6 +864,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\asset\asset.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\component\sprite.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -36,16 +36,17 @@ bool Shader::InitShader()
 }
 
 Shader::Shader(const std::string & vs, const std::string & fs)
+	: _GLID(0)
 {
 	if (InitShader())
 	{
-		Shader(
+		Init(
 			(s_head_vs_code + vs + s_back_vs_code).c_str(), 
 			(s_head_fs_code + fs + s_back_fs_code).c_str());
 	}
 }
 
-Shader::Shader(const char * vs, const char * fs)
+bool Shader::Init(const char * vs, const char * fs)
 {
 	auto vret = 0;
 	auto fret = 0;
@@ -89,6 +90,7 @@ Shader::Shader(const char * vs, const char * fs)
 	{
 		_GLID = 0;
 	}
+	return _GLID != 0;
 }
 
 Shader::~Shader()

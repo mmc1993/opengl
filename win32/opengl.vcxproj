@@ -120,6 +120,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp" />
+    <ClCompile Include="src\core\asset\material.cpp" />
+    <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\mmc.cpp" />
     <ClCompile Include="src\core\object\camera.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
@@ -141,6 +143,7 @@
     <ClInclude Include="src\core\asset\material.h" />
     <ClInclude Include="src\core\asset\mesh.h" />
     <ClInclude Include="src\core\asset\texture.h" />
+    <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\mmc.h" />
     <ClInclude Include="src\core\object\camera.h" />
     <ClInclude Include="src\core\component\component.h" />
