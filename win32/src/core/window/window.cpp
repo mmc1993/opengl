@@ -143,28 +143,28 @@ void Window::Update()
 
 void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
 {
-    EventMouse::Param param;
+    EventMouseParam param;
     param.act = act;
     param.btn = btn;
     param.stat = stat;
-    mmc::mEvent.Post(EventMouse::kBUTTON, param);
+    mmc::mEvent.Post(EventType::kMOUSE_BUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
 {
-    EventMouse::Param param;
+    EventMouseParam param;
     param.x = static_cast<float>(x);
     param.y = static_cast<float>(y);
-    mmc::mEvent.Post(EventMouse::kMOVEED, param);
+    mmc::mEvent.Post(EventType::kMOUSE_MOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
 {
-    EventKey::Param param;
+    EventKeyParam param;
     param.key = key;
     param.act = act;
     param.stat = stat;
-    mmc::mEvent.Post(EventKey::kKEY, param);
+    mmc::mEvent.Post(EventType::kKEYBOARD, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)

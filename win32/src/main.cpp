@@ -1,19 +1,19 @@
 #include "core/mmc.h"
 #include "core/timer/timer.h"
+#include "core/event/event.h"
 #include "core/window/window.h"
 #include "core/object/camera.h"
 #include "core/render/render.h"
 #include "core/component/sprite.h"
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
+#include "core/component/transform.h"
 #include "core/asset/file.h"
 
 class AppWindow : public Window {
 public:
     void InitGame()
     {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
         auto camera = new Camera();
         camera->Init(90, (float)GetW() / (float)GetH(), 100, 800);
         camera->LookAt(
@@ -27,6 +27,28 @@ public:
 		sprite->SetMaterial(material);
 		mmc::mRoot.AddComponent(sprite);
 		mmc::mRoot.GetTransform()->Translate(0, 0, -200);
+
+		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [](const std::any & event) {
+			auto param = std::any_cast<Window::EventKeyParam>(event);
+			if (param.act != 0)
+			{
+				return;
+			}
+
+			switch (param.key)
+			{
+			case 265:
+				mmc::mRoot.GetTransform()->AddScale(0.5, 0.5, 0.5);
+				//mmc::mRoot.GetTransform()->AddRotate(1, 0, 0, -0.1f);
+				break;
+			case 264:
+				mmc::mRoot.GetTransform()->AddRotate(1, 0, 0, 0.1f);
+				break;
+			}
+			std::cout
+				<< "key: " << param.key << "\n"
+				<< "act: " << param.act << std::endl;
+		});
     }
 };
 

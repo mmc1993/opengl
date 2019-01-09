@@ -21,7 +21,7 @@ public:
 		glBindVertexArray(_vao);
 		glGenBuffers(1, &_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex), _vertexs.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _vertexs.size() * sizeof(Vertex), _vertexs.data(), GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(size_t)sizeof(glm::vec3));

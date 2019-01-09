@@ -12,6 +12,27 @@ public:
     };
 
 public:
+	enum EventType {
+		kMOUSE_BUTTON,
+		kMOUSE_MOVEED,
+		kKEYBOARD,
+	};
+
+	struct EventMouseParam {
+		int btn;
+		int act;
+		float x;
+		float y;
+		int stat;
+	};
+
+	struct EventKeyParam {
+		int key;
+		int act;
+		int stat;
+	};
+
+public:
     Window();
     ~Window();
     bool Create(const std::string & title);

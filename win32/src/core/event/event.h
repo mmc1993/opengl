@@ -64,31 +64,3 @@ private:
     std::map<size_t, std::vector<Event_t>> _events;
 };
 
-class EventMouse {
-public:
-    struct Param {
-        int btn;
-        int act;
-        float x;
-        float y;
-        int stat;
-    };
-
-    enum {
-        kBUTTON,
-        kMOVEED,
-    };
-};
-
-class EventKey {
-public:
-    struct Param {
-        int key;
-        int act;
-        int stat;
-    };
-
-    enum {
-        kKEY
-    };
-};
