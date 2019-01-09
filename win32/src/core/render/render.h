@@ -47,6 +47,21 @@ public:
 			return GetStack(mode).top();
 		}
 
+		glm::mat4 GetMVP() const
+		{
+			return _project.top() * _modelview.top();
+		}
+
+		const glm::mat4 & GetMV() const
+		{
+			return Top(ModeType::kMODELVIEW);
+		}
+
+		const glm::mat4 & GetP() const
+		{
+			return Top(ModeType::kPROJECT);
+		}
+
 	private:
 		std::stack<glm::mat4> & GetStack(ModeType mode)
 		{
@@ -97,6 +112,7 @@ public:
 	
 	Matrix & GetMatrix();
     
+	void RenderMesh(size_t count);
 	void RenderOnce();
 
 private:

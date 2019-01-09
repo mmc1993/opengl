@@ -49,6 +49,11 @@ public:
 		glBindVertexArray(_vao);
 	}
 
+	void Free()
+	{
+		glBindVertexArray(0);
+	}
+
 private:
 	GLuint _vao;
 	GLuint _vbo;

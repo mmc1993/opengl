@@ -38,6 +38,11 @@ Render::Matrix & Render::GetMatrix()
 	return _matrix;
 }
 
+void Render::RenderMesh(size_t count)
+{
+	glDrawArrays(GL_TRIANGLES, 0, count);
+}
+
 void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
