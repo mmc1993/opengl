@@ -5,7 +5,6 @@ layout(location = 1) in vec2 uv_;
 
 uniform mat4 mvp_;
 uniform mat4 mv_;
-uniform mat4 m_;
 uniform sampler2D normal_;
 uniform sampler2D texture_;
 
