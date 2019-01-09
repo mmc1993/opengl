@@ -134,9 +134,11 @@ void Shader::SetUniform(size_t idx, const glm::mat4 & val)
 	glUniformMatrix4fv(idx, 1, GL_FALSE, &val[0][0]);
 }
 
-void Shader::SetUniform(size_t idx, const Texture & val)
+void Shader::SetUniform(size_t idx, const Texture & val, size_t pos)
 {
-    glUniform1i(static_cast<GLint>(idx), val.GetBitmap()->GetGLID());
+	glActiveTexture(GL_TEXTURE0 + pos);
+	glBindTexture(GL_TEXTURE_2D, val.GetBitmap()->GetGLID());
+    glUniform1i(static_cast<GLint>(idx), pos);
 }
 
 void Shader::SetUniform(const std::string & key, int val)
@@ -164,8 +166,8 @@ void Shader::SetUniform(const std::string & key, const glm::mat4 & val)
 	SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 
-void Shader::SetUniform(const std::string & key, const Texture & val)
+void Shader::SetUniform(const std::string & key, const Texture & val, size_t pos)
 {
-    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val, pos);
 }
 

@@ -15,75 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\timer\timer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\window\window.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\event\event.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\component\component.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\object\object.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\render\render.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\component\transform.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\object\camera.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\third\glm\detail\glm.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\mmc.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\asset\file.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\asset\shader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\component\sprite.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\asset\material.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\core\timer\timer.h">
+    <ClInclude Include="src\core\asset\asset.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\include.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\window\window.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\event\event.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\glew.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\glfw3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\stb_image.h">
+    <ClInclude Include="src\core\asset\asset_core.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\asset\bitmap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\file.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\asset\texture.h">
@@ -92,16 +42,13 @@
     <ClInclude Include="src\core\component\component.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\object\object.h">
+    <ClInclude Include="src\core\component\sprite.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\math\vec4.h">
+    <ClInclude Include="src\core\component\transform.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\third\json.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\sformat.h">
+    <ClInclude Include="src\core\event\event.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\math\math.h">
@@ -110,13 +57,16 @@
     <ClInclude Include="src\core\math\matrix.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\component\transform.h">
+    <ClInclude Include="src\core\math\vec4.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\object\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\object\object.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\third\glm\detail\_features.hpp">
@@ -839,36 +789,86 @@
     <ClInclude Include="src\core\third\glm\vector_relational.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\mmc.h">
+    <ClInclude Include="src\core\third\glew.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\mesh.h">
+    <ClInclude Include="src\core\third\glfw3.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\file.h">
+    <ClInclude Include="src\core\third\json.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\tools\string_tool.h">
+    <ClInclude Include="src\core\third\sformat.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\material.h">
+    <ClInclude Include="src\core\third\stb_image.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\shader.h">
+    <ClInclude Include="src\core\timer\timer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\tools\debug_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\asset_core.h">
+    <ClInclude Include="src\core\tools\string_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\asset.h">
+    <ClInclude Include="src\core\window\window.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\component\sprite.h">
+    <ClInclude Include="src\core\include.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\mmc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\asset\file.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\asset\material.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\asset\shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\component.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\sprite.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\transform.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\event\event.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\object\camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\object\object.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\render.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\third\glm\detail\glm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\timer\timer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\window\window.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\mmc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\third\glm\detail\func_common.inl">
