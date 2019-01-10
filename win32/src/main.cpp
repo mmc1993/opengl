@@ -39,7 +39,7 @@ public:
 			sprite->SetMaterial(material);
 			child->AddComponent(sprite);
 			child->GetTransform()->Translate(100, 0, 0);
-			//mmc::mRoot.AddChild(child);
+			mmc::mRoot.AddChild(child);
 		}
 
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [](const std::any & event) {
