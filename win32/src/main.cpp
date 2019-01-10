@@ -22,8 +22,8 @@ public:
         auto camera = new Camera();
         camera->Init(90, (float)GetW() / (float)GetH(), 1, 10000);
         camera->LookAt(
-            glm::vec3(0, 0, -1), 
             glm::vec3(0, 0, 0), 
+            glm::vec3(0, 0, -1), 
             glm::vec3(0, 1, 0));
         mmc::mRender.AddCamera(camera, 0);
 
@@ -32,6 +32,15 @@ public:
 		sprite->SetMaterial(material);
 		mmc::mRoot.AddComponent(sprite);
 		mmc::mRoot.GetTransform()->Translate(0, 0, -200);
+
+		{
+			auto child = new Object();
+			auto sprite = new Sprite();
+			sprite->SetMaterial(material);
+			child->AddComponent(sprite);
+			child->GetTransform()->Translate(100, 0, 0);
+			//mmc::mRoot.AddChild(child);
+		}
 
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [](const std::any & event) {
 			auto param = std::any_cast<Window::EventKeyParam>(event);
@@ -46,7 +55,7 @@ public:
 			{
 			case 265:
 				{
-					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
 					rotate = glm::inverse(rotate);
 					auto aixs = glm::vec4(1, 0, 0, 1);
 					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
@@ -54,7 +63,7 @@ public:
 				break;
 			case 264:
 				{
-					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
 					rotate = glm::inverse(rotate);
 					auto aixs = glm::vec4(1, 0, 0, 1);
 					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);
@@ -62,7 +71,7 @@ public:
 				break;
 			case 263:
 				{
-					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
 					rotate = glm::inverse(rotate);
 					auto aixs = glm::vec4(0, 1, 0, 1);
 					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
@@ -70,7 +79,7 @@ public:
 				break;
 			case 262:
 				{
-					auto rotate = mmc::mRoot.GetTransform()->GetMatrixOnlyRotate();
+					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
 					rotate = glm::inverse(rotate);
 					auto aixs = glm::vec4(0, 1, 0, 1);
 					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);

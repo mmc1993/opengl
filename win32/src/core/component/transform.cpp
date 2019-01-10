@@ -60,6 +60,11 @@ void Transform::Rotate(const glm::vec3 & vec, float a)
     Rotate(glm::quat(glm::angleAxis(a, vec)));
 }
 
+void Transform::Scale(float x)
+{
+	Scale(x, x, x);
+}
+
 void Transform::Scale(float x, float y, float z)
 {
     _isChange = true;
@@ -149,53 +154,40 @@ glm::vec3 Transform::GetRotate() const
 const glm::mat4 & Transform::GetMatrix()
 { 
     UpdateMatrix();
-    return _transform; 
+    return _matrix; 
 }
 
-const glm::mat4 & Transform::GetMatrixSelf()
+glm::mat4 Transform::GetMatrixFromRoot()
 {
-	UpdateMatrixSelf();
-	return _transformSelf;
-}
-
-glm::mat4 Transform::GetMatrixOnlyRotate()
-{
-	auto result = _rotate;
+	auto matrix = GetMatrix();
 	auto parent = GetOwner()->GetParent();
 	while (parent != nullptr)
 	{
-		result = parent->GetTransform()->GetRotateQuat() * result;
+		matrix = parent->GetTransform()->GetMatrix() * matrix;
 		parent = parent->GetParent();
 	}
-	return (glm::mat4)result;
+	return matrix;
 }
 
-bool Transform::UpdateMatrix()
+glm::mat4 Transform::GetRotateFromRoot()
 {
+	auto matrix = GetRotateQuat();
 	auto parent = GetOwner()->GetParent();
-	if (UpdateMatrixSelf())
+	while (parent != nullptr)
 	{
-		_transform = parent != nullptr 
-			? parent->GetTransform()->GetMatrix() * _transformSelf : _transformSelf;
-		return true;
+		matrix = parent->GetTransform()->GetRotateQuat() * matrix;
+		parent = parent->GetParent();
 	}
-	else if (parent != nullptr && parent->GetTransform()->UpdateMatrix())
-	{
-		_transform = parent->GetTransform()->GetMatrix() * _transformSelf;
-		return true;
-	}
-	return false;
+	return (glm::mat4)matrix;
 }
 
-bool Transform::UpdateMatrixSelf()
+void Transform::UpdateMatrix()
 {
 	if (_isChange)
 	{
 		_isChange = false;
 		auto t = glm::translate(glm::mat4(1), _translate);
 		auto s = glm::scale(glm::mat4(1), _scale);
-		_transformSelf = t * (glm::mat4)_rotate * s;
-		return true;
+		_matrix = t * (glm::mat4)_rotate * s;
 	}
-	return false;
 }

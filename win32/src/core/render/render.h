@@ -39,7 +39,7 @@ public:
 
 		void Mul(ModeType mode, const glm::mat4 & mat)
 		{
-			GetStack(mode).top() = mat * GetStack(mode).top();
+			GetStack(mode).top() *= mat;
 		}
 
 		const glm::mat4 & Top(ModeType mode) const

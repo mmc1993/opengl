@@ -15,9 +15,9 @@ void Camera::Init(float fov, float wdivh, float near, float far)
     _project = glm::perspective(fov, wdivh, near, far);
 }
 
-void Camera::LookAt(const glm::vec3 & eye, const glm::vec3 & pos, const glm::vec3 & up)
+void Camera::LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec3 & up)
 {
-    _modelview = glm::lookAt(eye, pos, up);
+    _modelview = glm::lookAt(pos, eye, up);
 }
 
 const glm::vec3 & Camera::GetUp() const

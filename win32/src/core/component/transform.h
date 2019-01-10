@@ -20,6 +20,7 @@ public:
     void Rotate(const glm::vec3 & vec, float a);
     void Rotate(float x, float y, float z, float a);
 
+	void Scale(float x);
     void Scale(float x, float y, float z);
     void Scale(const glm::vec3 & vec);
     void Scale(const glm::vec4 & vec);
@@ -42,18 +43,16 @@ public:
     glm::vec3 GetRotate() const;
 
     const glm::mat4 & GetMatrix();
-	const glm::mat4 & GetMatrixSelf();
-	glm::mat4 GetMatrixOnlyRotate();
+	glm::mat4 GetMatrixFromRoot();
+	glm::mat4 GetRotateFromRoot();
 
 private:
-    bool UpdateMatrix();
-	bool UpdateMatrixSelf();
+    void UpdateMatrix();
 
 private:
     glm::vec3 _scale;
     glm::quat _rotate;
-    glm::vec3 _translate;
-	glm::mat4 _transform;
-    glm::mat4 _transformSelf;
+	glm::vec3 _translate;
+	glm::mat4 _matrix;
     bool _isChange;
 };

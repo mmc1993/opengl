@@ -11,7 +11,7 @@ public:
     Camera();
     ~Camera();
     void Init(float fov, float wdivh, float near, float far);
-    void LookAt(const glm::vec3 & eye, const glm::vec3 & pos, const glm::vec3 & up);
+    void LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec3 & up);
     const glm::vec3 & GetUp() const;
     const glm::vec3 & GetEye() const;
     const glm::vec3 & GetPos() const;
