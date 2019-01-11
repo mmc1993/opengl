@@ -25,7 +25,7 @@ public:
             glm::vec3(0, 0, 0), 
             glm::vec3(0, 0, -1), 
             glm::vec3(0, 1, 0));
-        mmc::mRender.AddCamera(camera, 0);
+        mmc::mRender.AddCamera(0, camera);
 
 		auto material = File::LoadMaterial("res/material/1.txt");
 		auto sprite = new Sprite();

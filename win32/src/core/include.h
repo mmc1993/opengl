@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <array>
 #include <string>
 #include <stack>
 #include <list>
