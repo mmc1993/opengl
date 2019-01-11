@@ -8,6 +8,7 @@
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/transform.h"
+#include "core/render/light.h"
 #include "core/asset/file.h"
 
 class AppWindow : public Window {
@@ -20,7 +21,7 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
         auto camera = new Camera();
-        camera->Init(90, (float)GetW() / (float)GetH(), 1, 10000);
+        camera->Init(90, (float)GetW(), (float)GetH(), 1, 500);
         camera->LookAt(
             glm::vec3(0, 0, 0), 
             glm::vec3(0, 0, -1), 
@@ -33,17 +34,21 @@ public:
 		mmc::mRoot.AddComponent(sprite);
 		mmc::mRoot.GetTransform()->Translate(0, 0, -200);
 
-		{
-			auto child = new Object();
-			auto sprite = new Sprite();
-			sprite->SetMaterial(material);
-			child->AddComponent(sprite);
-			child->GetTransform()->Translate(100, 0, 0);
-			mmc::mRoot.AddChild(child);
-		}
+		mmc::mRender.GetLight().SetAmbient(0.5f);
+		/*auto pointLight = new LightPoint();
+		LightPoint::Value pointValue;
+		pointValue.color = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
+		pointValue.pos = glm::vec4(100, 0, -200, 1.0f);
+		pointValue.min = 100;
+		pointValue.max = 150;
+		pointLight->SetValue(pointValue);
+		mmc::mRender.GetLight().Add(pointLight);*/
 
-		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [](const std::any & event) {
+		static auto fov = 90.0f;
+
+		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [this, camera](const std::any & event) {
 			auto param = std::any_cast<Window::EventKeyParam>(event);
+			
 			if (param.act != 2)
 			{
 				return;
@@ -97,7 +102,7 @@ int main()
 {
     AppWindow app;
     app.Create("xxx");
-    app.Move(200, 100, 800, 600);
+    app.Move(200, 100, 600, 600);
     app.InitGame();
     app.SetFPS(60);
     app.Loop();

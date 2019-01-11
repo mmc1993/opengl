@@ -92,8 +92,8 @@ public:
 
 		struct UBO {
 			float mAmbient;
-			short mSpotNum;
-			short mPointNum;
+			int mSpotNum;
+			int mPointNum;
 			::LightSpot::Value mSpots[MAX_SPOT];
 			::LightPoint::Value mPoints[MAX_POINT];
 			UBO()
@@ -107,10 +107,8 @@ public:
 		void Add(::Light * light);
 		void Del(::Light * light);
 		void Bind(GLuint shaderID);
-
-		float GetAmbient() const;
-		const std::vector<::LightPoint *> & GetPoints() const;
-		const std::vector<::LightSpot *> & GetSpots() const;
+		Light(): _GLID(0), _change(true)
+		{ }
 
 	private:
 		void Update();

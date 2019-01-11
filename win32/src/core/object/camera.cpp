@@ -10,9 +10,9 @@ Camera::~Camera()
 {
 }
 
-void Camera::Init(float fov, float wdivh, float near, float far)
+void Camera::Init(float fov, float width, float height, float near, float far)
 {
-    _project = glm::perspective(fov, wdivh, near, far);
+    _project = glm::perspective(glm::radians(fov), width / height, near, far);
 }
 
 void Camera::LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec3 & up)

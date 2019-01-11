@@ -175,23 +175,8 @@ void Render::Light::Del(::Light * light)
 void Render::Light::Bind(GLuint shaderID)
 {
 	Update();
-	auto index = glGetUniformBlockIndex(shaderID, "light_");
-	glUniformBlockBinding(shaderID, index, GL_UBO_IDX::kLIGHT);
-}
-
-float Render::Light::GetAmbient() const
-{
-	return _ambient;
-}
-
-const std::vector<::LightPoint*>& Render::Light::GetPoints() const
-{
-	return _points;
-}
-
-const std::vector<::LightSpot*>& Render::Light::GetSpots() const
-{
-	return _spots;
+	auto index = glGetUniformBlockIndex(shaderID, "Light_");
+	glUniformBlockBinding(shaderID, 0, GL_UBO_IDX::kLIGHT);
 }
 
 void Render::Light::Update()
@@ -200,25 +185,25 @@ void Render::Light::Update()
 	{
 		glGenBuffers(1, &_GLID);
 	}
+	assert(_GLID != 0);
 	if (_change)
 	{
 		_change = false;
 		auto ubo = std::make_unique<UBO>();
-		ubo->mAmbient = GetAmbient();
-		ubo->mSpotNum = static_cast<short>(_spots.size());
-		ubo->mPointNum = static_cast<short>(_points.size());
-		for (auto i = 0; i != _points.size(); ++i)
-		{
-			ubo->mPoints[i] = _points.at(i)->GetValue();
-		}
+		ubo->mAmbient = _ambient;
+		ubo->mSpotNum = static_cast<int>(_spots.size());
+		ubo->mPointNum = static_cast<int>(_points.size());
 		for (auto i = 0; i != _spots.size(); ++i)
 		{
 			ubo->mSpots[i] = _spots.at(i)->GetValue();
 		}
-		assert(_GLID != 0);
+		for (auto i = 0; i != _points.size(); ++i)
+		{
+			ubo->mPoints[i] = _points.at(i)->GetValue();
+		}
 		glBindBuffer(GL_UNIFORM_BUFFER, _GLID);
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBO), ubo.get(), GL_DYNAMIC_DRAW);
-		glBindBufferRange(GL_UNIFORM_BUFFER, GL_UBO_IDX::kLIGHT, _GLID, 0, sizeof(UBO));
+		glBindBufferBase(GL_UNIFORM_BUFFER, GL_UBO_IDX::kLIGHT, _GLID);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 }
