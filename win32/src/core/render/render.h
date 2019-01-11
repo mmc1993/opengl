@@ -72,8 +72,7 @@ public:
 	private:
 		std::stack<glm::mat4> & GetStack(ModeType mode)
 		{
-			return ModeType::kPROJECT == mode
-				? _project : _modelview;
+			return ModeType::kPROJECT == mode ? _project : _modelview;
 		}
 
 		const std::stack<glm::mat4> & GetStack(ModeType mode) const
