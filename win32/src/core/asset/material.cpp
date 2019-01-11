@@ -10,8 +10,6 @@ void Material::Bind()
 	mmc::mRender.Bind(this);
 	mmc::mRender.Bind(_data.mMesh);
 	mmc::mRender.Bind(_data.mShader);
-	_data.mShader->SetUniform("mvp_", mmc::mRender.GetMatrix().GetMVP());
-	_data.mShader->SetUniform("mv_", mmc::mRender.GetMatrix().GetMV());
 	_data.mShader->SetUniform("texture_", _data.mTexture, 0);
 	_data.mShader->SetUniform("normal_", _data.mNormal, 1);
 }

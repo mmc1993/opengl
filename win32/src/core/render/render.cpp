@@ -63,6 +63,8 @@ void Render::RenderMesh(size_t count)
 {
 	assert(_renderInfo.mShader != nullptr);
 	_light.Bind(_renderInfo.mShader->GetGLID());
+	_renderInfo.mShader->SetUniform("mvp_", GetMatrix().GetMVP());
+	_renderInfo.mShader->SetUniform("mv_", GetMatrix().GetMV());
 	glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
@@ -70,9 +72,13 @@ void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
     {
-		camera.mCamera->Bind();
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODELVIEW);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera.mCamera->GetProject());
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, camera.mCamera->GetModelView());
 		OnRenderCamera(camera);
-		camera.mCamera->Free();
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
     }
 	_commands.clear();
 }

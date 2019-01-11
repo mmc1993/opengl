@@ -35,16 +35,12 @@ const glm::vec3 & Camera::GetPos() const
     return _pos;
 }
 
-void Camera::Bind()
+const glm::mat4 & Camera::GetProject() const
 {
-	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, _project);
-	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODELVIEW);
-	mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, _modelview);
+	return _project;
 }
 
-void Camera::Free()
+const glm::mat4 & Camera::GetModelView() const
 {
-	mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
-	mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
+	return _modelview;
 }
