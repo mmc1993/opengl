@@ -72,13 +72,9 @@ void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
     {
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODELVIEW);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera.mCamera->GetProject());
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, camera.mCamera->GetModelView());
+		camera.mCamera->Bind();
 		OnRenderCamera(camera);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
+		camera.mCamera->Free();
     }
 	_commands.clear();
 }
