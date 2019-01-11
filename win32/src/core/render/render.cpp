@@ -70,7 +70,7 @@ void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
     {
-		camera.mCamera->Apply();
+		camera.mCamera->Bind();
 		OnRenderCamera(camera);
 		camera.mCamera->Free();
     }

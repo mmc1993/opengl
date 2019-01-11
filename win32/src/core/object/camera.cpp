@@ -35,7 +35,7 @@ const glm::vec3 & Camera::GetPos() const
     return _pos;
 }
 
-void Camera::Apply()
+void Camera::Bind()
 {
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, _project);

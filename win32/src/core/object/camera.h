@@ -15,7 +15,7 @@ public:
     const glm::vec3 & GetUp() const;
     const glm::vec3 & GetEye() const;
     const glm::vec3 & GetPos() const;
-	void Apply();
+	void Bind();
 	void Free();
 
 private:
