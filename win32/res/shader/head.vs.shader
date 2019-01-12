@@ -8,6 +8,7 @@ uniform mat4 mv_;
 uniform sampler2D texture_;
 uniform sampler2D normal_;
 
-out vec3 vpos_;
 out vec2 vuv_;
+out vec4 vpos_mv_;
+out vec4 vpos_mvp_;
 
