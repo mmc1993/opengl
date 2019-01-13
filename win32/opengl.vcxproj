@@ -291,7 +291,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp" />
-    <ClCompile Include="src\core\asset\material.cpp" />
     <ClCompile Include="src\core\asset\shader.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />

@@ -6,26 +6,9 @@
 
 class Shader: public Asset {
 public:
-    struct Info {
-        bool mIsDTest;
-        bool mIsDWrite;
-        bool mIsZTest;
-        bool mIsZWrite;
-    };
-
-private:
-	static std::string s_head_vs_code;
-	static std::string s_head_fs_code;
-	static std::string s_back_vs_code;
-	static std::string s_back_fs_code;
-	static bool InitShader();
-
-public:
     Shader(const std::string & vs, const std::string & fs);
     ~Shader();
 
-    void Bind();
-	void Free();
     void SetUniform(size_t idx, int val);
     void SetUniform(size_t idx, float val);
     void SetUniform(size_t idx, const glm::vec3 & val);
@@ -40,13 +23,15 @@ public:
 	void SetUniform(const std::string & key, const glm::mat4 & val);
 	void SetUniform(const std::string & key, const Texture & val, size_t pos);
 
-    GLuint GetGLID() const { return _GLID; }
-    Info & GetInfo() { return _info; }
+    GLuint GetGLID() const 
+	{ 
+		assert(_GLID != 0);
+		return _GLID; 
+	}
 
 private:
 	bool Init(const char * vs, const char * fs);
 
 private:
     GLuint _GLID;
-    Info _info;
 };

@@ -89,19 +89,18 @@ public:
 		std::stack<glm::mat4> _modelview;
 	};
 
-    struct Camera {
+    struct CameraInfo {
 		size_t mID;
-		::Camera * mCamera;
-        Camera(): mCamera(nullptr), mID(0) { }
-        Camera(::Camera * camera, size_t id)
-			: mCamera(camera), mID(id) { }
+		Camera * mCamera;
+        CameraInfo(): mCamera(nullptr), mID(0) { }
+        CameraInfo(Camera * camera, size_t id) : mCamera(camera), mID(id) { }
         bool operator ==(size_t id) const { return mID == id; }
         bool operator <(size_t id) const { return mID < id; }
     };
 
 	struct RenderInfo {
 		Material * mMaterial;
-		::Camera * mCamera;
+		Camera * mCamera;
 		Shader * mShader;
 		Mesh * mMesh;
 	};
@@ -126,23 +125,23 @@ public:
 
 	void Bind(Mesh * mesh);
 	void Bind(Shader * shader);
-	void Bind(::Camera * camera);
+	void Bind(Camera * camera);
 	void Bind(Material * material);
 
-    void AddCamera(size_t id, ::Camera * camera);
+    void AddCamera(size_t id, Camera * camera);
     void DelCamera(size_t id);
     
-	void RenderMesh(size_t count);
+	void RenderMesh();
 	void RenderOnce();
 
 	void PostCommand(const Command & command);
 
 private:
-	void OnRenderCamera(Camera & camera);
+	void OnRenderCamera(CameraInfo & camera);
 
 private:
 	Matrix _matrix;
 	RenderInfo _renderInfo;
-    std::vector<Camera> _cameras;
     std::vector<Command> _commands;
+	std::vector<CameraInfo> _cameraInfos;
 };

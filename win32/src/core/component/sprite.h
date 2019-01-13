@@ -2,6 +2,8 @@
 
 #include "component.h"
 #include "../asset/material.h"
+#include "../asset/shader.h"
+#include "../asset/mesh.h"
 
 class Sprite : public Component {
 public:
@@ -14,11 +16,18 @@ public:
 		_material = material;
 	}
 
-	Material * GetMaterial()
+	void SetShader(Shader * shader)
 	{
-		return _material;
+		_shader = shader;
+	}
+
+	void SetMesh(Mesh * mesh)
+	{
+		_mesh = mesh;
 	}
 
 private:
+	Mesh * _mesh;
+	Shader * _shader;
 	Material * _material;
 };

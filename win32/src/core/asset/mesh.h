@@ -13,7 +13,7 @@ public:
 	};
 
 public:
-	Mesh(std::vector<Vertex> && vertexs) 
+	Mesh(std::vector<Vertex> && vertexs)
 		: _vertexs(std::move(vertexs))
 		, _vao(0), _vbo(0)
 	{
@@ -22,9 +22,9 @@ public:
 		glGenBuffers(1, &_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 		glBufferData(GL_ARRAY_BUFFER, _vertexs.size() * sizeof(Vertex), _vertexs.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(size_t)sizeof(glm::vec3));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
 	}
@@ -32,8 +32,8 @@ public:
 	virtual ~Mesh()
 	{
 		glDeleteBuffers(1, &_vbo);
-		_vbo = 0;
 		glDeleteVertexArrays(1, &_vao);
+		_vbo = 0;
 		_vao = 0;
 	}
 
@@ -42,16 +42,11 @@ public:
 		return _vertexs;
 	}
 
-	void Bind() 
+	GLuint GetGLID() const
 	{
 		assert(_vao != 0);
 		assert(_vbo != 0);
-		glBindVertexArray(_vao);
-	}
-
-	void Free()
-	{
-		glBindVertexArray(0);
+		return _vao;
 	}
 
 private:

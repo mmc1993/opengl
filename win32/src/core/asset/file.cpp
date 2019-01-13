@@ -13,7 +13,6 @@ Mesh * File::LoadMesh(const std::string & url)
 	std::vector<glm::vec3> vs;
 	std::vector<glm::vec2> fs;
 	std::vector<glm::vec2> vts;
-	std::vector<Mesh::Vertex> vertexs;
 	while (std::getline(ifile, line))
 	{
 		std::string_view view(line);
@@ -49,12 +48,13 @@ Mesh * File::LoadMesh(const std::string & url)
 			vts.push_back(vt);
 		}
 	}
+	std::vector<Mesh::Vertex> vertexs;
 	for (const auto & f : fs)
 	{
 		Mesh::Vertex vertex;
-		vertex.v.x = vs.at((size_t)f.x - 1).x * 100;
-		vertex.v.y = vs.at((size_t)f.x - 1).y * 100;
-		vertex.v.z = vs.at((size_t)f.x - 1).z * 100;
+		vertex.v.x = vs.at((size_t)f.x - 1).x;
+		vertex.v.y = vs.at((size_t)f.x - 1).y;
+		vertex.v.z = vs.at((size_t)f.x - 1).z;
 		vertex.uv.u = vts.at((size_t)f.y - 1).x;
 		vertex.uv.v = vts.at((size_t)f.y - 1).y;
 		vertexs.push_back(vertex);
@@ -115,15 +115,33 @@ Material * File::LoadMaterial(const std::string & url)
 	if (ifile)
 	{
 		Material::Data data;
-		CHECK_RET(std::getline(ifile, data.mMeshURL), nullptr);
-		CHECK_RET(std::getline(ifile, data.mNormalURL), nullptr);
-		CHECK_RET(std::getline(ifile, data.mTextureURL), nullptr);
-		CHECK_RET(std::getline(ifile, data.mShaderURL), nullptr);
-		data.mMesh = File::LoadMesh(data.mMeshURL);
-		data.mShader = File::LoadShader(data.mShaderURL);
-		data.mNormal = File::LoadTexture(data.mNormalURL);
-		data.mTexture = File::LoadTexture(data.mTextureURL);
-		auto material = new Material(std::move(data));
+
+		//	环境光分量
+		std::string line;
+		std::getline(ifile, line);
+		auto split = string_tool::Split(line, " ");
+		data.mAmbient.x = (float)std::atof(std::string(split.at(0)).c_str());
+		data.mAmbient.y = (float)std::atof(std::string(split.at(1)).c_str());
+		data.mAmbient.z = (float)std::atof(std::string(split.at(2)).c_str());
+
+		//	漫反射分量
+		std::getline(ifile, line);
+		split = string_tool::Split(line, " ");
+		data.mDiffuse.x = (float)std::atof(std::string(split.at(0)).c_str());
+		data.mDiffuse.y = (float)std::atof(std::string(split.at(1)).c_str());
+		data.mDiffuse.z = (float)std::atof(std::string(split.at(2)).c_str());
+
+		//	镜面反射分量
+		std::getline(ifile, line);
+		split = string_tool::Split(line, " ");
+		data.mSpecular.x = (float)std::atof(std::string(split.at(0)).c_str());
+		data.mSpecular.y = (float)std::atof(std::string(split.at(1)).c_str());
+		data.mSpecular.z = (float)std::atof(std::string(split.at(2)).c_str());
+
+		std::getline(ifile, line);
+		data.mShininess = (float)std::atof(line.c_str());
+
+		auto material = new Material(data);
 		mmc::mAssetCore.Reg(url, material);
 		return material;
 	}

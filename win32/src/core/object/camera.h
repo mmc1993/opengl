@@ -14,11 +14,13 @@ public:
     void LookAt(const glm::vec3 & pos, 
 				const glm::vec3 & eye, 
 				const glm::vec3 & up);
+
     const glm::vec3 & GetUp() const;
     const glm::vec3 & GetEye() const;
     const glm::vec3 & GetPos() const;
-	void Bind();
-	void Free();
+	
+	const glm::mat4 & GetProject() const;
+	const glm::mat4 & GetModelView() const;
 
 private:
     glm::mat4 _project;

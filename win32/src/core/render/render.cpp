@@ -1,6 +1,8 @@
 #include "render.h"
 #include "../mmc.h"
+#include "../asset/mesh.h"
 #include "../asset/shader.h"
+#include "../asset/material.h"
 #include "../object/camera.h"
 #include "../tools/debug_tool.h"
 
@@ -10,37 +12,68 @@ Render::Render()
 Render::~Render()
 { }
 
-void Render::AddCamera(size_t id, ::Camera * camera)
+void Render::AddCamera(size_t id, Camera * camera)
 {
-    assert(std::count(_cameras.begin(), _cameras.end(), id) == 0);
+    assert(std::count(_cameraInfos.begin(), _cameraInfos.end(), id) == 0);
     auto it = std::lower_bound(
-        _cameras.begin(), 
-        _cameras.end(), id);
-    _cameras.insert(it, Camera(camera, id));
+        _cameraInfos.begin(), 
+        _cameraInfos.end(), id);
+    _cameraInfos.insert(it, CameraInfo(camera, id));
 }
 
 void Render::DelCamera(size_t id)
 {
-    auto it = std::find(_cameras.begin(), _cameras.end(), id);
-    if (it != _cameras.end())
+    auto it = std::find(_cameraInfos.begin(), _cameraInfos.end(), id);
+    if (it != _cameraInfos.end())
     {
-        _cameras.erase(it);
+        _cameraInfos.erase(it);
     }
 }
 
 void Render::Bind(Mesh * mesh)
 {
-	_renderInfo.mMesh = mesh;
+	if (mesh != nullptr)
+	{
+		_renderInfo.mMesh = mesh;
+		glBindVertexArray(_renderInfo.mMesh->GetGLID());
+	}
+	else
+	{
+		_renderInfo.mMesh = nullptr;
+		glBindVertexArray(0);
+	}
 }
 
 void Render::Bind(Shader * shader)
 {
-	_renderInfo.mShader = shader;
+	if (shader != nullptr)
+	{
+		_renderInfo.mShader = shader;
+		glUseProgram(_renderInfo.mShader->GetGLID());
+	}
+	else
+	{
+		_renderInfo.mShader = nullptr;
+		glUseProgram(0);
+	}
 }
 
-void Render::Bind(::Camera * camera)
+void Render::Bind(Camera * camera)
 {
-	_renderInfo.mCamera = camera;
+	if (camera != nullptr)
+	{
+		_renderInfo.mCamera = camera;
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODELVIEW);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera->GetProject());
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODELVIEW, camera->GetModelView());
+	}
+	else
+	{
+		_renderInfo.mCamera = nullptr;
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODELVIEW);
+	}
 }
 
 void Render::Bind(Material * material)
@@ -59,7 +92,7 @@ Render::Matrix & Render::GetMatrix()
 	return _matrix;
 }
 
-void Render::RenderMesh(size_t count)
+void Render::RenderMesh()
 {
 	assert(_renderInfo.mShader != nullptr);
 	_renderInfo.mShader->SetUniform("nmvp_", GetMatrix().GetNMat());
@@ -67,22 +100,21 @@ void Render::RenderMesh(size_t count)
 	_renderInfo.mShader->SetUniform("mv_", GetMatrix().GetMV());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetEye());
-	glDrawArrays(GL_TRIANGLES, 0, count);
+	glDrawArrays(GL_TRIANGLES, 0, _renderInfo.mMesh->GetVertexs().size());
 }
 
 void Render::RenderOnce()
 {
-    for (auto & camera : _cameras)
+    for (auto & camera : _cameraInfos)
     {
 		Bind(camera.mCamera);
-		camera.mCamera->Bind();
 		OnRenderCamera(camera);
-		camera.mCamera->Free();
+		Bind((Camera *)nullptr);
     }
 	_commands.clear();
 }
 
-void Render::OnRenderCamera(Camera & camera)
+void Render::OnRenderCamera(CameraInfo & camera)
 {
     for (auto & command : _commands)
     {

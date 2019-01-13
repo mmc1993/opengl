@@ -2,48 +2,10 @@
 #include "../third/sformat.h"
 #include "../tools/debug_tool.h"
 
-std::string Shader::s_head_vs_code;
-std::string Shader::s_head_fs_code;
-std::string Shader::s_back_vs_code;
-std::string Shader::s_back_fs_code;
-
-bool Shader::InitShader()
-{
-	CHECK_RET(s_head_vs_code.empty() &&
-			  s_head_fs_code.empty() &&
-			  s_back_vs_code.empty() &&
-			  s_back_fs_code.empty(), true);
-	std::ifstream fHeadvs("res/shader/head.vs.shader");
-	std::ifstream fHeadfs("res/shader/head.fs.shader");
-	std::ifstream fBackvs("res/shader/back.vs.shader");
-	std::ifstream fBackfs("res/shader/back.fs.shader");
-	CHECK_RET(fHeadvs && fHeadfs && fBackvs && fBackfs, false);
-
-	std::stringstream ssHeadvs;
-	std::stringstream ssHeadfs;
-	std::stringstream ssBackvs;
-	std::stringstream ssBackfs;
-	std::stringstream ssLight;
-	ssHeadvs << fHeadvs.rdbuf();
-	ssHeadfs << fHeadfs.rdbuf();
-	ssBackvs << fBackvs.rdbuf();
-	ssBackfs << fBackfs.rdbuf();
-	s_head_vs_code = ssHeadvs.str();
-	s_head_fs_code = ssHeadfs.str();
-	s_back_vs_code = ssBackvs.str();
-	s_back_fs_code = ssBackfs.str();
-	return true;
-}
-
 Shader::Shader(const std::string & vs, const std::string & fs)
 	: _GLID(0)
 {
-	if (InitShader())
-	{
-		Init(
-			(s_head_vs_code + vs + s_back_vs_code).c_str(), 
-			(s_head_fs_code + fs + s_back_fs_code).c_str());
-	}
+	Init((vs).c_str(), (fs).c_str());
 }
 
 bool Shader::Init(const char * vs, const char * fs)
@@ -96,17 +58,6 @@ bool Shader::Init(const char * vs, const char * fs)
 Shader::~Shader()
 {
     glDeleteProgram(_GLID);
-}
-
-void Shader::Bind()
-{
-    assert(_GLID != 0);
-    glUseProgram(_GLID);
-}
-
-void Shader::Free()
-{
-	glUseProgram(0);
 }
 
 void Shader::SetUniform(size_t idx, int val)

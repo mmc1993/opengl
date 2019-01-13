@@ -25,6 +25,10 @@ public:
             glm::vec3(0, 1, 0));
         mmc::mRender.AddCamera(0, camera);
 
+		File::LoadTexture("res/bitmap/awesomeface.png");
+		File::LoadTexture("res/bitmap/container.png");
+
+
 		auto material = File::LoadMaterial("res/material/1.txt");
 		auto sprite = new Sprite();
 		sprite->SetMaterial(material);

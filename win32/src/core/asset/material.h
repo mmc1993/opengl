@@ -9,26 +9,18 @@
 class Material: public Asset {
 public:
 	struct Data {
-		std::string mMeshURL;
-		std::string mNormalURL;
-		std::string mShaderURL;
-		std::string mTextureURL;
-		Texture mTexture;
-		Texture mNormal;
-		Shader *mShader;
-		Mesh * mMesh;
+		glm::vec3 mAmbient;
+		glm::vec3 mDiffuse;
+		glm::vec3 mSpecular;
+		float mShininess;
 	};
 
 public:
-	Material(Data && data) : _data(std::move(data))
+	Material(const Data & data) : mData(data)
 	{ }
 
 	~Material()
 	{ }
 
-	Data & GetData() { return _data; }
-
-	void Draw();
-private:
-	Data _data;
+	Data mData;
 };
