@@ -12,6 +12,12 @@ Render::Render()
 Render::~Render()
 { }
 
+Camera * Render::GetCamera(size_t id)
+{
+	auto it = std::find(_cameraInfos.begin(), _cameraInfos.end(), id);
+	return it != _cameraInfos.end() ? it->mCamera : nullptr;
+}
+
 void Render::AddCamera(size_t id, Camera * camera)
 {
     assert(std::count(_cameraInfos.begin(), _cameraInfos.end(), id) == 0);
@@ -101,7 +107,7 @@ void Render::RenderMesh()
 	_renderInfo.mShader->SetUniform("mvp_", GetMatrix().GetMVP());
 	_renderInfo.mShader->SetUniform("mv_", GetMatrix().GetMV());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
-	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetEye());
+	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
 	glDrawArrays(GL_TRIANGLES, 0, _renderInfo.mMesh->GetVertexs().size());
 }
 

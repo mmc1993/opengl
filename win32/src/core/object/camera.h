@@ -15,15 +15,27 @@ public:
 				const glm::vec3 & eye, 
 				const glm::vec3 & up);
 
-    const glm::vec3 & GetUp() const;
-    const glm::vec3 & GetEye() const;
-    const glm::vec3 & GetPos() const;
-	
-	const glm::mat4 & GetProject() const;
-	const glm::mat4 & GetModelView() const;
+	void SetEye(const glm::vec3 & eye);
+	void SetPos(const glm::vec3 & pos);
+	void SetScale(float scale);
+	void SetRotate(const glm::vec3 & rotate);
+
+	float GetScale() const;
+	const glm::vec3 & GetUp() const;
+	const glm::vec3 & GetEye() const;
+	const glm::vec3 & GetPos() const;
+	const glm::vec3 & GetRotate() const;
+
+	const glm::mat4 & GetProject();
+	const glm::mat4 & GetModelView();
 
 private:
+	void Update();
+
+private:
+	bool _change;
     glm::mat4 _project;
 	glm::mat4 _modelview;
-	glm::vec3 _eye, _pos, _up;
+	glm::vec3 _eye, _pos, _up, _rotate;
+	float _w, _h, _near, _far, _fov, _scale;
 };

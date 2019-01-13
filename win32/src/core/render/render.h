@@ -128,6 +128,7 @@ public:
 	void Bind(Camera * camera);
 	void Bind(Material * material);
 
+	Camera * GetCamera(size_t id);
     void AddCamera(size_t id, Camera * camera);
     void DelCamera(size_t id);
     

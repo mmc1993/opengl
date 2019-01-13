@@ -21,8 +21,8 @@ public:
         auto camera = new Camera();
         camera->Init(90, (float)GetW(), (float)GetH(), 1, 500);
         camera->LookAt(
-            glm::vec3(0, 0, 3), 
-            glm::vec3(0, 0, 1), 
+            glm::vec3(0, 0, 2), 
+            glm::vec3(0, 0, -1), 
             glm::vec3(0, 1, 0));
         mmc::mRender.AddCamera(0, camera);
 
@@ -61,52 +61,32 @@ public:
 
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [this, camera](const std::any & event) {
 			auto param = std::any_cast<Window::EventKeyParam>(event);
-			
-			if (param.act != 2)
+			if (param.act == 2)
 			{
-				return;
+				auto camera = mmc::mRender.GetCamera(0);
+				switch (param.key)
+				{
+				case 'W': { camera->SetPos(camera->GetPos() + camera->GetEye()); }
+					break;
+				case 'S': { camera->SetPos(camera->GetPos() - camera->GetEye()); }
+					break;
+				case 'A': { camera->SetPos(camera->GetPos() - glm::cross(camera->GetEye(), camera->GetUp())); }
+					break;
+				case 'D': { camera->SetPos(camera->GetPos() + glm::cross(camera->GetEye(), camera->GetUp())); }
+					break;
+				}
+				switch (param.key)
+				{
+				case 'I': { auto rotate = camera->GetRotate(); rotate.x += glm::radians(5.0f); camera->SetRotate(rotate); }
+					break;
+				case 'K': { auto rotate = camera->GetRotate(); rotate.x -= glm::radians(5.0f); camera->SetRotate(rotate); }
+					break;
+				case 'J': { auto rotate = camera->GetRotate(); rotate.y -= glm::radians(5.0f); camera->SetRotate(rotate); }
+					break;
+				case 'L': { auto rotate = camera->GetRotate(); rotate.y += glm::radians(5.0f); camera->SetRotate(rotate); }
+					break;
+				}
 			}
-
-			const auto angle = 0.1f;
-
-			switch (param.key)
-			{
-			case 265:
-				{
-					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
-					rotate = glm::inverse(rotate);
-					auto aixs = glm::vec4(1, 0, 0, 1);
-					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
-				}
-				break;
-			case 264:
-				{
-					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
-					rotate = glm::inverse(rotate);
-					auto aixs = glm::vec4(1, 0, 0, 1);
-					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);
-				}
-				break;
-			case 263:
-				{
-					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
-					rotate = glm::inverse(rotate);
-					auto aixs = glm::vec4(0, 1, 0, 1);
-					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, -angle);
-				}
-				break;
-			case 262:
-				{
-					auto rotate = mmc::mRoot.GetTransform()->GetRotateFromRoot();
-					rotate = glm::inverse(rotate);
-					auto aixs = glm::vec4(0, 1, 0, 1);
-					mmc::mRoot.GetTransform()->AddRotate(rotate * aixs, angle);
-				}
-				break;
-			}
-			std::cout
-				<< "key: " << param.key << "\n"
-				<< "act: " << param.act << std::endl;
 		});
     }
 };
