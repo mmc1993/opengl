@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../include.h"
-#include "light.h"
 
 class Mesh;
 class Camera;
@@ -90,63 +89,6 @@ public:
 		std::stack<glm::mat4> _modelview;
 	};
 
-	class Light {
-	public:
-		static constexpr size_t MAX_POINT = 32;
-		static constexpr size_t MAX_SPOT = 32;
-
-		struct UBO {
-			struct Point {
-				glm::vec4 mPos;
-				glm::vec4 mColor;
-				GLfloat mMin;
-				GLfloat mMax;
-			};
-			struct Spot {
-				glm::vec4 mPos;
-				glm::vec4 mDir;
-				glm::vec4 mColor;
-				GLfloat mMinCone;
-				GLfloat mMaxCone;
-				GLfloat mMin;
-				GLfloat mMax;
-			};
-			GLfloat mAmbient;
-			GLint mPointNum;
-			GLint mSpotNum;
-			Point mPoints[MAX_POINT];
-			Spot mSpots[MAX_SPOT];
-			UBO() { memset(this, 0, sizeof(UBO)); }
-		};
-
-	public:
-		void SetAmbient(float value);
-		void Add(::Light * light);
-		void Del(::Light * light);
-		void Bind(GLuint shaderID);
-		Light(): _GLID(0), _change(true)
-		{ }
-		~Light() 
-		{ 
-			if (_GLID != 0)
-			{
-				glDeleteBuffers(1, &_GLID);
-				_GLID = 0;
-			}
-		}
-
-	private:
-		void Update(GLuint shaderID);
-		bool CheckCount(::Light * light) const;
-
-	private:
-		float _ambient;
-		std::vector<::LightPoint *> _points;
-		std::vector<::LightSpot *> _spots;
-		GLuint _GLID;
-		bool _change;
-	};
-
     struct Camera {
 		size_t mID;
 		::Camera * mCamera;
@@ -180,7 +122,6 @@ public:
     Render();
     ~Render();
 
-	Light & GetLight();
 	Matrix & GetMatrix();
 
 	void Bind(Mesh * mesh);
@@ -200,7 +141,6 @@ private:
 	void OnRenderCamera(Camera & camera);
 
 private:
-	Light _light;
 	Matrix _matrix;
 	RenderInfo _renderInfo;
     std::vector<Camera> _cameras;

@@ -8,15 +8,12 @@
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/transform.h"
-#include "core/render/light.h"
 #include "core/asset/file.h"
 
 class AppWindow : public Window {
 public:
     void InitGame()
     {
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 
@@ -33,21 +30,6 @@ public:
 		sprite->SetMaterial(material);
 		mmc::mRoot.AddComponent(sprite);
 		mmc::mRoot.GetTransform()->Translate(0, 0, -200);
-
-		mmc::mRender.GetLight().SetAmbient(0.5f);
-		auto pointLight = new LightPoint();
-		LightPoint::Value pointValue;
-		pointValue.mColor = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
-		pointValue.mPos = glm::vec3(0, 0, -100);
-		pointValue.mMin = 1000;
-		pointValue.mMax = 2000;
-		pointLight->SetValue(pointValue);
-		mmc::mRender.GetLight().Add(pointLight);
-
-		auto spotLight = new LightSpot();
-		mmc::mRender.GetLight().Add(spotLight);
-
-		static auto fov = 90.0f;
 
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, [this, camera](const std::any & event) {
 			auto param = std::any_cast<Window::EventKeyParam>(event);
