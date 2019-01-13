@@ -83,16 +83,16 @@ Shader * File::LoadShader(const std::string & url)
 	return shader;
 }
 
-Bitmap * File::LoadBitmap(const std::string & url)
+Bitmap * File::LoadBitmap(const std::string & url, int format)
 {
 	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Bitmap>(url));
 	
-	stbi_set_flip_vertically_on_load(1);
+	stbi_set_flip_vertically_on_load(true);
 	auto w = 0, h = 0, c = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
 	CHECK_RET(buffer != nullptr, nullptr);
 	Bitmap::Data data;
-	data.channel = c;
+	data.format = format;
 	data.url = url;
 	data.w = w;
 	data.h = h;
@@ -102,9 +102,9 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	return bitmap;
 }
 
-Texture File::LoadTexture(const std::string & url)
+Texture File::LoadTexture(const std::string & url, int format)
 {
-	return Texture(File::LoadBitmap(url));
+	return Texture(File::LoadBitmap(url, format));
 }
 
 Material * File::LoadMaterial(const std::string & url)

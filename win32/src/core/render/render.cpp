@@ -94,8 +94,10 @@ Render::Matrix & Render::GetMatrix()
 
 void Render::RenderMesh()
 {
+	assert(_renderInfo.mMesh != nullptr);
 	assert(_renderInfo.mShader != nullptr);
-	_renderInfo.mShader->SetUniform("nmvp_", GetMatrix().GetNMat());
+	assert(_renderInfo.mCamera != nullptr);
+	assert(_renderInfo.mMaterial != nullptr);
 	_renderInfo.mShader->SetUniform("mvp_", GetMatrix().GetMVP());
 	_renderInfo.mShader->SetUniform("mv_", GetMatrix().GetMV());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());

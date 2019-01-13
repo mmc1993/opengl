@@ -10,7 +10,7 @@ public:
     struct Data {
         int w;
         int h;
-        int channel;
+        int format;
         std::string url;
     };
 
@@ -26,7 +26,7 @@ public:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _data.w, _data.h, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, data.format, _data.w, _data.h, 0, data.format, GL_UNSIGNED_BYTE, buffer);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
@@ -53,6 +53,7 @@ public:
 
     GLuint GetGLID() const
     {
+		assert(_GLID != 0);
         return _GLID;
     }
 
