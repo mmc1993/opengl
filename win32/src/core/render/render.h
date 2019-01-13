@@ -54,6 +54,11 @@ public:
 			return GetStack(mode).top();
 		}
 
+		glm::mat4 GetNMat() const
+		{
+			return glm::transpose(glm::inverse(GetMV()));
+		}
+
 		glm::mat4 GetMVP() const
 		{
 			return _project.top() * _modelview.top();
@@ -91,15 +96,27 @@ public:
 		static constexpr size_t MAX_SPOT = 32;
 
 		struct UBO {
-			float mAmbient;
-			int mSpotNum;
-			int mPointNum;
-			::LightSpot::Value mSpots[MAX_SPOT];
-			::LightPoint::Value mPoints[MAX_POINT];
-			UBO()
-			{
-				memset(this, 0, sizeof(UBO));
-			}
+			struct Point {
+				glm::vec4 mPos;
+				glm::vec4 mColor;
+				GLfloat mMin;
+				GLfloat mMax;
+			};
+			struct Spot {
+				glm::vec4 mPos;
+				glm::vec4 mDir;
+				glm::vec4 mColor;
+				GLfloat mMinCone;
+				GLfloat mMaxCone;
+				GLfloat mMin;
+				GLfloat mMax;
+			};
+			GLfloat mAmbient;
+			GLint mPointNum;
+			GLint mSpotNum;
+			Point mPoints[MAX_POINT];
+			Spot mSpots[MAX_SPOT];
+			UBO() { memset(this, 0, sizeof(UBO)); }
 		};
 
 	public:
@@ -109,9 +126,17 @@ public:
 		void Bind(GLuint shaderID);
 		Light(): _GLID(0), _change(true)
 		{ }
+		~Light() 
+		{ 
+			if (_GLID != 0)
+			{
+				glDeleteBuffers(1, &_GLID);
+				_GLID = 0;
+			}
+		}
 
 	private:
-		void Update();
+		void Update(GLuint shaderID);
 		bool CheckCount(::Light * light) const;
 
 	private:
@@ -134,6 +159,7 @@ public:
 
 	struct RenderInfo {
 		Material * mMaterial;
+		::Camera * mCamera;
 		Shader * mShader;
 		Mesh * mMesh;
 	};
@@ -159,6 +185,7 @@ public:
 
 	void Bind(Mesh * mesh);
 	void Bind(Shader * shader);
+	void Bind(::Camera * camera);
 	void Bind(Material * material);
 
     void AddCamera(size_t id, ::Camera * camera);

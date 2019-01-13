@@ -54,10 +54,10 @@ public:
 class LightPoint : public Light {
 public:
 	struct Value {
-		glm::vec3 pos;
-		glm::vec3 color;
-		float min;
-		float max;
+		glm::vec3 mPos;
+		glm::vec4 mColor;
+		float mMin;
+		float mMax;
 	};
 
 public:
@@ -84,13 +84,13 @@ private:
 class LightSpot : public Light {
 public:
 	struct Value {
-		glm::vec3 pos;
-		glm::vec3 dir;
-		glm::vec3 color;
-		float min;
-		float max;
-		float mincone;
-		float maxcone;
+		glm::vec3 mPos;
+		glm::vec3 mDir;
+		glm::vec4 mColor;
+		float mMinCone;
+		float mMaxCone;
+		float mMin;
+		float mMax;
 	};
 
 public:

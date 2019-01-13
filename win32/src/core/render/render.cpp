@@ -38,6 +38,11 @@ void Render::Bind(Shader * shader)
 	_renderInfo.mShader = shader;
 }
 
+void Render::Bind(::Camera * camera)
+{
+	_renderInfo.mCamera = camera;
+}
+
 void Render::Bind(Material * material)
 {
 	_renderInfo.mMaterial = material;
@@ -63,8 +68,11 @@ void Render::RenderMesh(size_t count)
 {
 	assert(_renderInfo.mShader != nullptr);
 	_light.Bind(_renderInfo.mShader->GetGLID());
+	_renderInfo.mShader->SetUniform("nmvp_", GetMatrix().GetNMat());
 	_renderInfo.mShader->SetUniform("mvp_", GetMatrix().GetMVP());
 	_renderInfo.mShader->SetUniform("mv_", GetMatrix().GetMV());
+	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
+	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetEye());
 	glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
@@ -72,6 +80,7 @@ void Render::RenderOnce()
 {
     for (auto & camera : _cameras)
     {
+		Bind(camera.mCamera);
 		camera.mCamera->Bind();
 		OnRenderCamera(camera);
 		camera.mCamera->Free();
@@ -174,36 +183,89 @@ void Render::Light::Del(::Light * light)
 
 void Render::Light::Bind(GLuint shaderID)
 {
-	Update();
+	Update(shaderID);
 	auto index = glGetUniformBlockIndex(shaderID, "Light_");
-	glUniformBlockBinding(shaderID, 0, GL_UBO_IDX::kLIGHT);
+	glUniformBlockBinding(shaderID, index, GL_UBO_IDX::kLIGHT);
 }
 
-void Render::Light::Update()
+void Render::Light::Update(GLuint shaderID)
 {
-	if (_GLID == 0)
-	{
-		glGenBuffers(1, &_GLID);
-	}
-	assert(_GLID != 0);
 	if (_change)
 	{
 		_change = false;
+		if (_GLID == 0)
+		{
+			GLint bufferLength = 0;
+			glGetActiveUniformBlockiv(shaderID, GL_UBO_IDX::kLIGHT,
+						GL_UNIFORM_BLOCK_DATA_SIZE, &bufferLength);
+			glGenBuffers(1, &_GLID);
+			glBindBuffer(GL_UNIFORM_BUFFER, _GLID);
+			glBufferData(GL_UNIFORM_BUFFER, bufferLength, nullptr, GL_DYNAMIC_DRAW);
+			glBindBufferBase(GL_UNIFORM_BUFFER, GL_UBO_IDX::kLIGHT, _GLID);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
 		auto ubo = std::make_unique<UBO>();
 		ubo->mAmbient = _ambient;
-		ubo->mSpotNum = static_cast<int>(_spots.size());
 		ubo->mPointNum = static_cast<int>(_points.size());
-		for (auto i = 0; i != _spots.size(); ++i)
-		{
-			ubo->mSpots[i] = _spots.at(i)->GetValue();
-		}
+		ubo->mSpotNum = static_cast<int>(_spots.size());
 		for (auto i = 0; i != _points.size(); ++i)
-		{
-			ubo->mPoints[i] = _points.at(i)->GetValue();
+		{ 
+			ubo->mPoints[i].mPos = glm::vec4(_points.at(i)->GetValue().mPos, 1);
+			ubo->mPoints[i].mColor = _points.at(i)->GetValue().mColor;
+			ubo->mPoints[i].mMin = _points.at(i)->GetValue().mMin;
+			ubo->mPoints[i].mMax = _points.at(i)->GetValue().mMax;
 		}
+		for (auto i = 0; i != _spots.size(); ++i)
+		{ 
+			ubo->mSpots[i].mPos = glm::vec4(_spots.at(i)->GetValue().mPos, 1);
+			ubo->mSpots[i].mDir = glm::vec4(_spots.at(i)->GetValue().mPos, 1);
+			ubo->mSpots[i].mColor = _spots.at(i)->GetValue().mColor;
+			ubo->mSpots[i].mMinCone = _spots.at(i)->GetValue().mMinCone;
+			ubo->mSpots[i].mMaxCone = _spots.at(i)->GetValue().mMaxCone;
+			ubo->mSpots[i].mMin = _spots.at(i)->GetValue().mMin;
+			ubo->mSpots[i].mMax = _spots.at(i)->GetValue().mMax;
+		}
+		
+		const char * uboNames[] = {
+			"Light_.mAmbient", 
+			"Light_.mPointNum",
+			"Light_.mSpotNum",
+			"Light_.mPoints[0].mPos",
+			"Light_.mPoints[0].mColor",
+			"Light_.mPoints[0].mMin",
+			"Light_.mPoints[0].mMax",
+			"Light_.mPoints[1].mPos",
+			"Light_.mPoints[1].mColor",
+			"Light_.mPoints[1].mMin",
+			"Light_.mPoints[1].mMax",
+			"Light_.mPoints[2].mPos",
+			"Light_.mPoints[2].mColor",
+			"Light_.mPoints[2].mMin",
+			"Light_.mPoints[2].mMax",
+			//"Light_.mSpots",
+		};
+		
+		GLuint indices[sizeof(uboNames) / sizeof(char *)] = { 0 };
+		GLint offsets[sizeof(uboNames) / sizeof(char *)] = { 0 };
+		glGetUniformIndices(shaderID, sizeof(uboNames) / sizeof(char *), uboNames, indices);
+		glGetActiveUniformsiv(shaderID, sizeof(uboNames) / sizeof(char *), indices, GL_UNIFORM_OFFSET, offsets);
+
+		//glBindBuffer(GL_UNIFORM_BUFFER, _GLID);
+		//const GLchar * names[] = {
+		//	"UBO.xxx.aaa"
+		//};
+		//GLuint indices[1] = { 0 };
+		//glGetUniformIndices(shaderID, 1, names, indices);
+		//GLint size[1] = { 0 };
+		//glGetActiveUniformsiv(shaderID, 1, indices, GL_UNIFORM_SIZE, size);
+
 		glBindBuffer(GL_UNIFORM_BUFFER, _GLID);
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBO), ubo.get(), GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, GL_UBO_IDX::kLIGHT, _GLID);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBO, mAmbient), sizeof(GLfloat), &ubo->mAmbient);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBO, mPointNum), sizeof(UBO::mPointNum), &ubo->mPointNum);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBO, mSpotNum), sizeof(UBO::mSpotNum), &ubo->mSpotNum);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBO, mPoints), sizeof(UBO::mPoints), &ubo->mPoints);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBO, mSpots), sizeof(UBO::mSpots), &ubo->mSpots);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 }

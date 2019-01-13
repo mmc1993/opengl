@@ -28,9 +28,7 @@ public:
 
 	Data & GetData() { return _data; }
 
-	void Bind();
 	void Draw();
-	void Free();
 private:
 	Data _data;
 };

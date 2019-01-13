@@ -35,14 +35,17 @@ public:
 		mmc::mRoot.GetTransform()->Translate(0, 0, -200);
 
 		mmc::mRender.GetLight().SetAmbient(0.5f);
-		/*auto pointLight = new LightPoint();
+		auto pointLight = new LightPoint();
 		LightPoint::Value pointValue;
-		pointValue.color = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
-		pointValue.pos = glm::vec4(100, 0, -200, 1.0f);
-		pointValue.min = 100;
-		pointValue.max = 150;
+		pointValue.mColor = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
+		pointValue.mPos = glm::vec3(0, 0, -100);
+		pointValue.mMin = 1000;
+		pointValue.mMax = 2000;
 		pointLight->SetValue(pointValue);
-		mmc::mRender.GetLight().Add(pointLight);*/
+		mmc::mRender.GetLight().Add(pointLight);
+
+		auto spotLight = new LightSpot();
+		mmc::mRender.GetLight().Add(spotLight);
 
 		static auto fov = 90.0f;
 
