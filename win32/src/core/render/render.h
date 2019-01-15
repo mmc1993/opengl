@@ -3,19 +3,15 @@
 #include "../include.h"
 
 class Mesh;
+class Light;
 class Camera;
 class Shader;
-class Material;
 
 class Render {
 public:
-	enum GL_UBO_IDX {
-		kLIGHT,
-	};
-
 	class Matrix {
 	public:
-		enum ModeType { kPROJECT, kMODELVIEW, };
+		enum ModeType { kPROJECT, kMODEL, };
 
 	public:
 		Matrix()
@@ -53,19 +49,9 @@ public:
 			return GetStack(mode).top();
 		}
 
-		glm::mat4 GetNMat() const
+		const glm::mat4 & GetM() const
 		{
-			return glm::transpose(glm::inverse(GetMV()));
-		}
-
-		glm::mat4 GetMVP() const
-		{
-			return _project.top() * _modelview.top();
-		}
-
-		const glm::mat4 & GetMV() const
-		{
-			return Top(ModeType::kMODELVIEW);
+			return Top(ModeType::kMODEL);
 		}
 
 		const glm::mat4 & GetP() const
@@ -76,7 +62,7 @@ public:
 	private:
 		std::stack<glm::mat4> & GetStack(ModeType mode)
 		{
-			return ModeType::kPROJECT == mode ? _project : _modelview;
+			return ModeType::kPROJECT == mode ? _project : _model;
 		}
 
 		const std::stack<glm::mat4> & GetStack(ModeType mode) const
@@ -86,7 +72,7 @@ public:
 
 	private:
 		std::stack<glm::mat4> _project;
-		std::stack<glm::mat4> _modelview;
+		std::stack<glm::mat4> _model;
 	};
 
     struct CameraInfo {
@@ -99,7 +85,6 @@ public:
     };
 
 	struct RenderInfo {
-		Material * mMaterial;
 		Camera * mCamera;
 		Shader * mShader;
 		Mesh * mMesh;
@@ -126,11 +111,13 @@ public:
 	void Bind(Mesh * mesh);
 	void Bind(Shader * shader);
 	void Bind(Camera * camera);
-	void Bind(Material * material);
 
 	Camera * GetCamera(size_t id);
     void AddCamera(size_t id, Camera * camera);
     void DelCamera(size_t id);
+
+	void AddLight(Light * light);
+	void DelLight(Light * light);
     
 	void RenderMesh();
 	void RenderOnce();
@@ -139,10 +126,14 @@ public:
 
 private:
 	void OnRenderCamera(CameraInfo & camera);
+	const glm::mat4 & GetM() const;
+	glm::mat4 GetMV() const;
+	glm::mat4 GetMVP() const;
 
 private:
 	Matrix _matrix;
 	RenderInfo _renderInfo;
+	std::vector<Light *> _lights;
     std::vector<Command> _commands;
 	std::vector<CameraInfo> _cameraInfos;
 };

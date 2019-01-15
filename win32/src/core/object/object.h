@@ -21,6 +21,7 @@ public:
     Object * GetChildIdx(size_t idx);
     std::vector<Object *> & GetChilds();
 
+	void DelComponentAll();
     void AddComponent(Component * component);
     void DelComponent(const std::type_info & type);
     std::vector<Component *> & GetComponents();

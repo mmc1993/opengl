@@ -16,6 +16,10 @@ Object::Object()
 
 Object::~Object()
 {
+	while (!_childs.empty())
+	{
+		DelChild(_childs.front());
+	}
 }
 
 void Object::OnUpdate(float dt)
@@ -65,6 +69,17 @@ Object * Object::GetChildIdx(size_t idx)
 std::vector<Object*>& Object::GetChilds()
 {
     return _childs;
+}
+
+void Object::DelComponentAll()
+{
+	while (!_components.empty())
+	{
+		_components.back()->OnDel();
+		_components.back()->SetOwner(nullptr);
+		delete _components.back();
+		_components.pop_back();
+	}
 }
 
 void Object::AddComponent(Component * component)
@@ -163,7 +178,10 @@ void Object::DelChild(size_t idx, bool del)
     assert(idx < _childs.size());
     auto it = std::next(_childs.begin(), idx);
     (*it)->_parent = nullptr;
-    if (del) { delete *it; }
+    if (del) 
+	{
+		(*it)->DelComponentAll(); delete *it; 
+	}
     _childs.erase(it);
 }
 

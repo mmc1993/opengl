@@ -77,10 +77,15 @@ const glm::mat4 & Camera::GetProject()
 	return _project;
 }
 
-const glm::mat4 & Camera::GetModelView()
+const glm::mat4 & Camera::GetView()
 {
 	Update();
-	return _modelview;
+	return _view;
+}
+
+glm::vec4 Camera::InPosition(Transform * transform)
+{
+	return _view * transform->GetMatrixFromRoot() * glm::vec4(0, 0, 0, 1);
 }
 
 void Camera::Update()
@@ -98,6 +103,6 @@ void Camera::Update()
 		_up = glm::normalize(glm::cross(right, _eye));
 
 		_project = glm::perspective(_fov * _scale, _w / _h, _near, _far);
-		_modelview = glm::lookAt(_pos, _pos + _eye, _up);
+		_view = glm::lookAt(_pos, _pos + _eye, _up);
 	}
 }

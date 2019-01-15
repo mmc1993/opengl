@@ -11,7 +11,8 @@ Mesh * File::LoadMesh(const std::string & url)
 	std::string line;
 	std::ifstream ifile(url);
 	std::vector<glm::vec3> vs;
-	std::vector<glm::vec2> fs;
+	std::vector<glm::vec3> fs;
+	std::vector<glm::vec3> vns;
 	std::vector<glm::vec2> vts;
 	while (std::getline(ifile, line))
 	{
@@ -32,10 +33,11 @@ Mesh * File::LoadMesh(const std::string & url)
 			assert(split.size() == 3);
 			for (const auto & view : split)
 			{
-				glm::vec2 f;
+				glm::vec3 f;
 				auto fdata = string_tool::Split(view, "/");
 				f.x = (float)std::atof(std::string(fdata.at(0)).c_str());
 				f.y = (float)std::atof(std::string(fdata.at(1)).c_str());
+				f.z = (float)std::atof(std::string(fdata.at(2)).c_str());
 				fs.push_back(f);
 			}
 		}
@@ -47,6 +49,15 @@ Mesh * File::LoadMesh(const std::string & url)
 			vt.y = (float)std::atof(std::string(split.at(1)).c_str());
 			vts.push_back(vt);
 		}
+		else if (key == "vn")
+		{
+			glm::vec3 n;
+			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
+			n.x = (float)std::atof(std::string(split.at(0)).c_str());
+			n.y = (float)std::atof(std::string(split.at(1)).c_str());
+			n.z = (float)std::atof(std::string(split.at(2)).c_str());
+			vns.push_back(n);
+		}
 	}
 	std::vector<Mesh::Vertex> vertexs;
 	for (const auto & f : fs)
@@ -57,6 +68,9 @@ Mesh * File::LoadMesh(const std::string & url)
 		vertex.v.z = vs.at((size_t)f.x - 1).z;
 		vertex.uv.u = vts.at((size_t)f.y - 1).x;
 		vertex.uv.v = vts.at((size_t)f.y - 1).y;
+		vertex.n.x = vns.at((size_t)f.z - 1).x;
+		vertex.n.y = vns.at((size_t)f.z - 1).y;
+		vertex.n.z = vns.at((size_t)f.z - 1).z;
 		vertexs.push_back(vertex);
 	}
 	auto mesh = new Mesh(std::move(vertexs));

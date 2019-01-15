@@ -28,6 +28,7 @@
     <ClInclude Include="src\core\asset\shader.h" />
     <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\component\component.h" />
+    <ClInclude Include="src\core\component\light.h" />
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\transform.h" />
     <ClInclude Include="src\core\event\event.h" />
@@ -293,6 +294,7 @@
     <ClCompile Include="src\core\asset\file.cpp" />
     <ClCompile Include="src\core\asset\shader.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
+    <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />

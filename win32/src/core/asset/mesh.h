@@ -10,6 +10,7 @@ public:
 			float u;
 			float v;
 		} uv;
+		glm::vec3 n;
 	};
 
 public:
@@ -26,6 +27,8 @@ public:
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
 		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, n));
+		glEnableVertexAttribArray(2);
 		glBindVertexArray(0);
 	}
 

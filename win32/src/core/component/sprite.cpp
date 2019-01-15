@@ -18,9 +18,12 @@ void Sprite::OnUpdate(float dt)
 	command.mCallFn = [this]() {
 		mmc::mRender.Bind(_mesh);
 		mmc::mRender.Bind(_shader);
-		mmc::mRender.Bind(_material);
 		_shader->SetUniform("texture0_", _texture0, 0);
 		_shader->SetUniform("texture1_", _texture1, 1);
+		_shader->SetUniform("material_.mAmbient", _material->mData.mAmbient);
+		_shader->SetUniform("material_.mDiffuse", _material->mData.mDiffuse);
+		_shader->SetUniform("material_.mSpecular", _material->mData.mSpecular);
+		_shader->SetUniform("material_.mShininess", _material->mData.mShininess);
 		glEnable(GL_DEPTH_TEST);
 		mmc::mRender.RenderMesh();
 		glDisable(GL_DEPTH_TEST);

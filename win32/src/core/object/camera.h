@@ -27,7 +27,9 @@ public:
 	const glm::vec3 & GetRotate() const;
 
 	const glm::mat4 & GetProject();
-	const glm::mat4 & GetModelView();
+	const glm::mat4 & GetView();
+
+	glm::vec4 InPosition(Transform * transform);
 
 private:
 	void Update();
@@ -35,7 +37,7 @@ private:
 private:
 	bool _change;
     glm::mat4 _project;
-	glm::mat4 _modelview;
+	glm::mat4 _view;
 	glm::vec3 _eye, _pos, _up, _rotate;
 	float _w, _h, _near, _far, _fov, _scale;
 };
