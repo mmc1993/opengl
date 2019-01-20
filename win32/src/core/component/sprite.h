@@ -27,10 +27,11 @@ public:
 		_mesh = mesh;
 	}
 
+	void SetTexture(const std::string & url);
+
 private:
 	Mesh * _mesh;
 	Shader * _shader;
 	Material * _material;
-	Texture _texture0;
-	Texture _texture1;
+	Texture _texture;
 };
