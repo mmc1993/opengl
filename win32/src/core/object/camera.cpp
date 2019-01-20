@@ -28,7 +28,10 @@ void Camera::LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec
 
 void Camera::SetEye(const glm::vec3 & eye)
 {
-	_eye = eye; _change = true;
+	_eye = eye;
+	auto right = glm::cross(_eye, glm::vec3(0, 1, 0));
+	_up = glm::cross(right, _eye);
+	_change = true;
 }
 
 void Camera::SetPos(const glm::vec3 & pos)
@@ -66,11 +69,6 @@ const glm::vec3 & Camera::GetPos() const
     return _pos;
 }
 
-const glm::vec3 & Camera::GetRotate() const
-{
-	return _rotate;
-}
-
 const glm::mat4 & Camera::GetProject()
 {
 	Update();
@@ -83,26 +81,12 @@ const glm::mat4 & Camera::GetView()
 	return _view;
 }
 
-glm::vec4 Camera::InPosition(Transform * transform)
-{
-	return _view * transform->GetMatrixFromRoot() * glm::vec4(0, 0, 0, 1);
-}
-
 void Camera::Update()
 {
 	if (_change)
 	{
-		_change = false;
-		_eye.x = std::cos(_rotate.x) * std::cos(_rotate.y);
-		_eye.y = std::sin(_rotate.x);
-		_eye.z = std::cos(_rotate.x) * std::sin(_rotate.y);
-		_eye = glm::normalize(_eye);
-
-		auto worldUp = glm::vec3(0, 1, 0);
-		auto right = glm::cross(_eye, worldUp);
-		_up = glm::normalize(glm::cross(right, _eye));
-
 		_project = glm::perspective(_fov * _scale, _w / _h, _near, _far);
 		_view = glm::lookAt(_pos, _pos + _eye, _up);
+		_change = false;
 	}
 }

@@ -58,11 +58,12 @@ public:
     {
         while (!_tasks.empty() && _tasks.front().mTime <= time)
         {
-            _tasks.front().mCall();
+			auto fn = _tasks.front().mCall;
             std::pop_heap(
                 std::begin(_tasks), 
                 std::end(_tasks));
             _tasks.pop_back();
+			fn();
         }
     }
 
