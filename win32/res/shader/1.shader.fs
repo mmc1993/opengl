@@ -16,9 +16,8 @@ uniform struct Light_ {
 } light_;
 
 uniform struct Material_ {
-	vec3 mAmbient;
-	vec3 mDiffuse;
-	vec3 mSpecular;
+	sampler2D mDiffuse;
+	sampler2D mSpecular;
 	float mShininess;
 } material_;
 
@@ -34,23 +33,17 @@ out vec4 color_;
 
 void main()
 {
-	color_ = vec4(1.0, 0.5, 0.31, 1);
-
 	vec3 fragNormal = normalize(v_out_.mNormal);
 	vec3 lightNormal = normalize(light_.mPosition - v_out_.mMPos);
 	vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
 
-	vec4 ambient = color_ * light_.mAmbient * material_.mAmbient;
+	vec3 ambient = light_.mAmbient * texture(material_.mDiffuse, v_out_.mUV).rgb;
 
 	float dDotN = max(dot(lightNormal, fragNormal), 0);
-	vec4 diffuse = color_ * light_.mDiffuse * material_.mDiffuse * dDotN;
+	vec3 diffuse = light_.mDiffuse * texture(material_.mDiffuse, v_out_.mUV).rgb * dDotN;
 
-	vec3 mid = (lightNormal + cameraNormal) * 0.5;
-	float power = pow(max(dot(normalize(mid), fragNormal), 0), material_.mShininess);
-	vec4 specular = color_ * light_.mSpecular * material_.mSpecular * power;
+	float lDotF = max(dot(normalize((lightNormal + cameraNormal) * 0.5), fragNormal), 0);
+	vec3 specular = light_.mSpecular * texture(material_.mSpecular, v_out_.mUV).rgb * pow(lDotF, material_.mShininess);
 
-	color_ = ambient + diffuse + specular;
-	// color_ = ambient;
-	// color_ = diffuse;
-	// color_ = specular;
+	color_ = vec4(ambient + diffuse + specular, 1);
 }

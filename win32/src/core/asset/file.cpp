@@ -73,6 +73,7 @@ Mesh * File::LoadMesh(const std::string & url)
 		vertex.n.z = vns.at((size_t)f.z - 1).z;
 		vertexs.push_back(vertex);
 	}
+	assert(vertexs.size() >= 3);
 	auto mesh = new Mesh(std::move(vertexs));
 	mmc::mAssetCore.Reg(url, mesh);
 	return mesh;
@@ -94,6 +95,7 @@ Shader * File::LoadShader(const std::string & url)
 	ffile.close();
 	auto shader = new Shader(vss.str(), fss.str());
 	mmc::mAssetCore.Reg(url, shader);
+	assert(shader->GetGLID());
 	return shader;
 }
 
@@ -104,7 +106,7 @@ Bitmap * File::LoadBitmap(const std::string & url, int format)
 	stbi_set_flip_vertically_on_load(true);
 	auto w = 0, h = 0, c = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
-	CHECK_RET(buffer != nullptr, nullptr);
+	assert(buffer != nullptr);
 	Bitmap::Data data;
 	data.format = format;
 	data.url = url;
@@ -129,36 +131,18 @@ Material * File::LoadMaterial(const std::string & url)
 	if (ifile)
 	{
 		Material::Data data;
-
-		//	环境光分量
 		std::string line;
 		std::getline(ifile, line);
-		auto split = string_tool::Split(line, " ");
-		data.mAmbient.x = (float)std::atof(std::string(split.at(0)).c_str());
-		data.mAmbient.y = (float)std::atof(std::string(split.at(1)).c_str());
-		data.mAmbient.z = (float)std::atof(std::string(split.at(2)).c_str());
-
-		//	漫反射分量
+		data.mDiffuse = File::LoadTexture(line, GL_RGBA);
 		std::getline(ifile, line);
-		split = string_tool::Split(line, " ");
-		data.mDiffuse.x = (float)std::atof(std::string(split.at(0)).c_str());
-		data.mDiffuse.y = (float)std::atof(std::string(split.at(1)).c_str());
-		data.mDiffuse.z = (float)std::atof(std::string(split.at(2)).c_str());
-
-		//	镜面反射分量
-		std::getline(ifile, line);
-		split = string_tool::Split(line, " ");
-		data.mSpecular.x = (float)std::atof(std::string(split.at(0)).c_str());
-		data.mSpecular.y = (float)std::atof(std::string(split.at(1)).c_str());
-		data.mSpecular.z = (float)std::atof(std::string(split.at(2)).c_str());
-
+		data.mSpecular = File::LoadTexture(line, GL_RGBA);
 		std::getline(ifile, line);
 		data.mShininess = (float)std::atof(line.c_str());
-
 		auto material = new Material(data);
 		mmc::mAssetCore.Reg(url, material);
 		return material;
 	}
+	assert(false);
 	return nullptr;
 }
 

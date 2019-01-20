@@ -79,8 +79,6 @@ private:
 			sprite->SetMaterial(mmc::mAssetCore.Get<Material>("res/material/1.txt"));
 			sprite->SetShader(mmc::mAssetCore.Get<Shader>("res/shader/1.shader"));
 			sprite->SetMesh(mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj"));
-			sprite->SetTexture0("res/bitmap/container.png");
-			sprite->SetTexture1("res/bitmap/awesomeface.png");
 
 			auto child = new Object();
 			child->GetTransform()->Translate(point);
@@ -103,7 +101,7 @@ private:
 		light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
 		light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
 		light->mAmbient = glm::vec3(0.1f, 0.1f, 0.1f);
-		light->mDiffuse = glm::vec3(0.6f, 0.1f, 0.4f);
+		light->mDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 		light->mSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		auto lightObject = new Object();

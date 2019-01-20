@@ -12,9 +12,6 @@ public:
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
 
-	void SetTexture0(const std::string & url);
-	void SetTexture1(const std::string & url);
-
 	void SetMaterial(Material * material)
 	{
 		_material = material;
