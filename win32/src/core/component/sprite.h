@@ -27,11 +27,8 @@ public:
 		_mesh = mesh;
 	}
 
-	void SetTexture(const std::string & url);
-
 private:
 	Mesh * _mesh;
 	Shader * _shader;
 	Material * _material;
-	Texture _texture;
 };

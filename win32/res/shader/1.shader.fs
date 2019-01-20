@@ -1,6 +1,5 @@
 #version 410 core
 
-uniform sampler2D texture_;
 uniform vec3 camera_pos_;
 uniform vec3 camera_eye_;
 uniform mat4 mvp_;
@@ -44,7 +43,5 @@ void main()
 	float lDotF = max(dot(normalize((lightNormal + cameraNormal) * 0.5), fragNormal), 0);
 	vec3 specular = light_.mSpecular * texture(material_.mSpecular, v_out_.mUV).rgb * pow(lDotF, material_.mShininess);
 
-	vec3 tex = texture(texture_, v_out_.mUV).rgb;
-
-	color_ = vec4(ambient + diffuse + specular + tex, 1);
+	color_ = vec4(ambient + diffuse + specular, 1);
 }

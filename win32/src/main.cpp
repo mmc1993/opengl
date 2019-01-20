@@ -52,7 +52,6 @@ private:
 	{
 		File::LoadTexture("res/bitmap/awesomeface.png", GL_RGBA);
 		File::LoadTexture("res/bitmap/container.png", GL_RGBA);
-		File::LoadTexture("res/bitmap/matrix.jpg", GL_RGB);
 		File::LoadMaterial("res/material/1.txt");
 		File::LoadShader("res/shader/1.shader");
 		File::LoadShader("res/shader/light.shader");
@@ -80,7 +79,6 @@ private:
 			sprite->SetMaterial(mmc::mAssetCore.Get<Material>("res/material/1.txt"));
 			sprite->SetShader(mmc::mAssetCore.Get<Shader>("res/shader/1.shader"));
 			sprite->SetMesh(mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj"));
-			sprite->SetTexture("res/bitmap/matrix.jpg");
 
 			auto child = new Object();
 			child->GetTransform()->Translate(point);
@@ -103,7 +101,7 @@ private:
 		light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
 		light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
 		light->mAmbient = glm::vec3(0.1f, 0.1f, 0.1f);
-		light->mDiffuse = glm::vec3(0.1f, 0.1f, 0.1f);
+		light->mDiffuse = glm::vec3(0.3f, 0.3f, 0.3f);
 		light->mSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		auto lightObject = new Object();
