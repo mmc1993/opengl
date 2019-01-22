@@ -45,6 +45,8 @@ public:
     const glm::mat4 & GetMatrix();
 	glm::mat4 GetMatrixFromRoot();
 	glm::mat4 GetRotateFromRoot();
+	glm::vec3 GetWorldPosition();
+	glm::vec3 ApplyRotate(const glm::vec3 & vec3);
 
 private:
     void UpdateMatrix();

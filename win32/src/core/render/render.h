@@ -116,6 +116,7 @@ public:
     void AddCamera(size_t id, Camera * camera);
     void DelCamera(size_t id);
 
+	void BindLight();
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     

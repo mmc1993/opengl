@@ -61,14 +61,13 @@ out vec4 color_;
 
 vec3 CalculateDirect(LightDirect_ light, vec3 fragNormal, vec3 viewNormal)
 {
-	float diff = dot(fragNormal, light.mNormal);
-	vec3 center = (light.mNormal + viewNormal) * 0.5;
+	float diff = dot(fragNormal, -light.mNormal);
+	vec3 center = (-light.mNormal + viewNormal) * 0.5;
 	float spec = pow(dot(fragNormal, center), material_.mShininess);
 
 	vec3 ambient = light.mAmbient * texture(material_.mDiffuse, v_out_.mUV).rgb;
 	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse, v_out_.mUV).rgb * diff;
 	vec3 specular = light.mSpecular * texture(material_.mSpecular, v_out_.mUV).rgb * spec;
-	
 	return ambient + diffuse + specular;
 }
 
@@ -113,7 +112,7 @@ vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 viewNormal)
 void main()
 {
 	vec3 outColor;
-	vec3 viewNormal = camera_pos_ - v_out_.mMPos;
+	vec3 viewNormal = normalize(camera_pos_ - v_out_.mMPos);
 	for (int i = 0; i != light_.mDirectNum; ++i)
 	{
 		outColor += CalculateDirect(light_.mDirects[i], v_out_.mNormal, viewNormal);
@@ -126,7 +125,7 @@ void main()
 
 	for (int i = 0; i != light_.mSpotNum; ++i)
 	{
-		outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
+		//	outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
 	}
 
 	color_ = vec4(outColor, 1.0);

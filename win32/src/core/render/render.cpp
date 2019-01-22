@@ -1,5 +1,6 @@
 #include "render.h"
 #include "../mmc.h"
+#include "../third/sformat.h"
 #include "../asset/mesh.h"
 #include "../asset/shader.h"
 #include "../asset/material.h"
@@ -35,6 +36,62 @@ void Render::DelCamera(size_t id)
     {
         _cameraInfos.erase(it);
     }
+}
+
+void Render::BindLight()
+{
+	auto directNum = 0, pointNum = 0, spotNum = 0;
+	for (auto i = 0; i != _lights.size(); ++i)
+	{
+		switch (_lights.at(i)->GetType())
+		{
+		case Light::kDIRECT:
+			{
+				auto direct = reinterpret_cast<LightDirect *>(_lights.at(i));
+				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mNormal", directNum), direct->mNormal);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
+				++directNum;
+			}
+			break;
+		case Light::kPOINT:
+			{
+				auto point = reinterpret_cast<LightPoint *>(_lights.at(i));
+				auto position = point->GetOwner()->GetTransform()->GetWorldPosition();
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mK0", pointNum), point->mK0);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mK1", pointNum), point->mK1);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mK2", pointNum), point->mK2);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mPosition", pointNum), position);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mAmbient", pointNum), point->mAmbient);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mDiffuse", pointNum), point->mDiffuse);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mSpecular", pointNum), point->mSpecular);
+				++pointNum;
+			}
+			break;
+		case Light::kSPOT:
+			{
+				auto spot = reinterpret_cast<LightSpot *>(_lights.at(i));
+				auto position = spot->GetOwner()->GetTransform()->GetWorldPosition();
+				auto normal = spot->GetOwner()->GetTransform()->ApplyRotate(spot->mNormal);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mK0", spotNum), spot->mK0);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mK1", spotNum), spot->mK1);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mK2", spotNum), spot->mK2);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mNormal", spotNum), normal);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mPosition", spotNum), position);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mInCone", spotNum), spot->mInCone);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mOutCone", spotNum), spot->mOutCone);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mAmbient", spotNum), spot->mAmbient);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mDiffuse", spotNum), spot->mDiffuse);
+				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mSpecular", spotNum), spot->mSpecular);
+				++spotNum;
+			}
+			break;
+		}
+	}
+	_renderInfo.mShader->SetUniform("light_.mDirectNum", directNum);
+	_renderInfo.mShader->SetUniform("light_.mPointNum", pointNum);
+	_renderInfo.mShader->SetUniform("light_.mSpotNum", spotNum);
 }
 
 void Render::AddLight(Light * light)
@@ -108,22 +165,12 @@ void Render::RenderMesh()
 	assert(_renderInfo.mMesh != nullptr);
 	assert(_renderInfo.mShader != nullptr);
 	assert(_renderInfo.mCamera != nullptr);
-	
+	BindLight();
 	_renderInfo.mShader->SetUniform("m_", GetM());
 	_renderInfo.mShader->SetUniform("mv_", GetMV());
 	_renderInfo.mShader->SetUniform("mvp_", GetMVP());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
-
-	//	TODO mmc
-	//	强制单个光源
-	auto light = _lights.at(0);
-	auto lightPos = light->GetOwner()->GetTransform()->GetMatrixFromRoot() * glm::vec4(0, 0, 0, 1);
-	_renderInfo.mShader->SetUniform("light_.mAmbient", light->mAmbient);
-	_renderInfo.mShader->SetUniform("light_.mDiffuse", light->mDiffuse);
-	_renderInfo.mShader->SetUniform("light_.mSpecular", light->mSpecular);
-	_renderInfo.mShader->SetUniform("light_.mPosition", glm::vec3(lightPos));
-	
 	glDrawArrays(GL_TRIANGLES, 0, _renderInfo.mMesh->GetVertexs().size());
 }
 

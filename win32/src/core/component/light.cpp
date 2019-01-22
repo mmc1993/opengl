@@ -2,13 +2,11 @@
 #include "../mmc.h"
 #include "../render/render.h"
 
-Light::Light()
-{
-}
+Light::Light(LightType type): _type(type)
+{ }
 
 Light::~Light()
-{
-}
+{ }
 
 void Light::OnAdd()
 {

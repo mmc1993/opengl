@@ -97,18 +97,35 @@ private:
 
 	void InitLights()
 	{
-		auto light = new Light();
-		light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-		light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
-		light->mAmbient = glm::vec3(0.1f, 0.1f, 0.1f);
-		light->mDiffuse = glm::vec3(0.3f, 0.3f, 0.3f);
-		light->mSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+		auto direct = new LightDirect();
+		direct->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
+		direct->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+		direct->mAmbient = glm::vec3(0.2f, 0.2f, 0.2f);
+		direct->mDiffuse = glm::vec3(0.1f, 0.1f, 0.1f);
+		direct->mSpecular = glm::vec3(0.2f, 0.2f, 0.2f);
+		direct->mNormal = glm::vec3(0, 0, -1);
 
-		auto lightObject = new Object();
-		lightObject->AddComponent(light);
-		lightObject->GetTransform()->Scale(0.2f);
-		lightObject->GetTransform()->Translate(1.0f, 1.0f, 2.0f);
-		lightObject->SetParent(&mmc::mRoot);
+		auto directObject = new Object();
+		directObject->AddComponent(direct);
+		directObject->GetTransform()->Scale(0.2f);
+		directObject->GetTransform()->Translate(1.0f, 1.0f, 2.0f);
+		directObject->SetParent(&mmc::mRoot);
+
+		auto point = new LightPoint();
+		point->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
+		point->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+		point->mAmbient = glm::vec3(0.1f, 0.1f, 0.1f);
+		point->mDiffuse = glm::vec3(0.6f, 0.6f, 0.6f);
+		point->mSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+		point->mK0 = 1.0f;
+		point->mK1 = 0.09f;
+		point->mK2 = 0.032f;
+
+		auto pointObject = new Object();
+		pointObject->AddComponent(point);
+		pointObject->GetTransform()->Scale(0.2f);
+		pointObject->GetTransform()->Translate(1.0f, 2.0f, 0.0f);
+		pointObject->SetParent(&mmc::mRoot);
 	}
 
 	void OnKeyEvent(const std::any & any)

@@ -181,6 +181,16 @@ glm::mat4 Transform::GetRotateFromRoot()
 	return (glm::mat4)matrix;
 }
 
+glm::vec3 Transform::GetWorldPosition()
+{
+	return glm::vec3(GetMatrixFromRoot() * glm::vec4(0, 0, 0, 1));
+}
+
+glm::vec3 Transform::ApplyRotate(const glm::vec3 & vec3)
+{
+	return glm::transpose(glm::inverse(glm::mat3(GetMatrixFromRoot()))) * vec3;
+}
+
 void Transform::UpdateMatrix()
 {
 	if (_isChange)
