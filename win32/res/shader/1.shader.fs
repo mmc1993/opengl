@@ -91,7 +91,7 @@ vec3 CalculatePoint(LightPoint_ light, vec3 fragNormal, vec3 viewNormal)
 vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 viewNormal)
 {
 	vec3 lightNormal = normalize(light.mPosition - v_out_.mMPos);
-	float fragCone = dot(-lightNormal, light.mNormal);
+	float fragCone = dot(lightNormal, -light.mNormal);
 	float cutWeight = clamp((fragCone - light.mOutCone) / (light.mInCone - light.mOutCone), 0, 1);
 	if (cutWeight == 0) { return vec3(0, 0, 0); }
 
@@ -111,7 +111,7 @@ vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 viewNormal)
 
 void main()
 {
-	vec3 outColor;
+	vec3 outColor = vec3(0, 0, 0);
 	vec3 viewNormal = normalize(camera_pos_ - v_out_.mMPos);
 	for (int i = 0; i != light_.mDirectNum; ++i)
 	{
@@ -125,7 +125,7 @@ void main()
 
 	for (int i = 0; i != light_.mSpotNum; ++i)
 	{
-		//	outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
+		outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
 	}
 
 	color_ = vec4(outColor, 1.0);

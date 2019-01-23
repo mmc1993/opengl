@@ -188,7 +188,7 @@ glm::vec3 Transform::GetWorldPosition()
 
 glm::vec3 Transform::ApplyRotate(const glm::vec3 & vec3)
 {
-	return glm::transpose(glm::inverse(glm::mat3(GetMatrixFromRoot()))) * vec3;
+	return glm::normalize(glm::mat3(glm::transpose(glm::inverse(GetMatrix()))) * vec3);
 }
 
 void Transform::UpdateMatrix()

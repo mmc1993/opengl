@@ -15,7 +15,7 @@
 
 class AppWindow : public Window {
 public:
-	const float s_MAX_SPEED = 0.01f;
+	const float s_MAX_SPEED = 0.1f;
 	
 	enum DirectEnum {
 		kNONE,
@@ -97,35 +97,72 @@ private:
 
 	void InitLights()
 	{
-		auto direct = new LightDirect();
-		direct->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-		direct->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
-		direct->mAmbient = glm::vec3(0.2f, 0.2f, 0.2f);
-		direct->mDiffuse = glm::vec3(0.1f, 0.1f, 0.1f);
-		direct->mSpecular = glm::vec3(0.2f, 0.2f, 0.2f);
-		direct->mNormal = glm::vec3(0, 0, -1);
+		//	坐标，环境光，漫反射，镜面反射，方向
+		const glm::vec3 directs[][5] = {
+			{ glm::vec3(0, 5, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0, -1, 0) },
+		};
 
-		auto directObject = new Object();
-		directObject->AddComponent(direct);
-		directObject->GetTransform()->Scale(0.2f);
-		directObject->GetTransform()->Translate(1.0f, 1.0f, 2.0f);
-		directObject->SetParent(&mmc::mRoot);
+		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
+		const glm::vec3 points[][5] = {
+			{ glm::vec3(0, 0, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.09f, 0.05f) },
+		};
 
-		auto point = new LightPoint();
-		point->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-		point->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
-		point->mAmbient = glm::vec3(0.1f, 0.1f, 0.1f);
-		point->mDiffuse = glm::vec3(0.6f, 0.6f, 0.6f);
-		point->mSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
-		point->mK0 = 1.0f;
-		point->mK1 = 0.09f;
-		point->mK2 = 0.032f;
+		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
+		const glm::vec3 spots[][7] = {
+			{ glm::vec3(0, 0, 3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.01f, 0.1f), glm::vec3(0.99f, 0.90f, 0.0f) },
+		};
 
-		auto pointObject = new Object();
-		pointObject->AddComponent(point);
-		pointObject->GetTransform()->Scale(0.2f);
-		pointObject->GetTransform()->Translate(1.0f, 2.0f, 0.0f);
-		pointObject->SetParent(&mmc::mRoot);
+		for (auto & data : directs)
+		{
+			auto light = new LightDirect();
+			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
+			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mNormal = data[4];
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
+
+		for (auto & data : points)
+		{
+			auto light = new LightPoint();
+			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
+			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mK0 = data[4].x;
+			light->mK1 = data[4].y;
+			light->mK2 = data[4].z;
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
+		
+		for (auto & data : spots)
+		{
+			auto light = new LightSpot();
+			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
+			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mNormal = data[4];
+			light->mK0 = data[5].x;
+			light->mK1 = data[5].y;
+			light->mK2 = data[5].z;
+			light->mInCone = data[6].x;
+			light->mOutCone = data[6].y;
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -159,7 +196,7 @@ private:
 		auto  param = std::any_cast<Window::EventMouseParam>(any);
 		auto l = glm::vec3(GetW() * 0.5f, GetH() * 0.5f, 0);
 		auto v = glm::vec3(param.x - l.x, param.y - l.y, 0);
-		if (glm::length(v) < 50)
+		if (glm::length(v) < 100)
 		{
 			_speed = 0.0f;
 			_axis = glm::vec3(0, 0, 0);
@@ -187,27 +224,27 @@ private:
 			auto pos = camera->GetPos();
 			if ((_direct & kFRONT) != 0)
 			{
-				pos += camera->GetEye();
+				pos += camera->GetEye() * 0.1f;
 			}
 			if ((_direct & kBACK) != 0)
 			{
-				pos -= camera->GetEye();
+				pos -= camera->GetEye() * 0.1f;
 			}
 			if ((_direct & kUP) != 0)
 			{
-				pos.y += 1;
+				pos.y += 1 * 0.1f;
 			}
 			if ((_direct & kDOWN) != 0)
 			{
-				pos.y -= 1;
+				pos.y -= 1 * 0.1f;
 			}
 			if ((_direct & kLEFT) != 0)
 			{
-				pos += glm::cross(camera->GetUp(), camera->GetEye());
+				pos += glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f;
 			}
 			if ((_direct & kRIGHT) != 0)
 			{
-				pos -= glm::cross(camera->GetUp(), camera->GetEye());
+				pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f;
 			}
 			camera->SetPos(pos);
 		}
