@@ -3,20 +3,12 @@
 #include "asset.h"
 #include "texture.h"
 
-class Material: public Asset {
+class Material {
 public:
-	struct Data {
-		Texture mDiffuse;
-		Texture mSpecular;
-		float mShininess;
-	};
-
-public:
-	Material(const Data & data) : mData(data)
+	Material(): mShininess(32.0f)
 	{ }
-
-	~Material()
-	{ }
-
-	Data mData;
+	float mShininess;
+	std::vector<Texture> mNormals;
+	std::vector<Texture> mDiffuses;
+	std::vector<Texture> mSpeculars;
 };

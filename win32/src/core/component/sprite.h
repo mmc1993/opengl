@@ -12,9 +12,10 @@ public:
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
 
-	void SetMaterial(Material * material)
+	void AddMesh(Mesh * mesh, const Material & material)
 	{
-		_material = material;
+		_meshs.push_back(mesh);
+		_materials.push_back(material);
 	}
 
 	void SetShader(Shader * shader)
@@ -22,13 +23,8 @@ public:
 		_shader = shader;
 	}
 
-	void SetMesh(Mesh * mesh)
-	{
-		_mesh = mesh;
-	}
-
 private:
-	Mesh * _mesh;
 	Shader * _shader;
-	Material * _material;
+	std::vector<Mesh *> _meshs;
+	std::vector<Material> _materials;
 };

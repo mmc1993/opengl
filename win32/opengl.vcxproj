@@ -25,6 +25,7 @@
     <ClInclude Include="src\core\asset\file.h" />
     <ClInclude Include="src\core\asset\material.h" />
     <ClInclude Include="src\core\asset\mesh.h" />
+    <ClInclude Include="src\core\asset\model.h" />
     <ClInclude Include="src\core\asset\shader.h" />
     <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\component\component.h" />
@@ -491,7 +492,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)\src\core\third\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir)\src\core\third\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>

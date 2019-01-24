@@ -160,6 +160,19 @@ Render::Matrix & Render::GetMatrix()
 	return _matrix;
 }
 
+void Render::RenderMeshDebug(size_t count)
+{
+	assert(_renderInfo.mShader != nullptr);
+	assert(_renderInfo.mCamera != nullptr);
+	BindLight();
+	_renderInfo.mShader->SetUniform("m_", GetM());
+	_renderInfo.mShader->SetUniform("mv_", GetMV());
+	_renderInfo.mShader->SetUniform("mvp_", GetMVP());
+	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
+	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+}
+
 void Render::RenderMesh()
 {
 	assert(_renderInfo.mMesh != nullptr);
@@ -171,7 +184,7 @@ void Render::RenderMesh()
 	_renderInfo.mShader->SetUniform("mvp_", GetMVP());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
-	glDrawArrays(GL_TRIANGLES, 0, _renderInfo.mMesh->GetVertexs().size());
+	glDrawElements(GL_TRIANGLES, _renderInfo.mMesh->GetIndices().size(), GL_UNSIGNED_INT, 0);
 }
 
 void Render::RenderOnce()

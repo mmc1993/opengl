@@ -4,6 +4,24 @@
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
 
+#pragma comment(lib, "lib/assimp-vc140-mt.lib")
+
+Model * File::LoadModel(const std::string & url)
+{
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Model>(url));
+
+	Assimp::Importer importer;
+	auto scene = importer.ReadFile(url,
+								   aiProcess_CalcTangentSpace |
+								   aiProcess_Triangulate |
+								   aiProcess_FlipUVs);
+	ASSERT_RET(scene != nullptr, nullptr);
+	ASSERT_RET(scene->mRootNode != nullptr, nullptr);
+	auto model = File::LoadModel(scene->mRootNode, scene, url.substr(0, 1 + url.find_last_of('/')));
+	ASSERT_RET(model != nullptr, nullptr);
+	mmc::mAssetCore.Reg(url, model);
+	return model;
+}
 
 Mesh * File::LoadMesh(const std::string & url)
 {
@@ -75,9 +93,7 @@ Mesh * File::LoadMesh(const std::string & url)
 		vertexs.push_back(vertex);
 	}
 	assert(vertexs.size() >= 3);
-	auto mesh = new Mesh(std::move(vertexs));
-	mmc::mAssetCore.Reg(url, mesh);
-	return mesh;
+	return nullptr;
 }
 
 Shader * File::LoadShader(const std::string & url)
@@ -100,51 +116,107 @@ Shader * File::LoadShader(const std::string & url)
 	return shader;
 }
 
-Bitmap * File::LoadBitmap(const std::string & url, int format)
+Bitmap * File::LoadBitmap(const std::string & url)
 {
 	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Bitmap>(url));
 	
-	stbi_set_flip_vertically_on_load(true);
-	auto w = 0, h = 0, c = 0;
+	auto w = 0, h = 0, c = 0, fmt = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
-	assert(buffer != nullptr);
-	Bitmap::Data data;
-	data.format = format;
-	data.url = url;
-	data.w = w;
-	data.h = h;
-	auto bitmap = new Bitmap(std::move(data), buffer);
+	ASSERT_RET(buffer != nullptr, nullptr);
+	switch (c)
+	{
+	case 1: fmt = GL_RED; break;
+	case 3: fmt = GL_RGB; break;
+	case 4: fmt = GL_RGBA; break;
+	}
+	auto bitmap = new Bitmap(w, h, fmt, url, buffer);
 	mmc::mAssetCore.Reg(url, bitmap);
 	stbi_image_free(buffer);
 	return bitmap;
 }
 
-Texture File::LoadTexture(const std::string & url, int format)
+Texture File::LoadTexture(const std::string & url)
 {
-	return Texture(File::LoadBitmap(url, format));
+	return Texture(File::LoadBitmap(url));
 }
 
-Material * File::LoadMaterial(const std::string & url)
+Model * File::LoadModel(aiNode * node, const aiScene * scene, const std::string & directory)
 {
-	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Material>(url));
-
-	std::ifstream ifile(url);
-	if (ifile)
+	auto model = new Model();
+	for (auto i = 0; i != node->mNumMeshes; ++i)
 	{
-		Material::Data data;
-		std::string line;
-		std::getline(ifile, line);
-		data.mDiffuse = File::LoadTexture(line, GL_RGBA);
-		std::getline(ifile, line);
-		data.mSpecular = File::LoadTexture(line, GL_RGBA);
-		std::getline(ifile, line);
-		data.mShininess = (float)std::atof(line.c_str());
-		auto material = new Material(data);
-		mmc::mAssetCore.Reg(url, material);
-		return material;
+		model->mMeshs.emplace_back(File::LoadMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
+		model->mMaterials.emplace_back(File::LoadMaterial(scene->mMeshes[node->mMeshes[i]], scene, directory));
 	}
-	assert(false);
-	return nullptr;
+	for (auto i = 0; i != node->mNumChildren; ++i)
+	{
+		model->mChilds.emplace_back(File::LoadModel(node->mChildren[i], scene, directory));
+	}
+	return model;
+}
+
+Mesh * File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory)
+{
+	std::vector<std::uint32_t> indices;
+	std::vector<Mesh::Vertex> vertexs;
+	for (auto i = 0; i != mesh->mNumVertices; ++i)
+	{
+		Mesh::Vertex vertex;
+		//	vertex
+		vertex.v.x = mesh->mVertices[i].x;
+		vertex.v.y = mesh->mVertices[i].y;
+		vertex.v.z = mesh->mVertices[i].z;
+		//	normal
+		vertex.n.x = mesh->mNormals[i].x;
+		vertex.n.y = mesh->mNormals[i].y;
+		vertex.n.z = mesh->mNormals[i].z;
+		//	tan
+		vertex.tan.x = mesh->mTangents[i].x;
+		vertex.tan.y = mesh->mTangents[i].y;
+		vertex.tan.z = mesh->mTangents[i].z;
+		//	bitan
+		vertex.bitan.x = mesh->mBitangents[i].x;
+		vertex.bitan.y = mesh->mBitangents[i].y;
+		vertex.bitan.z = mesh->mBitangents[i].z;
+		//	uv
+		if (mesh->mTextureCoords[0])
+		{
+			vertex.uv.u = mesh->mTextureCoords[0][i].x;
+			vertex.uv.v = mesh->mTextureCoords[0][i].y;
+		}
+		vertexs.push_back(vertex);
+	}
+	for (auto i = 0; i != mesh->mNumFaces; ++i)
+	{
+		for (auto j = 0; j != mesh->mFaces[i].mNumIndices; ++j)
+		{
+			indices.push_back(mesh->mFaces[i].mIndices[j]);
+		}
+	}
+	return new Mesh(std::move(vertexs), std::move(indices));
+}
+
+Material File::LoadMaterial(aiMesh * mesh, const aiScene * scene, const std::string & directory)
+{
+	Material material;
+	aiString textureURL;
+	auto aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
+	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_NORMALS); ++i)
+	{
+		aiMaterial->GetTexture(aiTextureType_NORMALS, i, &textureURL);
+		material.mNormals.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+	}
+	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_DIFFUSE); ++i)
+	{
+		aiMaterial->GetTexture(aiTextureType_DIFFUSE, i, &textureURL);
+		material.mDiffuses.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+	}
+	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_SPECULAR); ++i)
+	{
+		aiMaterial->GetTexture(aiTextureType_SPECULAR, i, &textureURL);
+		material.mSpeculars.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+	}
+	return std::move(material);
 }
 
 std::string_view File::FindSubStrUntil(

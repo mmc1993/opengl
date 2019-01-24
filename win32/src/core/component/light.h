@@ -19,6 +19,7 @@ public:
 	virtual void OnAdd();
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
+	void SetShader(Shader * shader);
 	LightType GetType() { return _type; }
 
 public:
@@ -26,8 +27,11 @@ public:
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
 
-	Mesh * mMesh;
-	Shader * mShader;
+private:
+	GLuint _vbo;
+	GLuint _ebo;
+	GLuint _vao;
+	Shader * _shader;
 
 private:
 	LightType _type;

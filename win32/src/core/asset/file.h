@@ -1,19 +1,25 @@
 #pragma once
 
 #include "../include.h"
-#include "material.h"
-#include "texture.h"
-#include "bitmap.h"
 #include "shader.h"
-#include "mesh.h"
+#include "model.h"
+#include "../third/assimp/postprocess.h"
+#include "../third/assimp/Importer.hpp"
+#include "../third/assimp/scene.h"
 
 class File {
 public:
+	static Model * LoadModel(const std::string & url);
 	static Mesh * LoadMesh(const std::string & url);
 	static Shader * LoadShader(const std::string & url);
-	static Bitmap * LoadBitmap(const std::string & url, int format);
-	static Texture LoadTexture(const std::string & url, int format);
-	static Material * LoadMaterial(const std::string & url);
+	static Bitmap * LoadBitmap(const std::string & url);
+	static Texture LoadTexture(const std::string & url);
+
+private:
+	static Model * LoadModel(aiNode * node, const aiScene * scene, const std::string & directory);
+	static Mesh * LoadMesh(aiMesh * node, const aiScene * scene, const std::string & directory);
+	static Material LoadMaterial(aiMesh * node, const aiScene * scene, const std::string & directory);
+
 private:
 	static std::string_view FindSubStrUntil(
 		const std::string_view & str, 

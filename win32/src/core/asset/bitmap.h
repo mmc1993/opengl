@@ -7,16 +7,8 @@
 
 class Bitmap: public Asset {
 public:
-    struct Data {
-        int w;
-        int h;
-        int format;
-        std::string url;
-    };
-
-public:
-    Bitmap(Data && data, const void * buffer)
-		: _data(std::move(data)), _GLID(0)
+    Bitmap(int w, int h, int fmt, const std::string & url, const void * buffer)
+		: _w(w), _h(h), _fmt(fmt), _url(url)
     {
 		if (buffer != nullptr)
 		{
@@ -26,7 +18,7 @@ public:
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, data.format, _data.w, _data.h, 0, data.format, GL_UNSIGNED_BYTE, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, buffer);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
@@ -38,17 +30,17 @@ public:
 
     int GetW() const
     {
-        return _data.w;
+        return _w;
     }
 
     int GetH() const
     {
-        return _data.h;
+        return _h;
     }
 
     const std::string & GetURL() const
     {
-        return _data.url;
+        return _url;
     }
 
     GLuint GetGLID() const
@@ -58,6 +50,9 @@ public:
     }
 
 private:
-    Data _data;
+	int _w;
+	int _h;
+	int _fmt;
+	std::string _url;
     GLuint _GLID;
 };

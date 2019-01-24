@@ -30,11 +30,13 @@ public:
 public:
     void InitGame()
     {
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 		InitCamera();
 		InitAssets();
 		InitEvents();
 		InitLights();
-		InitBoxs();
+		InitObject();
     }
 private:
 	void InitCamera()
@@ -50,41 +52,36 @@ private:
 
 	void InitAssets()
 	{
-		File::LoadTexture("res/bitmap/awesomeface.png", GL_RGBA);
-		File::LoadTexture("res/bitmap/container.png", GL_RGBA);
-		File::LoadMaterial("res/material/1.txt");
 		File::LoadShader("res/shader/1.shader");
+		File::LoadShader("res/shader/model.shader");
 		File::LoadShader("res/shader/light.shader");
-		File::LoadMesh("res/model/1/model.obj");
+		File::LoadModel("res/model/nanosuit/nanosuit.obj");
 	}
 
-	void InitBoxs()
+	void InitObject()
 	{
-		glm::vec3 points[] = {
-			glm::vec3(0.0f,		0.0f,	0.0f),
-			glm::vec3(2.0f,		5.0f,	-15.0f),
-			glm::vec3(-1.5f,	-2.2f,	-2.5f),
-			glm::vec3(-3.8f,	-2.0f,	-12.3f),
-			glm::vec3(2.4f,		-0.4f,	-3.5f),
-			glm::vec3(-1.7f,	3.0f,	-7.5f),
-			glm::vec3(1.3f,		-2.0f,	-2.5f),
-			glm::vec3(1.5f,		2.0f,	-2.5f),
-			glm::vec3(1.5f,		0.2f,	-1.5f),
-			glm::vec3(-1.3f,	1.0f,	-1.5f)
-		};
-
-		for (auto & point : points)
-		{
+		std::function<void (Object * parent, Model * model)> createObjects;
+		createObjects = [&createObjects](Object * parent, Model * model) {
 			auto sprite = new Sprite();
-			sprite->SetMaterial(mmc::mAssetCore.Get<Material>("res/material/1.txt"));
-			sprite->SetShader(mmc::mAssetCore.Get<Shader>("res/shader/1.shader"));
-			sprite->SetMesh(mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj"));
+			sprite->SetShader(mmc::mAssetCore.Get<Shader>("res/shader/model.shader"));
 
-			auto child = new Object();
-			child->GetTransform()->Translate(point);
-			child->AddComponent(sprite);
-			mmc::mRoot.AddChild(child);
-		}
+			auto object = new Object();
+			object->AddComponent(sprite);
+			object->SetParent(parent);
+
+			for (auto i = 0; i != model->mMeshs.size(); ++i)
+			{
+				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
+			}
+
+			for (auto i = 0; i != model->mChilds.size(); ++i)
+			{
+				createObjects(object, model->mChilds.at(i));
+			}
+		};
+		createObjects(&mmc::mRoot, mmc::mAssetCore.Get<Model>("res/model/nanosuit/nanosuit.obj"));
+
+		mmc::mRoot.GetTransform()->Translate(0, 0, 0);
 	}
 
 	void InitEvents()
@@ -99,56 +96,50 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const glm::vec3 directs[][5] = {
-			{ glm::vec3(0, 5, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0, -1, 0) },
+			{ glm::vec3(0, 5, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const glm::vec3 points[][5] = {
-			{ glm::vec3(0, 0, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.09f, 0.05f) },
+			{ glm::vec3(5, 0, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const glm::vec3 spots[][7] = {
-			{ glm::vec3(0, 0, 3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.01f, 0.1f), glm::vec3(0.99f, 0.90f, 0.0f) },
+			{ glm::vec3(0, 10, 5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.001f, 0.001f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
-		for (auto & data : directs)
-		{
-			auto light = new LightDirect();
-			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
-			light->mAmbient = data[1];
-			light->mDiffuse = data[2];
-			light->mSpecular = data[3];
-			light->mNormal = data[4];
-			auto object = new Object();
-			object->AddComponent(light);
-			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
-		}
+		//for (auto & data : directs)
+		//{
+		//	auto light = new LightDirect();
+		//	light->mAmbient = data[1];
+		//	light->mDiffuse = data[2];
+		//	light->mSpecular = data[3];
+		//	light->mNormal = data[4];
+		//	auto object = new Object();
+		//	object->AddComponent(light);
+		//	object->GetTransform()->Translate(data[0]);
+		//	object->SetParent(&mmc::mRoot);
+		//}
 
-		for (auto & data : points)
-		{
-			auto light = new LightPoint();
-			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
-			light->mAmbient = data[1];
-			light->mDiffuse = data[2];
-			light->mSpecular = data[3];
-			light->mK0 = data[4].x;
-			light->mK1 = data[4].y;
-			light->mK2 = data[4].z;
-			auto object = new Object();
-			object->AddComponent(light);
-			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
-		}
+		//for (auto & data : points)
+		//{
+		//	auto light = new LightPoint();
+		//	light->mAmbient = data[1];
+		//	light->mDiffuse = data[2];
+		//	light->mSpecular = data[3];
+		//	light->mK0 = data[4].x;
+		//	light->mK1 = data[4].y;
+		//	light->mK2 = data[4].z;
+		//	auto object = new Object();
+		//	object->AddComponent(light);
+		//	object->GetTransform()->Translate(data[0]);
+		//	object->SetParent(&mmc::mRoot);
+		//}
 		
 		for (auto & data : spots)
 		{
 			auto light = new LightSpot();
-			light->mMesh = mmc::mAssetCore.Get<Mesh>("res/model/1/model.obj");
-			light->mShader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
 			light->mAmbient = data[1];
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];

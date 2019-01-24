@@ -825,6 +825,9 @@
     <ClInclude Include="src\core\component\light.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\asset\model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">

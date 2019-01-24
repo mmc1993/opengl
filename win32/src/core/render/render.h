@@ -120,6 +120,7 @@ public:
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     
+	void RenderMeshDebug(size_t count);
 	void RenderMesh();
 	void RenderOnce();
 
