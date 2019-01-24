@@ -194,18 +194,26 @@ private:
 	void OnMouseMoveed(const std::any & any)
 	{
 		auto  param = std::any_cast<Window::EventMouseParam>(any);
-		auto l = glm::vec3(GetW() * 0.5f, GetH() * 0.5f, 0);
-		auto v = glm::vec3(param.x - l.x, param.y - l.y, 0);
+		auto l = glm::vec2(GetW() * 0.5f, GetH() * 0.5f);
+		auto v = glm::vec2(param.x - l.x, l.y - param.y);
 		if (glm::length(v) < 100)
 		{
 			_speed = 0.0f;
-			_axis = glm::vec3(0, 0, 0);
+			_axis.x = 0;
+			_axis.y = 0;
+			_axis.z = 0;
 		}
 		else
 		{
-			_axis = glm::cross(v, glm::vec3(0, 0, 1));
-			_axis = glm::normalize(_axis);
-			_axis.x = -_axis.x;
+			auto camera = mmc::mRender.GetCamera(0);
+			auto a = glm::dot(glm::vec2(1, 0), glm::normalize(v));
+			auto cos = std::acos(glm::dot(glm::vec2(1, 0), glm::normalize(v)));
+			cos = v.y < 0 ? cos : -cos;
+
+			auto right = glm::cross(camera->GetEye(), camera->GetUp());
+			auto step = glm::angleAxis(cos, camera->GetEye()) * right;
+			auto look = glm::normalize(camera->GetEye() + step);
+			_axis = glm::normalize(glm::cross(camera->GetEye(), look));
 
 			auto s = glm::length(v) / glm::length(l);
 			_speed = s * AppWindow::s_MAX_SPEED;
