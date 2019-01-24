@@ -4,6 +4,7 @@
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
 
+
 Mesh * File::LoadMesh(const std::string & url)
 {
 	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Mesh>(url));
