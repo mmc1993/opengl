@@ -23,15 +23,14 @@ void Camera::Init(float fov, float width, float height, float near, float far)
 
 void Camera::LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec3 & up)
 {
-	_up = up; _pos = pos; _eye = eye; _change = true;
+	_up = up; _pos = pos; _eye = glm::normalize(eye - pos); _change = true;
 }
 
 void Camera::SetEye(const glm::vec3 & eye)
 {
 	_eye = eye;
 	auto right = glm::cross(_eye, glm::vec3(0, 1, 0));
-	_up = glm::cross(right, _eye);
-	_change = true;
+	_up = glm::cross(right, _eye); _change = true;
 }
 
 void Camera::SetPos(const glm::vec3 & pos)

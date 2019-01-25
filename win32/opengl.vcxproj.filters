@@ -828,6 +828,9 @@
     <ClInclude Include="src\core\asset\model.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\component\sprite_outline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -873,6 +876,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\sprite_outline.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

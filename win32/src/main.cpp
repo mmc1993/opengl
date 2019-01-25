@@ -7,6 +7,7 @@
 #include "core/asset/shader.h"
 #include "core/asset/material.h"
 #include "core/component/sprite.h"
+#include "core/component/sprite_outline.h"
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
@@ -42,47 +43,46 @@ private:
 	void InitCamera()
 	{
 		auto camera = new Camera();
-		camera->Init(60, (float)GetW(), (float)GetH(), 1, 500);
+		camera->Init(60, (float)GetW(), (float)GetH(), 0.1f, 500);
 		camera->LookAt(
-			glm::vec3(0, 0, 3),
-			glm::vec3(0, 0, -1),
+			glm::vec3(0, 3, 3),
+			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
 		mmc::mRender.AddCamera(0, camera);
 	}
 
 	void InitAssets()
 	{
-		File::LoadShader("res/shader/1.shader");
-		File::LoadShader("res/shader/model.shader");
-		File::LoadShader("res/shader/light.shader");
-		File::LoadModel("res/model/nanosuit/nanosuit.obj");
+		File::LoadShader("res/shader/outline/normal.shader");
+		File::LoadShader("res/shader/outline/outline.shader");
+		auto box = File::LoadModel("res/model/outline/box.obj");
+		auto floor = File::LoadModel("res/model/outline/floor.obj");
+		auto boxTex = File::LoadTexture("res/model/outline/box.jpg");
+		auto floorTex = File::LoadTexture("res/model/outline/floor.png");
+		box->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(boxTex);
+		floor->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(floorTex);
 	}
 
 	void InitObject()
 	{
-		std::function<void (Object * parent, Model * model)> createObjects;
-		createObjects = [&createObjects](Object * parent, Model * model) {
-			auto sprite = new Sprite();
-			sprite->SetShader(mmc::mAssetCore.Get<Shader>("res/shader/model.shader"));
+		auto box = mmc::mAssetCore.Get<Model>("res/model/outline/box.obj");
+		auto floor = mmc::mAssetCore.Get<Model>("res/model/outline/floor.obj");
 
-			auto object = new Object();
-			object->AddComponent(sprite);
-			object->SetParent(parent);
+		auto sprite = new Sprite();
+		sprite->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
+		sprite->AddMesh(floor->mChilds.at(0)->mMeshs.at(0), floor->mChilds.at(0)->mMaterials.at(0));
+		_floorObject = new Object();
+		_floorObject->AddComponent(sprite);
+		_floorObject->SetParent(&mmc::mRoot);
+		_floorObject->GetTransform()->Scale(5, 5, 5);
 
-			for (auto i = 0; i != model->mMeshs.size(); ++i)
-			{
-				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
-			}
-
-			for (auto i = 0; i != model->mChilds.size(); ++i)
-			{
-				createObjects(object, model->mChilds.at(i));
-			}
-		};
-		_object = new Object();
-		_object->SetParent(&mmc::mRoot);
-		_object->GetTransform()->Translate(0, 0, -5);
-		createObjects(_object, mmc::mAssetCore.Get<Model>("res/model/nanosuit/nanosuit.obj"));
+		auto spriteOutline = new SpriteOutline();
+		spriteOutline->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
+		spriteOutline->AddMesh(box->mChilds.at(0)->mMeshs.at(0), box->mChilds.at(0)->mMaterials.at(0));
+		_boxObject = new Object();
+		_boxObject->AddComponent(spriteOutline);
+		_boxObject->SetParent(&mmc::mRoot);
+		_boxObject->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
 	}
 
 	void InitEvents()
@@ -95,73 +95,6 @@ private:
 
 	void InitLights()
 	{
-		static auto OPEN_DRAW = true;
-
-		//	坐标，环境光，漫反射，镜面反射，方向
-		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 5, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0) },
-		};
-
-		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
-		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(5, 10, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
-			{ glm::vec3(-5, 10, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
-			{ glm::vec3(0, 15, -10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0009f, 0.0005f) },
-		};
-
-		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
-		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(0, 10, 5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.001f, 0.001f), glm::vec3(0.9f, 0.8f, 0.0f) },
-		};
-
-		for (auto & data : directs)
-		{
-			auto light = new LightDirect();
-			light->mIsDraw = OPEN_DRAW;
-			light->mAmbient = data[1];
-			light->mDiffuse = data[2];
-			light->mSpecular = data[3];
-			light->mNormal = data[4];
-			auto object = new Object();
-			object->AddComponent(light);
-			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
-		}
-
-		for (auto & data : points)
-		{
-			auto light = new LightPoint();
-			light->mIsDraw = OPEN_DRAW;
-			light->mAmbient = data[1];
-			light->mDiffuse = data[2];
-			light->mSpecular = data[3];
-			light->mK0 = data[4].x;
-			light->mK1 = data[4].y;
-			light->mK2 = data[4].z;
-			auto object = new Object();
-			object->AddComponent(light);
-			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
-		}
-		
-		for (auto & data : spots)
-		{
-			auto light = new LightSpot();
-			light->mIsDraw = OPEN_DRAW;
-			light->mAmbient = data[1];
-			light->mDiffuse = data[2];
-			light->mSpecular = data[3];
-			light->mNormal = data[4];
-			light->mK0 = data[5].x;
-			light->mK1 = data[5].y;
-			light->mK2 = data[5].z;
-			light->mInCone = data[6].x;
-			light->mOutCone = data[6].y;
-			auto object = new Object();
-			object->AddComponent(light);
-			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
-		}
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -237,12 +170,12 @@ private:
 			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
 			camera->SetPos(pos);
 		}
-		_object->GetTransform()->AddRotate(0, 1, 0, glm::radians(1.0f));
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
 private:
-	Object * _object;
+	Object * _floorObject;
+	Object * _boxObject;
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
