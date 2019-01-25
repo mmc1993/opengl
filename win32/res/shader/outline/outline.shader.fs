@@ -137,5 +137,5 @@ void main()
 		outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
 	}
 
-	color_ = texture(material_.mDiffuse0, v_out_.mUV);
+	color_ = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

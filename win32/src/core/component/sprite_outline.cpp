@@ -14,29 +14,36 @@ void SpriteOutline::OnDel()
 
 void SpriteOutline::OnUpdate(float dt)
 {
-	Render::Command command;
-	command.mCameraID = GetOwner()->GetCameraID();
-	command.mCallFn = [this]() {
-		mmc::mRender.Bind(_shader);
+	Render::Command command1;
+	command1.mCameraID = GetOwner()->GetCameraID();
+	command1.mCallFn = [this]() {
+		//	¿ªÆôÄ£°å²âÊÔ
+		glEnable(GL_STENCIL_TEST);
+		glStencilMask(0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	};
+	mmc::mRender.PostCommand(command1);
+
+	Sprite::OnUpdate(dt);
+
+	Render::Command command2;
+	command2.mCameraID = GetOwner()->GetCameraID();
+	command2.mCallFn = [this]() {
+		//	Ãè±ß
+		glDisable(GL_DEPTH_TEST);
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, glm::scale(glm::mat4(1), glm::vec3(_width)));
+		mmc::mRender.Bind(_outline);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
 			mmc::mRender.Bind(_meshs.at(i));
-			auto textureNum = 0;
-			for (auto j = 0; j != _materials.at(i).mNormals.size(); ++j)
-			{
-				_shader->SetUniform(SFormat("material_.mNormal{0}", j), _materials.at(i).mNormals.at(j), textureNum++);
-			}
-			for (auto j = 0; j != _materials.at(i).mDiffuses.size(); ++j)
-			{
-				_shader->SetUniform(SFormat("material_.mDiffuse{0}", j), _materials.at(i).mDiffuses.at(j), textureNum++);
-			}
-			for (auto j = 0; j != _materials.at(i).mSpeculars.size(); ++j)
-			{
-				_shader->SetUniform(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j), textureNum++);
-			}
-			_shader->SetUniform("material_.mShininess", _materials.at(i).mShininess);
 			mmc::mRender.RenderMesh();
 		}
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+		glDisable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
 	};
-	mmc::mRender.PostCommand(command);
+	mmc::mRender.PostCommand(command2);
 }

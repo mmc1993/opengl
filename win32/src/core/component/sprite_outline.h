@@ -1,36 +1,29 @@
 #pragma once
 
-#include "component.h"
+#include "sprite.h"
 #include "../asset/material.h"
 #include "../asset/texture.h"
 #include "../asset/shader.h"
 #include "../asset/mesh.h"
 
-class SpriteOutline : public Component {
+class SpriteOutline : public Sprite {
 public:
-	virtual void OnAdd();
-	virtual void OnDel();
-	virtual void OnUpdate(float dt);
+	SpriteOutline() : _width(1) {}
+	virtual void OnAdd() override;
+	virtual void OnDel() override;
+	virtual void OnUpdate(float dt) override;
 
-	void AddMesh(Mesh * mesh, const Material & material)
+	void SetOutlineShader(Shader * shader)
 	{
-		_meshs.push_back(mesh);
-		_materials.push_back(material);
+		_outline = shader;
 	}
 
-	void SetShader(Shader * shader)
+	void SetOutlineWidth(float width)
 	{
-		_shader = shader;
-	}
-
-	void EnableOutline(bool isTrue)
-	{
-		_isOutline = isTrue;
+		_width = width;
 	}
 
 private:
-	bool _isOutline;
-	Shader * _shader;
-	std::vector<Mesh *> _meshs;
-	std::vector<Material> _materials;
+	float _width;
+	Shader * _outline;
 };

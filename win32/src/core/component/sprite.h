@@ -8,9 +8,10 @@
 
 class Sprite : public Component {
 public:
-	virtual void OnAdd();
-	virtual void OnDel();
-	virtual void OnUpdate(float dt);
+	virtual ~Sprite() {}
+	virtual void OnAdd() override;
+	virtual void OnDel() override;
+	virtual void OnUpdate(float dt) override;
 
 	void AddMesh(Mesh * mesh, const Material & material)
 	{
@@ -23,7 +24,7 @@ public:
 		_shader = shader;
 	}
 
-private:
+protected:
 	Shader * _shader;
 	std::vector<Mesh *> _meshs;
 	std::vector<Material> _materials;

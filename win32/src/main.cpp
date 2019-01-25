@@ -77,12 +77,24 @@ private:
 		_floorObject->GetTransform()->Scale(5, 5, 5);
 
 		auto spriteOutline = new SpriteOutline();
+		spriteOutline->SetOutlineWidth(1.05f);
 		spriteOutline->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
+		spriteOutline->SetOutlineShader(File::LoadShader("res/shader/outline/outline.shader"));
 		spriteOutline->AddMesh(box->mChilds.at(0)->mMeshs.at(0), box->mChilds.at(0)->mMaterials.at(0));
-		_boxObject = new Object();
-		_boxObject->AddComponent(spriteOutline);
-		_boxObject->SetParent(&mmc::mRoot);
-		_boxObject->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
+		auto boxObject1 = new Object();
+		boxObject1->AddComponent(spriteOutline);
+		boxObject1->SetParent(&mmc::mRoot);
+		boxObject1->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
+
+		auto spriteOutline2 = new SpriteOutline();
+		spriteOutline2->SetOutlineWidth(1.05f);
+		spriteOutline2->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
+		spriteOutline2->SetOutlineShader(File::LoadShader("res/shader/outline/outline.shader"));
+		spriteOutline2->AddMesh(box->mChilds.at(0)->mMeshs.at(0), box->mChilds.at(0)->mMaterials.at(0));
+		auto boxObject2 = new Object();
+		boxObject2->AddComponent(spriteOutline2);
+		boxObject2->SetParent(&mmc::mRoot);
+		boxObject2->GetTransform()->Translate(0.5f, 0.5f, 1.5f);
 	}
 
 	void InitEvents()
