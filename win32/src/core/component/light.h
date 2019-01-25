@@ -19,10 +19,10 @@ public:
 	virtual void OnAdd();
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
-	void SetShader(Shader * shader);
 	LightType GetType() { return _type; }
 
 public:
+	bool mIsDraw;
 	glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;

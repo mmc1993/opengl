@@ -79,9 +79,10 @@ private:
 				createObjects(object, model->mChilds.at(i));
 			}
 		};
-		createObjects(&mmc::mRoot, mmc::mAssetCore.Get<Model>("res/model/nanosuit/nanosuit.obj"));
-
-		mmc::mRoot.GetTransform()->Translate(0, 0, 0);
+		_object = new Object();
+		_object->SetParent(&mmc::mRoot);
+		_object->GetTransform()->Translate(0, 0, -5);
+		createObjects(_object, mmc::mAssetCore.Get<Model>("res/model/nanosuit/nanosuit.obj"));
 	}
 
 	void InitEvents()
@@ -94,52 +95,59 @@ private:
 
 	void InitLights()
 	{
+		static auto OPEN_DRAW = true;
+
 		//	坐标，环境光，漫反射，镜面反射，方向
-		const glm::vec3 directs[][5] = {
+		const std::vector<std::array<glm::vec3, 5>> directs = {
 			{ glm::vec3(0, 5, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
-		const glm::vec3 points[][5] = {
-			{ glm::vec3(5, 0, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
+		const std::vector<std::array<glm::vec3, 5>> points = {
+			{ glm::vec3(5, 10, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
+			{ glm::vec3(-5, 10, -5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.009f, 0.005f) },
+			{ glm::vec3(0, 15, -10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0009f, 0.0005f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
-		const glm::vec3 spots[][7] = {
+		const std::vector<std::array<glm::vec3, 7>> spots = {
 			{ glm::vec3(0, 10, 5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.001f, 0.001f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
-		//for (auto & data : directs)
-		//{
-		//	auto light = new LightDirect();
-		//	light->mAmbient = data[1];
-		//	light->mDiffuse = data[2];
-		//	light->mSpecular = data[3];
-		//	light->mNormal = data[4];
-		//	auto object = new Object();
-		//	object->AddComponent(light);
-		//	object->GetTransform()->Translate(data[0]);
-		//	object->SetParent(&mmc::mRoot);
-		//}
+		for (auto & data : directs)
+		{
+			auto light = new LightDirect();
+			light->mIsDraw = OPEN_DRAW;
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mNormal = data[4];
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
 
-		//for (auto & data : points)
-		//{
-		//	auto light = new LightPoint();
-		//	light->mAmbient = data[1];
-		//	light->mDiffuse = data[2];
-		//	light->mSpecular = data[3];
-		//	light->mK0 = data[4].x;
-		//	light->mK1 = data[4].y;
-		//	light->mK2 = data[4].z;
-		//	auto object = new Object();
-		//	object->AddComponent(light);
-		//	object->GetTransform()->Translate(data[0]);
-		//	object->SetParent(&mmc::mRoot);
-		//}
+		for (auto & data : points)
+		{
+			auto light = new LightPoint();
+			light->mIsDraw = OPEN_DRAW;
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mK0 = data[4].x;
+			light->mK1 = data[4].y;
+			light->mK2 = data[4].z;
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
 		
 		for (auto & data : spots)
 		{
 			auto light = new LightSpot();
+			light->mIsDraw = OPEN_DRAW;
 			light->mAmbient = data[1];
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
@@ -221,36 +229,20 @@ private:
 		if (_direct != 0)
 		{
 			auto pos = camera->GetPos();
-			if ((_direct & kFRONT) != 0)
-			{
-				pos += camera->GetEye() * 0.1f;
-			}
-			if ((_direct & kBACK) != 0)
-			{
-				pos -= camera->GetEye() * 0.1f;
-			}
-			if ((_direct & kUP) != 0)
-			{
-				pos.y += 1 * 0.1f;
-			}
-			if ((_direct & kDOWN) != 0)
-			{
-				pos.y -= 1 * 0.1f;
-			}
-			if ((_direct & kLEFT) != 0)
-			{
-				pos += glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f;
-			}
-			if ((_direct & kRIGHT) != 0)
-			{
-				pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f;
-			}
+			if ((_direct & kUP) != 0) { pos.y += 1 * 0.1f; }
+			if ((_direct & kDOWN) != 0) { pos.y -= 1 * 0.1f; }
+			if ((_direct & kFRONT) != 0) { pos += camera->GetEye() * 0.1f; }
+			if ((_direct & kBACK) != 0) { pos -= camera->GetEye() * 0.1f; }
+			if ((_direct & kLEFT) != 0) { pos += glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
+			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
 			camera->SetPos(pos);
 		}
+		_object->GetTransform()->AddRotate(0, 1, 0, glm::radians(1.0f));
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
 private:
+	Object * _object;
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;

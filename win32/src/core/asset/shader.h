@@ -13,6 +13,7 @@ public:
     void SetUniform(size_t idx, float val);
     void SetUniform(size_t idx, const glm::vec3 & val);
     void SetUniform(size_t idx, const glm::vec4 & val);
+	void SetUniform(size_t idx, const glm::mat3 & val);
 	void SetUniform(size_t idx, const glm::mat4 & val);
 	void SetUniform(size_t idx, const Texture & val, size_t pos);
 
@@ -20,6 +21,7 @@ public:
     void SetUniform(const std::string & key, float val);
     void SetUniform(const std::string & key, const glm::vec3 & val);
 	void SetUniform(const std::string & key, const glm::vec4 & val);
+	void SetUniform(const std::string & key, const glm::mat3 & val);
 	void SetUniform(const std::string & key, const glm::mat4 & val);
 	void SetUniform(const std::string & key, const Texture & val, size_t pos);
 

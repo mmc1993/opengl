@@ -95,18 +95,16 @@ void Light::OnDel()
 
 void Light::OnUpdate(float dt)
 {
-	Render::Command command;
-	command.mCameraID = GetOwner()->GetCameraID();
-	command.mCallFn = [this]() {
-		mmc::mRender.Bind(_shader);
-		glBindVertexArray(_vao);
-		mmc::mRender.RenderMeshDebug(36);
-		glBindVertexArray(0);
-	};
-	mmc::mRender.PostCommand(command);
-}
-
-void Light::SetShader(Shader * shader)
-{
-	_shader = shader;
+	if (mIsDraw)
+	{
+		Render::Command command;
+		command.mCameraID = GetOwner()->GetCameraID();
+		command.mCallFn = [this]() {
+			mmc::mRender.Bind(_shader);
+			glBindVertexArray(_vao);
+			mmc::mRender.RenderMeshDebug(36);
+			glBindVertexArray(0);
+		};
+		mmc::mRender.PostCommand(command);
+	}
 }

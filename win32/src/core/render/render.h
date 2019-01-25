@@ -128,9 +128,10 @@ public:
 
 private:
 	void OnRenderCamera(CameraInfo & camera);
-	const glm::mat4 & GetM() const;
-	glm::mat4 GetMV() const;
-	glm::mat4 GetMVP() const;
+	const glm::mat4 & GetMatrixM() const;
+	glm::mat4 GetMatrixMV() const;
+	glm::mat4 GetMatrixMVP() const;
+	glm::mat3 GetMatrixN() const;
 
 private:
 	Matrix _matrix;

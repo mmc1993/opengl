@@ -165,9 +165,10 @@ void Render::RenderMeshDebug(size_t count)
 	assert(_renderInfo.mShader != nullptr);
 	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
-	_renderInfo.mShader->SetUniform("m_", GetM());
-	_renderInfo.mShader->SetUniform("mv_", GetMV());
-	_renderInfo.mShader->SetUniform("mvp_", GetMVP());
+	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
+	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
+	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
+	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
@@ -179,9 +180,10 @@ void Render::RenderMesh()
 	assert(_renderInfo.mShader != nullptr);
 	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
-	_renderInfo.mShader->SetUniform("m_", GetM());
-	_renderInfo.mShader->SetUniform("mv_", GetMV());
-	_renderInfo.mShader->SetUniform("mvp_", GetMVP());
+	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
+	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
+	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
+	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
 	glDrawElements(GL_TRIANGLES, _renderInfo.mMesh->GetIndices().size(), GL_UNSIGNED_INT, 0);
@@ -209,19 +211,24 @@ void Render::OnRenderCamera(CameraInfo & camera)
     }
 }
 
-const glm::mat4 & Render::GetM() const
+const glm::mat4 & Render::GetMatrixM() const
 {
 	return _matrix.GetM();
 }
 
-glm::mat4 Render::GetMV() const
+glm::mat4 Render::GetMatrixMV() const
 {
-	return _renderInfo.mCamera->GetView() * GetM();
+	return _renderInfo.mCamera->GetView() * GetMatrixM();
 }
 
-glm::mat4 Render::GetMVP() const
+glm::mat4 Render::GetMatrixMVP() const
 {
-	return _renderInfo.mCamera->GetProject() * GetMV();
+	return _renderInfo.mCamera->GetProject() * GetMatrixMV();
+}
+
+glm::mat3 Render::GetMatrixN() const
+{
+	return glm::mat3(glm::transpose(glm::inverse(GetMatrixM())));
 }
 
 void Render::CommandTransform::Post(size_t cameraID, const glm::mat4 & mat)

@@ -2,9 +2,6 @@
 
 uniform vec3 camera_pos_;
 uniform vec3 camera_eye_;
-uniform mat4 mvp_;
-uniform mat4 mv_;
-uniform mat4 m_;
 
 struct LightDirect_ {
 	vec3 mNormal;
