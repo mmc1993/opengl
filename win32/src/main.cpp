@@ -53,48 +53,87 @@ private:
 
 	void InitAssets()
 	{
-		File::LoadShader("res/shader/outline/normal.shader");
-		File::LoadShader("res/shader/outline/outline.shader");
-		auto box = File::LoadModel("res/model/outline/box.obj");
-		auto floor = File::LoadModel("res/model/outline/floor.obj");
-		auto boxTex = File::LoadTexture("res/model/outline/box.jpg");
-		auto floorTex = File::LoadTexture("res/model/outline/floor.png");
-		box->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(boxTex);
-		floor->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(floorTex);
+		File::LoadShader("res/alpha/normal.shader");
+		File::LoadModel("res/alpha/floor.obj");
+		File::LoadModel("res/alpha/box.obj");
+	
+		//	窗户
+		File::LoadBitmap("res/alpha/win.png");
+		//	地板
+		File::LoadBitmap("res/alpha/floor.png");
+		//	草丛
+		File::LoadBitmap("res/alpha/grass.png");
+		//	箱子
+		File::LoadBitmap("res/alpha/box.jpg");
 	}
 
 	void InitObject()
 	{
-		auto box = mmc::mAssetCore.Get<Model>("res/model/outline/box.obj");
-		auto floor = mmc::mAssetCore.Get<Model>("res/model/outline/floor.obj");
+		//	构建地板
+		Material materialFloor;
+		materialFloor.mDiffuses.push_back(File::LoadTexture("res/alpha/floor.png"));
+		auto spriteFloor = new Sprite();
+		auto modelFloor = File::LoadModel("res/alpha/floor.obj");
+		spriteFloor->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spriteFloor->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), materialFloor);
+		auto objectFloor = new Object();
+		objectFloor->AddComponent(spriteFloor);
+		objectFloor->GetTransform()->Scale(5);
+		objectFloor->SetParent(&mmc::mRoot);
 
-		auto sprite = new Sprite();
-		sprite->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
-		sprite->AddMesh(floor->mChilds.at(0)->mMeshs.at(0), floor->mChilds.at(0)->mMaterials.at(0));
-		_floorObject = new Object();
-		_floorObject->AddComponent(sprite);
-		_floorObject->SetParent(&mmc::mRoot);
-		_floorObject->GetTransform()->Scale(5, 5, 5);
+		//	构建箱子
+		Material materialBox;
+		materialBox.mDiffuses.push_back(File::LoadTexture("res/alpha/box.jpg"));
+		auto spriteBox = new Sprite();
+		auto modelBox = File::LoadModel("res/alpha/box.obj");
+		spriteBox->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), materialBox);
+		auto objectBox = new Object();
+		objectBox->AddComponent(spriteBox);
+		objectBox->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
+		objectBox->SetParent(&mmc::mRoot);
 
-		auto spriteOutline = new SpriteOutline();
-		spriteOutline->SetOutlineWidth(1.05f);
-		spriteOutline->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
-		spriteOutline->SetOutlineShader(File::LoadShader("res/shader/outline/outline.shader"));
-		spriteOutline->AddMesh(box->mChilds.at(0)->mMeshs.at(0), box->mChilds.at(0)->mMaterials.at(0));
-		auto boxObject1 = new Object();
-		boxObject1->AddComponent(spriteOutline);
-		boxObject1->SetParent(&mmc::mRoot);
-		boxObject1->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
+		//	构建草
+		std::vector<glm::vec3> grasscoords = {
+			glm::vec3(0.0f, 0.5f, 0.8f),
+			glm::vec3(0.2f, 0.5f, 1.8f),
+		};
+		for (auto i = 0; i != grasscoords.size(); ++i)
+		{
+			Material materialWin;
+			materialWin.mDiffuses.push_back(File::LoadTexture("res/alpha/grass.png"));
+			auto spriteWin = new Sprite();
+			auto modelWin = File::LoadModel("res/alpha/floor.obj");
+			spriteWin->SetBlendFunc({ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA });
+			spriteWin->SetShader(File::LoadShader("res/alpha/normal.shader"));
+			spriteWin->AddMesh(modelWin->mChilds.at(0)->mMeshs.at(0), materialWin);
+			auto objectWin = new Object();
+			objectWin->AddComponent(spriteWin);
+			objectWin->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
+			objectWin->GetTransform()->Translate(grasscoords.at(i));
+			objectWin->SetParent(&mmc::mRoot);
+		}
 
-		auto spriteOutline2 = new SpriteOutline();
-		spriteOutline2->SetOutlineWidth(1.05f);
-		spriteOutline2->SetShader(File::LoadShader("res/shader/outline/normal.shader"));
-		spriteOutline2->SetOutlineShader(File::LoadShader("res/shader/outline/outline.shader"));
-		spriteOutline2->AddMesh(box->mChilds.at(0)->mMeshs.at(0), box->mChilds.at(0)->mMaterials.at(0));
-		auto boxObject2 = new Object();
-		boxObject2->AddComponent(spriteOutline2);
-		boxObject2->SetParent(&mmc::mRoot);
-		boxObject2->GetTransform()->Translate(0.5f, 0.5f, 1.5f);
+		//	构建窗户
+		std::vector<glm::vec3> wincoords = {
+			glm::vec3(0.0f, 0.5f, 1.0f),
+			glm::vec3(0.2f, 0.5f, 1.5f),
+		};
+		for (auto i = 0; i != wincoords.size(); ++i)
+		{
+			Material materialWin;
+			materialWin.mDiffuses.push_back(File::LoadTexture("res/alpha/win.png"));
+			auto spriteWin = new Sprite();
+			auto modelWin = File::LoadModel("res/alpha/floor.obj");
+			spriteWin->SetBlendFunc({ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA });
+			spriteWin->SetShader(File::LoadShader("res/alpha/normal.shader"));
+			spriteWin->AddMesh(modelWin->mChilds.at(0)->mMeshs.at(0), materialWin);
+			auto objectWin = new Object();
+			objectWin->AddComponent(spriteWin);
+			objectWin->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
+			objectWin->GetTransform()->Translate(wincoords.at(i));
+			objectWin->SetParent(&mmc::mRoot);
+		}
 	}
 
 	void InitEvents()
@@ -186,8 +225,6 @@ private:
 	}
 	
 private:
-	Object * _floorObject;
-	Object * _boxObject;
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;

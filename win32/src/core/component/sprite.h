@@ -8,6 +8,15 @@
 
 class Sprite : public Component {
 public:
+	struct BlendFunc {
+		GLenum mSrc;
+		GLenum mDst;
+		BlendFunc() : mSrc(GL_ONE), mDst(GL_ZERO)
+		{ }
+		BlendFunc(GLenum src, GLenum dst): mSrc(src), mDst(dst)
+		{ }
+	};
+public:
 	virtual ~Sprite() {}
 	virtual void OnAdd() override;
 	virtual void OnDel() override;
@@ -24,7 +33,18 @@ public:
 		_shader = shader;
 	}
 
+	void SetBlendFunc(const BlendFunc & blend)
+	{
+		_blend = blend;
+	}
+
+	const BlendFunc & GetBlendFunc() const
+	{
+		return _blend;
+	}
+
 protected:
+	BlendFunc _blend;
 	Shader * _shader;
 	std::vector<Mesh *> _meshs;
 	std::vector<Material> _materials;
