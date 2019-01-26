@@ -115,9 +115,6 @@ void Window::Loop()
     _renderInfo.renderTM = std::chrono::high_resolution_clock::now();
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
-	//	TODO mmc
-	//	不知道为啥，加上这句会挂掉。
-    //glfwTerminate();
 }
 
 void Window::Update()
@@ -126,12 +123,9 @@ void Window::Update()
     if (now >= _renderInfo.renderTM)
     {
         glfwPollEvents();
-
         auto diffTM= now - _renderInfo.renderTM;
         diffTM += std::chrono::milliseconds(16);
         _renderInfo.renderTM += _renderInfo.renderCD;
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         mmc::mRoot.Update(std::chrono::duration_cast
             <std::chrono::milliseconds>
             (diffTM).count() * 0.001f);

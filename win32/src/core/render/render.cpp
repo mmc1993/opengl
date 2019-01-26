@@ -191,6 +191,7 @@ void Render::RenderMesh()
 
 void Render::RenderOnce()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     for (auto & camera : _cameraInfos)
     {
 		Bind(camera.mCamera);

@@ -7,26 +7,25 @@
 
 class Bitmap: public Asset {
 public:
-    Bitmap(int w, int h, int fmt, const std::string & url, const void * buffer)
-		: _w(w), _h(h), _fmt(fmt), _url(url)
+    Bitmap(int w, int h, int fmt, const std::string & url, const void * buffer): _GLID(0)
     {
-		if (buffer != nullptr)
-		{
-			glGenTextures(1, &_GLID);
-			glBindTexture(GL_TEXTURE_2D, _GLID);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, buffer);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+		Init(w, h, fmt, fmt, GL_UNSIGNED_BYTE, url, buffer);
+	}
+	
+	Bitmap(int w, int h, int imgfmt, int glfmt, int type, const std::string & url, const void * buffer): _GLID(0)
+	{
+		Init(w, h, imgfmt, glfmt, type, url, buffer);
 	}
 
     ~Bitmap()
     {
         glDeleteTextures(1, &_GLID);
     }
+
+	void SetParameter(GLenum key, GLint val)
+	{
+		glTexParameteri(GL_TEXTURE_2D, key, val);
+	}
 
     int GetW() const
     {
@@ -50,9 +49,22 @@ public:
     }
 
 private:
+	void Init(int w, int h, int imgfmt, int glfmt, int type, const std::string & url, const void * buffer)
+	{
+		_w = w; _h = h; _url = url;
+		glGenTextures(1, &_GLID);
+		glBindTexture(GL_TEXTURE_2D, _GLID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, imgfmt, w, h, 0, glfmt, type, buffer);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+private:
 	int _w;
 	int _h;
-	int _fmt;
 	std::string _url;
     GLuint _GLID;
 };

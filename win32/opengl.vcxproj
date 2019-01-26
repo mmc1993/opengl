@@ -30,6 +30,7 @@
     <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />
+    <ClInclude Include="src\core\component\render_target.h" />
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\sprite_outline.h" />
     <ClInclude Include="src\core\component\transform.h" />
@@ -297,6 +298,7 @@
     <ClCompile Include="src\core\asset\shader.cpp" />
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
+    <ClCompile Include="src\core\component\render_target.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\sprite_outline.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />

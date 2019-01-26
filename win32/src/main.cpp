@@ -7,7 +7,7 @@
 #include "core/asset/shader.h"
 #include "core/asset/material.h"
 #include "core/component/sprite.h"
-#include "core/component/sprite_outline.h"
+#include "core/component/render_target.h"
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
@@ -56,13 +56,8 @@ private:
 		File::LoadShader("res/alpha/normal.shader");
 		File::LoadModel("res/alpha/floor.obj");
 		File::LoadModel("res/alpha/box.obj");
-	
-		//	窗户
-		File::LoadBitmap("res/alpha/win.png");
 		//	地板
 		File::LoadBitmap("res/alpha/floor.png");
-		//	草丛
-		File::LoadBitmap("res/alpha/grass.png");
 		//	箱子
 		File::LoadBitmap("res/alpha/box.jpg");
 	}
@@ -93,47 +88,29 @@ private:
 		objectBox->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
 		objectBox->SetParent(&mmc::mRoot);
 
-		//	构建草
-		std::vector<glm::vec3> grasscoords = {
-			glm::vec3(0.0f, 0.5f, 0.8f),
-			glm::vec3(0.2f, 0.5f, 1.8f),
-		};
-		for (auto i = 0; i != grasscoords.size(); ++i)
-		{
-			Material materialWin;
-			materialWin.mDiffuses.push_back(File::LoadTexture("res/alpha/grass.png"));
-			auto spriteWin = new Sprite();
-			auto modelWin = File::LoadModel("res/alpha/floor.obj");
-			spriteWin->SetBlendFunc({ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA });
-			spriteWin->SetShader(File::LoadShader("res/alpha/normal.shader"));
-			spriteWin->AddMesh(modelWin->mChilds.at(0)->mMeshs.at(0), materialWin);
-			auto objectWin = new Object();
-			objectWin->AddComponent(spriteWin);
-			objectWin->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
-			objectWin->GetTransform()->Translate(grasscoords.at(i));
-			objectWin->SetParent(&mmc::mRoot);
-		}
+		//	构建RT
+		auto renderTarget = new RenderTarget(GetW(), GetH());
+		auto objectRT = new Object();
+		objectRT->AddComponent(renderTarget);
+		objectRT->SetParent(&mmc::mRoot);
+		renderTarget->Beg();
+		objectFloor->Update(0);
+		objectBox->Update(0);
+		mmc::mRender.RenderOnce();
+		renderTarget->End();
 
-		//	构建窗户
-		std::vector<glm::vec3> wincoords = {
-			glm::vec3(0.0f, 0.5f, 1.0f),
-			glm::vec3(0.2f, 0.5f, 1.5f),
-		};
-		for (auto i = 0; i != wincoords.size(); ++i)
-		{
-			Material materialWin;
-			materialWin.mDiffuses.push_back(File::LoadTexture("res/alpha/win.png"));
-			auto spriteWin = new Sprite();
-			auto modelWin = File::LoadModel("res/alpha/floor.obj");
-			spriteWin->SetBlendFunc({ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA });
-			spriteWin->SetShader(File::LoadShader("res/alpha/normal.shader"));
-			spriteWin->AddMesh(modelWin->mChilds.at(0)->mMeshs.at(0), materialWin);
-			auto objectWin = new Object();
-			objectWin->AddComponent(spriteWin);
-			objectWin->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
-			objectWin->GetTransform()->Translate(wincoords.at(i));
-			objectWin->SetParent(&mmc::mRoot);
-		}
+		//	构建后期处理画布
+		Material materialPost;
+		materialPost.mDiffuses.push_back(renderTarget->GetColorTex(true));
+		auto spritePost = new Sprite();
+		auto modelPost = File::LoadModel("res/alpha/floor.obj");
+		spritePost->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spritePost->AddMesh(modelPost->mChilds.at(0)->mMeshs.at(0), materialPost);
+		auto objectPost = new Object();
+		objectPost->AddComponent(spritePost);
+		objectPost->GetTransform()->Translate(0, 1.5f, 1);
+		objectPost->GetTransform()->Scale(5);
+		objectPost->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()
