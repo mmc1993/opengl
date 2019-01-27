@@ -17,6 +17,7 @@ public:
     void DelChild(Object * child);
     void DelChildIdx(size_t idx);
     void DelChildTag(size_t tag);
+	void DelThis();
     Object * GetChildTag(size_t tag);
     Object * GetChildIdx(size_t idx);
     std::vector<Object *> & GetChilds();

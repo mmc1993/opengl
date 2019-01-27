@@ -4,6 +4,10 @@
 #include "../render/render.h"
 #include "../asset/asset_core.h"
 
+Sprite::Sprite()
+{
+}
+
 void Sprite::OnAdd()
 {
 }
@@ -40,6 +44,8 @@ void Sprite::OnUpdate(float dt)
 			{
 				_shader->SetUniform(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j), textureNum++);
 			}
+			_shader->SetUniform("material_.mFlipUVX", _flipUVX);
+			_shader->SetUniform("material_.mFlipUVY", _flipUVY);
 			_shader->SetUniform("material_.mShininess", _materials.at(i).mShininess);
 			mmc::mRender.RenderMesh();
 		}

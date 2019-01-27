@@ -53,13 +53,13 @@ private:
 
 	void InitAssets()
 	{
-		File::LoadShader("res/alpha/normal.shader");
+		File::LoadShader("res/fbo/normal.shader");
 		File::LoadModel("res/alpha/floor.obj");
 		File::LoadModel("res/alpha/box.obj");
 		//	地板
 		File::LoadBitmap("res/alpha/floor.png");
 		//	箱子
-		File::LoadBitmap("res/alpha/box.jpg");
+		File::LoadBitmap("res/bitmap/container2.png");
 	}
 
 	void InitObject()
@@ -69,7 +69,7 @@ private:
 		materialFloor.mDiffuses.push_back(File::LoadTexture("res/alpha/floor.png"));
 		auto spriteFloor = new Sprite();
 		auto modelFloor = File::LoadModel("res/alpha/floor.obj");
-		spriteFloor->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spriteFloor->SetShader(File::LoadShader("res/fbo/normal.shader"));
 		spriteFloor->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), materialFloor);
 		auto objectFloor = new Object();
 		objectFloor->AddComponent(spriteFloor);
@@ -78,10 +78,10 @@ private:
 
 		//	构建箱子
 		Material materialBox;
-		materialBox.mDiffuses.push_back(File::LoadTexture("res/alpha/box.jpg"));
+		materialBox.mDiffuses.push_back(File::LoadTexture("res/bitmap/container2.png"));
 		auto spriteBox = new Sprite();
 		auto modelBox = File::LoadModel("res/alpha/box.obj");
-		spriteBox->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spriteBox->SetShader(File::LoadShader("res/fbo/normal.shader"));
 		spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), materialBox);
 		auto objectBox = new Object();
 		objectBox->AddComponent(spriteBox);
@@ -98,17 +98,20 @@ private:
 		objectBox->Update(0);
 		mmc::mRender.RenderOnce();
 		renderTarget->End();
+		
+		objectBox->DelThis();
+		objectFloor->DelThis();
 
 		//	构建后期处理画布
 		Material materialPost;
 		materialPost.mDiffuses.push_back(renderTarget->GetColorTex(true));
 		auto spritePost = new Sprite();
 		auto modelPost = File::LoadModel("res/alpha/floor.obj");
-		spritePost->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		spritePost->SetFlipUVY(true);
+		spritePost->SetShader(File::LoadShader("res/fbo/1.shader"));
 		spritePost->AddMesh(modelPost->mChilds.at(0)->mMeshs.at(0), materialPost);
 		auto objectPost = new Object();
 		objectPost->AddComponent(spritePost);
-		objectPost->GetTransform()->Translate(0, 1.5f, 1);
 		objectPost->GetTransform()->Scale(5);
 		objectPost->SetParent(&mmc::mRoot);
 	}

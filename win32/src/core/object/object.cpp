@@ -16,6 +16,8 @@ Object::Object()
 
 Object::~Object()
 {
+	DelComponentAll();
+
 	while (!_childs.empty())
 	{
 		DelChild(_childs.front());
@@ -51,6 +53,18 @@ void Object::DelChildTag(size_t tag)
     {
         DelChild(std::distance(_childs.begin(), it), true);
     }
+}
+
+void Object::DelThis()
+{
+	if (nullptr != GetParent())
+	{
+		GetParent()->DelChild(this);
+	}
+	else
+	{
+		delete this;
+	}
 }
 
 Object * Object::GetChildTag(size_t tag)
@@ -178,10 +192,7 @@ void Object::DelChild(size_t idx, bool del)
     assert(idx < _childs.size());
     auto it = std::next(_childs.begin(), idx);
     (*it)->_parent = nullptr;
-    if (del) 
-	{
-		(*it)->DelComponentAll(); delete *it; 
-	}
+    if (del) { delete *it; }
     _childs.erase(it);
 }
 
