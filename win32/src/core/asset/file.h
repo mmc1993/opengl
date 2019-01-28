@@ -7,6 +7,8 @@
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
 
+class BitmapCube;
+
 class File {
 public:
 	static Model * LoadModel(const std::string & url);
@@ -14,6 +16,7 @@ public:
 	static Shader * LoadShader(const std::string & url);
 	static Bitmap * LoadBitmap(const std::string & url);
 	static Texture LoadTexture(const std::string & url);
+	static BitmapCube * LoadBitmapCube(const std::string & url);
 
 private:
 	static Model * LoadModel(aiNode * node, const aiScene * scene, const std::string & directory);

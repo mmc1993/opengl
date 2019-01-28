@@ -1,6 +1,8 @@
 #include "shader.h"
 #include "../third/sformat.h"
 #include "../tools/debug_tool.h"
+#include "../asset/texture.h"
+#include "../asset/bitmap_cube.h"
 
 Shader::Shader(const std::string & vs, const std::string & fs)
 	: _GLID(0)
@@ -90,11 +92,25 @@ void Shader::SetUniform(size_t idx, const glm::mat4 & val)
 	glUniformMatrix4fv(idx, 1, GL_FALSE, &val[0][0]);
 }
 
+void Shader::SetUniform(size_t idx, const Bitmap * val, size_t pos)
+{
+	glActiveTexture(GL_TEXTURE0 + pos);
+	glBindTexture(GL_TEXTURE_2D, val->GetGLID());
+	glUniform1i(static_cast<GLint>(idx), pos);
+}
+
 void Shader::SetUniform(size_t idx, const Texture & val, size_t pos)
 {
 	glActiveTexture(GL_TEXTURE0 + pos);
 	glBindTexture(GL_TEXTURE_2D, val.GetBitmap()->GetGLID());
     glUniform1i(static_cast<GLint>(idx), pos);
+}
+
+void Shader::SetUniform(size_t idx, const BitmapCube * val, size_t pos)
+{
+	glActiveTexture(GL_TEXTURE0 + pos);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, val->GetGLID());
+	glUniform1i(static_cast<GLint>(idx), pos);
 }
 
 void Shader::SetUniform(const std::string & key, int val)
@@ -127,8 +143,17 @@ void Shader::SetUniform(const std::string & key, const glm::mat4 & val)
 	SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }
 
+void Shader::SetUniform(const std::string & key, const Bitmap * val, size_t pos)
+{
+	SetUniform(glGetUniformLocation(_GLID, key.c_str()), val, pos);
+}
+
 void Shader::SetUniform(const std::string & key, const Texture & val, size_t pos)
 {
     SetUniform(glGetUniformLocation(_GLID, key.c_str()), val, pos);
 }
 
+void Shader::SetUniform(const std::string & key, const BitmapCube * val, size_t pos)
+{
+	SetUniform(glGetUniformLocation(_GLID, key.c_str()), val, pos);
+}

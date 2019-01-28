@@ -101,9 +101,7 @@ void Light::OnUpdate(float dt)
 		command.mCameraID = GetOwner()->GetCameraID();
 		command.mCallFn = [this]() {
 			mmc::mRender.Bind(_shader);
-			glBindVertexArray(_vao);
-			mmc::mRender.RenderMeshDebug(36);
-			glBindVertexArray(0);
+			mmc::mRender.RenderIdx(_vao, 36);
 		};
 		mmc::mRender.PostCommand(command);
 	}

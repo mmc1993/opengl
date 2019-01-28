@@ -1,9 +1,6 @@
 #pragma once
 
 #include "asset.h"
-#define STB_IMAGE_STATIC
-#define STB_IMAGE_IMPLEMENTATION
-#include "../third/stb_image.h"
 
 class Bitmap: public Asset {
 public:
@@ -24,7 +21,9 @@ public:
 
 	void SetParameter(GLenum key, GLint val)
 	{
+		glBindTexture(GL_TEXTURE_2D, _GLID);
 		glTexParameteri(GL_TEXTURE_2D, key, val);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
     int GetW() const

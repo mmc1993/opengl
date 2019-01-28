@@ -12,6 +12,7 @@
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
 #include "core/component/transform.h"
+#include "core/component/skybox.h"
 #include "core/asset/file.h"
 
 class AppWindow : public Window {
@@ -53,67 +54,25 @@ private:
 
 	void InitAssets()
 	{
-		File::LoadShader("res/fbo/normal.shader");
-		File::LoadModel("res/alpha/floor.obj");
-		File::LoadModel("res/alpha/box.obj");
-		//	地板
-		File::LoadBitmap("res/alpha/floor.png");
-		//	箱子
-		File::LoadBitmap("res/bitmap/container2.png");
+		//	加载shader
+		File::LoadShader("res/skybox/normal.shader");
+		//	加载skybox
+		File::LoadBitmapCube("res/skybox/skybox.skybox");
 	}
 
 	void InitObject()
 	{
-		//	构建地板
-		Material materialFloor;
-		materialFloor.mDiffuses.push_back(File::LoadTexture("res/alpha/floor.png"));
-		auto spriteFloor = new Sprite();
-		auto modelFloor = File::LoadModel("res/alpha/floor.obj");
-		spriteFloor->SetShader(File::LoadShader("res/fbo/normal.shader"));
-		spriteFloor->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), materialFloor);
-		auto objectFloor = new Object();
-		objectFloor->AddComponent(spriteFloor);
-		objectFloor->GetTransform()->Scale(5);
-		objectFloor->SetParent(&mmc::mRoot);
+		while (glGetError() != 0)
+		{
+			std::cout << glewGetErrorString(glGetError()) << std::endl;
+		}
+		auto skybox = new Skybox();
+		skybox->SetShader(File::LoadShader("res/skybox/normal.shader"));
+		skybox->SetBitmapCube(File::LoadBitmapCube("res/skybox/skybox.skybox"));
 
-		//	构建箱子
-		Material materialBox;
-		materialBox.mDiffuses.push_back(File::LoadTexture("res/bitmap/container2.png"));
-		auto spriteBox = new Sprite();
-		auto modelBox = File::LoadModel("res/alpha/box.obj");
-		spriteBox->SetShader(File::LoadShader("res/fbo/normal.shader"));
-		spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), materialBox);
-		auto objectBox = new Object();
-		objectBox->AddComponent(spriteBox);
-		objectBox->GetTransform()->Translate(0.0f, 0.5f, 0.0f);
-		objectBox->SetParent(&mmc::mRoot);
-
-		//	构建RT
-		auto renderTarget = new RenderTarget(GetW(), GetH());
-		auto objectRT = new Object();
-		objectRT->AddComponent(renderTarget);
-		objectRT->SetParent(&mmc::mRoot);
-		renderTarget->Beg();
-		objectFloor->Update(0);
-		objectBox->Update(0);
-		mmc::mRender.RenderOnce();
-		renderTarget->End();
-		
-		objectBox->DelThis();
-		objectFloor->DelThis();
-
-		//	构建后期处理画布
-		Material materialPost;
-		materialPost.mDiffuses.push_back(renderTarget->GetColorTex(true));
-		auto spritePost = new Sprite();
-		auto modelPost = File::LoadModel("res/alpha/floor.obj");
-		spritePost->SetFlipUVY(true);
-		spritePost->SetShader(File::LoadShader("res/fbo/1.shader"));
-		spritePost->AddMesh(modelPost->mChilds.at(0)->mMeshs.at(0), materialPost);
-		auto objectPost = new Object();
-		objectPost->AddComponent(spritePost);
-		objectPost->GetTransform()->Scale(5);
-		objectPost->SetParent(&mmc::mRoot);
+		auto object = new Object();
+		object->AddComponent(skybox);
+		object->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()

@@ -1,8 +1,12 @@
 #include "file.h"
 #include "../mmc.h"
 #include "asset_core.h"
+#include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include "../third/stb_image.h"
 
 #pragma comment(lib, "lib/assimp-vc140-mt.lib")
 
@@ -138,6 +142,38 @@ Bitmap * File::LoadBitmap(const std::string & url)
 Texture File::LoadTexture(const std::string & url)
 {
 	return Texture(File::LoadBitmap(url));
+}
+
+BitmapCube * File::LoadBitmapCube(const std::string & url)
+{
+	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<BitmapCube>(url));
+	std::vector<std::string> urls{
+		url + ".right.jpg",		url + ".left.jpg",
+		url + ".top.jpg",		url + ".bottom.jpg",
+		url + ".front.jpg",		url + ".back.jpg",
+	};
+	std::vector<const void*> buffers;
+	auto w = 0, h = 0, fmt = 0;
+	for (auto & url: urls)
+	{
+		auto buffer = stbi_load(url.c_str(), &w, &h, &fmt, 0);
+		ASSERT_RET(buffer != nullptr, nullptr);
+		buffers.push_back(buffer);
+	}
+	switch (fmt)
+	{
+	case 1: fmt = GL_RED; break;
+	case 3: fmt = GL_RGB; break;
+	case 4: fmt = GL_RGBA; break;
+	}
+
+	auto bitmapCube = new BitmapCube(w, h, fmt, urls, buffers);
+	mmc::mAssetCore.Reg(url, bitmapCube);
+	for (auto buffer : buffers)
+	{
+		stbi_image_free(const_cast<void *>(buffer));
+	}
+	return bitmapCube;
 }
 
 Model * File::LoadModel(aiNode * node, const aiScene * scene, const std::string & directory)

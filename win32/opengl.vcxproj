@@ -22,6 +22,7 @@
     <ClInclude Include="src\core\asset\asset.h" />
     <ClInclude Include="src\core\asset\asset_core.h" />
     <ClInclude Include="src\core\asset\bitmap.h" />
+    <ClInclude Include="src\core\asset\bitmap_cube.h" />
     <ClInclude Include="src\core\asset\file.h" />
     <ClInclude Include="src\core\asset\material.h" />
     <ClInclude Include="src\core\asset\mesh.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />
     <ClInclude Include="src\core\component\render_target.h" />
+    <ClInclude Include="src\core\component\skybox.h" />
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\sprite_outline.h" />
     <ClInclude Include="src\core\component\transform.h" />
@@ -299,6 +301,7 @@
     <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\render_target.cpp" />
+    <ClCompile Include="src\core\component\skybox.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\sprite_outline.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />

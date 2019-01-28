@@ -2,7 +2,10 @@
 
 #include "asset.h"
 #include "../math/vec4.h"
-#include "../asset/texture.h"
+
+class Texture;
+class Bitmap;
+class BitmapCube;
 
 class Shader: public Asset {
 public:
@@ -15,7 +18,9 @@ public:
     void SetUniform(size_t idx, const glm::vec4 & val);
 	void SetUniform(size_t idx, const glm::mat3 & val);
 	void SetUniform(size_t idx, const glm::mat4 & val);
+	void SetUniform(size_t idx, const Bitmap * val, size_t pos);
 	void SetUniform(size_t idx, const Texture & val, size_t pos);
+	void SetUniform(size_t idx, const BitmapCube * val, size_t pos);
 
     void SetUniform(const std::string & key, int val);
     void SetUniform(const std::string & key, float val);
@@ -23,7 +28,9 @@ public:
 	void SetUniform(const std::string & key, const glm::vec4 & val);
 	void SetUniform(const std::string & key, const glm::mat3 & val);
 	void SetUniform(const std::string & key, const glm::mat4 & val);
+	void SetUniform(const std::string & key, const Bitmap * val, size_t pos);
 	void SetUniform(const std::string & key, const Texture & val, size_t pos);
+	void SetUniform(const std::string & key, const BitmapCube * val, size_t pos);
 
     GLuint GetGLID() const 
 	{ 

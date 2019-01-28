@@ -120,7 +120,9 @@ public:
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     
-	void RenderMeshDebug(size_t count);
+	void RenderVex(GLuint vao, size_t count);
+	void RenderIdx(GLuint vao, size_t count);
+	void RenderVAO(GLuint vao);
 	void RenderMesh();
 	void RenderOnce();
 
@@ -128,7 +130,9 @@ public:
 
 private:
 	void OnRenderCamera(CameraInfo & camera);
+	const glm::mat4 & GetMatrixV() const;
 	const glm::mat4 & GetMatrixM() const;
+	const glm::mat4 & GetMatrixP() const;
 	glm::mat4 GetMatrixMV() const;
 	glm::mat4 GetMatrixMVP() const;
 	glm::mat3 GetMatrixN() const;
