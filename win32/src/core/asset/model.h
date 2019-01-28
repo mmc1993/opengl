@@ -13,8 +13,8 @@ public:
 	
 	~Model()
 	{
-		auto delModel = [](Model * model) { delete model; };
-		auto delMesh = [](Mesh * mesh) { delete mesh; };
+		const auto delModel = [](Model * model) { delete model; };
+		const auto delMesh = [](Mesh * mesh) { delete mesh; };
 		std::for_each(mChilds.begin(), mChilds.end(), delModel);
 		std::for_each(mMeshs.begin(), mMeshs.end(), delMesh);
 	}

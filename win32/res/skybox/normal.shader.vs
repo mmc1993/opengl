@@ -11,7 +11,6 @@ uniform mat4 matrix_p_;
 uniform mat4 matrix_v_;
 uniform mat3 matrix_n_;
 
-
 out V_OUT_ {
 	vec3 mAPos;
 } v_out_;

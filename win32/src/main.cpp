@@ -120,15 +120,11 @@ private:
 		auto v = glm::vec2(param.x - l.x, l.y - param.y);
 		if (glm::length(v) < 100)
 		{
-			_speed = 0.0f;
-			_axis.x = 0;
-			_axis.y = 0;
-			_axis.z = 0;
+			_axis.x = _axis.y = _axis.z = _speed = 0.0f;
 		}
 		else
 		{
 			auto camera = mmc::mRender.GetCamera(0);
-			auto a = glm::dot(glm::vec2(1, 0), glm::normalize(v));
 			auto cos = std::acos(glm::dot(glm::vec2(1, 0), glm::normalize(v)));
 			cos = v.y < 0 ? cos : -cos;
 
