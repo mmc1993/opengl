@@ -207,7 +207,10 @@ void Render::RenderMesh()
 
 void Render::RenderOnce()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | 
+			GL_DEPTH_BUFFER_BIT | 
+			GL_STENCIL_BUFFER_BIT);
+	_renderInfo.mTexCount = 0;
     for (auto & camera : _cameraInfos)
     {
 		Bind(camera.mCamera);
@@ -215,6 +218,21 @@ void Render::RenderOnce()
 		Bind((Camera *)nullptr);
     }
 	_commands.clear();
+}
+
+void Render::BindTexture(const std::string & key, const Texture & val)
+{
+	_renderInfo.mShader->SetUniform(key, val, _renderInfo.mTexCount++);
+}
+
+void Render::BindTexture(const std::string & key, const Bitmap * val)
+{
+	_renderInfo.mShader->SetUniform(key, val, _renderInfo.mTexCount++);
+}
+
+void Render::BindTexture(const std::string & key, const BitmapCube * val)
+{
+	_renderInfo.mShader->SetUniform(key, val, _renderInfo.mTexCount++);
 }
 
 void Render::OnRenderCamera(CameraInfo & camera)

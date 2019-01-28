@@ -6,6 +6,9 @@ class Mesh;
 class Light;
 class Camera;
 class Shader;
+class Bitmap;
+class BitmapCube;
+class Texture;
 
 class Render {
 public:
@@ -85,9 +88,16 @@ public:
     };
 
 	struct RenderInfo {
+		size_t mTexCount;
 		Camera * mCamera;
 		Shader * mShader;
 		Mesh * mMesh;
+		RenderInfo()
+			: mTexCount(0)
+			, mCamera(nullptr)
+			, mShader(nullptr)
+			, mMesh(nullptr)
+		{ }
 	};
 
     //  ±‰ªª√¸¡Ó
@@ -125,6 +135,10 @@ public:
 	void RenderVAO(GLuint vao);
 	void RenderMesh();
 	void RenderOnce();
+
+	void BindTexture(const std::string & key, const Texture & val);
+	void BindTexture(const std::string & key, const Bitmap * val);
+	void BindTexture(const std::string & key, const BitmapCube * val);
 
 	void PostCommand(const Command & command);
 
