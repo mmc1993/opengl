@@ -98,7 +98,7 @@ void Skybox::OnUpdate(float dt)
 	command.mCameraID = GetOwner()->GetCameraID();
 	command.mCallFn = [this]() {
 		mmc::mRender.Bind(_shader);
-		_shader->SetUniform("skybox_", _bitmapCube, 0);
+		mmc::mRender.BindTexture("skybox_", _bitmapCube);
 		mmc::mRender.RenderIdx(_vao, 36);
 	};
 	mmc::mRender.PostCommand(command);
