@@ -7,6 +7,7 @@
 #include "../object/camera.h"
 #include "../tools/debug_tool.h"
 #include "../component/light.h"
+#include "../component/skybox.h"
 
 Render::Render()
 { }
@@ -194,6 +195,12 @@ void Render::RenderMesh()
 	assert(_renderInfo.mShader != nullptr);
 	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
+	//	°ó¶¨Ìì¿ÕºÐ×Ó
+	auto skybox = mmc::mRoot.GetComponent<Skybox>();
+	if (skybox != nullptr)
+	{
+		BindTexture("skybox_", skybox->GetBitmapCube());
+	}
 	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
 	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
 	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());

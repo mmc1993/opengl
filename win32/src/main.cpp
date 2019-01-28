@@ -13,6 +13,7 @@
 #include "core/component/light.h"
 #include "core/component/transform.h"
 #include "core/component/skybox.h"
+#include "core/asset/model.h"
 #include "core/asset/file.h"
 
 class AppWindow : public Window {
@@ -62,17 +63,40 @@ private:
 
 	void InitObject()
 	{
-		while (glGetError() != 0)
-		{
-			std::cout << glewGetErrorString(glGetError()) << std::endl;
-		}
 		auto skybox = new Skybox();
 		skybox->SetShader(File::LoadShader("res/skybox/normal.shader"));
 		skybox->SetBitmapCube(File::LoadBitmapCube("res/skybox/skybox.skybox"));
+		mmc::mRoot.AddComponent(skybox);
+		
+		//	´´½¨Ïä×Ó
+		//Material materialBox;
+		//materialBox.mDiffuses.push_back(File::LoadTexture("res/bitmap/container2.png"));
+		//auto spriteBox = new Sprite();
+		//spriteBox->SetShader(File::LoadShader("res/skybox/box.shader"));
+		//spriteBox->AddMesh(File::LoadModel("res/alpha/box.obj")->mChilds.at(0)->mMeshs.at(0), materialBox);
+		//auto objectBox = new Object();
+		//objectBox->AddComponent(spriteBox);
+		//objectBox->SetParent(&mmc::mRoot);
 
-		auto object = new Object();
-		object->AddComponent(skybox);
-		object->SetParent(&mmc::mRoot);
+		std::function<void (Object *, const Model *)> CreateModel;
+		CreateModel = [&CreateModel](Object * parent, const Model * model) {
+			auto sprite = new Sprite();
+			auto object = new Object();
+			object->AddComponent(sprite);
+			object->SetParent(parent);
+			for (auto i = 0; i != model->mMeshs.size(); ++i)
+			{
+				sprite->SetShader(File::LoadShader("res/skybox/box.shader"));
+				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
+			}
+
+			for (auto i = 0; i != model->mChilds.size(); ++i)
+			{
+				CreateModel(object, model->mChilds.at(i));
+			}
+		};
+		auto modelRole = File::LoadModel("res/model/nanosuit/nanosuit.obj");
+		CreateModel(&mmc::mRoot, modelRole);
 	}
 
 	void InitEvents()
