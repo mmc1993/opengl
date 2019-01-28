@@ -1,12 +1,15 @@
 #pragma once
 
 #include "../include.h"
-#include "shader.h"
-#include "model.h"
+#include "texture.h"
+#include "material.h"
 #include "../third/assimp/postprocess.h"
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
 
+class Mesh;
+class Model;
+class Shader;
 class BitmapCube;
 
 class File {

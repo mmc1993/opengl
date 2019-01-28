@@ -21,7 +21,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-    const std::vector<std::string> & GetURL() const
+    const std::vector<std::string> & GetURLs() const
     {
         return _urls;
     }

@@ -1,5 +1,7 @@
 #include "file.h"
 #include "../mmc.h"
+#include "model.h"
+#include "shader.h"
 #include "asset_core.h"
 #include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
