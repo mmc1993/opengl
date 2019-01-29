@@ -55,8 +55,6 @@ private:
 
 	void InitAssets()
 	{
-		//	¼ÓÔØshader
-		File::LoadShader("res/skybox/normal.shader");
 		//	¼ÓÔØskybox
 		File::LoadBitmapCube("res/skybox/skybox.skybox");
 	}
@@ -86,7 +84,7 @@ private:
 			object->SetParent(parent);
 			for (auto i = 0; i != model->mMeshs.size(); ++i)
 			{
-				sprite->SetShader(File::LoadShader("res/skybox/box.shader"));
+				sprite->SetShader(File::LoadShader("res/geometry/boom.shader"));
 				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
 			}
 
