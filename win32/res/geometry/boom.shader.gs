@@ -33,7 +33,7 @@ vec3 GetNormal()
 
 void main()
 {
-	vec3 normal = GetNormal() * 0.5f;
+	vec3 normal = GetNormal() * 0.0f;
 
     g_out_.mUV = v_out_[0].mUV;
 	gl_Position = matrix_p_ * matrix_v_ * vec4(v_out_[0].mMPos + normal, 1.0f);

@@ -11,10 +11,8 @@ public:
 	struct BlendFunc {
 		GLenum mSrc;
 		GLenum mDst;
-		BlendFunc() : mSrc(GL_ONE), mDst(GL_ZERO)
-		{ }
-		BlendFunc(GLenum src, GLenum dst): mSrc(src), mDst(dst)
-		{ }
+		BlendFunc() : mSrc(GL_ONE), mDst(GL_ZERO) { }
+		BlendFunc(GLenum src, GLenum dst): mSrc(src), mDst(dst) { }
 	};
 public:
 	Sprite();
@@ -64,11 +62,14 @@ public:
 		return _flipUVY != 0.0f;
 	}
 
+	void ShowNormal(bool isTrue);
+
 protected:
 	float _flipUVX;
 	float _flipUVY;
 	BlendFunc _blend;
 	Shader * _shader;
+	Shader * _showNormal;
 	std::vector<Mesh *> _meshs;
 	std::vector<Material> _materials;
 };

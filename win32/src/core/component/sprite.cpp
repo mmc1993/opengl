@@ -1,10 +1,15 @@
 #include "sprite.h"
 #include "../mmc.h"
+#include "../asset/file.h"
 #include "../third/sformat.h"
 #include "../render/render.h"
 #include "../asset/asset_core.h"
 
 Sprite::Sprite()
+	: _shader(nullptr)
+	, _showNormal(nullptr)
+	, _flipUVX(0)
+	, _flipUVY(0)
 {
 }
 
@@ -52,10 +57,33 @@ void Sprite::OnUpdate(float dt)
 			_shader->SetUniform("material_.mFlipUVY", _flipUVY);
 			mmc::mRender.RenderMesh();
 		}
+
+		if (nullptr != _showNormal)
+		{
+			mmc::mRender.Bind(_showNormal);
+			for (auto i = 0; i != _meshs.size(); ++i)
+			{
+				mmc::mRender.Bind(_meshs.at(i));
+				mmc::mRender.RenderMesh();
+			}
+		}
+
 		//	关闭混合
 		glDisable(GL_BLEND);
 		//	关闭深度测试
 		glDisable(GL_DEPTH_TEST);
 	};
 	mmc::mRender.PostCommand(command);
+}
+
+void Sprite::ShowNormal(bool isTrue)
+{
+	if (isTrue && nullptr == _showNormal)
+	{
+		_showNormal = File::LoadShader("res/geometry/show_normal.shader");
+	}
+	if (!isTrue && nullptr == _showNormal)
+	{
+		_showNormal = nullptr;
+	}
 }

@@ -82,9 +82,11 @@ private:
 			auto object = new Object();
 			object->AddComponent(sprite);
 			object->SetParent(parent);
+
+			sprite->ShowNormal(true);
+			sprite->SetShader(File::LoadShader("res/geometry/boom.shader"));
 			for (auto i = 0; i != model->mMeshs.size(); ++i)
 			{
-				sprite->SetShader(File::LoadShader("res/geometry/boom.shader"));
 				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
 			}
 
