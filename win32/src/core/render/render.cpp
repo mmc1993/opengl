@@ -161,6 +161,18 @@ Render::Matrix & Render::GetMatrix()
 	return _matrix;
 }
 
+void Render::RenderVexInst(GLuint vao, size_t count, size_t instanceCount)
+{
+	RenderVAO(vao);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, count, instanceCount);
+}
+
+void Render::RenderIdxInst(GLuint vao, size_t count, size_t instanceCount)
+{
+	RenderVAO(vao);
+	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, instanceCount);
+}
+
 void Render::RenderVex(GLuint vao, size_t count)
 {
 	RenderVAO(vao);
@@ -170,7 +182,7 @@ void Render::RenderVex(GLuint vao, size_t count)
 void Render::RenderIdx(GLuint vao, size_t count)
 {
 	RenderVAO(vao);
-	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 }
 
 void Render::RenderVAO(GLuint vao)
@@ -179,7 +191,6 @@ void Render::RenderVAO(GLuint vao)
 	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
 	glBindVertexArray(vao);
-	//	°ó¶¨Ìì¿ÕºÐ×Ó
 	auto skybox = mmc::mRoot.GetComponent<Skybox>();
 	if (skybox != nullptr)
 	{

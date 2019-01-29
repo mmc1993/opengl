@@ -8,6 +8,7 @@
 #include "core/asset/material.h"
 #include "core/component/sprite.h"
 #include "core/component/render_target.h"
+#include "core/component/sprite_batch.h"
 #include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
@@ -47,7 +48,7 @@ private:
 		auto camera = new Camera();
 		camera->Init(60, (float)GetW(), (float)GetH(), 0.1f, 500);
 		camera->LookAt(
-			glm::vec3(0, 3, 3),
+			glm::vec3(0, 0, 3),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
 		mmc::mRender.AddCamera(0, camera);
@@ -55,48 +56,55 @@ private:
 
 	void InitAssets()
 	{
-		//	加载skybox
-		File::LoadBitmapCube("res/skybox/skybox.skybox");
 	}
 
 	void InitObject()
 	{
-		auto skybox = new Skybox();
-		skybox->SetShader(File::LoadShader("res/skybox/normal.shader"));
-		skybox->SetBitmapCube(File::LoadBitmapCube("res/skybox/skybox.skybox"));
-		mmc::mRoot.AddComponent(skybox);
-		
-		//	创建箱子
-		//Material materialBox;
-		//materialBox.mDiffuses.push_back(File::LoadTexture("res/bitmap/container2.png"));
-		//auto spriteBox = new Sprite();
-		//spriteBox->SetShader(File::LoadShader("res/skybox/box.shader"));
-		//spriteBox->AddMesh(File::LoadModel("res/alpha/box.obj")->mChilds.at(0)->mMeshs.at(0), materialBox);
-		//auto objectBox = new Object();
-		//objectBox->AddComponent(spriteBox);
-		//objectBox->SetParent(&mmc::mRoot);
+		auto modelPlanet = File::LoadModel("res/instance/planet/planet.obj");
+		auto spritePlanet = new Sprite();
+		spritePlanet->AddMesh(modelPlanet->mChilds.at(0)->mMeshs.at(0), 
+							  modelPlanet->mChilds.at(0)->mMaterials.at(0));
+		spritePlanet->SetShader(File::LoadShader("res/alpha/normal.shader"));
+		auto objectPlanet = new Object();
+		objectPlanet->AddComponent(spritePlanet);
+		objectPlanet->GetTransform()->Translate(0, 0, -5);
+		objectPlanet->SetParent(&mmc::mRoot);
 
-		std::function<void (Object *, const Model *)> CreateModel;
-		CreateModel = [&CreateModel](Object * parent, const Model * model) {
-			auto sprite = new Sprite();
-			auto object = new Object();
-			object->AddComponent(sprite);
-			object->SetParent(parent);
 
-			sprite->ShowNormal(true);
-			sprite->SetShader(File::LoadShader("res/geometry/boom.shader"));
-			for (auto i = 0; i != model->mMeshs.size(); ++i)
-			{
-				sprite->AddMesh(model->mMeshs.at(i), model->mMaterials.at(i));
-			}
 
-			for (auto i = 0; i != model->mChilds.size(); ++i)
-			{
-				CreateModel(object, model->mChilds.at(i));
-			}
-		};
-		auto modelRole = File::LoadModel("res/skybox/model/nanosuit.obj");
-		CreateModel(&mmc::mRoot, modelRole);
+		//	修改顶点属性，把实例坐标塞进去
+		const auto rockCount = 1000;
+		std::vector<glm::vec3> points;
+		for (auto i = 0.0f; i <= 1.0f; i += 1.0f / rockCount)
+		{
+			auto radius = (float)M_PI * 2.0f * i;
+			auto x = std::cos(radius) * 1000.0f + std::rand() % 200 * 0.01f - 1.0f;
+			auto z = std::sin(radius) * 1000.0f + std::rand() % 200 * 0.01f - 1.0f;
+			auto y = std::rand() % 10000 * 0.01f - 5.0f;
+			points.emplace_back(x, y, z);
+		}
+
+		auto modelRock = File::LoadModel("res/instance/rock/rock.obj");
+		auto spriteRock = new SpriteBatch();
+		spriteRock->AddMesh(modelRock->mChilds.at(0)->mMeshs.at(0),
+							modelRock->mChilds.at(0)->mMaterials.at(0));
+		spriteRock->SetShader(File::LoadShader("res/instance/normal.shader"));
+		spriteRock->SetCount(rockCount);
+		auto meshRock = modelRock->mChilds.at(0)->mMeshs.at(0);
+		glBindVertexArray(meshRock->GetGLID());
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Mesh::Vertex) * meshRock->GetVertexs().size() + sizeof(glm::vec3) * points.size(), nullptr, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Mesh::Vertex) * meshRock->GetVertexs().size(), meshRock->GetVertexs().data());
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(Mesh::Vertex) * meshRock->GetVertexs().size(), sizeof(glm::vec3) * points.size(), points.data());
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (const void *)(sizeof(Mesh::Vertex) * meshRock->GetVertexs().size()));
+		glEnableVertexAttribArray(5);
+		glVertexAttribDivisor(5, 1);
+		glBindVertexArray(0);
+
+		auto objectRock = new Object();
+		objectRock->AddComponent(spriteRock);
+		objectRock->GetTransform()->Scale(0.02f);
+		objectRock->GetTransform()->Translate(0, 0.5f, -5);
+		objectRock->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()

@@ -130,6 +130,8 @@ public:
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     
+	void RenderVexInst(GLuint vao, size_t count, size_t instanceCount);
+	void RenderIdxInst(GLuint vao, size_t count, size_t instanceCount);
 	void RenderVex(GLuint vao, size_t count);
 	void RenderIdx(GLuint vao, size_t count);
 	void RenderVAO(GLuint vao);
