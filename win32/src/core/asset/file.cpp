@@ -108,15 +108,19 @@ Shader * File::LoadShader(const std::string & url)
 
 	auto vs = url + ".vs";
 	auto fs = url + ".fs";
+	auto gs = url + ".gs";
 	std::ifstream vfile(vs);
 	std::ifstream ffile(fs);
+	std::ifstream gfile(gs);
 	CHECK_RET(vfile && ffile, nullptr);
-	std::stringstream vss, fss;
+	std::stringstream vss, fss, gss;
 	vss << vfile.rdbuf();
 	fss << ffile.rdbuf();
+	gss << gfile.rdbuf();
 	vfile.close();
 	ffile.close();
-	auto shader = new Shader(vss.str(), fss.str());
+	gfile.close();
+	auto shader = new Shader(vss.str(), fss.str(), gss.str());
 	mmc::mAssetCore.Reg(url, shader);
 	assert(shader->GetGLID());
 	return shader;
