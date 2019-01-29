@@ -56,6 +56,11 @@ uniform struct Material_ {
 	sampler2D mSpecular1;
 	sampler2D mSpecular2;
 	sampler2D mSpecular3;
+	
+	sampler2D mReflect0;
+	sampler2D mReflect1;
+	sampler2D mReflect2;
+	sampler2D mReflect3;
 	float mShininess;
 } material_;
 
@@ -122,9 +127,12 @@ vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 viewNormal)
 void main()
 {
 //	∑¥…‰
+	vec3 diffuse = vec3(texture(material_.mDiffuse0, v_out_.mUV));
+	vec3 rfacotr = vec3(texture(material_.mReflect0, v_out_.mUV));
 	vec3 viewdir = v_out_.mMPos - camera_pos_;
 	vec3 uv = reflect(viewdir, v_out_.mNormal);
-	color_ = texture(skybox_, uv);
+	vec3 color = diffuse/* + rfacotr * vec3(texture(skybox_, uv))*/;
+	color_ = vec4(color, 1);
 
 //	’€…‰
 //	vec3 viewdir = v_out_.mMPos - camera_pos_;

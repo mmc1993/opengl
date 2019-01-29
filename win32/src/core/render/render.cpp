@@ -179,6 +179,12 @@ void Render::RenderVAO(GLuint vao)
 	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
 	glBindVertexArray(vao);
+	//	°ó¶¨Ìì¿ÕºÐ×Ó
+	auto skybox = mmc::mRoot.GetComponent<Skybox>();
+	if (skybox != nullptr)
+	{
+		BindTexture("skybox_", skybox->GetBitmapCube());
+	}
 	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
 	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
 	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());

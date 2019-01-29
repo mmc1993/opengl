@@ -31,22 +31,25 @@ void Sprite::OnUpdate(float dt)
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
 			mmc::mRender.Bind(_meshs.at(i));
-			auto textureNum = 0;
 			for (auto j = 0; j != _materials.at(i).mNormals.size(); ++j)
 			{
-				_shader->SetUniform(SFormat("material_.mNormal{0}", j), _materials.at(i).mNormals.at(j), textureNum++);
+				mmc::mRender.BindTexture(SFormat("material_.mNormal{0}", j), _materials.at(i).mNormals.at(j));
 			}
 			for (auto j = 0; j != _materials.at(i).mDiffuses.size(); ++j)
 			{
-				_shader->SetUniform(SFormat("material_.mDiffuse{0}", j), _materials.at(i).mDiffuses.at(j), textureNum++);
+				mmc::mRender.BindTexture(SFormat("material_.mDiffuse{0}", j), _materials.at(i).mDiffuses.at(j));
 			}
 			for (auto j = 0; j != _materials.at(i).mSpeculars.size(); ++j)
 			{
-				_shader->SetUniform(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j), textureNum++);
+				mmc::mRender.BindTexture(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j));
 			}
+			for (auto j = 0; j != _materials.at(i).mReflects.size(); ++j)
+			{
+				mmc::mRender.BindTexture(SFormat("material_.mReflect{0}", j), _materials.at(i).mReflects.at(j));
+			}
+			_shader->SetUniform("material_.mShininess", _materials.at(i).mShininess);
 			_shader->SetUniform("material_.mFlipUVX", _flipUVX);
 			_shader->SetUniform("material_.mFlipUVY", _flipUVY);
-			_shader->SetUniform("material_.mShininess", _materials.at(i).mShininess);
 			mmc::mRender.RenderMesh();
 		}
 		//	¹Ø±Õ»ìºÏ

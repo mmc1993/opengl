@@ -95,7 +95,7 @@ private:
 				CreateModel(object, model->mChilds.at(i));
 			}
 		};
-		auto modelRole = File::LoadModel("res/model/nanosuit/nanosuit.obj");
+		auto modelRole = File::LoadModel("res/skybox/model/nanosuit.obj");
 		CreateModel(&mmc::mRoot, modelRole);
 	}
 

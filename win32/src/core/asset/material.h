@@ -11,4 +11,5 @@ public:
 	std::vector<Texture> mNormals;
 	std::vector<Texture> mDiffuses;
 	std::vector<Texture> mSpeculars;
+	std::vector<Texture> mReflects;
 };

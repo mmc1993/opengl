@@ -254,6 +254,11 @@ Material File::LoadMaterial(aiMesh * mesh, const aiScene * scene, const std::str
 		aiMaterial->GetTexture(aiTextureType_SPECULAR, i, &textureURL);
 		material.mSpeculars.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
 	}
+	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_AMBIENT); ++i)
+	{
+		aiMaterial->GetTexture(aiTextureType_AMBIENT, i, &textureURL);
+		material.mReflects.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+	}
 	return std::move(material);
 }
 
