@@ -37,7 +37,6 @@ void main()
 
 	EndPrimitive();
 
-	/*
 	gl_Position = matrix_p_ * matrix_v_ * vec4(v_out_[1].mMPos, 1.0f);
 	EmitVertex();
 
@@ -53,5 +52,5 @@ void main()
 	gl_Position = matrix_p_ * matrix_v_ * vec4(v_out_[2].mMPos + normal * 0.2f, 1.0f);
 	EmitVertex();
 
-	EndPrimitive();*/
+	EndPrimitive();
 }
