@@ -4,57 +4,62 @@
 #include "../asset/texture.h"
 #include "../asset/bitmap_cube.h"
 
-Shader::Shader(const std::string & vs, const std::string & fs)
+Shader::Shader(const std::string & vs, const std::string & fs, const std::string & gs)
 	: _GLID(0)
 {
-	Init((vs).c_str(), (fs).c_str());
+	Init(vs.c_str(), fs.c_str(), !gs.empty()? gs.c_str(): nullptr);
 }
 
-bool Shader::Init(const char * vs, const char * fs)
+void Shader::Init(const char * vs, const char * fs, const char * gs)
 {
-	auto vret = 0;
-	auto fret = 0;
-	auto pret = 0;
-	char logtxt[512] = { 0 };
-	auto vshader = glCreateShader(GL_VERTEX_SHADER);
-	auto fshader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(vshader, 1, &vs, nullptr);
-	glShaderSource(fshader, 1, &fs, nullptr);
-	glCompileShader(vshader);
-	glCompileShader(fshader);
+	_GLID = glCreateProgram();
 
-	glGetShaderiv(vshader, GL_COMPILE_STATUS, &vret);
-	glGetShaderiv(fshader, GL_COMPILE_STATUS, &fret);
-	if (vret != 0 && fret != 0)
+	if (vs != nullptr)
 	{
-		_GLID = glCreateProgram();
+		GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vshader, 1, &vs, nullptr);
+		glCompileShader(vshader);
+		Check(vshader, "vertex error");
 		glAttachShader(_GLID, vshader);
+		glDeleteShader(vshader);
+	}
+
+	if (fs != nullptr)
+	{
+		GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fshader, 1, &fs, nullptr);
+		glCompileShader(fshader);
+		Check(fshader, "fragment error");
 		glAttachShader(_GLID, fshader);
-		glLinkProgram(_GLID);
-		glGetProgramiv(_GLID, GL_LINK_STATUS, &pret);
+		glDeleteShader(fshader);
 	}
-	if (vret == 0)
+	
+	if (gs != nullptr)
 	{
-		glGetShaderInfoLog(vshader, sizeof(logtxt), nullptr, logtxt);
-		std::cout << SFormat("Shader Init Vertex Shader Failed: {0}", logtxt);
+		GLuint gshader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(gshader, 1, &gs, nullptr);
+		glCompileShader(gshader);
+		Check(gshader, "geometry error");
+		glAttachShader(_GLID, gshader);
+		glDeleteShader(gshader);
 	}
-	if (fret == 0)
+
+	GLint ret;
+	glLinkProgram(_GLID);
+	glGetProgramiv(_GLID, GL_LINK_STATUS, &ret);
+	if (ret == 0) { glDeleteProgram(_GLID); _GLID = 0; }
+}
+
+void Shader::Check(GLuint shader, const std::string & str)
+{
+	GLint ret;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &ret);
+	if (ret == 0)
 	{
-		glGetShaderInfoLog(fshader, sizeof(logtxt), nullptr, logtxt);
-		std::cout << SFormat("Shader Init Fragment Shader Failed: {0}", logtxt);
+		char err[256] = { 0 };
+		glGetShaderInfoLog(shader, sizeof(err), nullptr, err);
+		std::cout << SFormat("Shader Error Desc: {0}, Code: {1}, Text: {2}", str, ret, err) << std::endl;
 	}
-	if (pret == 0)
-	{
-		glGetProgramInfoLog(_GLID, sizeof(logtxt), nullptr, logtxt);
-		std::cout << SFormat("Shader Init Program Shader Failed: {0}", logtxt);
-	}
-	glDeleteShader(vshader);
-	glDeleteShader(fshader);
-	if (vret == 0 || fret == 0 || pret == 0)
-	{
-		_GLID = 0;
-	}
-	return _GLID != 0;
 }
 
 Shader::~Shader()

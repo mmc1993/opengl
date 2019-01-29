@@ -9,7 +9,7 @@ class BitmapCube;
 
 class Shader: public Asset {
 public:
-    Shader(const std::string & vs, const std::string & fs);
+    Shader(const std::string & vs, const std::string & fs, const std::string & gs = std::string());
     ~Shader();
 
     void SetUniform(size_t idx, int val);
@@ -39,7 +39,8 @@ public:
 	}
 
 private:
-	bool Init(const char * vs, const char * fs);
+	void Init(const char * vs, const char * fs, const char * gs);
+	void Check(GLuint shader, const std::string & string);
 
 private:
     GLuint _GLID;
