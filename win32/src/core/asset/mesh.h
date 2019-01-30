@@ -74,6 +74,11 @@ public:
 		return _vao;
 	}
 
+	size_t GetIdxCount() const
+	{
+		return _indices.size();
+	}
+
 private:
 	GLuint _vao;
 	GLuint _vbo;

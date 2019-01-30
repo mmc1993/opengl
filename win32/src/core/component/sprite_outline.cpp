@@ -38,8 +38,7 @@ void SpriteOutline::OnUpdate(float dt)
 		mmc::mRender.Bind(_outline);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
-			mmc::mRender.Bind(_meshs.at(i));
-			mmc::mRender.RenderMesh();
+			mmc::mRender.RenderIdx(_meshs.at(i)->GetGLID(), _meshs.at(i)->GetIdxCount());
 		}
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 		glDisable(GL_STENCIL_TEST);

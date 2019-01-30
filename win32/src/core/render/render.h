@@ -91,12 +91,10 @@ public:
 		size_t mTexCount;
 		Camera * mCamera;
 		Shader * mShader;
-		Mesh * mMesh;
 		RenderInfo()
 			: mTexCount(0)
 			, mCamera(nullptr)
 			, mShader(nullptr)
-			, mMesh(nullptr)
 		{ }
 	};
 
@@ -118,7 +116,6 @@ public:
 
 	Matrix & GetMatrix();
 
-	void Bind(Mesh * mesh);
 	void Bind(Shader * shader);
 	void Bind(Camera * camera);
 
@@ -134,8 +131,6 @@ public:
 	void RenderIdxInst(GLuint vao, size_t count, size_t instanceCount);
 	void RenderVex(GLuint vao, size_t count);
 	void RenderIdx(GLuint vao, size_t count);
-	void RenderVAO(GLuint vao);
-	void RenderMesh();
 	void RenderOnce();
 
 	void BindTexture(const std::string & key, const Texture & val);
@@ -152,6 +147,7 @@ private:
 	glm::mat4 GetMatrixMV() const;
 	glm::mat4 GetMatrixMVP() const;
 	glm::mat3 GetMatrixN() const;
+	void RenderVAO(GLuint vao);
 
 private:
 	Matrix _matrix;

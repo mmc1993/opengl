@@ -106,20 +106,6 @@ void Render::DelLight(Light * light)
 	if (it != _lights.end()) { _lights.erase(it); }
 }
 
-void Render::Bind(Mesh * mesh)
-{
-	if (mesh != nullptr)
-	{
-		_renderInfo.mMesh = mesh;
-		glBindVertexArray(_renderInfo.mMesh->GetGLID());
-	}
-	else
-	{
-		_renderInfo.mMesh = nullptr;
-		glBindVertexArray(0);
-	}
-}
-
 void Render::Bind(Shader * shader)
 {
 	if (shader != nullptr)
@@ -183,50 +169,6 @@ void Render::RenderIdx(GLuint vao, size_t count)
 {
 	RenderVAO(vao);
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
-}
-
-void Render::RenderVAO(GLuint vao)
-{
-	assert(_renderInfo.mShader != nullptr);
-	assert(_renderInfo.mCamera != nullptr);
-	BindLight();
-	glBindVertexArray(vao);
-	auto skybox = mmc::mRoot.GetComponent<Skybox>();
-	if (skybox != nullptr)
-	{
-		BindTexture("skybox_", skybox->GetBitmapCube());
-	}
-	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
-	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
-	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
-	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
-	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
-	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
-	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
-	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
-}
-
-void Render::RenderMesh()
-{
-	assert(_renderInfo.mMesh != nullptr);
-	assert(_renderInfo.mShader != nullptr);
-	assert(_renderInfo.mCamera != nullptr);
-	BindLight();
-	//	°ó¶¨Ìì¿ÕºÐ×Ó
-	auto skybox = mmc::mRoot.GetComponent<Skybox>();
-	if (skybox != nullptr)
-	{
-		BindTexture("skybox_", skybox->GetBitmapCube());
-	}
-	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
-	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
-	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
-	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
-	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
-	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
-	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
-	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
-	glDrawElements(GL_TRIANGLES, _renderInfo.mMesh->GetIndices().size(), GL_UNSIGNED_INT, 0);
 }
 
 void Render::RenderOnce()
@@ -298,6 +240,27 @@ glm::mat4 Render::GetMatrixMVP() const
 glm::mat3 Render::GetMatrixN() const
 {
 	return glm::mat3(glm::transpose(glm::inverse(GetMatrixM())));
+}
+
+void Render::RenderVAO(GLuint vao)
+{
+	assert(_renderInfo.mShader != nullptr);
+	assert(_renderInfo.mCamera != nullptr);
+	BindLight();
+	glBindVertexArray(vao);
+	auto skybox = mmc::mRoot.GetComponent<Skybox>();
+	if (skybox != nullptr)
+	{
+		BindTexture("skybox_", skybox->GetBitmapCube());
+	}
+	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
+	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
+	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
+	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
+	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
+	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
+	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
+	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
 }
 
 void Render::CommandTransform::Post(size_t cameraID, const glm::mat4 & mat)

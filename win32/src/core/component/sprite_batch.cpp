@@ -35,7 +35,6 @@ void SpriteBatch::OnUpdate(float dt)
 		mmc::mRender.Bind(_shader);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
-			mmc::mRender.Bind(_meshs.at(i));
 			for (auto j = 0; j != _materials.at(i).mNormals.size(); ++j)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mNormal{0}", j), _materials.at(i).mNormals.at(j));
@@ -63,8 +62,7 @@ void SpriteBatch::OnUpdate(float dt)
 			mmc::mRender.Bind(_showNormal);
 			for (auto i = 0; i != _meshs.size(); ++i)
 			{
-				mmc::mRender.Bind(_meshs.at(i));
-				mmc::mRender.RenderMesh();
+				mmc::mRender.RenderIdx(_meshs.at(i)->GetGLID(), _meshs.at(i)->GetIdxCount());
 			}
 		}
 
