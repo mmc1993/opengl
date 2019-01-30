@@ -126,12 +126,15 @@ void Render::Bind(Camera * camera)
 	{
 		_renderInfo.mCamera = camera;
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, camera->GetView());
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera->GetProject());
 	}
 	else
 	{
 		_renderInfo.mCamera = nullptr;
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
 	}
 }
@@ -212,34 +215,19 @@ void Render::OnRenderCamera(CameraInfo & camera)
     }
 }
 
-const glm::mat4 & Render::GetMatrixV() const
+glm::mat4 Render::GetMatrixMVP() const
 {
-	return _renderInfo.mCamera->GetView();
-}
-
-const glm::mat4 & Render::GetMatrixM() const
-{
-	return _matrix.GetM();
-}
-
-const glm::mat4 & Render::GetMatrixP() const
-{
-	return _renderInfo.mCamera->GetProject();
+	return _matrix.GetP() * _matrix.GetV() * _matrix.GetM();
 }
 
 glm::mat4 Render::GetMatrixMV() const
 {
-	return _renderInfo.mCamera->GetView() * GetMatrixM();
-}
-
-glm::mat4 Render::GetMatrixMVP() const
-{
-	return _renderInfo.mCamera->GetProject() * GetMatrixMV();
+	return _matrix.GetV() * _matrix.GetM();
 }
 
 glm::mat3 Render::GetMatrixN() const
 {
-	return glm::mat3(glm::transpose(glm::inverse(GetMatrixM())));
+	return glm::mat3(glm::transpose(glm::inverse(_matrix.GetM())));
 }
 
 void Render::RenderVAO(GLuint vao)
@@ -253,10 +241,10 @@ void Render::RenderVAO(GLuint vao)
 	{
 		BindTexture("skybox_", skybox->GetBitmapCube());
 	}
-	_renderInfo.mShader->SetUniform("matrix_p_", GetMatrixP());
-	_renderInfo.mShader->SetUniform("matrix_v_", GetMatrixV());
 	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
-	_renderInfo.mShader->SetUniform("matrix_m_", GetMatrixM());
+	_renderInfo.mShader->SetUniform("matrix_p_", _matrix.GetP());
+	_renderInfo.mShader->SetUniform("matrix_v_", _matrix.GetV());
+	_renderInfo.mShader->SetUniform("matrix_m_", _matrix.GetM());
 	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
 	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
 	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());

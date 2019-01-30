@@ -14,7 +14,7 @@ class Render {
 public:
 	class Matrix {
 	public:
-		enum ModeType { kPROJECT, kMODEL, };
+		enum ModeType { kPROJECT, kVIEW, kMODEL, };
 
 	public:
 		Matrix()
@@ -57,6 +57,11 @@ public:
 			return Top(ModeType::kMODEL);
 		}
 
+		const glm::mat4 & GetV() const
+		{
+			return Top(ModeType::kVIEW);
+		}
+
 		const glm::mat4 & GetP() const
 		{
 			return Top(ModeType::kPROJECT);
@@ -65,7 +70,7 @@ public:
 	private:
 		std::stack<glm::mat4> & GetStack(ModeType mode)
 		{
-			return ModeType::kPROJECT == mode ? _project : _model;
+			return _matrixs.at((size_t)mode);
 		}
 
 		const std::stack<glm::mat4> & GetStack(ModeType mode) const
@@ -74,8 +79,7 @@ public:
 		}
 
 	private:
-		std::stack<glm::mat4> _project;
-		std::stack<glm::mat4> _model;
+		std::array<std::stack<glm::mat4>, 3> _matrixs;
 	};
 
     struct CameraInfo {
@@ -141,11 +145,8 @@ public:
 
 private:
 	void OnRenderCamera(CameraInfo & camera);
-	const glm::mat4 & GetMatrixV() const;
-	const glm::mat4 & GetMatrixM() const;
-	const glm::mat4 & GetMatrixP() const;
-	glm::mat4 GetMatrixMV() const;
 	glm::mat4 GetMatrixMVP() const;
+	glm::mat4 GetMatrixMV() const;
 	glm::mat3 GetMatrixN() const;
 	void RenderVAO(GLuint vao);
 
