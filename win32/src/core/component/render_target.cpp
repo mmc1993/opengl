@@ -6,14 +6,27 @@ RenderTarget::RenderTarget(std::uint32_t w, std::uint32_t h)
 	, _h(h)
 	, _fbo(0)
 	, _color(nullptr)
-	, _depthStencil(nullptr)
+	, _depth(nullptr)
+	, _bit(GL_COLOR_BUFFER_BIT | 
+		   GL_DEPTH_BUFFER_BIT | 
+		   GL_STENCIL_BUFFER_BIT)
 { }
+
+RenderTarget::RenderTarget(std::uint32_t w, std::uint32_t h, GLuint bit)
+	: _w(w)
+	, _h(h)
+	, _fbo(0)
+	, _bit(bit)
+	, _color(nullptr)
+	, _depth(nullptr)
+{
+}
 
 RenderTarget::~RenderTarget()
 {
-	glDeleteFramebuffers(1, &_fbo);
-	delete _depthStencil;
 	delete _color;
+	delete _depth;
+	glDeleteFramebuffers(1, &_fbo);
 }
 
 void RenderTarget::OnAdd()
@@ -35,20 +48,36 @@ void RenderTarget::Beg()
 		glGenFramebuffers(1, &_fbo);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-	if (_color == nullptr)
+
+	if ((_bit & GL_COLOR_BUFFER_BIT) != 0 && _color == nullptr)
 	{
-		_color = new Bitmap(_w, _h, GL_RGBA, "RenderTarget", nullptr);
+		_color = new Bitmap(_w, _h, GL_RGBA, "RenderTarget Color", nullptr);
 		_color->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		_color->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _color->GetGLID(), 0);
 	}
-	if (_depthStencil == nullptr)
+
+	if ((_bit & GL_STENCIL_BUFFER_BIT) != 0 && _depth == nullptr)
 	{
-		_depthStencil = new Bitmap(_w, _h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, "RenderTarget", nullptr);
-		_depthStencil->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		_depthStencil->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, _depthStencil->GetGLID(), 0);
+		_depth = new Bitmap(_w, _h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, "RenderTarget Stencil", nullptr);
+		_depth->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		_depth->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, _depth->GetGLID(), 0);
 	}
+	else if ((_bit & GL_DEPTH_BUFFER_BIT) != 0 && _depth == nullptr)
+	{
+		_depth = new Bitmap(_w, _h, GL_DEPTH_COMPONENT, "RenderTarget Depth", nullptr);
+		_depth->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		_depth->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depth->GetGLID(), 0);
+	}
+
+	if (_bit == GL_COLOR_BUFFER_BIT)
+	{
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+
 	ASSERT_RET(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 }
 
@@ -74,9 +103,9 @@ Texture RenderTarget::GetColorTex(bool free)
 	return texture;
 }
 
-Texture RenderTarget::GetDepthStencilTex(bool free)
+Texture RenderTarget::GetDepthTex(bool free)
 {
-	auto texture = Texture(_depthStencil);
-	if (free) { _depthStencil = nullptr; }
+	auto texture = Texture(_depth);
+	if (free) { _depth = nullptr; }
 	return texture;
 }
