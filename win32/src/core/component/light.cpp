@@ -1,5 +1,6 @@
 #include "light.h"
 #include "../mmc.h"
+#include "../asset/file.h"
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../asset/asset_core.h"
@@ -7,54 +8,29 @@
 Light::Light(LightType type): _type(type)
 {
 	float vertexs[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
 	};
 
 	std::uint32_t indices[] = {
-		0, 1, 2, 3, 4, 5, 6, 7, 8,
-		9, 10, 11, 12, 13, 14, 15, 16, 17, 
-		18, 19, 20, 21, 22, 23, 24, 25, 26, 
-		27, 28, 29, 30, 31, 32, 33, 34, 35
+		4, 0, 3,
+		4, 3, 7,
+		2, 6, 7,
+		2, 7, 3,
+		1, 5, 2,
+		5, 6, 2,
+		0, 4, 1,
+		4, 5, 1,
+		4, 7, 5,
+		7, 6, 5,
+		0, 1, 2,
+		0, 2, 3,
 	};
 
 	glGenVertexArrays(1, &_vao);
@@ -68,12 +44,12 @@ Light::Light(LightType type): _type(type)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
 
-	_shader = mmc::mAssetCore.Get<Shader>("res/shader/light.shader");
+	_shader = File::LoadShader("res/shader/light.shader");
 }
 
 Light::~Light()
@@ -100,8 +76,10 @@ void Light::OnUpdate(float dt)
 		Render::Command command;
 		command.mCameraID = GetOwner()->GetCameraID();
 		command.mCallFn = [this]() {
+			glEnable(GL_DEPTH_TEST);
 			mmc::mRender.Bind(_shader);
 			mmc::mRender.RenderIdx(_vao, 36);
+			glDisable(GL_DEPTH_TEST);
 		};
 		mmc::mRender.PostCommand(command);
 	}
