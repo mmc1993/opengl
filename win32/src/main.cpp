@@ -57,7 +57,7 @@ private:
 		auto camera2 = new Camera();
 		camera2->InitOrthogonal(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 1000.0f);
 		camera2->SetViewport({ 0, 0, GetW() * 0.5f, GetH() * 0.5f });
-		camera2->LookAt({ 0, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
+		camera2->LookAt({ -5, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
 		mmc::mRender.AddCamera(0, camera2, 1);
 	}
 
@@ -89,21 +89,22 @@ private:
 		spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
 		auto objectBox = new Object();
 		objectBox->AddComponent(spriteBox);
-		objectBox->GetTransform()->Translate(0, 10, 0);
+		objectBox->GetTransform()->Translate(0, 1, 0);
 		objectBox->SetParent(&mmc::mRoot);
 
-		_lightDirects.at(0)->OpenShadow(800, 600, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0,-1));
-		auto shadowRT = _lightDirects.at(0)->DrawShadow(false);
+		_lightDirects.at(0)->OpenShadow(512, 512, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0, -1));
+		_lightDirects.at(1)->OpenShadow(512, 512, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0, -1));
+		//auto shadowRT = _lightDirects.at(0)->DrawShadow(false);
 
-		modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.at(0) = Texture(shadowRT->GetDepthTex());
+		//modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.at(0) = Texture(shadowRT->GetDepthTex());
 
-		auto spriteShadow = new Sprite();
-		spriteShadow->SetShader(File::LoadShader("res/shadow/depth.shader"));
-		spriteShadow->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
-		auto objectShadow = new Object();
-		objectShadow->AddComponent(spriteShadow);
-		objectShadow->GetTransform()->Translate(2, 1, 0);
-		objectShadow->SetParent(&mmc::mRoot);
+		//auto spriteShadow = new Sprite();
+		//spriteShadow->SetShader(File::LoadShader("res/shadow/depth.shader"));
+		//spriteShadow->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
+		//auto objectShadow = new Object();
+		//objectShadow->AddComponent(spriteShadow);
+		//objectShadow->GetTransform()->Translate(2, 1, 0);
+		//objectShadow->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()
@@ -120,7 +121,8 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 100, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0, -1, 0) },
+			{ glm::vec3(20, 100, -20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(20, 100, -20)) },
+			{ glm::vec3(-20, 100, 20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(-20, 100, 20)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
@@ -182,6 +184,7 @@ private:
 			object->GetTransform()->Translate(data[0]);
 			object->SetParent(&mmc::mRoot);
 		}
+		_bMove = false;
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -204,6 +207,11 @@ private:
 
 		_direct = param.act == 1 && param.key == 'E' ? _direct | kDOWN :
 				  param.act == 0 && param.key == 'E' ? _direct ^ kDOWN : _direct;
+		
+		if (param.act == 1 && param.key == 'G')
+		{
+			_bMove = true;
+		}
 	}
 
 	void OnMouseButton(const std::any & any)
@@ -253,6 +261,16 @@ private:
 			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
 			camera->SetPos(pos);
 		}
+
+		if (_bMove)
+		{
+			//	移动灯光
+			auto onwer = _lightDirects.at(0)->GetOwner();
+			onwer->GetTransform()->AddTranslate(1.0f, 0, 0);
+			auto & position = onwer->GetTransform()->GetPosition();
+			_lightDirects.at(0)->mNormal = glm::normalize(glm::vec3(0) - position);
+		}
+
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
@@ -261,6 +279,8 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
+
+	bool _bMove;
 };
 
 int main()

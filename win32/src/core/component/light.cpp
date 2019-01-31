@@ -130,7 +130,6 @@ RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
 
 		_shadowRT->Beg();
-		mmc::mRoot.Update(0);
 		glCullFace(GL_FRONT);
 		mmc::mRender.OnRenderCamera(nullptr);
 		glCullFace(GL_BACK);

@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 uniform vec3 camera_pos_;
 uniform vec3 camera_eye_;
@@ -9,8 +9,6 @@ struct LightDirect_ {
 	vec3 mAmbient;
 	vec3 mDiffuse;
 	vec3 mSpecular;
-	mat4 mShadowMat;
-	sampler2D mShadowTex;
 };
 
 struct LightPoint_ {
@@ -37,16 +35,33 @@ uniform struct Light_ {
 	int mDirectNum;
 	int mPointNum;
 	int mSpotNum;
-	LightDirect_ mDirects[4];
-	LightPoint_ mPoints[8];
-	LightSpot_ mSpots[8];
+	LightDirect_ mDirects[2];
+	LightPoint_ mPoints[4];
+	LightSpot_ mSpots[4];
+	sampler2D mDirect0ShadowTex;
+	sampler2D mDirect1ShadowTex;
+	sampler2D mPoint0ShadowTex;
+	sampler2D mPoint1ShadowTex;
+	sampler2D mPoint2ShadowTex;
+	sampler2D mPoint3ShadowTex;
+	sampler2D mSpot0ShadowTex;
+	sampler2D mSpot1ShadowTex;
+	sampler2D mSpot2ShadowTex;
+	sampler2D mSpot3ShadowTex;
+	mat4 mDirect0ShadowMat;
+	mat4 mDirect1ShadowMat;
+	mat4 mPoint0ShadowMat;
+	mat4 mPoint1ShadowMat;
+	mat4 mPoint2ShadowMat;
+	mat4 mPoint3ShadowMat;
+	mat4 mSpot0ShadowMat;
+	mat4 mSpot1ShadowMat;
+	mat4 mSpot2ShadowMat;
+	mat4 mSpot3ShadowMat;
 } light_;
 
 uniform struct Material_ {
 	sampler2D mNormal0;
-	sampler2D mNormal1;
-	sampler2D mNormal2;
-	sampler2D mNormal3;
 
 	sampler2D mDiffuse0;
 	sampler2D mDiffuse1;
@@ -70,22 +85,45 @@ in V_OUT_ {
 
 out vec4 color_;
 
-vec3 CalculateDirect(int i, vec3 fragNormal, vec3 viewNormal)
-{
-	vec4 mvpPos = light_.mDirects[i].mShadowMat * vec4(v_out_.mMPos, 1);
-	mvpPos.xyz = mvpPos.xyz / mvpPos.w;
-	mvpPos.xyz = mvpPos.xyz * 0.5 + 0.5;
-	float depth = texture(light_.mDirects[i].mShadowTex, mvpPos.xy).r;
-	float s = depth > mvpPos.z? 1.0f: 0.0f;
+#define CAL_DIRECT_SHADOW(outvar, shadowMat, shadowTex)		   {\
+		vec2 offset = 1.0f / textureSize(shadowTex, 0);			\
+		vec4 coord = shadowMat * vec4(v_out_.mMPos, 1);			\
+		coord.xyz = coord.xyz / coord.w * 0.5 + 0.5;			\
+		float depth = 0.0f;										\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		outvar = outvar / 9.0f;	}
 
-	float diff = max(0, dot(fragNormal, -light_.mDirects[i].mNormal));
+float CalculateDirectShadow(const int i)
+{
+	float shadow = 0.0f;
+	switch (i)
+	{
+	case 0: CAL_DIRECT_SHADOW(shadow, light_.mDirect0ShadowMat, light_.mDirect0ShadowTex); break;
+	case 1: CAL_DIRECT_SHADOW(shadow, light_.mDirect1ShadowMat, light_.mDirect1ShadowTex); break;
+	}
+	return shadow;
+}
+
+vec3 CalculateDirect(const int i, vec3 fragNormal, vec3 viewNormal)
+{
+	float shadow = CalculateDirectShadow(i);
+
 	vec3 center = (-light_.mDirects[i].mNormal + viewNormal) * 0.5;
-	float spec = pow(max(0, dot(fragNormal, center)), material_.mShininess);
+	float diff	= max(0, dot(fragNormal, -light_.mDirects[i].mNormal));
+	float spec	= pow(max(0, dot(fragNormal, center)), material_.mShininess);
 
 	vec3 ambient = light_.mDirects[i].mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
 	vec3 diffuse = light_.mDirects[i].mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
 	vec3 specular = light_.mDirects[i].mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
-	return ambient + diffuse * s + specular * s;
+	return ambient + diffuse * shadow + specular * shadow;
 }
 
 vec3 CalculatePoint(LightPoint_ light, vec3 fragNormal, vec3 viewNormal)
@@ -144,6 +182,6 @@ void main()
 	{
 		outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
 	}
-
-	color_ = vec4(outColor, 1.0f);
+	
+	color_ = vec4(outColor, 1);
 }

@@ -57,17 +57,11 @@ void Render::BindLight()
 		case Light::kDIRECT:
 			{
 				auto direct = reinterpret_cast<LightDirect *>(_lights.at(i));
-				auto shadowRT = direct->DrawShadow(true);
-				if (shadowRT != nullptr)
-				{
-					BindTexture(SFormat("light_.mDirects[{0}].mShadowTex", directNum), shadowRT->GetDepthTex());
-
-					_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mShadowMat", directNum), direct->GetShadowMatrix());
-				}
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mNormal", directNum), direct->mNormal);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
+				BindLightTexture("mDirect", directNum, direct);
 				++directNum;
 			}
 			break;
@@ -121,10 +115,23 @@ void Render::DelLight(Light * light)
 	if (it != _lights.end()) { _lights.erase(it); }
 }
 
+void Render::BindLightTexture(const std::string & key, size_t idx, Light * light)
+{
+	//	绑定sm需判定该灯光是否开启阴影，同时是否已经生成sm
+	auto shadowRT = light->DrawShadow(true);
+	if (shadowRT != nullptr && !shadowRT->IsDepthEmpty())
+	{
+		BindTexture(SFormat("light_.{0}{1}ShadowTex", key, idx), shadowRT->GetDepthTex());
+
+		_renderInfo.mShader->SetUniform(SFormat("light_.{0}{1}ShadowMat", key, idx), light->GetShadowMatrix());
+	}
+}
+
 void Render::Bind(Shader * shader)
 {
 	if (shader != nullptr)
 	{
+		_renderInfo.mTexCount = 0;
 		_renderInfo.mShader = shader;
 		glUseProgram(_renderInfo.mShader->GetGLID());
 	}
@@ -194,7 +201,6 @@ void Render::RenderIdx(GLuint vao, size_t count)
 
 void Render::OnRenderCamera(CameraInfo * camera)
 {
-	_renderInfo.mTexCount = 0;
 	//	camera != nullptr 的时候，表示本次渲染是多相机渲染，
 	//	而多相机渲染需要保留每个相机渲染的结果，因此不需要glClear。
 	if (camera == nullptr)

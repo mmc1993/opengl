@@ -126,6 +126,7 @@ public:
 	void BindLight();
 	void AddLight(Light * light);
 	void DelLight(Light * light);
+	void BindLightTexture(const std::string & key, size_t idx, Light * light);
     
 	void RenderVexInst(GLuint vao, size_t count, size_t instanceCount);
 	void RenderIdxInst(GLuint vao, size_t count, size_t instanceCount);

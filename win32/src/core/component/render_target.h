@@ -15,6 +15,8 @@ public:
 	Texture GetDepthTex(bool free = false);
 	std::uint32_t GetW() const;
 	std::uint32_t GetH() const;
+	bool IsColorEmpty() const;
+	bool IsDepthEmpty() const;
 	void Beg();
 	void End();
 

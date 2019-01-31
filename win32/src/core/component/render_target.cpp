@@ -96,6 +96,16 @@ std::uint32_t RenderTarget::GetH() const
 	return _h;
 }
 
+bool RenderTarget::IsColorEmpty() const
+{
+	return nullptr == _color;
+}
+
+bool RenderTarget::IsDepthEmpty() const
+{
+	return nullptr == _depth;
+}
+
 Texture RenderTarget::GetColorTex(bool free)
 {
 	auto texture = Texture(_color);
