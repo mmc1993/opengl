@@ -54,11 +54,11 @@ private:
 			glm::vec3(0, 1, 0));
 		mmc::mRender.AddCamera(0, camera, 0);
 		
-		//auto camera2 = new Camera();
-		//camera2->InitOrthogonal(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 1000.0f);
-		//camera2->SetViewport({ 0, 0, GetW() * 0.25f, GetH() * 0.25f });
-		//camera2->LookAt({ 0, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
-		//mmc::mRender.AddCamera(0, camera, 1);
+		auto camera2 = new Camera();
+		camera2->InitOrthogonal(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 1000.0f);
+		camera2->SetViewport({ 0, 0, GetW() * 0.5f, GetH() * 0.5f });
+		camera2->LookAt({ 0, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
+		mmc::mRender.AddCamera(0, camera2, 1);
 	}
 
 	void InitAssets()

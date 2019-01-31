@@ -119,20 +119,22 @@ RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 								  _orthoZMin, _orthoZMax);
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
 		auto view = glm::lookAt(world, world + mNormal, _up);
-
 		//	调整投影矩阵
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
-
 		//	调整视图矩阵
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-
+		//	调整模型矩阵
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+
+		glViewport(0, 0, _depthW, _depthH);
 
 		_shadowRT->Beg();
 		mmc::mRoot.Update(0);
+		glCullFace(GL_FRONT);
 		mmc::mRender.OnRenderCamera(nullptr);
+		glCullFace(GL_BACK);
 		_shadowRT->End();
 
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);

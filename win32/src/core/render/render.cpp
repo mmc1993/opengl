@@ -188,9 +188,14 @@ void Render::RenderIdx(GLuint vao, size_t count)
 void Render::OnRenderCamera(CameraInfo * camera)
 {
 	_renderInfo.mTexCount = 0;
-	glClear(GL_COLOR_BUFFER_BIT |
-			GL_DEPTH_BUFFER_BIT |
-			GL_STENCIL_BUFFER_BIT);
+	//	camera != nullptr 的时候，表示本次渲染是多相机渲染，
+	//	而多相机渲染需要保留每个相机渲染的结果，因此不需要glClear。
+	if (camera == nullptr)
+	{
+		glClear(GL_COLOR_BUFFER_BIT |
+				GL_DEPTH_BUFFER_BIT |
+				GL_STENCIL_BUFFER_BIT);
+	}
 	for (auto & command : _commands)
 	{
 		if (camera == nullptr ||
@@ -204,8 +209,11 @@ void Render::OnRenderCamera(CameraInfo * camera)
 
 void Render::RenderOnce()
 {
-	//auto fn = BIND(Light::DrawShadow, PARAM_1, false);
-	//std::for_each(_lights.begin(), _lights.end(), fn);
+	glClear(GL_COLOR_BUFFER_BIT |
+			GL_DEPTH_BUFFER_BIT |
+			GL_STENCIL_BUFFER_BIT);
+	auto fn = BIND(Light::DrawShadow, PARAM_1, false);
+	std::for_each(_lights.begin(), _lights.end(), fn);
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(camera.mCamera);
