@@ -7,6 +7,15 @@ Camera::Camera() : _change(true)
 Camera::~Camera()
 { }
 
+void Camera::InitPerspective(float fov, float w, float h, float n, float f)
+{
+	_change = true;
+	_type = Type::kPERSPECTIVE;
+	_info.mPersp.fov = glm::radians(fov);
+	_info.mPersp.w = w; _info.mPersp.h = h;
+	_info.mPersp.n = n; _info.mPersp.f = f;
+}
+
 void Camera::InitOrthogonal(float l, float r, float t, float b, float n, float f)
 {
 	_change = true;
@@ -15,25 +24,6 @@ void Camera::InitOrthogonal(float l, float r, float t, float b, float n, float f
 	_info.mOrtho.t = t; _info.mOrtho.b = b;
 	_info.mOrtho.n = n; _info.mOrtho.f = f;
 }
-
-void Camera::InitPerspective(float fov, float w, float h, float n, float f)
-{
-	_change = true;
-	_type = Type::kPERSPECTIVE;
-	_info.mPersp.w = w;
-	_info.mPersp.h = h;
-	_info.mPersp.n = n;
-	_info.mPersp.f = f;
-	_info.mPersp.fov = glm::radians(fov);
-}
-
-//void Camera::Init(float fov, float width, float height, float near, float far)
-//{
-//	_change = true;
-//	_w = width; _h = height;
-//	_fov = glm::radians(fov);
-//	_near = near; _far = far;
-//}
 
 void Camera::LookAt(const glm::vec3 & pos, const glm::vec3 & eye, const glm::vec3 & up)
 {

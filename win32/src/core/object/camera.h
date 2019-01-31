@@ -33,10 +33,8 @@ public:
 public:
     Camera();
     ~Camera();
-	void InitOrthogonal(float l, float r, float t, float b, float n, float f);
 	void InitPerspective(float fov, float w, float h, float n, float f);
-
-    //void Init(float fov, float width, float height, float near, float far);
+	void InitOrthogonal(float l, float r, float t, float b, float n, float f);
     void LookAt(const glm::vec3 & pos, 
 				const glm::vec3 & eye, 
 				const glm::vec3 & up);
@@ -62,5 +60,4 @@ private:
 	glm::mat4 _project;
 	glm::vec4 _viewport;
 	glm::vec3 _eye, _pos, _up;
-	float _w, _h, _near, _far, _fov;
 };
