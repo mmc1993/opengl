@@ -95,9 +95,9 @@ void LightDirect::OpenShadow(std::uint32_t depthW, std::uint32_t depthH,
 								 const glm::vec3 &up)
 {
 	_up = up; _depthW = depthW; _depthH = depthH;
-	_orthoXMin = orthoXMin; _orthoXMax = orthoXMax;
-	_orthoYMin = orthoYMin; _orthoYMax = orthoYMax;
-	_orthoZMin = orthoZMin; _orthoZMax = orthoZMax;
+	_orthoX.x = orthoXMin; _orthoX.y = orthoXMax;
+	_orthoY.x = orthoYMin; _orthoY.y = orthoYMax;
+	_orthoZ.x = orthoZMin; _orthoZ.y = orthoZMax;
 	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
 }
 
@@ -114,21 +114,20 @@ RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 	}
 	if (_shadowRT != nullptr)
 	{
-		auto project = glm::ortho(_orthoXMin, _orthoXMax,
-								  _orthoYMin, _orthoYMax,
-								  _orthoZMin, _orthoZMax);
+		auto project = glm::ortho(_orthoX.x, _orthoX.y,
+								  _orthoY.x, _orthoY.y,
+								  _orthoZ.x, _orthoZ.y);
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
 		auto view = glm::lookAt(world, world + mNormal, _up);
-		//	调整投影矩阵
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
-		//	调整视图矩阵
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-		//	调整模型矩阵
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+
+		_matrixVP = project * view;
 
 		glViewport(0, 0, _depthW, _depthH);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
 
 		_shadowRT->Beg();
 		mmc::mRoot.Update(0);

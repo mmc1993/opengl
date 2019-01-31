@@ -76,7 +76,7 @@ private:
 
 		//	µØ°å
 		auto spriteFloor = new Sprite();
-		spriteFloor->SetShader(File::LoadShader("res/shadow/floor.shader"));
+		spriteFloor->SetShader(File::LoadShader("res/shadow/shadow.shader"));
 		spriteFloor->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
 		auto objectFloor = new Object();
 		objectFloor->AddComponent(spriteFloor);

@@ -22,6 +22,7 @@ public:
 	virtual void OnUpdate(float dt);
 	LightType GetType() { return _type; }
 	virtual RenderTarget * DrawShadow(bool onlyGet) = 0;
+	const glm::mat4 & GetShadowMatrix() const { return _matrixVP; }
 
 public:
 	bool mIsDraw;
@@ -31,6 +32,7 @@ public:
 
 protected:
 	RenderTarget * _shadowRT;
+	glm::mat4 _matrixVP;
 
 private:
 	GLuint _vbo;
@@ -66,12 +68,9 @@ public:
 private:
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
-	float _orthoXMin;
-	float _orthoXMax;
-	float _orthoYMin;
-	float _orthoYMax;
-	float _orthoZMin;
-	float _orthoZMax;
+	glm::vec2 _orthoX;
+	glm::vec2 _orthoY;
+	glm::vec2 _orthoZ;
 	glm::vec3 _up;
 };
 

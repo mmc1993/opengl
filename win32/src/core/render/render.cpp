@@ -57,6 +57,13 @@ void Render::BindLight()
 		case Light::kDIRECT:
 			{
 				auto direct = reinterpret_cast<LightDirect *>(_lights.at(i));
+				auto shadowRT = direct->DrawShadow(true);
+				if (shadowRT != nullptr)
+				{
+					BindTexture(SFormat("light_.mDirects[{0}].mShadowTex", directNum), shadowRT->GetDepthTex());
+
+					_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mShadowMat", directNum), direct->GetShadowMatrix());
+				}
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mNormal", directNum), direct->mNormal);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
