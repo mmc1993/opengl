@@ -4,6 +4,7 @@
 
 class Mesh;
 class Shader;
+class RenderTarget;
 
 class Light : public Component {
 public:
@@ -20,12 +21,16 @@ public:
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
 	LightType GetType() { return _type; }
+	virtual RenderTarget * DrawShadow(bool onlyGet) = 0;
 
 public:
 	bool mIsDraw;
 	glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
+
+protected:
+	RenderTarget * _shadowRT;
 
 private:
 	GLuint _vbo;
@@ -45,8 +50,29 @@ public:
 	~LightDirect()
 	{ }
 
+	void OpenShadow(std::uint32_t depthW, std::uint32_t depthH, 
+					float orthoXMin, float orthoXMax, 
+					float orthoYMin, float orthoYMax, 
+					float orthoZMin, float orthoZMax,
+					const glm::vec3 &up);
+	void HideShadow();
+	//	深度贴图尺寸
+	//	正交矩阵大小
+	virtual RenderTarget * DrawShadow(bool onlyGet) override;
+
 public:
 	glm::vec3 mNormal;
+
+private:
+	std::uint32_t _depthW;
+	std::uint32_t _depthH;
+	float _orthoXMin;
+	float _orthoXMax;
+	float _orthoYMin;
+	float _orthoYMax;
+	float _orthoZMin;
+	float _orthoZMax;
+	glm::vec3 _up;
 };
 
 class LightPoint : public Light {
@@ -56,6 +82,11 @@ public:
 
 	~LightPoint()
 	{ }
+
+	virtual RenderTarget * DrawShadow(bool onlyGet) override
+	{
+		return _shadowRT;
+	}
 
 public:
 	float mK0, mK1, mK2;
@@ -68,6 +99,11 @@ public:
 
 	~LightSpot()
 	{ }
+
+	virtual RenderTarget * DrawShadow(bool onlyGet) override
+	{
+		return _shadowRT;
+	}
 
 public:
 	glm::vec3 mNormal;

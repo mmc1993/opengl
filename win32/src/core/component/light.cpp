@@ -1,11 +1,13 @@
 #include "light.h"
+#include "transform.h"
+#include "render_target.h"
 #include "../mmc.h"
 #include "../asset/file.h"
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../asset/asset_core.h"
 
-Light::Light(LightType type): _type(type)
+Light::Light(LightType type): _type(type), _shadowRT(nullptr)
 {
 	float vertexs[] = {
 		1.0f, -1.0f, -1.0f,
@@ -54,6 +56,7 @@ Light::Light(LightType type): _type(type)
 
 Light::~Light()
 {
+	delete _shadowRT;
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ebo);
 	glDeleteVertexArrays(1, &_vao);
@@ -74,7 +77,7 @@ void Light::OnUpdate(float dt)
 	if (mIsDraw)
 	{
 		Render::Command command;
-		command.mCameraID = GetOwner()->GetCameraID();
+		command.mCameraIdx = GetOwner()->GetCameraIdx();
 		command.mCallFn = [this]() {
 			glEnable(GL_DEPTH_TEST);
 			mmc::mRender.Bind(_shader);
@@ -83,4 +86,58 @@ void Light::OnUpdate(float dt)
 		};
 		mmc::mRender.PostCommand(command);
 	}
+}
+
+void LightDirect::OpenShadow(std::uint32_t depthW, std::uint32_t depthH,
+								 float orthoXMin, float orthoXMax, 
+								 float orthoYMin, float orthoYMax, 
+								 float orthoZMin, float orthoZMax,
+								 const glm::vec3 &up)
+{
+	_up = up; _depthW = depthW; _depthH = depthH;
+	_orthoXMin = orthoXMin; _orthoXMax = orthoXMax;
+	_orthoYMin = orthoYMin; _orthoYMax = orthoYMax;
+	_orthoZMin = orthoZMin; _orthoZMax = orthoZMax;
+	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+}
+
+void LightDirect::HideShadow()
+{
+	delete _shadowRT; _shadowRT = nullptr;
+}
+
+RenderTarget * LightDirect::DrawShadow(bool onlyGet)
+{
+	if (onlyGet)
+	{
+		return _shadowRT;
+	}
+	if (_shadowRT != nullptr)
+	{
+		auto project = glm::ortho(_orthoXMin, _orthoXMax,
+								  _orthoYMin, _orthoYMax,
+								  _orthoZMin, _orthoZMax);
+		auto world = GetOwner()->GetTransform()->GetWorldPosition();
+		auto view = glm::lookAt(world, world + mNormal, _up);
+
+		//	调整投影矩阵
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
+
+		//	调整视图矩阵
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
+
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+
+		_shadowRT->Beg();
+		mmc::mRoot.Update(0);
+		mmc::mRender.OnRenderCamera(nullptr);
+		_shadowRT->End();
+
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+	}
+	return _shadowRT;
 }

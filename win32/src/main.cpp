@@ -46,12 +46,19 @@ private:
 	void InitCamera()
 	{
 		auto camera = new Camera();
-		camera->Init(60, (float)GetW(), (float)GetH(), 0.1f, 500);
+		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 0.1f, 500);
+		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(0, 0, 3),
+			glm::vec3(0, 5, 5),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
-		mmc::mRender.AddCamera(0, camera);
+		mmc::mRender.AddCamera(0, camera, 0);
+		
+		//auto camera2 = new Camera();
+		//camera2->InitOrthogonal(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 1000.0f);
+		//camera2->SetViewport({ 0, 0, GetW() * 0.25f, GetH() * 0.25f });
+		//camera2->LookAt({ 0, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
+		//mmc::mRender.AddCamera(0, camera, 1);
 	}
 
 	void InitAssets()
@@ -60,38 +67,43 @@ private:
 
 	void InitObject()
 	{
-		auto modelPlanet = File::LoadModel("res/instance/planet/planet.obj");
-		auto spritePlanet = new Sprite();
-		spritePlanet->AddMesh(modelPlanet->mChilds.at(0)->mMeshs.at(0), 
-							  modelPlanet->mChilds.at(0)->mMaterials.at(0));
-		spritePlanet->SetShader(File::LoadShader("res/alpha/normal.shader"));
-		auto objectPlanet = new Object();
-		objectPlanet->AddComponent(spritePlanet);
-		objectPlanet->GetTransform()->Translate(0, 0, -5);
-		objectPlanet->SetParent(&mmc::mRoot);
+		auto modelFloor = File::LoadModel("res/shadow/floor.obj");
+		modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(File::LoadTexture("res/shadow/wood.png"));
 
-		//	创建渲染目标
-		auto rt = new RenderTarget(GetW(), GetH());
-		rt->Beg();
-		objectPlanet->Update(0);
-		mmc::mRender.RenderOnce();
-		rt->End();
-		objectPlanet->DelThis();
+		auto modelBox = File::LoadModel("res/shadow/box.obj");
+		modelBox->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(File::LoadTexture("res/shadow/container_diffuse.png"));
+		modelBox->mChilds.at(0)->mMaterials.at(0).mSpeculars.push_back(File::LoadTexture("res/shadow/container_specular.png"));
 
-		std::cout << glewGetErrorString(glGetError()) << std::endl;
-		
-		auto texture = rt->GetColorTex(true);
-		auto modelFloor = File::LoadModel("res/alpha/floor.obj");
-		modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(texture);
-		auto sprite = new Sprite();
-		sprite->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), 
-						modelFloor->mChilds.at(0)->mMaterials.at(0));
-		sprite->SetShader(File::LoadShader("res/alpha/normal.shader"));
-		auto object = new Object();
-		object->GetTransform()->Scale(5);
-		object->GetTransform()->Translate(0, 0, 0);
-		object->AddComponent(sprite);
-		object->SetParent(&mmc::mRoot);
+		//	地板
+		auto spriteFloor = new Sprite();
+		spriteFloor->SetShader(File::LoadShader("res/shadow/floor.shader"));
+		spriteFloor->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
+		auto objectFloor = new Object();
+		objectFloor->AddComponent(spriteFloor);
+		objectFloor->GetTransform()->Scale(10, 0.1f, 10);
+		objectFloor->SetParent(&mmc::mRoot);
+
+		//	箱子
+		auto spriteBox = new Sprite();
+		spriteBox->SetShader(File::LoadShader("res/shadow/box.shader"));
+		spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
+		auto objectBox = new Object();
+		objectBox->AddComponent(spriteBox);
+		objectBox->GetTransform()->Translate(0, 10, 0);
+		objectBox->SetParent(&mmc::mRoot);
+
+		_lightDirects.at(0)->OpenShadow(800, 600, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0,-1));
+		auto shadowRT = _lightDirects.at(0)->DrawShadow(false);
+
+		modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.at(0) = Texture(shadowRT->GetDepthTex());
+
+		auto spriteShadow = new Sprite();
+		spriteShadow->SetShader(File::LoadShader("res/shadow/depth.shader"));
+		spriteShadow->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
+		auto objectShadow = new Object();
+		objectShadow->AddComponent(spriteShadow);
+		objectShadow->GetTransform()->Translate(2, 1, 0);
+		objectShadow->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()
@@ -104,6 +116,72 @@ private:
 
 	void InitLights()
 	{
+		static auto OPEN_DRAW = false;
+
+		//	坐标，环境光，漫反射，镜面反射，方向
+		const std::vector<std::array<glm::vec3, 5>> directs = {
+			{ glm::vec3(0, 100, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0, -1, 0) },
+		};
+
+		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
+		const std::vector<std::array<glm::vec3, 5>> points = {
+			//{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.01f, 0.01f) },
+		};
+
+		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
+		const std::vector<std::array<glm::vec3, 7>> spots = {
+			//{ glm::vec3(0, 10, 5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.001f, 0.001f), glm::vec3(0.9f, 0.8f, 0.0f) },
+		};
+
+		for (auto & data : directs)
+		{
+			auto light = new LightDirect();
+			light->mIsDraw = OPEN_DRAW;
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mNormal = data[4];
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+			_lightDirects.push_back(light);
+		}
+
+		for (auto & data : points)
+		{
+			auto light = new LightPoint();
+			light->mIsDraw = OPEN_DRAW;
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mK0 = data[4].x;
+			light->mK1 = data[4].y;
+			light->mK2 = data[4].z;
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
+
+		for (auto & data : spots)
+		{
+			auto light = new LightSpot();
+			light->mIsDraw = OPEN_DRAW;
+			light->mAmbient = data[1];
+			light->mDiffuse = data[2];
+			light->mSpecular = data[3];
+			light->mNormal = data[4];
+			light->mK0 = data[5].x;
+			light->mK1 = data[5].y;
+			light->mK2 = data[5].z;
+			light->mInCone = data[6].x;
+			light->mOutCone = data[6].y;
+			auto object = new Object();
+			object->AddComponent(light);
+			object->GetTransform()->Translate(data[0]);
+			object->SetParent(&mmc::mRoot);
+		}
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -179,6 +257,7 @@ private:
 	}
 	
 private:
+	std::vector<LightDirect *> _lightDirects;
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;

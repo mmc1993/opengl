@@ -125,14 +125,14 @@ Transform * Object::GetTransform()
     return _transform;
 }
 
-size_t Object::GetCameraID() const
+size_t Object::GetCameraIdx() const
 {
-    return _cameraID;
+    return _cameraIdx;
 }
 
-void Object::SetCameraID(size_t id)
+void Object::SetCameraIdx(size_t idx)
 {
-    _cameraID = id;
+    _cameraIdx = idx;
 }
 
 void Object::SetActive(bool active)
@@ -149,7 +149,7 @@ void Object::Update(float dt)
 {
 	OnUpdate(dt);
 
-	Render::CommandTransform::Post(GetCameraID(), GetTransform()->GetMatrix());
+	Render::CommandTransform::Post(GetCameraIdx(), GetTransform()->GetMatrix());
 
 	for (auto component : _components)
 	{
@@ -167,7 +167,7 @@ void Object::Update(float dt)
 		}
 	}
 
-	Render::CommandTransform::Free(GetCameraID());
+	Render::CommandTransform::Free(GetCameraIdx());
 }
 
 void Object::SetParent(Object * parent)

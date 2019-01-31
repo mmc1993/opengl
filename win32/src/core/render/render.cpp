@@ -1,13 +1,14 @@
 #include "render.h"
 #include "../mmc.h"
 #include "../third/sformat.h"
-#include "../asset/mesh.h"
 #include "../asset/shader.h"
-#include "../asset/material.h"
 #include "../object/camera.h"
 #include "../tools/debug_tool.h"
+#include "../tools/utility_tool.h"
 #include "../component/light.h"
 #include "../component/skybox.h"
+#include "../component/transform.h"
+#include "../component/render_target.h"
 
 Render::Render()
 { }
@@ -17,26 +18,33 @@ Render::~Render()
 
 Camera * Render::GetCamera(size_t id)
 {
-	auto it = std::find(_cameraInfos.begin(), _cameraInfos.end(), id);
+	auto fn = [id](const CameraInfo & info)	{ return info.mID == id; };
+	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
 	return it != _cameraInfos.end() ? it->mCamera : nullptr;
 }
 
-void Render::AddCamera(size_t id, Camera * camera)
+void Render::AddCamera(size_t idx, Camera * camera, size_t id)
 {
-    assert(std::count(_cameraInfos.begin(), _cameraInfos.end(), id) == 0);
-    auto it = std::lower_bound(
-        _cameraInfos.begin(), 
-        _cameraInfos.end(), id);
-    _cameraInfos.insert(it, CameraInfo(camera, id));
+	assert(id == (size_t)-1 || GetCamera(id) == nullptr);
+	auto fn = [idx](const CameraInfo & info) { return idx < info.mIdx; };
+	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
+	_cameraInfos.insert(it, CameraInfo(camera, idx, id));
 }
 
-void Render::DelCamera(size_t id)
+void Render::DelCamera(size_t idx)
 {
-    auto it = std::find(_cameraInfos.begin(), _cameraInfos.end(), id);
-    if (it != _cameraInfos.end())
-    {
-        _cameraInfos.erase(it);
-    }
+	auto fn = [idx](const CameraInfo & info) { return info.mIdx == idx; };
+	auto it = std::remove_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
+	while (it != _cameraInfos.end())
+	{ DelCamera(it->mCamera); }
+}
+
+void Render::DelCamera(Camera * camera)
+{
+	auto fn = [camera](const CameraInfo & info) { return info.mCamera == camera; };
+	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
+	if (it != _cameraInfos.end()) _cameraInfos.erase(it);
+	delete camera;
 }
 
 void Render::BindLight()
@@ -130,10 +138,13 @@ void Render::Bind(Camera * camera)
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, camera->GetView());
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera->GetProject());
+		glViewport((int)camera->GetViewport().x, (int)camera->GetViewport().y, 
+				   (int)camera->GetViewport().z, (int)camera->GetViewport().w);
 	}
 	else
 	{
 		_renderInfo.mCamera = nullptr;
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
 	}
@@ -174,18 +185,33 @@ void Render::RenderIdx(GLuint vao, size_t count)
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 }
 
+void Render::OnRenderCamera(CameraInfo * camera)
+{
+	_renderInfo.mTexCount = 0;
+	glClear(GL_COLOR_BUFFER_BIT |
+			GL_DEPTH_BUFFER_BIT |
+			GL_STENCIL_BUFFER_BIT);
+	for (auto & command : _commands)
+	{
+		if (camera == nullptr ||
+			camera != nullptr && 
+			camera->mIdx == command.mCameraIdx)
+		{
+			command.mCallFn();
+		}
+	}
+}
+
 void Render::RenderOnce()
 {
-	glClear(GL_COLOR_BUFFER_BIT | 
-			GL_DEPTH_BUFFER_BIT | 
-			GL_STENCIL_BUFFER_BIT);
-	_renderInfo.mTexCount = 0;
-    for (auto & camera : _cameraInfos)
-    {
+	//auto fn = BIND(Light::DrawShadow, PARAM_1, false);
+	//std::for_each(_lights.begin(), _lights.end(), fn);
+	for (auto & camera : _cameraInfos)
+	{
 		Bind(camera.mCamera);
-		OnRenderCamera(camera);
+		OnRenderCamera(&camera);
 		Bind((Camera *)nullptr);
-    }
+	}
 	_commands.clear();
 }
 
@@ -202,17 +228,6 @@ void Render::BindTexture(const std::string & key, const Bitmap * val)
 void Render::BindTexture(const std::string & key, const BitmapCube * val)
 {
 	_renderInfo.mShader->SetUniform(key, val, _renderInfo.mTexCount++);
-}
-
-void Render::OnRenderCamera(CameraInfo & camera)
-{
-    for (auto & command : _commands)
-    {
-        if (command.mCameraID == camera.mID)
-        {
-			command.mCallFn();
-		}
-    }
 }
 
 glm::mat4 Render::GetMatrixMVP() const
@@ -233,7 +248,6 @@ glm::mat3 Render::GetMatrixN() const
 void Render::RenderVAO(GLuint vao)
 {
 	assert(_renderInfo.mShader != nullptr);
-	assert(_renderInfo.mCamera != nullptr);
 	BindLight();
 	glBindVertexArray(vao);
 	auto skybox = mmc::mRoot.GetComponent<Skybox>();
@@ -247,14 +261,17 @@ void Render::RenderVAO(GLuint vao)
 	_renderInfo.mShader->SetUniform("matrix_m_", _matrix.GetM());
 	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());
 	_renderInfo.mShader->SetUniform("matrix_mvp_", GetMatrixMVP());
-	_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
-	_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
+	if (_renderInfo.mCamera != nullptr)
+	{
+		_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
+		_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
+	}
 }
 
-void Render::CommandTransform::Post(size_t cameraID, const glm::mat4 & mat)
+void Render::CommandTransform::Post(size_t cameraIdx, const glm::mat4 & mat)
 {
 	Command command;
-	command.mCameraID = cameraID;
+	command.mCameraIdx = cameraIdx;
 	command.mCallFn = [mat]() {
 		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, mat);
@@ -262,10 +279,10 @@ void Render::CommandTransform::Post(size_t cameraID, const glm::mat4 & mat)
 	mmc::mRender.PostCommand(command);
 }
 
-void Render::CommandTransform::Free(size_t cameraID)
+void Render::CommandTransform::Free(size_t cameraIdx)
 {
 	Command command;
-	command.mCameraID = cameraID;
+	command.mCameraIdx = cameraIdx;
 	command.mCallFn = []() {
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 	};

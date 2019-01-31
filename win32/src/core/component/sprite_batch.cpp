@@ -24,7 +24,7 @@ void SpriteBatch::OnDel()
 void SpriteBatch::OnUpdate(float dt)
 {
 	Render::Command command;
-	command.mCameraID = GetOwner()->GetCameraID();
+	command.mCameraIdx = GetOwner()->GetCameraIdx();
 	command.mCallFn = [this]() {
 		//	¿ªÆô»ìºÏ
 		glEnable(GL_BLEND);

@@ -58,8 +58,8 @@ public:
     void Update(float dt);
 
     Transform * GetTransform();
-    size_t GetCameraID() const;
-    void SetCameraID(size_t id);
+    size_t GetCameraIdx() const;
+    void SetCameraIdx(size_t idx);
     void SetActive(bool active);
     bool IsActive() const;
 
@@ -73,9 +73,9 @@ protected:
 private:
     size_t _tag;
     bool _active;
-    size_t _cameraID;
     Object * _parent;
-    Transform * _transform;
+	size_t _cameraIdx;
+	Transform * _transform;
     std::vector<Object *> _childs;
     std::vector<Component *> _components;
 };

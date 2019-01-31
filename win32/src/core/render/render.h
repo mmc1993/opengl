@@ -2,7 +2,6 @@
 
 #include "../include.h"
 
-class Mesh;
 class Light;
 class Camera;
 class Shader;
@@ -35,11 +34,7 @@ public:
 
 		void Identity(ModeType mode)
 		{
-			auto & stack = GetStack(mode);
-			if (stack.empty())
-			{ stack.push(glm::mat4(1)); }
-			else
-			{ stack.top() = glm::mat4(1); }
+			GetStack(mode).push(glm::mat4(1));
 		}
 
 		void Mul(ModeType mode, const glm::mat4 & mat)
@@ -84,11 +79,11 @@ public:
 
     struct CameraInfo {
 		size_t mID;
+		size_t mIdx;
 		Camera * mCamera;
-        CameraInfo(): mCamera(nullptr), mID(0) { }
-        CameraInfo(Camera * camera, size_t id) : mCamera(camera), mID(id) { }
-        bool operator ==(size_t id) const { return mID == id; }
-        bool operator <(size_t id) const { return mID < id; }
+        CameraInfo(): mCamera(nullptr), mID(0), mIdx(0) { }
+        CameraInfo(Camera * camera, size_t idx, size_t id) 
+			: mCamera(camera), mIdx(idx), mID(id) { }
     };
 
 	struct RenderInfo {
@@ -104,14 +99,14 @@ public:
 
     //  ±ä»»ÃüÁî
     struct CommandTransform {
-		static void Post(size_t cameraID, const glm::mat4 & mat);
-		static void Free(size_t cameraID);
+		static void Post(size_t cameraIdx, const glm::mat4 & mat);
+		static void Free(size_t cameraIdx);
     };
 
     struct Command {
-        size_t mCameraID;
+        size_t mCameraIdx;
         std::function<void()> mCallFn;
-        Command(): mCameraID(0) { }
+        Command(): mCameraIdx(0) { }
     };
 
 public:
@@ -124,8 +119,9 @@ public:
 	void Bind(Camera * camera);
 
 	Camera * GetCamera(size_t id);
-    void AddCamera(size_t id, Camera * camera);
-    void DelCamera(size_t id);
+    void AddCamera(size_t idx, Camera * camera, size_t id);
+	void DelCamera(size_t idx);
+	void DelCamera(Camera * camera);
 
 	void BindLight();
 	void AddLight(Light * light);
@@ -135,6 +131,7 @@ public:
 	void RenderIdxInst(GLuint vao, size_t count, size_t instanceCount);
 	void RenderVex(GLuint vao, size_t count);
 	void RenderIdx(GLuint vao, size_t count);
+	void OnRenderCamera(CameraInfo * camera);
 	void RenderOnce();
 
 	void BindTexture(const std::string & key, const Texture & val);
@@ -144,7 +141,6 @@ public:
 	void PostCommand(const Command & command);
 
 private:
-	void OnRenderCamera(CameraInfo & camera);
 	glm::mat4 GetMatrixMVP() const;
 	glm::mat4 GetMatrixMV() const;
 	glm::mat3 GetMatrixN() const;
