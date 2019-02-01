@@ -53,10 +53,10 @@ public:
 	~LightDirect()
 	{ }
 
-	void OpenShadow(std::uint32_t depthW, std::uint32_t depthH, 
-					float orthoXMin, float orthoXMax, 
-					float orthoYMin, float orthoYMax, 
-					float orthoZMin, float orthoZMax,
+	void OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH,
+					const float orthoXMin, const float orthoXMax,
+					const float orthoYMin, const float orthoYMax,
+					const float orthoZMin, const float orthoZMax,
 					const glm::vec3 &up);
 	virtual RenderTarget * DrawShadow(bool onlyGet) override;
 
@@ -80,13 +80,19 @@ public:
 	~LightPoint()
 	{ }
 
-	virtual RenderTarget * DrawShadow(bool onlyGet) override
-	{
-		return _shadowRT;
-	}
+	void OpenShadow(const std::uint32_t depthW,
+					const std::uint32_t depthH, 
+					const float n, const float f);
+
+	virtual RenderTarget * DrawShadow(bool onlyGet) override;
 
 public:
 	float mK0, mK1, mK2;
+
+private:
+	std::uint32_t _depthW;
+	std::uint32_t _depthH;
+	float _n, _f;
 };
 
 class LightSpot : public Light {

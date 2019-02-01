@@ -93,11 +93,11 @@ void Light::HideShadow()
 	delete _shadowRT; _shadowRT = nullptr;
 }
 
-void LightDirect::OpenShadow(std::uint32_t depthW, std::uint32_t depthH,
-								 float orthoXMin, float orthoXMax, 
-								 float orthoYMin, float orthoYMax, 
-								 float orthoZMin, float orthoZMax,
-								 const glm::vec3 &up)
+void LightDirect::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH,
+							 const float orthoXMin, const float orthoXMax,
+							 const float orthoYMin, const float orthoYMax,
+							 const float orthoZMin, const float orthoZMax,
+							 const glm::vec3 &up)
 {
 	_up = up; _depthW = depthW; _depthH = depthH;
 	_orthoX.x = orthoXMin; _orthoX.y = orthoXMax;
@@ -136,6 +136,17 @@ RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 	}
 	return _shadowRT;
+}
+
+void LightPoint::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f)
+{
+	_depthW = depthW; _depthH = depthH; _n = n; _f = f;
+	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+}
+
+RenderTarget * LightPoint::DrawShadow(bool onlyGet)
+{
+	return nullptr;
 }
 
 void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f, const glm::vec3 & up)
