@@ -93,6 +93,7 @@ private:
 		objectBox->SetParent(&mmc::mRoot);
 
 		_lightSpots.at(0)->OpenShadow(512, 512, 1, 1000, glm::vec3(0, 0, -1));
+		_lightSpots.at(1)->OpenShadow(512, 512, 1, 1000, glm::vec3(0, 0, -1));
 
 		//auto shadowRT = _lightSpots.at(0)->DrawShadow(false);
 
@@ -132,7 +133,8 @@ private:
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			{ glm::vec3(2, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			{ glm::vec3(-2, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
