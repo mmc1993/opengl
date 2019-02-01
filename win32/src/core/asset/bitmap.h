@@ -9,9 +9,9 @@ public:
 		Init(w, h, fmt, fmt, GL_UNSIGNED_BYTE, url, buffer);
 	}
 	
-	Bitmap(int w, int h, int imgfmt, int glfmt, int type, const std::string & url, const void * buffer): _GLID(0)
+	Bitmap(int w, int h, int fmt1, int fmt2, int type, const std::string & url, const void * buffer): _GLID(0)
 	{
-		Init(w, h, imgfmt, glfmt, type, url, buffer);
+		Init(w, h, fmt1, fmt2, type, url, buffer);
 	}
 
     ~Bitmap()
@@ -48,7 +48,7 @@ public:
     }
 
 private:
-	void Init(int w, int h, int imgfmt, int glfmt, int type, const std::string & url, const void * buffer)
+	void Init(int w, int h, int fmt1, int fmt2, int type, const std::string & url, const void * buffer)
 	{
 		_w = w; _h = h; _url = url;
 		glGenTextures(1, &_GLID);
@@ -57,7 +57,7 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, imgfmt, w, h, 0, glfmt, type, buffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, fmt1, w, h, 0, fmt2, type, buffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 

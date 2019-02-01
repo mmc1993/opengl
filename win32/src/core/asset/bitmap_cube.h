@@ -4,9 +4,19 @@
 
 class BitmapCube: public Asset {
 public:
-	BitmapCube(int w, int h, int fmt, const std::vector<std::string> & urls, const std::vector<const void *> & buffers): _GLID(0)
+	BitmapCube(int w, int h, int fmt, 
+			   const std::vector<std::string> & urls, 
+			   const std::vector<const void *> & buffers): _GLID(0)
     {
-		Init(w, h, fmt, urls, buffers);
+		Init(w, h, fmt, fmt, GL_UNSIGNED_BYTE, urls, buffers);
+	}
+
+	BitmapCube(int w, int h, 
+			   int fmt1, int fmt2, int type, 
+			   const std::vector<std::string> & urls, 
+			   const std::vector<const void *> & buffers) : _GLID(0)
+	{
+		Init(w, h, fmt1, fmt2, type, urls, buffers);
 	}
 	
     ~BitmapCube()
@@ -33,7 +43,10 @@ public:
     }
 
 private:
-	void Init(int w, int h, int fmt, const std::vector<std::string> & urls, const std::vector<const void *> & buffers)
+	void Init(int w, int h, 
+			  int fmt1, int fmt2, int type, 
+			  const std::vector<std::string> & urls, 
+			  const std::vector<const void *> & buffers)
 	{
 		_urls = urls;
 		glGenTextures(1, &_GLID);
@@ -45,7 +58,7 @@ private:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		for (auto i = 0; i != buffers.size(); ++i)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, buffers.at(i));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, fmt1, w, h, 0, fmt2, type, buffers.at(i));
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
