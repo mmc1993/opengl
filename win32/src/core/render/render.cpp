@@ -61,7 +61,12 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
-				BindLightTexture("mDirect", directNum, direct);
+				if (direct->GetShadowTex() != nullptr)
+				{
+					BindTexture(SFormat("light_.mDirect{0}ShadowTex", directNum), direct->GetShadowTex());
+
+					_renderInfo.mShader->SetUniform(SFormat("light_.mDirect{0}ShadowMat", directNum), direct->GetShadowMat());
+				}
 				++directNum;
 			}
 			break;
@@ -76,6 +81,10 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mAmbient", pointNum), point->mAmbient);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mDiffuse", pointNum), point->mDiffuse);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mSpecular", pointNum), point->mSpecular);
+				if (point->GetShadowTex() != nullptr)
+				{
+					BindTexture(SFormat("light_.mPoint{0}ShadowTex", spotNum), point->GetShadowTex());
+				}
 				++pointNum;
 			}
 			break;
@@ -94,7 +103,12 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mAmbient", spotNum), spot->mAmbient);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mDiffuse", spotNum), spot->mDiffuse);
 				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mSpecular", spotNum), spot->mSpecular);
-				BindLightTexture("mSpot", spotNum, spot);
+				if (spot->GetShadowTex() != nullptr)
+				{
+					BindTexture(SFormat("light_.mSpot{0}ShadowTex", spotNum), spot->GetShadowTex());
+
+					_renderInfo.mShader->SetUniform(SFormat("light_.mSpot{0}ShadowMat", spotNum), spot->GetShadowMat());
+				}
 				++spotNum;
 			}
 			break;
@@ -114,18 +128,6 @@ void Render::DelLight(Light * light)
 {
 	auto it = std::find(_lights.begin(), _lights.end(), light);
 	if (it != _lights.end()) { _lights.erase(it); }
-}
-
-void Render::BindLightTexture(const std::string & key, size_t idx, Light * light)
-{
-	//	绑定sm需判定该灯光是否开启阴影，同时是否已经生成sm
-	auto shadowRT = light->DrawShadow(true);
-	if (shadowRT != nullptr && !shadowRT->IsDepthEmpty())
-	{
-		BindTexture(SFormat("light_.{0}{1}ShadowTex", key, idx), shadowRT->GetDepthTex());
-
-		_renderInfo.mShader->SetUniform(SFormat("light_.{0}{1}ShadowMat", key, idx), light->GetShadowMatrix());
-	}
 }
 
 void Render::Bind(Shader * shader)
@@ -226,7 +228,7 @@ void Render::RenderOnce()
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
-	auto fn = BIND(Light::DrawShadow, PARAM_1, false);
+	auto fn = BIND(Light::DrawShadow, PARAM_1);
 	std::for_each(_lights.begin(), _lights.end(), fn);
 	for (auto & camera : _cameraInfos)
 	{

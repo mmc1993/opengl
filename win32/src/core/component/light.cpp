@@ -7,7 +7,7 @@
 #include "../render/render.h"
 #include "../asset/asset_core.h"
 
-Light::Light(LightType type): _type(type), _shadowRT(nullptr)
+Light::Light(LightType type): _type(type)
 {
 	float vertexs[] = {
 		1.0f, -1.0f, -1.0f,
@@ -56,7 +56,6 @@ Light::Light(LightType type): _type(type), _shadowRT(nullptr)
 
 Light::~Light()
 {
-	delete _shadowRT;
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ebo);
 	glDeleteVertexArrays(1, &_vao);
@@ -88,9 +87,9 @@ void Light::OnUpdate(float dt)
 	}
 }
 
-void Light::HideShadow()
+LightDirect::~LightDirect()
 {
-	delete _shadowRT; _shadowRT = nullptr;
+	HideShadow();
 }
 
 void LightDirect::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH,
@@ -103,27 +102,55 @@ void LightDirect::OpenShadow(const std::uint32_t depthW, const std::uint32_t dep
 	_orthoX.x = orthoXMin; _orthoX.y = orthoXMax;
 	_orthoY.x = orthoYMin; _orthoY.y = orthoYMax;
 	_orthoZ.x = orthoZMin; _orthoZ.y = orthoZMax;
-	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+	assert(_shadowRT == nullptr);
+	assert(_shadowTex == nullptr);
+	_shadowTex = RenderTarget::Create2DTexture(
+		_depthW, _depthH, RenderTarget::kDEPTH);
+	_shadowRT = new RenderTarget();
+	_shadowRT->Beg();
+	_shadowRT->BindAttachment(RenderTarget::kDEPTH, 
+		 RenderTarget::k2D, _shadowTex->GetGLID());
+	_shadowRT->CloseDraw();
+	_shadowRT->CloseRead();
+	_shadowRT->End();
 }
 
-RenderTarget * LightDirect::DrawShadow(bool onlyGet)
+void LightDirect::HideShadow()
 {
-	if (!onlyGet && _shadowRT != nullptr)
+	delete _shadowTex; _shadowTex = nullptr;
+	delete _shadowRT; _shadowRT = nullptr;
+}
+
+const glm::mat4 LightDirect::GetShadowMat() const
+{
+	return _shadowMat;
+}
+
+const Bitmap * LightDirect::GetShadowTex() const
+{
+	return _shadowTex;
+}
+
+void LightDirect::DrawShadow()
+{
+	if (_shadowTex != nullptr)
 	{
-		auto project = glm::ortho(_orthoX.x, _orthoX.y,
-								  _orthoY.x, _orthoY.y,
-								  _orthoZ.x, _orthoZ.y);
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
+
+		auto proj = glm::ortho(_orthoX.x, _orthoX.y,
+							   _orthoY.x, _orthoY.y,
+							   _orthoZ.x, _orthoZ.y);
+
 		auto view = glm::lookAt(world, world + mNormal, _up);
 
-		_matrixVP = project * view;
+		_shadowMat = proj * view;
 
 		glViewport(0, 0, _depthW, _depthH);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -135,44 +162,140 @@ RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 	}
-	return _shadowRT;
 }
 
 void LightPoint::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f)
 {
+	assert(_shadowTex == nullptr);
 	_depthW = depthW; _depthH = depthH; _n = n; _f = f;
-	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+	_shadowTex = RenderTarget::Create3DTexture(_depthW, _depthH, RenderTarget::kDEPTH);
+	for (auto i = 0; i != 6; ++i)
+	{
+		assert(_shadowRT[i] == nullptr);
+		auto texType = RenderTarget::TextureType(RenderTarget::k3D_RIGHT + i);
+		_shadowRT[i] = new RenderTarget();
+		_shadowRT[i]->Beg();
+		_shadowRT[i]->BindAttachment(RenderTarget::kDEPTH, texType, _shadowTex->GetGLID());
+		_shadowRT[i]->CloseDraw();
+		_shadowRT[i]->CloseRead();
+		_shadowRT[i]->End();
+	}
 }
 
-RenderTarget * LightPoint::DrawShadow(bool onlyGet)
+void LightPoint::HideShadow()
 {
-	return nullptr;
+	for (auto i = 0; i != 6; ++i)
+	{
+		delete _shadowRT[i]; _shadowRT[i] = nullptr;
+	}
+	delete _shadowTex; _shadowTex = nullptr;
+}
+
+const BitmapCube * LightPoint::GetShadowTex() const
+{
+	return _shadowTex;
+}
+
+void LightPoint::DrawShadow()
+{
+	if (_shadowTex != nullptr)
+	{
+		glm::mat4 proj, view;
+		
+		glViewport(0, 0, _depthW, _depthH);
+
+		auto world = GetOwner()->GetTransform()->GetWorldPosition();
+
+		proj = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
+
+		//	右
+		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
+		DrawShadow(0, proj, view);
+		//	左
+		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0));
+		DrawShadow(1, proj, view);
+		//	上
+		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
+		DrawShadow(2, proj, view);
+		//	下
+		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+		DrawShadow(3, proj, view);
+		//	前
+		view = glm::lookAt(world, world + glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+		DrawShadow(4, proj, view);
+		//	后
+		view = glm::lookAt(world, world + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+		DrawShadow(5, proj, view);
+	}
+}
+
+void LightPoint::DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view)
+{
+	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+	mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
+	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
+
+	_shadowRT[idx]->Beg();
+	glCullFace(GL_FRONT);
+	mmc::mRender.OnRenderCamera(nullptr);
+	glCullFace(GL_BACK);
+	_shadowRT[idx]->End();
+
+	mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+	mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
+	mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 }
 
 void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f, const glm::vec3 & up)
 {
-	_depthW = depthW;
-	_depthH = depthH;
-	_n = n; _f = f; _up = up;
-	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+	_depthW = depthW; _depthH = depthH; _n = n; _f = f; _up = up;
+	assert(_shadowRT == nullptr);
+	assert(_shadowTex == nullptr);
+	_shadowTex = RenderTarget::Create2DTexture(
+		_depthW, _depthH, RenderTarget::kDEPTH);
+	_shadowRT = new RenderTarget();
+	_shadowRT->Beg();
+	_shadowRT->BindAttachment(RenderTarget::kDEPTH,
+		 RenderTarget::k2D, _shadowTex->GetGLID());
+	_shadowRT->CloseDraw();
+	_shadowRT->CloseRead();
+	_shadowRT->End();
 }
 
-RenderTarget * LightSpot::DrawShadow(bool onlyGet)
+void LightSpot::HideShadow()
 {
-	if (!onlyGet && _shadowRT != nullptr)
+	delete _shadowTex; _shadowTex = nullptr;
+	delete _shadowRT; _shadowRT = nullptr;
+}
+
+const glm::mat4 LightSpot::GetShadowMat() const
+{
+	return _shadowMat;
+}
+
+const Bitmap * LightSpot::GetShadowTex() const
+{
+	return _shadowTex;
+}
+
+void LightSpot::DrawShadow()
+{
+	if (_shadowTex != nullptr)
 	{
-		auto project = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
+		auto proj = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
 		auto view = glm::lookAt(world, world + mNormal, _up);
 
-		_matrixVP = project * view;
+		_shadowMat = proj * view;
 
 		glViewport(0, 0, _depthW, _depthH);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -184,5 +307,4 @@ RenderTarget * LightSpot::DrawShadow(bool onlyGet)
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 	}
-	return _shadowRT;
 }

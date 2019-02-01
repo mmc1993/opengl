@@ -121,6 +121,7 @@ private:
 		objectBox2->GetTransform()->Translate(0, 3, -3);
 		objectBox2->SetParent(&mmc::mRoot);
 
+		_lightPoints.at(0)->OpenShadow(512, 512, 1, 1000);
 
 		//auto shadowRT = _lightSpots.at(0)->DrawShadow(false);
 

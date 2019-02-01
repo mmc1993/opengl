@@ -26,9 +26,9 @@ public:
 
 	void SetParameter(GLenum key, GLint val)
 	{
-		glBindTexture(GL_TEXTURE_2D, _GLID);
-		glTexParameteri(GL_TEXTURE_2D, key, val);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _GLID);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, key, val);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
     const std::vector<std::string> & GetURLs() const

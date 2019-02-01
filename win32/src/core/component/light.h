@@ -2,8 +2,9 @@
 
 #include "component.h"
 
-class Mesh;
 class Shader;
+class Bitmap;
+class BitmapCube;
 class RenderTarget;
 
 class Light : public Component {
@@ -20,20 +21,14 @@ public:
 	virtual void OnAdd();
 	virtual void OnDel();
 	virtual void OnUpdate(float dt);
+	virtual void DrawShadow() = 0;
 	LightType GetType() { return _type; }
-	virtual RenderTarget * DrawShadow(bool onlyGet) = 0;
-	const glm::mat4 & GetShadowMatrix() const { return _matrixVP; }
-	void HideShadow();
 
 public:
 	bool mIsDraw;
 	glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
-
-protected:
-	RenderTarget * _shadowRT;
-	glm::mat4 _matrixVP;
 
 private:
 	GLuint _vbo;
@@ -47,29 +42,38 @@ private:
 
 class LightDirect : public Light {
 public:
-	LightDirect(): Light(Light::kDIRECT)
+	LightDirect()
+		: Light(Light::kDIRECT)
+		, _shadowTex(nullptr)
+		, _shadowRT(nullptr)
 	{ }
 
-	~LightDirect()
-	{ }
+	~LightDirect();
 
 	void OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH,
 					const float orthoXMin, const float orthoXMax,
 					const float orthoYMin, const float orthoYMax,
 					const float orthoZMin, const float orthoZMax,
 					const glm::vec3 &up);
-	virtual RenderTarget * DrawShadow(bool onlyGet) override;
+	void HideShadow();
+	const glm::mat4 GetShadowMat() const;
+	const Bitmap *GetShadowTex() const;
+	virtual void DrawShadow() override;
 
 public:
 	glm::vec3 mNormal;
 
 private:
+	RenderTarget * _shadowRT;
+	glm::mat4 _shadowMat;
+	Bitmap * _shadowTex;
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	glm::vec2 _orthoX;
 	glm::vec2 _orthoY;
 	glm::vec2 _orthoZ;
 	glm::vec3 _up;
+
 };
 
 class LightPoint : public Light {
@@ -83,13 +87,19 @@ public:
 	void OpenShadow(const std::uint32_t depthW,
 					const std::uint32_t depthH, 
 					const float n, const float f);
-
-	virtual RenderTarget * DrawShadow(bool onlyGet) override;
+	void HideShadow();
+	const BitmapCube *GetShadowTex() const;
+	virtual void DrawShadow() override;
 
 public:
 	float mK0, mK1, mK2;
 
 private:
+	void DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view);
+
+private:
+	RenderTarget * _shadowRT[6];
+	BitmapCube * _shadowTex;
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	float _n, _f;
@@ -107,8 +117,10 @@ public:
 					const std::uint32_t depthH,
 					const float n, const float f,
 					const glm::vec3 & up);
-
-	virtual RenderTarget * DrawShadow(bool onlyGet) override;
+	void HideShadow();
+	const glm::mat4 GetShadowMat() const;
+	const Bitmap *GetShadowTex() const;
+	virtual void DrawShadow() override;
 
 public:
 	glm::vec3 mNormal;
@@ -116,6 +128,9 @@ public:
 	float mOutCone, mInCone;
 
 private:
+	RenderTarget * _shadowRT;
+	glm::mat4 _shadowMat;
+	Bitmap * _shadowTex;
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	glm::vec3 _up;
