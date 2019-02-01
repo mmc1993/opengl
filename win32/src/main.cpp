@@ -92,9 +92,9 @@ private:
 		objectBox->GetTransform()->Translate(0, 1, 0);
 		objectBox->SetParent(&mmc::mRoot);
 
-		_lightDirects.at(0)->OpenShadow(512, 512, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0, -1));
-		_lightDirects.at(1)->OpenShadow(512, 512, -5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f, glm::vec3(0, 0, -1));
-		//auto shadowRT = _lightDirects.at(0)->DrawShadow(false);
+		_lightSpots.at(0)->OpenShadow(512, 512, 1, 1000, glm::vec3(0, 0, -1));
+
+		//auto shadowRT = _lightSpots.at(0)->DrawShadow(false);
 
 		//modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.at(0) = Texture(shadowRT->GetDepthTex());
 
@@ -121,8 +121,8 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(20, 100, -20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(20, 100, -20)) },
-			{ glm::vec3(-20, 100, 20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(-20, 100, 20)) },
+			//{ glm::vec3(20, 100, -20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(20, 100, -20)) },
+			//{ glm::vec3(-20, 100, 20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(-20, 100, 20)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
@@ -132,7 +132,7 @@ private:
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			//{ glm::vec3(0, 10, 5), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.001f, 0.001f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -164,6 +164,7 @@ private:
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
 			object->SetParent(&mmc::mRoot);
+			_lightPoints.push_back(light);
 		}
 
 		for (auto & data : spots)
@@ -183,8 +184,10 @@ private:
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
 			object->SetParent(&mmc::mRoot);
+			_lightSpots.push_back(light);
 		}
-		_bMove = false;
+
+		_val = 0;
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -207,11 +210,6 @@ private:
 
 		_direct = param.act == 1 && param.key == 'E' ? _direct | kDOWN :
 				  param.act == 0 && param.key == 'E' ? _direct ^ kDOWN : _direct;
-		
-		if (param.act == 1 && param.key == 'G')
-		{
-			_bMove = true;
-		}
 	}
 
 	void OnMouseButton(const std::any & any)
@@ -262,25 +260,27 @@ private:
 			camera->SetPos(pos);
 		}
 
-		if (_bMove)
-		{
-			//	移动灯光
-			auto onwer = _lightDirects.at(0)->GetOwner();
-			onwer->GetTransform()->AddTranslate(1.0f, 0, 0);
-			auto & position = onwer->GetTransform()->GetPosition();
-			_lightDirects.at(0)->mNormal = glm::normalize(glm::vec3(0) - position);
-		}
+		auto onwer = _lightSpots.at(0)->GetOwner();
+		auto pos = onwer->GetTransform()->GetPosition();
+		pos.x = std::cos(_val) * 5.0f;
+		pos.z = std::sin(_val) * 5.0f;
+		pos.y = 5.0f;
+		onwer->GetTransform()->Translate(pos);
+		_lightSpots.at(0)->mNormal = glm::normalize(glm::vec3(0) - pos);
+		_val += 0.01f;
 
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
 private:
 	std::vector<LightDirect *> _lightDirects;
+	std::vector<LightPoint *> _lightPoints;
+	std::vector<LightSpot *> _lightSpots;
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
 
-	bool _bMove;
+	float _val;
 };
 
 int main()

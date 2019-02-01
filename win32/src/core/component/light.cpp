@@ -88,6 +88,11 @@ void Light::OnUpdate(float dt)
 	}
 }
 
+void Light::HideShadow()
+{
+	delete _shadowRT; _shadowRT = nullptr;
+}
+
 void LightDirect::OpenShadow(std::uint32_t depthW, std::uint32_t depthH,
 								 float orthoXMin, float orthoXMax, 
 								 float orthoYMin, float orthoYMax, 
@@ -101,22 +106,51 @@ void LightDirect::OpenShadow(std::uint32_t depthW, std::uint32_t depthH,
 	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
 }
 
-void LightDirect::HideShadow()
-{
-	delete _shadowRT; _shadowRT = nullptr;
-}
-
 RenderTarget * LightDirect::DrawShadow(bool onlyGet)
 {
-	if (onlyGet)
-	{
-		return _shadowRT;
-	}
-	if (_shadowRT != nullptr)
+	if (!onlyGet && _shadowRT != nullptr)
 	{
 		auto project = glm::ortho(_orthoX.x, _orthoX.y,
 								  _orthoY.x, _orthoY.y,
 								  _orthoZ.x, _orthoZ.y);
+		auto world = GetOwner()->GetTransform()->GetWorldPosition();
+		auto view = glm::lookAt(world, world + mNormal, _up);
+
+		_matrixVP = project * view;
+
+		glViewport(0, 0, _depthW, _depthH);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
+		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, project);
+
+		_shadowRT->Beg();
+		glCullFace(GL_FRONT);
+		mmc::mRender.OnRenderCamera(nullptr);
+		glCullFace(GL_BACK);
+		_shadowRT->End();
+
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
+		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+	}
+	return _shadowRT;
+}
+
+void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f, const glm::vec3 & up)
+{
+	_depthW = depthW;
+	_depthH = depthH;
+	_n = n; _f = f; _up = up;
+	delete _shadowRT; _shadowRT = new RenderTarget(depthW, depthH, GL_DEPTH_BUFFER_BIT);
+}
+
+RenderTarget * LightSpot::DrawShadow(bool onlyGet)
+{
+	if (!onlyGet && _shadowRT != nullptr)
+	{
+		auto project = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
 		auto view = glm::lookAt(world, world + mNormal, _up);
 

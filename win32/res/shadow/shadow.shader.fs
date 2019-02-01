@@ -85,7 +85,7 @@ in V_OUT_ {
 
 out vec4 color_;
 
-#define CAL_DIRECT_SHADOW(outvar, shadowMat, shadowTex)		   {\
+#define CAL_PLANE_SHADOW(outvar, shadowMat, shadowTex)		   {\
 		vec2 offset = 1.0f / textureSize(shadowTex, 0);			\
 		vec4 coord = shadowMat * vec4(v_out_.mMPos, 1);			\
 		coord.xyz = coord.xyz / coord.w * 0.5 + 0.5;			\
@@ -106,8 +106,21 @@ float CalculateDirectShadow(const int i)
 	float shadow = 0.0f;
 	switch (i)
 	{
-	case 0: CAL_DIRECT_SHADOW(shadow, light_.mDirect0ShadowMat, light_.mDirect0ShadowTex); break;
-	case 1: CAL_DIRECT_SHADOW(shadow, light_.mDirect1ShadowMat, light_.mDirect1ShadowTex); break;
+	case 0: CAL_PLANE_SHADOW(shadow, light_.mDirect0ShadowMat, light_.mDirect0ShadowTex); break;
+	case 1: CAL_PLANE_SHADOW(shadow, light_.mDirect1ShadowMat, light_.mDirect1ShadowTex); break;
+	}
+	return shadow;
+}
+
+float CalculateSpotShadow(const int i)
+{
+	float shadow = 0.0f;
+	switch (i)
+	{
+	case 0: CAL_PLANE_SHADOW(shadow, light_.mSpot0ShadowMat, light_.mSpot0ShadowTex); break;
+	case 1: CAL_PLANE_SHADOW(shadow, light_.mSpot1ShadowMat, light_.mSpot1ShadowTex); break;
+	case 2: CAL_PLANE_SHADOW(shadow, light_.mSpot2ShadowMat, light_.mSpot2ShadowTex); break;
+	case 3: CAL_PLANE_SHADOW(shadow, light_.mSpot3ShadowMat, light_.mSpot3ShadowTex); break;
 	}
 	return shadow;
 }
@@ -143,25 +156,29 @@ vec3 CalculatePoint(LightPoint_ light, vec3 fragNormal, vec3 viewNormal)
 	return (ambient + diffuse + specular) * weight;
 }
 
-vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 viewNormal)
+vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 viewNormal)
 {
-	vec3 lightNormal = normalize(light.mPosition - v_out_.mMPos);
-	float fragCone = max(0, dot(lightNormal, -light.mNormal));
-	float cutWeight = clamp((fragCone - light.mOutCone) / (light.mInCone - light.mOutCone), 0, 1);
+	vec3 lightNormal	= normalize(light_.mSpots[i].mPosition - v_out_.mMPos);
+	float fragCone		= max(0, dot(lightNormal, -light_.mSpots[i].mNormal));
+	float diffCone		= light_.mSpots[i].mInCone - light_.mSpots[i].mOutCone;
+	float cutWeight		= clamp((fragCone - light_.mSpots[i].mOutCone) / diffCone, 0, 1);
 	if (cutWeight == 0) { return vec3(0, 0, 0); }
+
+	float shadow = CalculateSpotShadow(i);
+	if (shadow == 0) { return vec3(0, 0, 0); }
 
 	vec3 center = (lightNormal + viewNormal) * 0.5;
 	float diff = max(0, dot(fragNormal, lightNormal));
 	float spec = pow(max(0, dot(fragNormal, center)), material_.mShininess);
 
-	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
-	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
-	vec3 specular = light.mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+	vec3 ambient = light_.mSpots[i].mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
+	vec3 diffuse = light_.mSpots[i].mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
+	vec3 specular = light_.mSpots[i].mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
 
-	float distance = length(light.mPosition - v_out_.mMPos);
-	float weight = 1 / (light.mK0 + light.mK1 * distance + light.mK2 * distance * distance);
+	float distance = length(light_.mSpots[i].mPosition - v_out_.mMPos);
+	float weight = 1 / (light_.mSpots[i].mK0 + light_.mSpots[i].mK1 * distance + light_.mSpots[i].mK2 * distance * distance);
 
-	return (ambient + diffuse + specular) * weight * cutWeight;
+	return (ambient + diffuse * shadow + specular * shadow) * weight * cutWeight;
 }
 
 void main()
@@ -180,7 +197,7 @@ void main()
 
 	for (int i = 0; i != light_.mSpotNum; ++i)
 	{
-		outColor += CalculateSpot(light_.mSpots[i], v_out_.mNormal, viewNormal);
+		outColor += CalculateSpot(i, v_out_.mNormal, viewNormal);
 	}
 	
 	color_ = vec4(outColor, 1);

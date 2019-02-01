@@ -23,6 +23,7 @@ public:
 	LightType GetType() { return _type; }
 	virtual RenderTarget * DrawShadow(bool onlyGet) = 0;
 	const glm::mat4 & GetShadowMatrix() const { return _matrixVP; }
+	void HideShadow();
 
 public:
 	bool mIsDraw;
@@ -57,9 +58,6 @@ public:
 					float orthoYMin, float orthoYMax, 
 					float orthoZMin, float orthoZMax,
 					const glm::vec3 &up);
-	void HideShadow();
-	//	深度贴图尺寸
-	//	正交矩阵大小
 	virtual RenderTarget * DrawShadow(bool onlyGet) override;
 
 public:
@@ -99,13 +97,21 @@ public:
 	~LightSpot()
 	{ }
 
-	virtual RenderTarget * DrawShadow(bool onlyGet) override
-	{
-		return _shadowRT;
-	}
+	void OpenShadow(const std::uint32_t depthW, 
+					const std::uint32_t depthH,
+					const float n, const float f,
+					const glm::vec3 & up);
+
+	virtual RenderTarget * DrawShadow(bool onlyGet) override;
 
 public:
 	glm::vec3 mNormal;
 	float mK0, mK1, mK2;
 	float mOutCone, mInCone;
+
+private:
+	std::uint32_t _depthW;
+	std::uint32_t _depthH;
+	glm::vec3 _up;
+	float _n, _f;
 };
