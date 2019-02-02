@@ -220,7 +220,7 @@ void LightPoint::DrawShadow()
 		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
 		DrawShadow(1, proj, view);
 		//	ио
-		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
+		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
 		DrawShadow(2, proj, view);
 		//	об
 		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));

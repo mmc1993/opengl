@@ -118,7 +118,7 @@ private:
 		spriteBox2->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
 		auto objectBox2 = new Object();
 		objectBox2->AddComponent(spriteBox2);
-		objectBox2->GetTransform()->Translate(0, 3, -3);
+		objectBox2->GetTransform()->Translate(-2, 3, 0);
 		objectBox2->SetParent(&mmc::mRoot);
 
 		auto spriteBox3 = new Sprite();
@@ -128,6 +128,7 @@ private:
 		objectBox3->AddComponent(spriteBox3);
 		objectBox3->GetTransform()->Translate(0, 1, 3);
 		objectBox3->SetParent(&mmc::mRoot);
+		_box = objectBox3;
 
 		_lightPoints.at(0)->OpenShadow(512, 512, 1, 1000);
 	}
@@ -152,7 +153,7 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(0, 2, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
+			{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -284,6 +285,9 @@ private:
 			camera->SetPos(pos);
 		}
 
+		_box->GetTransform()->AddTranslate(0.0f, 0.0f, -0.01f);
+		//_box->GetTransform()->AddRotate(glm::normalize(glm::vec3(1, 1, 1)), glm::radians(10.0f));
+
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
@@ -294,6 +298,7 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
+	Object * _box;
 };
 
 int main()
