@@ -84,6 +84,12 @@ void Render::BindLight()
 				if (point->GetShadowTex() != nullptr)
 				{
 					BindTexture(SFormat("light_.mPoint{0}ShadowTex", spotNum), point->GetShadowTex());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat0", pointNum), point->GetShadowMat(0));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat1", pointNum), point->GetShadowMat(1));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat2", pointNum), point->GetShadowMat(2));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat3", pointNum), point->GetShadowMat(3));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat4", pointNum), point->GetShadowMat(4));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat5", pointNum), point->GetShadowMat(5));
 				}
 				++pointNum;
 			}

@@ -88,7 +88,8 @@ public:
 					const std::uint32_t depthH, 
 					const float n, const float f);
 	void HideShadow();
-	const BitmapCube *GetShadowTex() const;
+	const glm::mat4 GetShadowMat(size_t idx) const;
+	BitmapCube * GetShadowTex();
 	virtual void DrawShadow() override;
 
 public:
@@ -100,6 +101,7 @@ private:
 private:
 	RenderTarget * _shadowRT[6];
 	BitmapCube * _shadowTex;
+	glm::mat4 _shadowMat[6];
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	float _n, _f;

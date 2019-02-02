@@ -110,7 +110,7 @@ private:
 		spriteBox1->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
 		auto objectBox1 = new Object();
 		objectBox1->AddComponent(spriteBox1);
-		objectBox1->GetTransform()->Translate(-3, 1, 0);
+		objectBox1->GetTransform()->Translate(-3, 1, -3);
 		objectBox1->SetParent(&mmc::mRoot);
 
 		auto spriteBox2 = new Sprite();
@@ -121,19 +121,15 @@ private:
 		objectBox2->GetTransform()->Translate(0, 3, -3);
 		objectBox2->SetParent(&mmc::mRoot);
 
+		auto spriteBox3 = new Sprite();
+		spriteBox3->SetShader(File::LoadShader("res/shadow/box.shader"));
+		spriteBox3->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
+		auto objectBox3 = new Object();
+		objectBox3->AddComponent(spriteBox3);
+		objectBox3->GetTransform()->Translate(0, 1, 3);
+		objectBox3->SetParent(&mmc::mRoot);
+
 		_lightPoints.at(0)->OpenShadow(512, 512, 1, 1000);
-
-		//auto shadowRT = _lightSpots.at(0)->DrawShadow(false);
-
-		//modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.at(0) = Texture(shadowRT->GetDepthTex());
-
-		//auto spriteShadow = new Sprite();
-		//spriteShadow->SetShader(File::LoadShader("res/shadow/depth.shader"));
-		//spriteShadow->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
-		//auto objectShadow = new Object();
-		//objectShadow->AddComponent(spriteShadow);
-		//objectShadow->GetTransform()->Translate(2, 1, 0);
-		//objectShadow->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()
@@ -156,7 +152,7 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
+			{ glm::vec3(0, 2, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角

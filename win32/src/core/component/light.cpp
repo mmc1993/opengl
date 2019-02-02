@@ -191,7 +191,12 @@ void LightPoint::HideShadow()
 	delete _shadowTex; _shadowTex = nullptr;
 }
 
-const BitmapCube * LightPoint::GetShadowTex() const
+const glm::mat4 LightPoint::GetShadowMat(size_t idx) const
+{
+	return _shadowMat[idx];
+}
+
+BitmapCube * LightPoint::GetShadowTex()
 {
 	return _shadowTex;
 }
@@ -209,28 +214,30 @@ void LightPoint::DrawShadow()
 		proj = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
 
 		//	右
-		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
+		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
 		DrawShadow(0, proj, view);
 		//	左
-		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0));
+		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
 		DrawShadow(1, proj, view);
 		//	上
-		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
+		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 		DrawShadow(2, proj, view);
 		//	下
-		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
 		DrawShadow(3, proj, view);
 		//	前
-		view = glm::lookAt(world, world + glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+		view = glm::lookAt(world, world + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
 		DrawShadow(4, proj, view);
 		//	后
-		view = glm::lookAt(world, world + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+		view = glm::lookAt(world, world + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
 		DrawShadow(5, proj, view);
 	}
 }
 
 void LightPoint::DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view)
 {
+	_shadowMat[idx] = proj * view;
+
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
