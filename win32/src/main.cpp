@@ -49,16 +49,10 @@ private:
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 0.1f, 500);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(0, 5, 5),
+			glm::vec3(0, 0, 5),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
 		mmc::mRender.AddCamera(0, camera, 0);
-		
-		auto camera2 = new Camera();
-		camera2->InitOrthogonal(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 1000.0f);
-		camera2->SetViewport({ 0, 0, GetW() * 0.5f, GetH() * 0.5f });
-		camera2->LookAt({ -5, 100, 0 }, { 0, 0, 0 }, { 0, 0, -1 });
-		mmc::mRender.AddCamera(0, camera2, 1);
 	}
 
 	void InitAssets()
@@ -67,70 +61,25 @@ private:
 
 	void InitObject()
 	{
-		auto modelFloor = File::LoadModel("res/shadow/floor.obj");
-		modelFloor->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(File::LoadTexture("res/shadow/wood.png"));
+		auto model = File::LoadModel("res/normal/floor.obj");
+		model->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(File::LoadBitmap("res/normal/brickwall.jpg"));
+		model->mChilds.at(0)->mMaterials.at(0).mNormals.push_back(File::LoadBitmap("res/normal/brickwall_normal.jpg"));
 
-		auto modelBox = File::LoadModel("res/shadow/box.obj");
-		modelBox->mChilds.at(0)->mMaterials.at(0).mDiffuses.push_back(File::LoadTexture("res/shadow/container_diffuse.png"));
-		modelBox->mChilds.at(0)->mMaterials.at(0).mSpeculars.push_back(File::LoadTexture("res/shadow/container_specular.png"));
+		auto sprite = new Sprite();
+		sprite->AddMesh(model->mChilds.at(0)->mMeshs.at(0), model->mChilds.at(0)->mMaterials.at(0));
+		sprite->SetShader(File::LoadShader("res/normal/floor.shader"));
 
-		//	地板1
-		auto spriteFloor1 = new Sprite();
-		spriteFloor1->SetShader(File::LoadShader("res/shadow/shadow.shader"));
-		spriteFloor1->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
-		auto objectFloor1 = new Object();
-		objectFloor1->AddComponent(spriteFloor1);
-		objectFloor1->GetTransform()->Scale(10, 0.1f, 10);
-		objectFloor1->SetParent(&mmc::mRoot);
+		auto parent = new Object();
+		parent->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
+		parent->SetParent(&mmc::mRoot);
 
-		//	地板2
-		auto spriteFloor2 = new Sprite();
-		spriteFloor2->SetShader(File::LoadShader("res/shadow/shadow.shader"));
-		spriteFloor2->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
-		auto objectFloor2 = new Object();
-		objectFloor2->AddComponent(spriteFloor2);
-		objectFloor2->GetTransform()->Scale(10, 0.1f, 10);
-		objectFloor2->GetTransform()->Translate(-5, 5, 0);
-		objectFloor2->GetTransform()->Rotate(0, 0, 1, glm::radians(90.0f));
-		objectFloor2->SetParent(&mmc::mRoot);
+		auto object = new Object();
+		object->AddComponent(sprite);
+		object->GetTransform()->Scale(5, 0.1f, 5);
+		object->GetTransform()->Rotate(0, 0, 1, glm::radians(-45.0f));
+		object->SetParent(parent);
 
-		auto spriteFloor3 = new Sprite();
-		spriteFloor3->SetShader(File::LoadShader("res/shadow/shadow.shader"));
-		spriteFloor3->AddMesh(modelFloor->mChilds.at(0)->mMeshs.at(0), modelFloor->mChilds.at(0)->mMaterials.at(0));
-		auto objectFloor3 = new Object();
-		objectFloor3->AddComponent(spriteFloor3);
-		objectFloor3->GetTransform()->Scale(10, 0.1f, 10);
-		objectFloor3->GetTransform()->Translate(0, 5, -5);
-		objectFloor3->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
-		objectFloor3->SetParent(&mmc::mRoot);
-
-		//	箱子
-		auto spriteBox1 = new Sprite();
-		spriteBox1->SetShader(File::LoadShader("res/shadow/box.shader"));
-		spriteBox1->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
-		auto objectBox1 = new Object();
-		objectBox1->AddComponent(spriteBox1);
-		objectBox1->GetTransform()->Translate(-3, 1, -3);
-		objectBox1->SetParent(&mmc::mRoot);
-
-		auto spriteBox2 = new Sprite();
-		spriteBox2->SetShader(File::LoadShader("res/shadow/box.shader"));
-		spriteBox2->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
-		auto objectBox2 = new Object();
-		objectBox2->AddComponent(spriteBox2);
-		objectBox2->GetTransform()->Translate(-2, 3, 0);
-		objectBox2->SetParent(&mmc::mRoot);
-
-		auto spriteBox3 = new Sprite();
-		spriteBox3->SetShader(File::LoadShader("res/shadow/box.shader"));
-		spriteBox3->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0), modelBox->mChilds.at(0)->mMaterials.at(0));
-		auto objectBox3 = new Object();
-		objectBox3->AddComponent(spriteBox3);
-		objectBox3->GetTransform()->Translate(0, 1, 3);
-		objectBox3->SetParent(&mmc::mRoot);
-		_box = objectBox3;
-
-		_lightPoints.at(0)->OpenShadow(512, 512, 1, 1000);
+		_object = object;
 	}
 
 	void InitEvents()
@@ -147,13 +96,12 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			//{ glm::vec3(20, 100, -20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(20, 100, -20)) },
-			//{ glm::vec3(-20, 100, 20), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, 0, 0) - glm::vec3(-20, 100, 20)) },
+			{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0, 0, -1) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
+			//{ glm::vec3(0, 5, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.001f, 0.001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -285,8 +233,8 @@ private:
 			camera->SetPos(pos);
 		}
 
-		_box->GetTransform()->AddTranslate(0.0f, 0.0f, -0.01f);
-		//_box->GetTransform()->AddRotate(glm::normalize(glm::vec3(1, 1, 1)), glm::radians(10.0f));
+		_cos += 0.05f;
+		_object->GetTransform()->Rotate(0, 0, 1, glm::radians(50.0f * std::cos(_cos)));
 
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
@@ -298,7 +246,8 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
-	Object * _box;
+	float _cos;
+	Object * _object;
 };
 
 int main()
