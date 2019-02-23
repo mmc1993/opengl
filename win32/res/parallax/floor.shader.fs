@@ -102,7 +102,7 @@ vec2 CalculateParallaxUV(vec3 cameraNormal)
 {
 	float h = texture(material_.mParallax0, v_out_.mUV).r;
 	vec2 offset = cameraNormal.xy * h;
-	return v_out_.mUV - offset.xy;
+	return v_out_.mUV - offset;
 }
 
 vec3 CalculateDirect(LightDirect_ light, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
@@ -155,7 +155,7 @@ void main()
 {
 	vec3 outColor = vec3(0, 0, 0);
 	vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
-	vec2 parallaxUV = CalculateParallaxUV(v_out_.mTBN*cameraNormal);
+	vec2 parallaxUV = CalculateParallaxUV(cameraNormal);
 	vec3 fragNormal = vec3(texture(material_.mNormal0, parallaxUV));
 		 fragNormal = v_out_.mTBN * normalize(fragNormal * 2 - 1.0);
 
