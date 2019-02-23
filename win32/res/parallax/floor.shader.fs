@@ -55,6 +55,8 @@ uniform struct Material_ {
 	sampler2D mSpecular1;
 	sampler2D mSpecular2;
 	sampler2D mSpecular3;
+
+	sampler2D mParallax0;
 	float mShininess;
 } material_;
 
@@ -96,42 +98,49 @@ float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 
 	return clamp((cone - outCone) / (inCone - outCone), 0, 1);
 }
 
-vec3 CalculateDirect(LightDirect_ light, vec3 fragNormal, vec3 cameraNormal)
+vec2 CalculateParallaxUV(vec3 cameraNormal)
+{
+	float h = texture(material_.mParallax0, v_out_.mUV).r;
+	vec2 offset = cameraNormal.xy * h;
+	return v_out_.mUV - offset.xy;
+}
+
+vec3 CalculateDirect(LightDirect_ light, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
 {
 	float diff = CalculateDiffuseScale(fragNormal, -light.mNormal, cameraNormal);
 	float spec = CalculateSpecularScale(fragNormal, -light.mNormal, cameraNormal);
 
-	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
-	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
-	vec3 specular = light.mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, parallaxUV).rgb;
+	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
+	vec3 specular = light.mSpecular * texture(material_.mSpecular0, parallaxUV).rgb * spec;
 	return ambient + diffuse + specular;
 }
 
-vec3 CalculatePoint(LightPoint_ light, vec3 fragNormal, vec3 cameraNormal)
+vec3 CalculatePoint(LightPoint_ light, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
 {
 	vec3 lightNormal = normalize(light.mPosition - v_out_.mMPos);
 	float diff = CalculateDiffuseScale(fragNormal, lightNormal, cameraNormal);
 	float spec = CalculateSpecularScale(fragNormal, lightNormal, cameraNormal);
 
-	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
-	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
-	vec3 specular = light.mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, parallaxUV).rgb;
+	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
+	vec3 specular = light.mSpecular * texture(material_.mSpecular0, parallaxUV).rgb * spec;
 
 	float distance = CalculateDistanceScale(v_out_.mMPos, light.mPosition, light.mK0, light.mK1, light.mK2);
 
 	return (ambient + diffuse + specular) * distance;
 }
 
-vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 cameraNormal)
+vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
 {
 	vec3 lightNormal = normalize(light.mPosition - v_out_.mMPos);
 
 	float diff = CalculateDiffuseScale(fragNormal, lightNormal, cameraNormal);
 	float spec = CalculateSpecularScale(fragNormal, lightNormal, cameraNormal);
 	
-	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
-	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
-	vec3 specular = light.mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+	vec3 ambient = light.mAmbient * texture(material_.mDiffuse0, parallaxUV).rgb;
+	vec3 diffuse = light.mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
+	vec3 specular = light.mSpecular * texture(material_.mSpecular0, parallaxUV).rgb * spec;
 
 	//	¹â×¶Ë¥¼õ
 	float weight = CalculateOutConeScale(light.mInCone, light.mOutCone, light.mNormal, -lightNormal);
@@ -146,22 +155,23 @@ void main()
 {
 	vec3 outColor = vec3(0, 0, 0);
 	vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
-	vec3 fragNormal = vec3(texture(material_.mNormal0, v_out_.mUV));
+	vec2 parallaxUV = CalculateParallaxUV(v_out_.mTBN*cameraNormal);
+	vec3 fragNormal = vec3(texture(material_.mNormal0, parallaxUV));
 		 fragNormal = v_out_.mTBN * normalize(fragNormal * 2 - 1.0);
 
 	for (int i = 0; i != light_.mDirectNum; ++i)
 	{
-		outColor += CalculateDirect(light_.mDirects[i], fragNormal, cameraNormal);
+		outColor += CalculateDirect(light_.mDirects[i], fragNormal, cameraNormal, parallaxUV);
 	}
 
 	for (int i = 0; i != light_.mPointNum; ++i)
 	{
-		outColor += CalculatePoint(light_.mPoints[i], fragNormal, cameraNormal);
+		outColor += CalculatePoint(light_.mPoints[i], fragNormal, cameraNormal, parallaxUV);
 	}
 
 	for (int i = 0; i != light_.mSpotNum; ++i)
 	{
-		outColor += CalculateSpot(light_.mSpots[i], fragNormal, cameraNormal);
+		outColor += CalculateSpot(light_.mSpots[i], fragNormal, cameraNormal, parallaxUV);
 	}
 
 	color_ = vec4(outColor, 1.0f);

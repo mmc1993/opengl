@@ -47,6 +47,10 @@ void Sprite::OnUpdate(float dt)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j));
 			}
+			for (auto j = 0; j != _materials.at(i).mParallaxs.size(); ++j)
+			{
+				mmc::mRender.BindTexture(SFormat("material_.mParallax{0}", j), _materials.at(i).mParallaxs.at(j));
+			}
 			for (auto j = 0; j != _materials.at(i).mReflects.size(); ++j)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mReflect{0}", j), _materials.at(i).mReflects.at(j));
