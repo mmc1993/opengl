@@ -188,7 +188,7 @@ Model * File::LoadModel(aiNode * node, const aiScene * scene, const std::string 
 	for (auto i = 0; i != node->mNumMeshes; ++i)
 	{
 		model->mMeshs.emplace_back(File::LoadMesh(scene->mMeshes[node->mMeshes[i]], scene, directory));
-		model->mMaterials.emplace_back(File::LoadMaterial(scene->mMeshes[node->mMeshes[i]], scene, directory));
+		model->mMates.emplace_back(File::LoadMaterial(scene->mMeshes[node->mMeshes[i]], scene, directory));
 	}
 	for (auto i = 0; i != node->mNumChildren; ++i)
 	{
@@ -262,6 +262,11 @@ Material File::LoadMaterial(aiMesh * mesh, const aiScene * scene, const std::str
 	{
 		aiMaterial->GetTexture(aiTextureType_AMBIENT, i, &textureURL);
 		material.mReflects.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+	}
+	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_HEIGHT); ++i)
+	{
+		aiMaterial->GetTexture(aiTextureType_HEIGHT, i, &textureURL);
+		material.mParallaxs.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
 	}
 	return std::move(material);
 }

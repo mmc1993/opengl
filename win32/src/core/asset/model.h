@@ -7,9 +7,9 @@
 
 class Model: public Asset {
 public:
+	std::vector<Material> mMates;
 	std::vector<Model *> mChilds;
 	std::vector<Mesh *> mMeshs;
-	std::vector<Material> mMaterials;
 	
 	~Model()
 	{
