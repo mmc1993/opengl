@@ -61,15 +61,15 @@ private:
 
 	void InitObject()
 	{
-		auto model = File::LoadModel("res/parallax/floor.obj");
-		model->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(File::LoadBitmap("res/parallax/bricks2.jpg"));
-		model->mChilds.at(0)->mMates.at(0).mNormals.push_back(File::LoadBitmap("res/parallax/bricks2_normal.jpg"));
-		model->mChilds.at(0)->mMates.at(0).mParallaxs.push_back(File::LoadBitmap("res/parallax/bricks2_disp.jpg"));
+		auto model = File::LoadModel("res/normal/floor.obj");
+		model->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(File::LoadBitmap("res/normal/brickwall.jpg"));
+		model->mChilds.at(0)->mMates.at(0).mNormals.push_back(File::LoadBitmap("res/normal/brickwall_normal.jpg"));
+		//model->mChilds.at(0)->mMates.at(0).mParallaxs.push_back(File::LoadBitmap("res/normal/bricks2_disp.jpg"));
 
 		auto sprite = new Sprite();
 		sprite->AddMesh(model->mChilds.at(0)->mMeshs.at(0), 
 						model->mChilds.at(0)->mMates.at(0));
-		sprite->SetShader(File::LoadShader("res/parallax/floor.shader"));
+		sprite->SetShader(File::LoadShader("res/normal/floor.shader"));
 
 		auto object = new Object();
 		object->AddComponent(sprite);
