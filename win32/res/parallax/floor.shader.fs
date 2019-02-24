@@ -65,8 +65,9 @@ in V_OUT_ {
     vec4 mMVPPos;
     vec3 mMVPos;
     vec3 mMPos;
-    vec2 mUV;
+	mat3 mTBNR;
 	mat3 mTBN;
+    vec2 mUV;
 } v_out_;
 
 out vec4 color_;
@@ -155,9 +156,9 @@ void main()
 {
 	vec3 outColor = vec3(0, 0, 0);
 	vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
-	vec2 parallaxUV = CalculateParallaxUV(cameraNormal);
-	vec3 fragNormal = vec3(texture(material_.mNormal0, parallaxUV));
-		 fragNormal = v_out_.mTBN * normalize(fragNormal * 2 - 1.0);
+	vec2 parallaxUV = CalculateParallaxUV(v_out_.mTBNR*cameraNormal);
+	vec3 fragNormal =  vec3(texture(material_.mNormal0, parallaxUV));
+		 fragNormal =  v_out_.mTBN * normalize(fragNormal * 2 - 1.0);
 
 	for (int i = 0; i != light_.mDirectNum; ++i)
 	{

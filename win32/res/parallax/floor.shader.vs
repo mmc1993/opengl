@@ -21,6 +21,7 @@ out V_OUT_ {
     vec4 mMVPPos;
     vec3 mMVPos;
     vec3 mMPos;
+	mat3 mTBNR;
 	mat3 mTBN;
     vec2 mUV;
 } v_out_;
@@ -36,6 +37,7 @@ void main()
 	vec3 B = normalize(vec3(matrix_m_ * vec4(a_b_, 0.0f)));
 	vec3 N = normalize(vec3(matrix_m_ * vec4(a_n_, 0.0f)));
 	v_out_.mTBN = mat3(T, B, N);
+	v_out_.mTBNR = transpose(v_out_.mTBN);
 
     v_out_.mUV = a_uv_;
 
