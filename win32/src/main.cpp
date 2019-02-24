@@ -71,15 +71,10 @@ private:
 						model->mChilds.at(0)->mMates.at(0));
 		sprite->SetShader(File::LoadShader("res/parallax/floor.shader"));
 
-		auto parent = new Object();
-		parent->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
-		parent->SetParent(&mmc::mRoot);
-
 		auto object = new Object();
 		object->AddComponent(sprite);
-		object->GetTransform()->Scale(5, 0.1f, 5);
-		object->GetTransform()->Rotate(0, 0, 1, glm::radians(-45.0f));
-		object->SetParent(parent);
+		object->GetTransform()->Scale(5, 5, 0.1f);
+		object->SetParent(&mmc::mRoot);
 
 		_object = object;
 	}
@@ -236,7 +231,7 @@ private:
 		}
 
 		_cos += 0.05f;
-		_object->GetTransform()->Rotate(0, 0, 1, glm::radians(50.0f * std::cos(_cos)));
+		_object->GetTransform()->Rotate(0, 1, 0, glm::radians(50.0f * std::cos(_cos)));
 
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
