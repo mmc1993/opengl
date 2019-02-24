@@ -31,6 +31,7 @@ void main()
 	vec4 apos = vec4(a_pos_, 1);
     v_out_.mMPos = vec3(matrix_m_ * apos);
     v_out_.mMVPos = vec3(matrix_mv_ * apos);
+	v_out_.mNormal = vec3(matrix_n_ * a_n_);
     v_out_.mMVPPos = vec4(matrix_mvp_ * apos);
 
 	vec3 T = normalize(vec3(matrix_m_ * vec4(a_t_, 0.0f)));

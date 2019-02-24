@@ -49,7 +49,7 @@ private:
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 0.1f, 500);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(0, 0, 5),
+			glm::vec3(0, 0, 5.0f),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
 		mmc::mRender.AddCamera(0, camera, 0);
@@ -72,13 +72,13 @@ private:
 		sprite->SetShader(File::LoadShader("res/parallax/floor.shader"));
 
 		auto parent = new Object();
-		//parent->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
+		parent->GetTransform()->Rotate(1, 0, 0, glm::radians(90.0f));
 		parent->SetParent(&mmc::mRoot);
 
 		auto object = new Object();
 		object->AddComponent(sprite);
-		//object->GetTransform()->Scale(5, 0.1f, 5);
-		//object->GetTransform()->Rotate(0, 0, 1, glm::radians(-45.0f));
+		object->GetTransform()->Scale(5, 0.1f, 5);
+		object->GetTransform()->Rotate(0, 0, 1, glm::radians(-45.0f));
 		object->SetParent(parent);
 
 		_object = object;
@@ -236,7 +236,7 @@ private:
 		}
 
 		_cos += 0.05f;
-		//_object->GetTransform()->Rotate(0, 0, 1, glm::radians(50.0f * std::cos(_cos)));
+		_object->GetTransform()->Rotate(0, 0, 1, glm::radians(50.0f * std::cos(_cos)));
 
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}

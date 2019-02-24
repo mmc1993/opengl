@@ -102,8 +102,8 @@ float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 
 vec2 CalculateParallaxUV(vec3 cameraNormal)
 {
 	float h = texture(material_.mParallax0, v_out_.mUV).r;
-	vec2 offset = cameraNormal.xy * h;
-	return v_out_.mUV - offset;
+	vec2 offset = cameraNormal.xy / cameraNormal.z * h;
+	return v_out_.mUV - offset * 0.05f;
 }
 
 vec3 CalculateDirect(LightDirect_ light, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
@@ -154,12 +154,24 @@ vec3 CalculateSpot(LightSpot_ light, vec3 fragNormal, vec3 cameraNormal, vec2 pa
 
 void main()
 {
-	vec3 outColor = vec3(0, 0, 0);
 	vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
-	vec2 parallaxUV = CalculateParallaxUV(v_out_.mTBNR*cameraNormal);
+	//	Í¨¹ýÊÓ²îÌùÍ¼Æ«ÒÆUV
+	vec3 tbnCameraNormal = vec3(0, 0, 0);
+	tbnCameraNormal.x =  cameraNormal.x;
+	tbnCameraNormal.y = -cameraNormal.y;
+	tbnCameraNormal.z =  cameraNormal.z;
+	tbnCameraNormal = v_out_.mTBNR * tbnCameraNormal;
+	vec2 parallaxUV = CalculateParallaxUV(tbnCameraNormal);
+	if (	parallaxUV.x < 0 || parallaxUV.x > 1 
+		||	parallaxUV.y < 0 || parallaxUV.y > 1)
+	{
+		discard;
+	}
 	vec3 fragNormal =  vec3(texture(material_.mNormal0, parallaxUV));
 		 fragNormal =  v_out_.mTBN * normalize(fragNormal * 2 - 1.0);
+//	fragNormal = normalize(v_out_.mNormal);
 
+	vec3 outColor = vec3(0, 0, 0);
 	for (int i = 0; i != light_.mDirectNum; ++i)
 	{
 		outColor += CalculateDirect(light_.mDirects[i], fragNormal, cameraNormal, parallaxUV);
