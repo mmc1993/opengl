@@ -126,10 +126,10 @@ void Window::Update()
         auto diffTM= now - _renderInfo.renderTM;
         diffTM += std::chrono::milliseconds(16);
         _renderInfo.renderTM += _renderInfo.renderCD;
+		mmc::mTimer.Update(now);
         mmc::mRoot.Update(std::chrono::duration_cast
             <std::chrono::milliseconds>
             (diffTM).count() * 0.001f);
-        mmc::mTimer.Update(now);
         mmc::mRender.RenderOnce();
         glfwSwapBuffers(_window);
     }

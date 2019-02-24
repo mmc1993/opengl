@@ -36,6 +36,7 @@
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\sprite_batch.h" />
     <ClInclude Include="src\core\component\sprite_outline.h" />
+    <ClInclude Include="src\core\component\sprite_screen.h" />
     <ClInclude Include="src\core\component\transform.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
@@ -306,6 +307,7 @@
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\sprite_batch.cpp" />
     <ClCompile Include="src\core\component\sprite_outline.cpp" />
+    <ClCompile Include="src\core\component\sprite_screen.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
     <ClCompile Include="src\core\mmc.cpp" />

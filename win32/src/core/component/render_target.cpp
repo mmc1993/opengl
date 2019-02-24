@@ -3,14 +3,17 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment)
+Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
+									   const std::uint32_t h, 
+									   AttachmentType attachment, 
+									   int texFormat, int glFormat, int glType)
 {
 	Bitmap * bitmap = nullptr;
 	switch (attachment)
 	{
 	case kCOLOR:
 		{
-			bitmap = new Bitmap(w, h, GL_RGBA, "RenderTarget Color", nullptr);
+			bitmap = new Bitmap(w, h, texFormat, glFormat, glType, "RenderTarget Color", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}

@@ -27,7 +27,7 @@ public:
 		_materials.push_back(material);
 	}
 
-	void SetShader(Shader * shader)
+	void BindShader(Shader * shader)
 	{
 		_shader = shader;
 	}

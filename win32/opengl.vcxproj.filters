@@ -843,6 +843,9 @@
     <ClInclude Include="src\core\component\sprite_batch.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\component\sprite_screen.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -900,6 +903,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\sprite_batch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\sprite_screen.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
