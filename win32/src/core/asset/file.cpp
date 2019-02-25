@@ -112,7 +112,7 @@ Shader * File::LoadShader(const std::string & url)
 	std::ifstream vfile(vs);
 	std::ifstream ffile(fs);
 	std::ifstream gfile(gs);
-	CHECK_RET(vfile && ffile, nullptr);
+	ASSERT_RET(vfile && ffile, nullptr);
 	std::stringstream vss, fss, gss;
 	vss << vfile.rdbuf();
 	fss << ffile.rdbuf();
