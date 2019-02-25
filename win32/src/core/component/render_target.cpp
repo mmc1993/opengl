@@ -11,7 +11,13 @@ Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
 	Bitmap * bitmap = nullptr;
 	switch (attachment)
 	{
-	case kCOLOR:
+	case kCOLOR0:
+	case kCOLOR1:
+	case kCOLOR2:
+	case kCOLOR3:
+	case kCOLOR4:
+	case kCOLOR5:
+	case kCOLOR6:
 		{
 			bitmap = new Bitmap(w, h, texFormat, glFormat, glType, "RenderTarget Color", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -41,7 +47,13 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 	BitmapCube * bitmap = nullptr;
 	switch (attachment)
 	{
-	case kCOLOR:
+	case kCOLOR0:
+	case kCOLOR1:
+	case kCOLOR2:
+	case kCOLOR3:
+	case kCOLOR4:
+	case kCOLOR5:
+	case kCOLOR6:
 		{
 			bitmap = new BitmapCube(w, h, GL_RGBA,
 									{	"RenderTarget Color", "RenderTarget Color", "RenderTarget Color",
