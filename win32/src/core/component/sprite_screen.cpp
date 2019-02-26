@@ -1,6 +1,7 @@
 #include "sprite_screen.h"
 #include "../mmc.h"
 #include "../render/render.h"
+#include "../third/sformat.h"
 
 SpriteScreen::SpriteScreen()
 	: _flipUVX(0.0f)
@@ -35,7 +36,10 @@ void SpriteScreen::OnUpdate(float dt)
 		mmc::mRender.Bind(_shader);
 		_shader->SetUniform("material_.mFlipUVX", _flipUVX);
 		_shader->SetUniform("material_.mFlipUVY", _flipUVY);
-		mmc::mRender.BindTexture("material_.mTexture", _texture);
+		for (auto i = 0; i != _textures.size(); ++i)
+		{
+			mmc::mRender.BindTexture(SFormat("material_.mTexture{0}", i), _textures.at(i));
+		}
 		mmc::mRender.RenderIdx(_meshQuat.GetGLID(), _meshQuat.GetIdxCount());
 	};
 	mmc::mRender.PostCommand(command);

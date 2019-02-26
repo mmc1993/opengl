@@ -68,8 +68,7 @@ private:
 			{-1, -1, -1}
 		};
 
-		_root = new Object();
-		//_root->SetParent(&mmc::mRoot);
+		_objectRoot = new Object();
 
 		auto texBox = File::LoadTexture("res/normal/brickwall.jpg");
 		auto modelBox = File::LoadModel("res/bloom/box.obj");
@@ -85,32 +84,35 @@ private:
 			auto objectBox = new Object();
 			objectBox->AddComponent(spriteBox);
 			objectBox->GetTransform()->Translate(coord);
-			objectBox->SetParent(_root);
+			objectBox->SetParent(_objectRoot);
 		}
 
-		_hdrDepth = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kDEPTH);
-		_hdrColor = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
-		_hdrBloom = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR1);
-		_hdrRT = new RenderTarget();
-		_hdrRT->Beg();
-		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _hdrColor->GetGLID());
-		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _hdrBloom->GetGLID());
-		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _hdrDepth->GetGLID());
-		const GLenum drawBuffers[] = {
-			RenderTarget::AttachmentType::kCOLOR0,
-			RenderTarget::AttachmentType::kCOLOR1,
-		};
-		glDrawBuffers(2, drawBuffers);
-		_hdrRT->End();
+		_texDepth = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kDEPTH);
+		_texNormal = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
+		_texBright[0] = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
+		_texBright[1] = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
+		_renderTarget = new RenderTarget();
+		_renderTarget->Beg();
+		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _texDepth->GetGLID());
+		_renderTarget->End();
 
-		auto hdrShader = File::LoadShader("res/bloom/hdr.shader");
-		auto hdrSprite = new SpriteScreen();
-		hdrSprite->BindTexture(_hdrBloom);
-		hdrSprite->BindShader(hdrShader);
 
-		auto hdrObject = new Object();
-		hdrObject->AddComponent(hdrSprite);
-		hdrObject->SetParent(&mmc::mRoot);
+		File::LoadShader("res/bloom/normal.shader");
+		File::LoadShader("res/bloom/bright.shader");
+
+		_screenRoot = new Object();
+		_renderSprite = new SpriteScreen();
+		_screenRoot->AddComponent(_renderSprite);
+
+
+		//	显示
+		auto renderObject = new Object();
+		renderObject->SetParent(&mmc::mRoot);
+
+		_screenSprite = new SpriteScreen();
+		_screenSprite->BindShader(File::LoadShader("res/bloom/normal.shader"));
+		_screenSprite->BindTexture(_texBright[0]);
+		renderObject->AddComponent(_screenSprite);
 	}
 
 	void InitEvents()
@@ -153,7 +155,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_root);
+			object->SetParent(_objectRoot);
 			_lightDirects.push_back(light);
 		}
 
@@ -170,7 +172,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_root);
+			object->SetParent(_objectRoot);
 			_lightPoints.push_back(light);
 		}
 
@@ -190,7 +192,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_root);
+			object->SetParent(_objectRoot);
 			_lightSpots.push_back(light);
 		}
 	}
@@ -265,11 +267,50 @@ private:
 			camera->SetPos(pos);
 		}
 
-		_hdrRT->Beg();
-		_root->Update(0);
+		//	旋绕到纹理
+		_renderTarget->Beg();
+		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
+									  RenderTarget::TextureType::k2D, 
+									  _texNormal->GetGLID());
+		_objectRoot->Update(0);
 		mmc::mRender.RenderOnce();
-		_hdrRT->End();
-		
+		_renderTarget->End();
+
+		//	提取亮度
+		auto brightShader = File::LoadShader("res/bloom/bright.shader");
+		_renderSprite->BindShader(brightShader);
+		_renderSprite->BindTexture(_texNormal);
+		_renderTarget->Beg();
+		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
+									  RenderTarget::TextureType::k2D, 
+									  _texBright[0]->GetGLID());
+		_screenRoot->Update(0);
+		mmc::mRender.RenderOnce();
+		_renderTarget->End();
+
+		//	高斯模糊
+		auto blurShader = File::LoadShader("res/bloom/blur.shader");
+		_renderSprite->BindShader(blurShader);
+		for (auto i = 0; i != 5; ++i)
+		{
+			auto i0 = (i	) % 2;
+			auto i1 = (i + 1) % 2;
+			_renderSprite->BindTexture(_texBright[i0]);
+			_renderTarget->Beg();
+			_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0,
+										  RenderTarget::TextureType::k2D,
+										  _texBright[i1]->GetGLID());
+			blurShader->SetUniform("is_vertical", (i & 1) * 1.0f);
+			_screenRoot->Update(0);
+			mmc::mRender.RenderOnce();
+			_renderTarget->End();
+		}
+
+		auto bloomShader = File::LoadShader("res/bloom/bloom.shader");
+		_screenSprite->BindShader(bloomShader);
+		_screenSprite->BindTexture(_texNormal);
+		_screenSprite->BindTexture(_texBright[0], false);
+
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
@@ -280,11 +321,15 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
-	Object * _root;
-	RenderTarget * _hdrRT;
-	Bitmap * _hdrDepth;
-	Bitmap * _hdrColor;
-	Bitmap * _hdrBloom;
+
+	Object * _objectRoot;
+	Object * _screenRoot;
+	Bitmap * _texDepth;
+	Bitmap * _texNormal;
+	Bitmap * _texBright[2];
+	SpriteScreen * _renderSprite;
+	SpriteScreen * _screenSprite;
+	RenderTarget * _renderTarget;
 };
 
 int main()
