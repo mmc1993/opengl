@@ -40,9 +40,9 @@ public:
 		InitCamera();
 		InitAssets();
 		InitEvents();
-		InitLights();
 		InitObject();
-    }
+		InitLights();
+	}
 private:
 	void InitCamera()
 	{
@@ -62,59 +62,55 @@ private:
 
 	void InitObject()
 	{
-		_pipeRoot = new Object();
-		//_pipeRoot->SetParent(&mmc::mRoot);
+		const glm::vec3 coords[] = {
+			{ 0,  0,  0}, 
+			{ 1,  1, -1}, 
+			{-1, -1, -1}
+		};
 
-		//	管道贴图
-		auto texPipe = File::LoadTexture("res/shadow/skybox.skybox.back.jpg");
+		_root = new Object();
+		//_root->SetParent(&mmc::mRoot);
 
-		//	管道网格
-		auto modelPipe = File::LoadModel("res/hdr/pipe.obj");
-		modelPipe->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(texPipe);
+		auto texBox = File::LoadTexture("res/normal/brickwall.jpg");
+		auto modelBox = File::LoadModel("res/bloom/box.obj");
+		modelBox->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(texBox);
 
-		auto spritePipe = new Sprite();
-		spritePipe->BindShader(File::LoadShader("res/hdr/pipe.shader"));
-		spritePipe->AddMesh(modelPipe->mChilds.at(0)->mMeshs.at(0),
-							modelPipe->mChilds.at(0)->mMates.at(0));
+		for (auto & coord : coords)
+		{
+			auto spriteBox = new Sprite();
+			spriteBox->BindShader(File::LoadShader("res/bloom/box.shader"));
+			spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0),
+							   modelBox->mChilds.at(0)->mMates.at(0));
 
-		auto objectPipe = new Object();
-		objectPipe->AddComponent(spritePipe);
-		objectPipe->SetParent(_pipeRoot);
+			auto objectBox = new Object();
+			objectBox->AddComponent(spriteBox);
+			objectBox->GetTransform()->Translate(coord);
+			objectBox->SetParent(_root);
+		}
 
-
-		auto hdrTexture = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR, GL_RGB16F, GL_RGB, GL_FLOAT);
-
+		_hdrDepth = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kDEPTH);
+		_hdrColor = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
+		_hdrBloom = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR1);
 		_hdrRT = new RenderTarget();
 		_hdrRT->Beg();
-		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kCOLOR, RenderTarget::TextureType::k2D, hdrTexture->GetGLID());
+		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _hdrColor->GetGLID());
+		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _hdrBloom->GetGLID());
+		_hdrRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _hdrDepth->GetGLID());
+		const GLenum drawBuffers[] = {
+			RenderTarget::AttachmentType::kCOLOR0,
+			RenderTarget::AttachmentType::kCOLOR1,
+		};
+		glDrawBuffers(2, drawBuffers);
 		_hdrRT->End();
 
-		auto hdrShader = File::LoadShader("res/hdr/quat.shader");
+		auto hdrShader = File::LoadShader("res/bloom/hdr.shader");
 		auto hdrSprite = new SpriteScreen();
-		hdrSprite->BindTexture(hdrTexture);
+		hdrSprite->BindTexture(_hdrBloom);
 		hdrSprite->BindShader(hdrShader);
 
 		auto hdrObject = new Object();
 		hdrObject->AddComponent(hdrSprite);
 		hdrObject->SetParent(&mmc::mRoot);
-
-
-
-
-		//auto model = File::LoadModel("res/normal/floor.obj");
-		//model->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(File::LoadBitmap("res/normal/brickwall.jpg"));
-		//model->mChilds.at(0)->mMates.at(0).mNormals.push_back(File::LoadBitmap("res/normal/brickwall_normal.jpg"));
-		////model->mChilds.at(0)->mMates.at(0).mParallaxs.push_back(File::LoadBitmap("res/normal/bricks2_disp.jpg"));
-
-		//auto sprite = new Sprite();
-		//sprite->AddMesh(model->mChilds.at(0)->mMeshs.at(0), 
-		//				model->mChilds.at(0)->mMates.at(0));
-		//sprite->SetShader(File::LoadShader("res/normal/floor.shader"));
-
-		//auto object = new Object();
-		//object->AddComponent(sprite);
-		//object->GetTransform()->Scale(5, 5, 0.1f);
-		//object->SetParent(&mmc::mRoot);
 	}
 
 	void InitEvents()
@@ -127,25 +123,17 @@ private:
 
 	void InitLights()
 	{
-		static auto OPEN_DRAW = false;
+		static auto OPEN_DRAW = true;
 
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			//{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3( 1, 0, 0) },
-			//{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(-1, 0, 0) },
-			//{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0,  1, 0) },
-			//{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0, -1, 0) },
+			{ glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			//{ glm::vec3(-0.4f,  0.0f,  2.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 1.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 10.0f, 1.0f) },
-			//{ glm::vec3( 0.4f,  0.0f,  0.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 1.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 10.0f, 1.0f) },
-			
-			{ glm::vec3(-0.4f,  0.0f, -2.5f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.01f, 1.0f) },
-			{ glm::vec3( 0.4f,  0.0f, -2.5f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.01f, 1.0f) },
-			{ glm::vec3( 0.0f, -0.4f, -2.5f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.01f, 1.0f) },
-			{ glm::vec3( 0.0f,  0.4f, -2.5f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.01f, 1.0f) },
+			{ glm::vec3(0.0f,  1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
+			{ glm::vec3(0.4f, -1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -165,7 +153,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(_root);
 			_lightDirects.push_back(light);
 		}
 
@@ -182,7 +170,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(_root);
 			_lightPoints.push_back(light);
 		}
 
@@ -202,7 +190,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(_root);
 			_lightSpots.push_back(light);
 		}
 	}
@@ -278,10 +266,10 @@ private:
 		}
 
 		_hdrRT->Beg();
-		_pipeRoot->Update(0);
+		_root->Update(0);
 		mmc::mRender.RenderOnce();
 		_hdrRT->End();
-
+		
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
@@ -292,8 +280,11 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
-	Object * _pipeRoot;
+	Object * _root;
 	RenderTarget * _hdrRT;
+	Bitmap * _hdrDepth;
+	Bitmap * _hdrColor;
+	Bitmap * _hdrBloom;
 };
 
 int main()
