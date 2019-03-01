@@ -120,7 +120,7 @@ void LightDirect::HideShadow()
 	delete _shadowRT; _shadowRT = nullptr;
 }
 
-const glm::mat4 LightDirect::GetShadowMat() const
+const glm::mat4 & LightDirect::GetShadowMat() const
 {
 	return _shadowMat;
 }
@@ -190,12 +190,12 @@ void LightPoint::HideShadow()
 	delete _shadowTex; _shadowTex = nullptr;
 }
 
-const glm::mat4 LightPoint::GetShadowMat(size_t idx) const
+const glm::mat4 & LightPoint::GetShadowMat(size_t idx) const
 {
 	return _shadowMat[idx];
 }
 
-BitmapCube * LightPoint::GetShadowTex()
+const BitmapCube * LightPoint::GetShadowTex() const
 {
 	return _shadowTex;
 }
