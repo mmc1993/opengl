@@ -78,7 +78,9 @@ private:
 
 class LightPoint : public Light {
 public:
-	LightPoint(): Light(Light::kPOINT)
+	LightPoint()
+		: Light(Light::kPOINT)
+		, _shadowTex(nullptr)
 	{ }
 
 	~LightPoint()
@@ -109,7 +111,10 @@ private:
 
 class LightSpot : public Light {
 public:
-	LightSpot(): Light(Light::kSPOT)
+	LightSpot()
+		: Light(Light::kSPOT)
+		, _shadowTex(nullptr)
+		, _shadowRT(nullptr)
 	{ }
 
 	~LightSpot()
