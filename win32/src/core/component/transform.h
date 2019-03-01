@@ -1,8 +1,6 @@
 #pragma once
 
 #include "component.h"
-#include "../math/vec4.h"
-#include "../math/matrix.h"
 
 class Transform : public Component {
 public:

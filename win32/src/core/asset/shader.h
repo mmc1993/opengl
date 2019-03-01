@@ -1,7 +1,6 @@
 #pragma once
 
 #include "asset.h"
-#include "../math/vec4.h"
 
 class Texture;
 class Bitmap;

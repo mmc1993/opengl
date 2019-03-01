@@ -40,9 +40,6 @@
     <ClInclude Include="src\core\component\transform.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
-    <ClInclude Include="src\core\math\math.h" />
-    <ClInclude Include="src\core\math\matrix.h" />
-    <ClInclude Include="src\core\math\vec4.h" />
     <ClInclude Include="src\core\mmc.h" />
     <ClInclude Include="src\core\object\camera.h" />
     <ClInclude Include="src\core\object\object.h" />
