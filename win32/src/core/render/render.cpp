@@ -2,13 +2,11 @@
 #include "../mmc.h"
 #include "../third/sformat.h"
 #include "../asset/shader.h"
-#include "../object/camera.h"
+#include "../component/camera.h"
 #include "../tools/debug_tool.h"
-#include "../tools/utility_tool.h"
 #include "../component/light.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
-#include "../component/render_target.h"
 
 Render::Render()
 { }
@@ -234,8 +232,10 @@ void Render::RenderOnce()
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
-	auto fn = BIND(Light::DrawShadow, PARAM_1);
-	std::for_each(_lights.begin(), _lights.end(), fn);
+	for (auto light : _lights)
+	{
+		light->DrawShadow();
+	}
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(camera.mCamera);

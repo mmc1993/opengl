@@ -83,6 +83,8 @@ void Camera::Update()
 {
 	if (_change)
 	{
+		_change = false;
+
 		switch (_type)
 		{
 		case Camera::kORTHOGONAL:
@@ -97,9 +99,5 @@ void Camera::Update()
 			break;
 		}
 		_view = glm::lookAt(_pos, _pos + _eye, _up);
-
-		//_project = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -100.0f, 1000.0f);
-		//_view = glm::lookAt(glm::vec3(0, 100, 0), glm::vec3(0), glm::vec3(0, 0, -1));
-		_change = false;
 	}
 }

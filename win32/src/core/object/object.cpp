@@ -6,9 +6,9 @@
 #include "../component/transform.h"
 
 Object::Object()
-    : _tag(std::numeric_limits<size_t>::max())
-    , _active(true)
-    , _parent(nullptr)
+    : _tag((size_t)-1)
+	, _parent(nullptr)
+	, _active(true)
 {
     _transform = new Transform();
     AddComponent(_transform);

@@ -48,9 +48,6 @@
     <ClInclude Include="src\core\event\event.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\object\camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\object\object.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -837,6 +834,9 @@
     <ClInclude Include="src\core\timer\timer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\component\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -855,9 +855,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\event\event.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\object\camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\object\object.cpp">
@@ -897,6 +894,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\timer\timer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

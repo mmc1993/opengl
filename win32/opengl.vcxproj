@@ -41,7 +41,7 @@
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
     <ClInclude Include="src\core\mmc.h" />
-    <ClInclude Include="src\core\object\camera.h" />
+    <ClInclude Include="src\core\component\camera.h" />
     <ClInclude Include="src\core\object\object.h" />
     <ClInclude Include="src\core\render\render.h" />
     <ClInclude Include="src\core\third\glew.h" />
@@ -308,7 +308,7 @@
     <ClCompile Include="src\core\component\transform.cpp" />
     <ClCompile Include="src\core\event\event.cpp" />
     <ClCompile Include="src\core\mmc.cpp" />
-    <ClCompile Include="src\core\object\camera.cpp" />
+    <ClCompile Include="src\core\component\camera.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\third\glm\detail\glm.cpp" />

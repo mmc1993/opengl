@@ -2,7 +2,7 @@
 #include "core/timer/timer.h"
 #include "core/event/event.h"
 #include "core/window/window.h"
-#include "core/object/camera.h"
+#include "core/component/camera.h"
 #include "core/render/render.h"
 #include "core/asset/shader.h"
 #include "core/asset/material.h"

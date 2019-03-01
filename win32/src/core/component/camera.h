@@ -1,8 +1,8 @@
 #pragma once
 
-#include "object.h"
+#include "component.h"
 
-class Camera: public Object {
+class Camera: public Component {
 public:
 	enum Type {
 		//	Õý½»
@@ -48,6 +48,10 @@ public:
 	const glm::mat4 & GetView();
 	const glm::mat4 & GetProject();
 	const glm::vec4 & GetViewport() const;
+
+	virtual void OnAdd() override {}
+	virtual void OnDel() override {}
+	virtual void OnUpdate(float dt) override {}
 
 private:
 	void Update();

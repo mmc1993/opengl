@@ -2,7 +2,6 @@
 
 #include "../include.h"
 
-class Window;
 class Component;
 class Transform;
 
@@ -13,7 +12,7 @@ public:
 
     virtual void OnUpdate(float dt);
 
-    void AddChild(Object * child, size_t tag = std::numeric_limits<size_t>::max());
+    void AddChild(Object * child, size_t tag = (size_t)-1);
     void DelChild(Object * child);
     void DelChildIdx(size_t idx);
     void DelChildTag(size_t tag);
