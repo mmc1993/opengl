@@ -62,57 +62,11 @@ private:
 
 	void InitObject()
 	{
-		const glm::vec3 coords[] = {
-			{ 0,  0,  0}, 
-			{ 1,  1, -1}, 
-			{-1, -1, -1}
-		};
+		auto skybox = new Skybox();
+		skybox->BindShader("res/demo/skybox/skybox.shader");
+		skybox->BindBitmapCube("res/demo/skybox/skybox.skybox");
 
-		_objectRoot = new Object();
-
-		auto texBox = File::LoadTexture("res/normal/brickwall.jpg");
-		auto modelBox = File::LoadModel("res/bloom/box.obj");
-		modelBox->mChilds.at(0)->mMates.at(0).mDiffuses.push_back(texBox);
-
-		for (auto & coord : coords)
-		{
-			auto spriteBox = new Sprite();
-			spriteBox->BindShader(File::LoadShader("res/bloom/box.shader"));
-			spriteBox->AddMesh(modelBox->mChilds.at(0)->mMeshs.at(0),
-							   modelBox->mChilds.at(0)->mMates.at(0));
-
-			auto objectBox = new Object();
-			objectBox->AddComponent(spriteBox);
-			objectBox->GetTransform()->Translate(coord);
-			objectBox->SetParent(_objectRoot);
-		}
-
-		_texDepth = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kDEPTH);
-		_texNormal = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
-		_texBright[0] = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
-		_texBright[1] = RenderTarget::Create2DTexture(GetW(), GetH(), RenderTarget::AttachmentType::kCOLOR0);
-		_renderTarget = new RenderTarget();
-		_renderTarget->Beg();
-		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _texDepth->GetGLID());
-		_renderTarget->End();
-
-
-		File::LoadShader("res/bloom/normal.shader");
-		File::LoadShader("res/bloom/bright.shader");
-
-		_screenRoot = new Object();
-		_renderSprite = new SpriteScreen();
-		_screenRoot->AddComponent(_renderSprite);
-
-
-		//	显示
-		auto renderObject = new Object();
-		renderObject->SetParent(&mmc::mRoot);
-
-		_screenSprite = new SpriteScreen();
-		_screenSprite->BindShader(File::LoadShader("res/bloom/normal.shader"));
-		_screenSprite->BindTexture(_texBright[0]);
-		renderObject->AddComponent(_screenSprite);
+		mmc::mRoot.AddComponent(skybox);
 	}
 
 	void InitEvents()
@@ -134,8 +88,8 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(0.0f,  1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
-			{ glm::vec3(0.4f, -1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
+			//{ glm::vec3(0.0f,  1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
+			//{ glm::vec3(0.4f, -1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -155,7 +109,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_objectRoot);
+			object->SetParent(&mmc::mRoot);
 			_lightDirects.push_back(light);
 		}
 
@@ -172,7 +126,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_objectRoot);
+			object->SetParent(&mmc::mRoot);
 			_lightPoints.push_back(light);
 		}
 
@@ -192,7 +146,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(_objectRoot);
+			object->SetParent(&mmc::mRoot);
 			_lightSpots.push_back(light);
 		}
 	}
@@ -266,51 +220,6 @@ private:
 			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
 			camera->SetPos(pos);
 		}
-
-		//	旋绕到纹理
-		_renderTarget->Beg();
-		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
-									  RenderTarget::TextureType::k2D, 
-									  _texNormal->GetGLID());
-		_objectRoot->Update(0);
-		mmc::mRender.RenderOnce();
-		_renderTarget->End();
-
-		//	提取亮度
-		auto brightShader = File::LoadShader("res/bloom/bright.shader");
-		_renderSprite->BindShader(brightShader);
-		_renderSprite->BindTexture(_texNormal);
-		_renderTarget->Beg();
-		_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
-									  RenderTarget::TextureType::k2D, 
-									  _texBright[0]->GetGLID());
-		_screenRoot->Update(0);
-		mmc::mRender.RenderOnce();
-		_renderTarget->End();
-
-		//	高斯模糊
-		auto blurShader = File::LoadShader("res/bloom/blur.shader");
-		_renderSprite->BindShader(blurShader);
-		for (auto i = 0; i != 5; ++i)
-		{
-			auto i0 = (i	) % 2;
-			auto i1 = (i + 1) % 2;
-			_renderSprite->BindTexture(_texBright[i0]);
-			_renderTarget->Beg();
-			_renderTarget->BindAttachment(RenderTarget::AttachmentType::kCOLOR0,
-										  RenderTarget::TextureType::k2D,
-										  _texBright[i1]->GetGLID());
-			blurShader->SetUniform("is_vertical", (i & 1) * 1.0f);
-			_screenRoot->Update(0);
-			mmc::mRender.RenderOnce();
-			_renderTarget->End();
-		}
-
-		auto bloomShader = File::LoadShader("res/bloom/bloom.shader");
-		_screenSprite->BindShader(bloomShader);
-		_screenSprite->BindTexture(_texNormal);
-		_screenSprite->BindTexture(_texBright[0], false);
-
 		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
@@ -321,15 +230,6 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
-
-	Object * _objectRoot;
-	Object * _screenRoot;
-	Bitmap * _texDepth;
-	Bitmap * _texNormal;
-	Bitmap * _texBright[2];
-	SpriteScreen * _renderSprite;
-	SpriteScreen * _screenSprite;
-	RenderTarget * _renderTarget;
 };
 
 int main()

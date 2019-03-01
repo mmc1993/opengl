@@ -1,11 +1,13 @@
 #include "skybox.h"
 #include "../mmc.h"
+#include "../asset/file.h"
 #include "../render/render.h"
 
 Skybox::Skybox()
 	: _vao(0)
 	, _vbo(0)
 	, _ebo(0)
+	, _bitmapCube(nullptr)
 {
 	float vertexs[] = {
 		-1.0f,		 1.0f,		-1.0f,
@@ -101,4 +103,14 @@ void Skybox::OnUpdate(float dt)
 		mmc::mRender.RenderIdx(_vao, 36);
 	};
 	mmc::mRender.PostCommand(command);
+}
+
+void Skybox::BindShader(const std::string & url)
+{
+	_shader = File::LoadShader(url);
+}
+
+void Skybox::BindBitmapCube(const std::string & url)
+{
+	_bitmapCube = File::LoadBitmapCube(url);
 }

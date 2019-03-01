@@ -12,21 +12,12 @@ public:
 	virtual void OnAdd() override;
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
-
-	void SetBitmapCube(BitmapCube *bitmapCube)
-	{
-		_bitmapCube = bitmapCube;
-	}
-
-	BitmapCube * GetBitmapCube()
-	{
-		return _bitmapCube;
-	}
-
-	void SetShader(Shader * shader)
-	{
-		_shader = shader;
-	}
+	
+	void BindShader(const std::string & url);
+	Shader * GetShader() { return _shader; }
+	
+	void BindBitmapCube(const std::string & url);
+	BitmapCube * GetBitmapCube() { return _bitmapCube; }
 
 private:
 	GLuint _vao;
