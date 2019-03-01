@@ -24,7 +24,7 @@ public:
 	void AddMesh(Mesh * mesh, const Material & material)
 	{
 		_meshs.push_back(mesh);
-		_materials.push_back(material);
+		_mates.push_back(material);
 	}
 
 	void BindShader(Shader * shader)
@@ -62,14 +62,11 @@ public:
 		return _flipUVY != 0.0f;
 	}
 
-	void ShowNormal(bool isTrue);
-
 protected:
 	float _flipUVX;
 	float _flipUVY;
 	BlendFunc _blend;
 	Shader * _shader;
-	Shader * _showNormal;
 	std::vector<Mesh *> _meshs;
-	std::vector<Material> _materials;
+	std::vector<Material> _mates;
 };

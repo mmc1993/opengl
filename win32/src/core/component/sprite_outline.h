@@ -13,7 +13,7 @@ public:
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
 
-	void SetOutlineShader(Shader * shader)
+	void BindOutlineShader(Shader * shader)
 	{
 		_outline = shader;
 	}

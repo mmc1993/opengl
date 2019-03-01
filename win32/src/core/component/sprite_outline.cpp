@@ -29,8 +29,6 @@ void SpriteOutline::OnUpdate(float dt)
 	Render::Command command2;
 	command2.mCameraFlag = GetOwner()->GetCameraFlag();
 	command2.mCallFn = [this]() {
-		//	√Ë±ﬂ
-		glDisable(GL_DEPTH_TEST);
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, glm::scale(glm::mat4(1), glm::vec3(_width)));
@@ -41,7 +39,6 @@ void SpriteOutline::OnUpdate(float dt)
 		}
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 		glDisable(GL_STENCIL_TEST);
-		glEnable(GL_DEPTH_TEST);
 	};
 	mmc::mRender.PostCommand(command2);
 }
