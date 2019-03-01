@@ -5,12 +5,12 @@
 
 class Material {
 public:
-	Material(): mShininess(32.0f)
+	Material(): mShinines(32.0f)
 	{ }
-	float mShininess;
-	std::vector<Texture> mNormals;
 	std::vector<Texture> mDiffuses;
-	std::vector<Texture> mSpeculars;
-	std::vector<Texture> mReflects;			//	反射贴图
-	std::vector<Texture> mParallaxs;		//	视差贴图
+	Texture mParallax;				//	视差贴图
+	Texture mSpecular;				//	高光贴图
+	Texture mReflect;				//	反射贴图
+	Texture mNormal;				//	法线贴图
+	float mShinines;				//	光泽度
 };

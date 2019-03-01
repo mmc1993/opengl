@@ -61,7 +61,7 @@ public:
 		return _vertexs;
 	}
 
-	const std::vector<std::uint32_t> & GetIndices() const
+	const std::vector<uint32_t> & GetIndices() const
 	{
 		return _indices;
 	}
@@ -77,6 +77,11 @@ public:
 	size_t GetIdxCount() const
 	{
 		return _indices.size();
+	}
+
+	size_t GetVerCount() const
+	{
+		return _vertexs.size();
 	}
 
 private:

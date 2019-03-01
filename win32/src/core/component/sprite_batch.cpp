@@ -34,35 +34,30 @@ void SpriteBatch::OnUpdate(float dt)
 		mmc::mRender.Bind(_shader);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
-			for (auto j = 0; j != _materials.at(i).mNormals.size(); ++j)
-			{
-				mmc::mRender.BindTexture(SFormat("material_.mNormal{0}", j), _materials.at(i).mNormals.at(j));
-			}
 			for (auto j = 0; j != _materials.at(i).mDiffuses.size(); ++j)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mDiffuse{0}", j), _materials.at(i).mDiffuses.at(j));
 			}
-			for (auto j = 0; j != _materials.at(i).mSpeculars.size(); ++j)
+			if (_materials.at(i).mParallax.GetBitmap() != nullptr)
 			{
-				mmc::mRender.BindTexture(SFormat("material_.mSpecular{0}", j), _materials.at(i).mSpeculars.at(j));
+				mmc::mRender.BindTexture("material_.mParallax", _materials.at(i).mParallax);
 			}
-			for (auto j = 0; j != _materials.at(i).mReflects.size(); ++j)
+			if (_materials.at(i).mSpecular.GetBitmap() != nullptr)
 			{
-				mmc::mRender.BindTexture(SFormat("material_.mReflect{0}", j), _materials.at(i).mReflects.at(j));
+				mmc::mRender.BindTexture("material_.mSpecular", _materials.at(i).mSpecular);
+			}
+			if (_materials.at(i).mReflect.GetBitmap() != nullptr)
+			{
+				mmc::mRender.BindTexture("material_.mReflect", _materials.at(i).mReflect);
+			}
+			if (_materials.at(i).mNormal.GetBitmap() != nullptr)
+			{
+				mmc::mRender.BindTexture("material_.mNormal", _materials.at(i).mNormal);
 			}
 			_shader->SetUniform("material_.mFlipUVX", _flipUVX);
 			_shader->SetUniform("material_.mFlipUVY", _flipUVY);
-			_shader->SetUniform("material_.mShininess", _materials.at(i).mShininess);
+			_shader->SetUniform("material_.mShininess", _materials.at(i).mShinines);
 			mmc::mRender.RenderIdxInst(_meshs.at(i)->GetGLID(), _meshs.at(i)->GetIndices().size(), _count);
-		}
-
-		if (nullptr != _showNormal)
-		{
-			mmc::mRender.Bind(_showNormal);
-			for (auto i = 0; i != _meshs.size(); ++i)
-			{
-				mmc::mRender.RenderIdx(_meshs.at(i)->GetGLID(), _meshs.at(i)->GetIdxCount());
-			}
 		}
 
 		//	¹Ø±Õ»ìºÏ

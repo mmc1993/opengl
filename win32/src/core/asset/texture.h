@@ -9,17 +9,17 @@ public:
 
     Texture(Bitmap * bitmap)
     {
-        SetTexture(bitmap);
+        BindBitmap(bitmap);
     }
 
     Texture(Bitmap * bitmap, float x, float y)
     {
-        SetTexture(bitmap, x, y);
+        BindBitmap(bitmap, x, y);
     }
 
     Texture(Bitmap * bitmap, float x, float y, float w, float h)
     {
-        SetTexture(bitmap, x, y, w, h);
+        BindBitmap(bitmap, x, y, w, h);
     }
 
     ~Texture()
@@ -31,17 +31,17 @@ public:
     float GetH() const { return _h; }
     const Bitmap * GetBitmap() const { return _bitmap; }
 
-    void SetTexture(Bitmap * bitmap)
+    void BindBitmap(Bitmap * bitmap)
     {
-        SetTexture(bitmap, 0, 0);
+        BindBitmap(bitmap, 0, 0);
     }
 
-    void SetTexture(Bitmap * bitmap, float x, float y)
+    void BindBitmap(Bitmap * bitmap, float x, float y)
     {
-        SetTexture(bitmap, 0, 0, bitmap->GetW() - x, bitmap->GetH() - y);
+        BindBitmap(bitmap, 0, 0, bitmap->GetW() - x, bitmap->GetH() - y);
     }
 
-    void SetTexture(Bitmap * bitmap, float x, float y, float w, float h)
+    void BindBitmap(Bitmap * bitmap, float x, float y, float w, float h)
     {
         _x = x; _y = y;
         _w = w; _h = h;

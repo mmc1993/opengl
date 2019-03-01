@@ -23,5 +23,5 @@ public:
 private:
 	static Model * LoadModel(aiNode * node, const aiScene * scene, const std::string & directory);
 	static Mesh * LoadMesh(aiMesh * node, const aiScene * scene, const std::string & directory);
-	static Material LoadMaterial(aiMesh * node, const aiScene * scene, const std::string & directory);
+	static Material LoadMate(aiMesh * node, const aiScene * scene, const std::string & directory);
 };
