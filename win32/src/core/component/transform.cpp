@@ -39,11 +39,6 @@ void Transform::Translate(const glm::vec3 & vec)
     Translate(vec.x, vec.y, vec.z);
 }
 
-void Transform::Translate(const glm::vec4 & vec)
-{
-    Translate(vec.x, vec.y, vec.z);
-}
-
 void Transform::Rotate(const glm::quat & rotate)
 {
     _isChange = true;
@@ -78,11 +73,6 @@ void Transform::Scale(const glm::vec3 & vec)
     Scale(vec.x, vec.y, vec.z);
 }
 
-void Transform::Scale(const glm::vec4 & vec)
-{
-    Scale(vec.x, vec.y, vec.z);
-}
-
 Transform & Transform::AddTranslate(float x, float y, float z)
 {
     Translate(_translate.x + x, _translate.y + y, _translate.z + z);
@@ -90,11 +80,6 @@ Transform & Transform::AddTranslate(float x, float y, float z)
 }
 
 Transform & Transform::AddTranslate(const glm::vec3 & vec)
-{
-    return AddTranslate(vec.x, vec.y, vec.z);
-}
-
-Transform & Transform::AddTranslate(const glm::vec4 & vec)
 {
     return AddTranslate(vec.x, vec.y, vec.z);
 }
@@ -122,11 +107,6 @@ Transform & Transform::AddScale(float x, float y, float z)
 }
 
 Transform & Transform::AddScale(const glm::vec3 & vec)
-{
-    return AddScale(vec.x, vec.y, vec.z);
-}
-
-Transform & Transform::AddScale(const glm::vec4 & vec)
 {
     return AddScale(vec.x, vec.y, vec.z);
 }
