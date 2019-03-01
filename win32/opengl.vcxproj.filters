@@ -869,9 +869,6 @@
     <ClCompile Include="src\core\mmc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\light.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -894,6 +891,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
