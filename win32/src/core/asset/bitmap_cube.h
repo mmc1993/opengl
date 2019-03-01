@@ -4,19 +4,12 @@
 
 class BitmapCube: public Asset {
 public:
-	BitmapCube(int w, int h, int fmt, 
-			   const std::vector<std::string> & urls, 
-			   const std::vector<const void *> & buffers): _GLID(0)
-    {
-		Init(w, h, fmt, fmt, GL_UNSIGNED_BYTE, urls, buffers);
-	}
-
 	BitmapCube(int w, int h, 
-			   int fmt1, int fmt2, int type, 
+			   int texfmt, int glfmt, int gltype, 
 			   const std::vector<std::string> & urls, 
 			   const std::vector<const void *> & buffers) : _GLID(0)
 	{
-		Init(w, h, fmt1, fmt2, type, urls, buffers);
+		Init(w, h, texfmt, glfmt, gltype, urls, buffers);
 	}
 	
     ~BitmapCube()
@@ -44,21 +37,16 @@ public:
 
 private:
 	void Init(int w, int h, 
-			  int fmt1, int fmt2, int type, 
+			  int texfmt, int glfmt, int gltype, 
 			  const std::vector<std::string> & urls, 
 			  const std::vector<const void *> & buffers)
 	{
 		_urls = urls;
 		glGenTextures(1, &_GLID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _GLID);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		for (auto i = 0; i != buffers.size(); ++i)
+		for (auto i = 0u; i != buffers.size(); ++i)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, fmt1, w, h, 0, fmt2, type, buffers.at(i));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, texfmt, w, h, 0, glfmt, gltype, i < buffers.size() ? buffers.at(i) : nullptr);
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}

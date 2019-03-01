@@ -29,79 +29,6 @@ Model * File::LoadModel(const std::string & url)
 	return model;
 }
 
-Mesh * File::LoadMesh(const std::string & url)
-{
-	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Mesh>(url));
-
-	std::string line;
-	std::ifstream ifile(url);
-	std::vector<glm::vec3> vs;
-	std::vector<glm::vec3> fs;
-	std::vector<glm::vec3> vns;
-	std::vector<glm::vec2> vts;
-	while (std::getline(ifile, line))
-	{
-		std::string_view view(line);
-		auto key = FindSubStrUntil(line, " ");
-		if (key == "v")
-		{
-			glm::vec3 v;
-			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
-			v.x = (float)std::atof(std::string(split.at(0)).c_str());
-			v.y = (float)std::atof(std::string(split.at(1)).c_str());
-			v.z = (float)std::atof(std::string(split.at(2)).c_str());
-			vs.push_back(v);
-		}
-		else if (key == "f")
-		{
-			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
-			assert(split.size() == 3);
-			for (const auto & view : split)
-			{
-				glm::vec3 f;
-				auto fdata = string_tool::Split(view, "/");
-				f.x = (float)std::atof(std::string(fdata.at(0)).c_str());
-				f.y = (float)std::atof(std::string(fdata.at(1)).c_str());
-				f.z = (float)std::atof(std::string(fdata.at(2)).c_str());
-				fs.push_back(f);
-			}
-		}
-		else if (key == "vt")
-		{
-			glm::vec2 vt;
-			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
-			vt.x = (float)std::atof(std::string(split.at(0)).c_str());
-			vt.y = (float)std::atof(std::string(split.at(1)).c_str());
-			vts.push_back(vt);
-		}
-		else if (key == "vn")
-		{
-			glm::vec3 n;
-			auto split = string_tool::Split(view.substr(key.size() + 1), " ");
-			n.x = (float)std::atof(std::string(split.at(0)).c_str());
-			n.y = (float)std::atof(std::string(split.at(1)).c_str());
-			n.z = (float)std::atof(std::string(split.at(2)).c_str());
-			vns.push_back(n);
-		}
-	}
-	std::vector<Mesh::Vertex> vertexs;
-	for (const auto & f : fs)
-	{
-		Mesh::Vertex vertex;
-		vertex.v.x = vs.at((size_t)f.x - 1).x;
-		vertex.v.y = vs.at((size_t)f.x - 1).y;
-		vertex.v.z = vs.at((size_t)f.x - 1).z;
-		vertex.uv.u = vts.at((size_t)f.y - 1).x;
-		vertex.uv.v = vts.at((size_t)f.y - 1).y;
-		vertex.n.x = vns.at((size_t)f.z - 1).x;
-		vertex.n.y = vns.at((size_t)f.z - 1).y;
-		vertex.n.z = vns.at((size_t)f.z - 1).z;
-		vertexs.push_back(vertex);
-	}
-	assert(vertexs.size() >= 3);
-	return nullptr;
-}
-
 Shader * File::LoadShader(const std::string & url)
 {
 	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Shader>(url));
@@ -177,7 +104,12 @@ BitmapCube * File::LoadBitmapCube(const std::string & url)
 	case 4: fmt = GL_RGBA; break;
 	}
 
-	auto bitmapCube = new BitmapCube(w, h, fmt, urls, buffers);
+	auto bitmapCube = new BitmapCube(w, h, fmt, fmt, GL_UNSIGNED_BYTE, urls, buffers);
+	bitmapCube->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	bitmapCube->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	bitmapCube->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	bitmapCube->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	bitmapCube->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	mmc::mAssetCore.Reg(url, bitmapCube);
 	for (auto buffer : buffers)
 	{
@@ -273,17 +205,4 @@ Material File::LoadMaterial(aiMesh * mesh, const aiScene * scene, const std::str
 		material.mParallaxs.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
 	}
 	return std::move(material);
-}
-
-std::string_view File::FindSubStrUntil(
-	const std::string_view & str,
-	const std::string_view & end, 
-	size_t pos)
-{
-	auto idx = str.find(end, pos);
-	if (idx == std::string::npos)
-	{
-		return std::string_view();
-	}
-	return str.substr(pos, idx - pos);
 }

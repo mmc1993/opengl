@@ -58,10 +58,7 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 	case kCOLOR5:
 	case kCOLOR6:
 		{
-			bitmap = new BitmapCube(w, h, GL_RGBA,
-									{	"RenderTarget Color", "RenderTarget Color", "RenderTarget Color",
-										"RenderTarget Color", "RenderTarget Color", "RenderTarget Color" },
-									{	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, });
+			bitmap = new BitmapCube(w, h, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, { }, { });
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -71,10 +68,7 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 		break;
 	case kDEPTH:
 		{
-			bitmap = new BitmapCube(w, h, GL_DEPTH_COMPONENT,
-									{	"RenderTarget Depth", "RenderTarget Depth", "RenderTarget Depth",
-										"RenderTarget Depth", "RenderTarget Depth", "RenderTarget Depth" },
-									{	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, });
+			bitmap = new BitmapCube(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, { }, { });
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -84,10 +78,7 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 		break;
 	case kSTENCIL:
 		{
-			bitmap = new BitmapCube(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
-									{	"RenderTarget Stencil", "RenderTarget Stencil", "RenderTarget Stencil",
-										"RenderTarget Stencil", "RenderTarget Stencil", "RenderTarget Stencil" },
-									{	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, });
+			bitmap = new BitmapCube(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, { }, { });
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
