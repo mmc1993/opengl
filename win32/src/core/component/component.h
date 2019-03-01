@@ -5,34 +5,18 @@
 
 class Component {
 public:
-    Component();
-    virtual ~Component();
+	Component()
+		: _owner(nullptr)
+		, _active(true) { }
+	virtual ~Component() { }
     virtual void OnAdd() = 0;
     virtual void OnDel() = 0;
     virtual void OnUpdate(float dt) = 0;
 
-    bool IsActive() const;
-    void SetActive(bool active);
-
-    void SetOwner(Object * owner);
-    Object * GetOwner();
-
-    template <class T>
-    T * GetParent()
-    {
-        assert(GetOwner() != nullptr);
-        auto parent = GetOwner()->GetParent();
-        while (parent != nullptr)
-        {
-            auto comp = parent->GetComponent<T>();
-            if (comp != nullptr)
-            {
-                return comp;
-            }
-            parent = parent->GetParent();
-        }
-        return nullptr;
-    }
+	bool IsActive() const { return _active; }
+	void SetActive(bool active) { _active = active; }
+	void SetOwner(Object * owner) { _owner = owner; }
+	Object * GetOwner() { return _owner; }
 
 private:
     bool _active;
