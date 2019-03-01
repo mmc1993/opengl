@@ -792,9 +792,6 @@
     <ClInclude Include="src\core\third\stb_image.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\timer\timer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\tools\debug_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -837,6 +834,9 @@
     <ClInclude Include="src\core\asset\asset_cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\timer\timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -869,9 +869,6 @@
     <ClCompile Include="src\core\third\glm\detail\glm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\timer\timer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\window\window.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -897,6 +894,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\sprite_screen.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\timer\timer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

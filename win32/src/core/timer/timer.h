@@ -28,12 +28,12 @@ public:
 
         bool operator <(const Timer::Task & other) const
         {
-            return mTime < other.mTime;
+            return mTime > other.mTime;
         }
 
         bool operator >(const Timer::Task & other) const
         {
-            return mTime > other.mTime;
+            return mTime < other.mTime;
         }
 
         bool operator ==(const Timer::Task & other) const
@@ -82,7 +82,7 @@ public:
         if (it != std::end(_tasks))
         {
             _tasks.erase(it);
-            std::sort_heap(
+            std::make_heap(
                 std::begin(_tasks), 
                 std::end(_tasks));
         }
