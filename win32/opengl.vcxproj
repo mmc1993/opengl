@@ -297,7 +297,6 @@
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp" />
     <ClCompile Include="src\core\asset\shader.cpp" />
-    <ClCompile Include="src\core\component\component.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\render_target.cpp" />
     <ClCompile Include="src\core\component\skybox.cpp" />

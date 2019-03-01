@@ -845,9 +845,6 @@
     <ClCompile Include="src\core\asset\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\component\component.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\sprite.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
