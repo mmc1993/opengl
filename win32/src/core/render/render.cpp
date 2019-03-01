@@ -14,27 +14,19 @@ Render::Render()
 Render::~Render()
 { }
 
-Camera * Render::GetCamera(size_t id)
+void Render::AddCamera(Camera * camera, size_t flag, size_t order)
 {
-	auto fn = [id](const CameraInfo & info)	{ return info.mID == id; };
+	assert(order == (size_t)-1 || GetCamera(order) == nullptr);
+	auto fn = [order](const CameraInfo & info) { return order <= info.mOrder; };
+	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
+	_cameraInfos.insert(it, CameraInfo(camera, flag, order));
+}
+
+Camera * Render::GetCamera(size_t order)
+{
+	auto fn = [order](const CameraInfo & info) { return info.mOrder == order; };
 	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
 	return it != _cameraInfos.end() ? it->mCamera : nullptr;
-}
-
-void Render::AddCamera(size_t idx, Camera * camera, size_t id)
-{
-	assert(id == (size_t)-1 || GetCamera(id) == nullptr);
-	auto fn = [idx](const CameraInfo & info) { return idx < info.mIdx; };
-	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	_cameraInfos.insert(it, CameraInfo(camera, idx, id));
-}
-
-void Render::DelCamera(size_t idx)
-{
-	auto fn = [idx](const CameraInfo & info) { return info.mIdx == idx; };
-	auto it = std::remove_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	while (it != _cameraInfos.end())
-	{ DelCamera(it->mCamera); }
 }
 
 void Render::DelCamera(Camera * camera)
@@ -43,6 +35,14 @@ void Render::DelCamera(Camera * camera)
 	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
 	if (it != _cameraInfos.end()) _cameraInfos.erase(it);
 	delete camera;
+}
+
+void Render::DelCamera(size_t order)
+{
+	auto fn = [order](const CameraInfo & info) { return info.mOrder == order; };
+	auto it = std::remove_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
+	if (it != _cameraInfos.end())
+	{ DelCamera(it->mCamera); }
 }
 
 void Render::BindLight()
@@ -220,7 +220,7 @@ void Render::OnRenderCamera(CameraInfo * camera)
 	{
 		if (camera == nullptr ||
 			camera != nullptr && 
-			camera->mIdx == command.mCameraIdx)
+			(camera->mFlag & command.mCameraFlag) != 0)
 		{
 			command.mCallFn();
 		}
@@ -298,10 +298,10 @@ void Render::RenderVAO(GLuint vao)
 	}
 }
 
-void Render::CommandTransform::Post(size_t cameraIdx, const glm::mat4 & mat)
+void Render::CommandTransform::Post(size_t cameraFlag, const glm::mat4 & mat)
 {
 	Command command;
-	command.mCameraIdx = cameraIdx;
+	command.mCameraFlag = cameraFlag;
 	command.mCallFn = [mat]() {
 		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
 		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, mat);
@@ -309,10 +309,10 @@ void Render::CommandTransform::Post(size_t cameraIdx, const glm::mat4 & mat)
 	mmc::mRender.PostCommand(command);
 }
 
-void Render::CommandTransform::Free(size_t cameraIdx)
+void Render::CommandTransform::Free(size_t cameraFlag)
 {
 	Command command;
-	command.mCameraIdx = cameraIdx;
+	command.mCameraFlag = cameraFlag;
 	command.mCallFn = []() {
 		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
 	};

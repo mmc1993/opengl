@@ -75,7 +75,7 @@ void Light::OnUpdate(float dt)
 	if (mIsDraw)
 	{
 		Render::Command command;
-		command.mCameraIdx = GetOwner()->GetCameraIdx();
+		command.mCameraFlag = GetOwner()->GetCameraFlag();
 		command.mCallFn = [this]() {
 			glEnable(GL_DEPTH_TEST);
 			mmc::mRender.Bind(_shader);

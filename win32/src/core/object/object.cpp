@@ -9,6 +9,7 @@ Object::Object()
     : _tag((size_t)-1)
 	, _parent(nullptr)
 	, _active(true)
+	, _cameraFlag(1)
 {
     _transform = new Transform();
     AddComponent(_transform);
@@ -125,14 +126,14 @@ Transform * Object::GetTransform()
     return _transform;
 }
 
-size_t Object::GetCameraIdx() const
+size_t Object::GetCameraFlag() const
 {
-    return _cameraIdx;
+    return _cameraFlag;
 }
 
-void Object::SetCameraIdx(size_t idx)
+void Object::SetCameraFlag(size_t flag)
 {
-    _cameraIdx = idx;
+    _cameraFlag = flag;
 }
 
 void Object::SetActive(bool active)
@@ -149,7 +150,7 @@ void Object::Update(float dt)
 {
 	OnUpdate(dt);
 
-	Render::CommandTransform::Post(GetCameraIdx(), GetTransform()->GetMatrix());
+	Render::CommandTransform::Post(GetCameraFlag(), GetTransform()->GetMatrix());
 
 	for (auto component : _components)
 	{
@@ -167,7 +168,7 @@ void Object::Update(float dt)
 		}
 	}
 
-	Render::CommandTransform::Free(GetCameraIdx());
+	Render::CommandTransform::Free(GetCameraFlag());
 }
 
 void Object::SetParent(Object * parent)

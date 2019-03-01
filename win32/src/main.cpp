@@ -53,7 +53,7 @@ private:
 			glm::vec3(0, 0, 2.5f),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
-		mmc::mRender.AddCamera(0, camera, 0);
+		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFlag0, 0);
 	}
 
 	void InitAssets()

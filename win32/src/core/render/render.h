@@ -78,12 +78,17 @@ public:
 	};
 
     struct CameraInfo {
-		size_t mID;
-		size_t mIdx;
+		enum Flag {
+			kFlag0 = 0x1,	kFlag1 = 0x2,	kFlag2 = 0x4,	kFlag3 = 0x8,
+			kFlag4 = 0x10,	kFlag5 = 0x20,	kFlag6 = 0x30,	kFlag7 = 0x40,
+		};
+
+		size_t mFlag;
+		size_t mOrder;
 		Camera * mCamera;
-        CameraInfo(): mCamera(nullptr), mID(0), mIdx(0) { }
-        CameraInfo(Camera * camera, size_t idx, size_t id) 
-			: mCamera(camera), mIdx(idx), mID(id) { }
+        CameraInfo(): mCamera(nullptr), mOrder(0), mFlag(0) { }
+        CameraInfo(Camera * camera, size_t flag, size_t order) 
+			: mCamera(camera), mFlag(flag), mOrder(order) { }
     };
 
 	struct RenderInfo {
@@ -99,14 +104,14 @@ public:
 
     //  ±‰ªª√¸¡Ó
     struct CommandTransform {
-		static void Post(size_t cameraIdx, const glm::mat4 & mat);
-		static void Free(size_t cameraIdx);
+		static void Post(size_t cameraFlag, const glm::mat4 & mat);
+		static void Free(size_t cameraFlag);
     };
 
     struct Command {
-        size_t mCameraIdx;
+		size_t mCameraFlag;
         std::function<void()> mCallFn;
-        Command(): mCameraIdx(0) { }
+        Command(): mCameraFlag(0) { }
     };
 
 public:
@@ -118,10 +123,10 @@ public:
 	void Bind(Shader * shader);
 	void Bind(Camera * camera);
 
-	Camera * GetCamera(size_t id);
-    void AddCamera(size_t idx, Camera * camera, size_t id);
-	void DelCamera(size_t idx);
+    void AddCamera(Camera * camera, size_t flag, size_t order = (size_t)-1);
+	Camera * GetCamera(size_t order);
 	void DelCamera(Camera * camera);
+	void DelCamera(size_t order);
 
 	void BindLight();
 	void AddLight(Light * light);

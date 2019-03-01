@@ -95,7 +95,7 @@ void Skybox::OnDel()
 void Skybox::OnUpdate(float dt)
 {
 	Render::Command command;
-	command.mCameraIdx = GetOwner()->GetCameraIdx();
+	command.mCameraFlag = GetOwner()->GetCameraFlag();
 	command.mCallFn = [this]() {
 		mmc::mRender.Bind(_shader);
 		mmc::mRender.RenderIdx(_vao, 36);

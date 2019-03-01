@@ -14,7 +14,7 @@ void SpriteOutline::OnDel()
 void SpriteOutline::OnUpdate(float dt)
 {
 	Render::Command command1;
-	command1.mCameraIdx = GetOwner()->GetCameraIdx();
+	command1.mCameraFlag = GetOwner()->GetCameraFlag();
 	command1.mCallFn = [this]() {
 		//	ø™∆Ùƒ£∞Â≤‚ ‘
 		glEnable(GL_STENCIL_TEST);
@@ -27,7 +27,7 @@ void SpriteOutline::OnUpdate(float dt)
 	Sprite::OnUpdate(dt);
 
 	Render::Command command2;
-	command2.mCameraIdx = GetOwner()->GetCameraIdx();
+	command2.mCameraFlag = GetOwner()->GetCameraFlag();
 	command2.mCallFn = [this]() {
 		//	√Ë±ﬂ
 		glDisable(GL_DEPTH_TEST);

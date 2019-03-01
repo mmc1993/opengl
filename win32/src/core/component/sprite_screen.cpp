@@ -31,7 +31,7 @@ void SpriteScreen::OnDel()
 void SpriteScreen::OnUpdate(float dt)
 {
 	Render::Command command;
-	command.mCameraIdx = GetOwner()->GetCameraIdx();
+	command.mCameraFlag = GetOwner()->GetCameraFlag();
 	command.mCallFn = [this]() {
 		mmc::mRender.Bind(_shader);
 		_shader->SetUniform("material_.mFlipUVX", _flipUVX);
