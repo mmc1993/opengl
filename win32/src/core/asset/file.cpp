@@ -2,7 +2,7 @@
 #include "../mmc.h"
 #include "model.h"
 #include "shader.h"
-#include "asset_core.h"
+#include "asset_cache.h"
 #include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
@@ -139,7 +139,11 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	case 3: fmt = GL_RGB; break;
 	case 4: fmt = GL_RGBA; break;
 	}
-	auto bitmap = new Bitmap(w, h, fmt, url, buffer);
+	auto bitmap = new Bitmap(w, h, fmt, fmt, GL_UNSIGNED_BYTE, url, buffer);
+	bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 	mmc::mAssetCore.Reg(url, bitmap);
 	stbi_image_free(buffer);
 	return bitmap;

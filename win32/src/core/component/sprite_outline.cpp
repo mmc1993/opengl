@@ -2,7 +2,6 @@
 #include "../mmc.h"
 #include "../third/sformat.h"
 #include "../render/render.h"
-#include "../asset/asset_core.h"
 
 void SpriteOutline::OnAdd()
 {

@@ -35,9 +35,9 @@ public:
 	static Bitmap * Create2DTexture(const std::uint32_t w, 
 									const std::uint32_t h, 
 									AttachmentType attachment, 
-									int texFormat = GL_RGBA, 
-									int glFormat = GL_RGBA,
-									int glType = GL_UNSIGNED_BYTE);
+									int texfmt = GL_RGBA, 
+									int glfmt = GL_RGBA,
+									int gltype = GL_UNSIGNED_BYTE);
 
 	static BitmapCube * Create3DTexture(const std::uint32_t w, 
 										const std::uint32_t h,

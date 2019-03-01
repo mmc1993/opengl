@@ -10,13 +10,13 @@
 #include "core/component/render_target.h"
 #include "core/component/sprite_batch.h"
 #include "core/component/sprite_screen.h"
-#include "core/asset/asset_core.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
 #include "core/component/transform.h"
 #include "core/component/skybox.h"
 #include "core/asset/model.h"
 #include "core/asset/file.h"
+#include "core/asset/asset_cache.h"
 
 class AppWindow : public Window {
 public:

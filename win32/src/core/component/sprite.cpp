@@ -3,7 +3,6 @@
 #include "../asset/file.h"
 #include "../third/sformat.h"
 #include "../render/render.h"
-#include "../asset/asset_core.h"
 
 Sprite::Sprite()
 	: _shader(nullptr)

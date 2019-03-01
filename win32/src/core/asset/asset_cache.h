@@ -2,7 +2,7 @@
 
 #include "asset.h"
 
-class AssetCore {
+class AssetCache {
 public:
 	bool IsReg(const std::string & url) const
 	{

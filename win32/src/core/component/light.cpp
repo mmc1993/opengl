@@ -5,7 +5,6 @@
 #include "../asset/file.h"
 #include "../asset/shader.h"
 #include "../render/render.h"
-#include "../asset/asset_core.h"
 
 Light::Light(LightType type): _type(type)
 {

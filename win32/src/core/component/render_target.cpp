@@ -6,7 +6,7 @@
 Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
 									   const std::uint32_t h, 
 									   AttachmentType attachment, 
-									   int texFormat, int glFormat, int glType)
+									   int texfmt, int glfmt, int gltype)
 {
 	Bitmap * bitmap = nullptr;
 	switch (attachment)
@@ -19,16 +19,20 @@ Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
 	case kCOLOR5:
 	case kCOLOR6:
 		{
-			bitmap = new Bitmap(w, h, texFormat, glFormat, glType, "RenderTarget Color", nullptr);
+			bitmap = new Bitmap(w, h, texfmt, glfmt, gltype, "RenderTarget Color", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kDEPTH:
 		{
-			bitmap = new Bitmap(w, h, GL_DEPTH_COMPONENT, "RenderTarget Depth", nullptr);
+			bitmap = new Bitmap(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, "RenderTarget Depth", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kSTENCIL:
@@ -36,6 +40,8 @@ Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
 			bitmap = new Bitmap(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, "RenderTarget Stencil", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	}
@@ -62,6 +68,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kDEPTH:
@@ -73,6 +81,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kSTENCIL:
@@ -84,6 +94,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	}
