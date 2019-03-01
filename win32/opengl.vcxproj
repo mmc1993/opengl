@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\asset\asset.h" />
-    <ClInclude Include="src\core\asset\asset_core.h" />
+    <ClInclude Include="src\core\asset\asset_cache.h" />
     <ClInclude Include="src\core\asset\bitmap.h" />
     <ClInclude Include="src\core\asset\bitmap_cube.h" />
     <ClInclude Include="src\core\asset\file.h" />

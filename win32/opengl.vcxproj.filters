@@ -18,9 +18,6 @@
     <ClInclude Include="src\core\asset\asset.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\asset_core.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\asset\bitmap.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -844,6 +841,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\component\sprite_screen.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\asset\asset_cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

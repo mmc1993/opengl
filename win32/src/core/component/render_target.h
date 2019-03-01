@@ -30,18 +30,12 @@ public:
 		k3D_FRONT		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4,
 		k3D_BACK		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5,
 	};
-	
-public:
-	static Bitmap * Create2DTexture(const std::uint32_t w, 
-									const std::uint32_t h, 
-									AttachmentType attachment, 
-									int texfmt = GL_RGBA, 
-									int glfmt = GL_RGBA,
-									int gltype = GL_UNSIGNED_BYTE);
 
-	static BitmapCube * Create3DTexture(const std::uint32_t w, 
-										const std::uint32_t h,
-										AttachmentType attachment);
+public:
+	static Bitmap * Create2DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, 
+									int texfmt = GL_RGBA, int glfmt = GL_RGBA, int gltype = GL_UNSIGNED_BYTE);
+
+	static BitmapCube * Create3DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment);
 
 	RenderTarget();
 	~RenderTarget();

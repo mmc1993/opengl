@@ -3,10 +3,7 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
-									   const std::uint32_t h, 
-									   AttachmentType attachment, 
-									   int texfmt, int glfmt, int gltype)
+Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int glfmt, int gltype)
 {
 	Bitmap * bitmap = nullptr;
 	switch (attachment)
@@ -28,7 +25,7 @@ Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w,
 		break;
 	case kDEPTH:
 		{
-			bitmap = new Bitmap(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, "RenderTarget Depth", nullptr);
+			bitmap = new Bitmap(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, gltype, "RenderTarget Depth", nullptr);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
