@@ -1,3 +1,0 @@
-res/bitmap/container2.png
-res/bitmap/container2_specular.png
-32
