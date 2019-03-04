@@ -182,31 +182,49 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 	for (auto i = 0; i != aiMaterial->GetTextureCount(aiTextureType_DIFFUSE); ++i)
 	{
 		aiMaterial->GetTexture(aiTextureType_DIFFUSE, i, &textureURL);
-		material.mDiffuses.push_back(File::LoadTexture(directory + std::string(textureURL.C_Str())));
+		auto fullpath = directory + std::string(textureURL.C_Str());
+		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+		material.mDiffuses.push_back(File::LoadTexture(urlpath));
 	}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_REFLECTION))
 	{
 		aiMaterial->GetTexture(aiTextureType_REFLECTION, 0, &textureURL);
-		material.mReflect = File::LoadTexture(directory + std::string(textureURL.C_Str()));
+		auto fullpath = directory + std::string(textureURL.C_Str());
+		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+		material.mReflect = File::LoadTexture(urlpath);
 	}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_SPECULAR))
 	{
 		aiMaterial->GetTexture(aiTextureType_SPECULAR, 0, &textureURL);
-		material.mSpecular = File::LoadTexture(directory + std::string(textureURL.C_Str()));
+		auto fullpath = directory + std::string(textureURL.C_Str());
+		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+		material.mSpecular = File::LoadTexture(urlpath);
 	}
+
+	//if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
+	//{
+	//	aiMaterial->GetTexture(aiTextureType_HEIGHT, 0, &textureURL);
+	//	auto fullpath = directory + std::string(textureURL.C_Str());
+	//	auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+	//	material.mParallax = File::LoadTexture(urlpath);
+	//}
+
+	//if (0 != aiMaterial->GetTextureCount(aiTextureType_NORMALS))
+	//{
+	//	aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &textureURL);
+	//	auto fullpath = directory + std::string(textureURL.C_Str());
+	//	auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+	//	material.mNormal = File::LoadTexture(urlpath);
+	//}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
 	{
 		aiMaterial->GetTexture(aiTextureType_HEIGHT, 0, &textureURL);
-		material.mParallax = File::LoadTexture(directory + std::string(textureURL.C_Str()));
-	}
-
-	if (0 != aiMaterial->GetTextureCount(aiTextureType_NORMALS))
-	{
-		aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &textureURL);
-		material.mNormal = File::LoadTexture(directory + std::string(textureURL.C_Str()));
+		auto fullpath = directory + std::string(textureURL.C_Str());
+		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
+		material.mNormal = File::LoadTexture(urlpath);
 	}
 
 	return std::move(material);

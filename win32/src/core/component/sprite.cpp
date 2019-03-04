@@ -66,3 +66,8 @@ void Sprite::OnUpdate(float dt)
 	};
 	mmc::mRender.PostCommand(command);
 }
+
+void Sprite::BindShader(const std::string & url)
+{
+	_shader = File::LoadShader(url);
+}

@@ -17,6 +17,7 @@
 #include "core/asset/model.h"
 #include "core/asset/file.h"
 #include "core/asset/asset_cache.h"
+#include "core/tools/string_tool.h"
 
 class AppWindow : public Window {
 public:
@@ -40,8 +41,8 @@ public:
 		InitCamera();
 		InitAssets();
 		InitEvents();
-		InitObject();
 		InitLights();
+		InitObject();
 	}
 private:
 	void InitCamera()
@@ -62,11 +63,27 @@ private:
 
 	void InitObject()
 	{
-		auto skybox = new Skybox();
-		skybox->BindShader("res/demo/skybox/skybox.shader");
-		skybox->BindBitmapCube("res/demo/skybox/skybox.skybox");
+		auto modelScene = File::LoadModel("res/demo/scene.obj");
 
-		mmc::mRoot.AddComponent(skybox);
+		std::function<void(Model *, Object *)> createScene;
+		createScene = [&createScene](Model * model, Object * parent) {
+			auto sprite = new Sprite();
+			sprite->BindShader("res/demo/shader/scene.shader");
+			for (auto i = 0; i != model->mMeshs.size(); ++i)
+			{
+				sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
+			}
+
+			auto object = new Object();
+			object->AddComponent(sprite);
+			object->SetParent(parent);
+
+			for (auto i = 0; i != model->mChilds.size(); ++i)
+			{
+				createScene(model->mChilds.at(i), object);
+			}
+		};
+		createScene(modelScene, &mmc::mRoot);
 	}
 
 	void InitEvents()
@@ -88,7 +105,7 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			//{ glm::vec3(0.0f,  1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
+			{ glm::vec3(0.0f,  3.0f, -3.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
 			//{ glm::vec3(0.4f, -1.0f, -1.0f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f) },
 		};
 

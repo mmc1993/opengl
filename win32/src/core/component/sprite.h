@@ -27,10 +27,8 @@ public:
 		_mates.push_back(material);
 	}
 
-	void BindShader(Shader * shader)
-	{
-		_shader = shader;
-	}
+	void BindShader(const std::string & url);
+	Shader * GetShader() { return _shader; }
 
 	void SetBlendFunc(const BlendFunc & blend)
 	{
