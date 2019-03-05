@@ -92,21 +92,21 @@ public:
 					const float n, const float f);
 	void HideShadow();
 	const BitmapCube * GetShadowTex() const;
-	float GetNear() const { return _n; }
-	float GetFar() const { return _f; }
+	const glm::mat4 & GetShadowMat() const;
 	virtual void DrawShadow() override;
 
 public:
 	float mK0, mK1, mK2;
 
 private:
-	void DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view);
+	void DrawShadow(size_t idx, const glm::mat4 & view);
 
 private:
 	RenderTarget * _shadowRT;
 	BitmapCube * _shadowTex;
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
+	glm::mat4 _proj;
 	float _n, _f;
 };
 
@@ -126,7 +126,7 @@ public:
 					const float n, const float f,
 					const glm::vec3 & up);
 	void HideShadow();
-	const glm::mat4 GetShadowMat() const;
+	const glm::mat4 & GetShadowMat() const;
 	const Bitmap * GetShadowTex() const;
 	virtual void DrawShadow() override;
 

@@ -195,6 +195,7 @@ void LightPoint::OpenShadow(const std::uint32_t depthW, const std::uint32_t dept
 	_n = n; _f = f;
 	_depthW = depthW;
 	_depthH = depthH;
+	_proj = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
 
 	_shadowTex = RenderTarget::Create3DTexture(_depthW, _depthH, RenderTarget::kDEPTH);
 
@@ -219,46 +220,49 @@ const BitmapCube * LightPoint::GetShadowTex() const
 	return _shadowTex;
 }
 
+const glm::mat4 & LightPoint::GetShadowMat() const
+{
+	return _proj;
+}
+
 void LightPoint::DrawShadow()
 {
 	if (_shadowTex != nullptr)
 	{
-		glm::mat4 proj, view;
-		
+		glm::mat4 view;
+
 		glViewport(0, 0, _depthW, _depthH);
 
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
 
-		proj = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, _n, _f);
-
 		//	右
 		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
-		DrawShadow(RenderTarget::TextureType::k3D_RIGHT, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_RIGHT, view);
 		//	左
 		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
-		DrawShadow(RenderTarget::TextureType::k3D_LEFT, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_LEFT, view);
 		//	上
 		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
-		DrawShadow(RenderTarget::TextureType::k3D_TOP, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_TOP, view);
 		//	下
 		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
-		DrawShadow(RenderTarget::TextureType::k3D_BOTTOM, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_BOTTOM, view);
 		//	前
 		view = glm::lookAt(world, world + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
-		DrawShadow(RenderTarget::TextureType::k3D_FRONT, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_FRONT, view);
 		//	后
 		view = glm::lookAt(world, world + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
-		DrawShadow(RenderTarget::TextureType::k3D_BACK, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_BACK, view);
 	}
 }
 
-void LightPoint::DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view)
+void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 {
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 	mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
+	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, _proj);
 
 	_shadowRT->Beg();
 	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
@@ -296,7 +300,7 @@ void LightSpot::HideShadow()
 	delete _shadowRT; _shadowRT = nullptr;
 }
 
-const glm::mat4 LightSpot::GetShadowMat() const
+const glm::mat4 & LightSpot::GetShadowMat() const
 {
 	return _shadowMat;
 }

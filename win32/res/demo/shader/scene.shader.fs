@@ -20,7 +20,7 @@ struct LightPoint_ {
 	vec3 mAmbient;
 	vec3 mDiffuse;
 	vec3 mSpecular;
-	float mNear, mFar;
+	mat4 mShadowMat;
 	samplerCube mShadowTex;
 };
 
@@ -123,10 +123,11 @@ float CalculateSpotShadow(const int i)
 float CalculatePointShadow(const int i)
 {
 	vec3 normal = v_out_.mMPos - light_.mPoints[i].mPosition;
-	float depth = 1 / light_.mPoints[i].mNear / (normal.z - 1) /
-				  1 / light_.mPoints[i].mNear / (light_.mPoints[i].mFar - 1);
-	float value = texture(light_.mPoints[i].mShadowTex, normalize(normal)).r;
-	return depth < value? 1: 0;
+	vec4 sampla = vec4(0, 0, -abs(normal.z), 1);
+		 sampla = light_.mPoints[i].mShadowMat * sampla;
+		 sampla.z =	  sampla.z / sampla.w * 0.5f + 0.5f;
+	float depth = texture(light_.mPoints[i].mShadowTex, normalize(normal)).r;
+	return sampla.z < depth? 1: 0;
 }
 
 //	计算漫反射缩放因子

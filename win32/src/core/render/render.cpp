@@ -81,8 +81,8 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mSpecular", pointNum), point->mSpecular);
 				if (point->GetShadowTex() != nullptr)
 				{
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mFar", pointNum), point->GetFar());
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mNear", pointNum), point->GetNear());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mShadowMat", pointNum), point->GetShadowMat());
+
 					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mShadowTex", pointNum), point->GetShadowTex(), _renderInfo.mTexCount++);
 				}
 				++pointNum;

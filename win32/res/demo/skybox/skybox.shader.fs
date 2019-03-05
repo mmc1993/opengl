@@ -12,5 +12,6 @@ out vec4 color_;
 
 void main()
 {
-	color_ = texture(skybox_, v_out_.mAPos);
+	float r = texture(skybox_, v_out_.mAPos).r;
+	color_ = vec4(r, r, r, 1);
 }

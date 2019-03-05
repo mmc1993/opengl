@@ -54,7 +54,16 @@ private:
 			glm::vec3(6, 10, 6),
 			glm::vec3(-5, 0, -5),
 			glm::vec3(0, 1, 0));
-		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFlag0, 0);
+		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFlag0, 1);
+
+		auto camera2 = new Camera();
+		camera2->InitPerspective(60, (float)GetW(), (float)GetH(), 0.1f, 500);
+		camera2->SetViewport({ 0, 0, GetW(), GetH() });
+		camera2->LookAt(
+			glm::vec3(6, 10, 6),
+			glm::vec3(-5, 0, -5),
+			glm::vec3(0, 1, 0));
+		mmc::mRender.AddCamera(camera2, Render::CameraInfo::kFlag1, 0);
 	}
 
 	void InitAssets()
@@ -166,7 +175,7 @@ private:
 		}
 		//_lightDirects.at(0)->OpenShadow(800, 600, -50, 50, -50, 50, -10, 1000, glm::vec3(0, 0, -1));
 		//_lightSpots.at(0)->OpenShadow(800, 600, 1, 1000, glm::vec3(0, 0, -1));
-		_lightPoints.at(0)->OpenShadow(800, 600, 1, 1000);
+		_lightPoints.at(0)->OpenShadow(800, 800, 1, 1000);
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -222,7 +231,7 @@ private:
 	
 	void OnTimerUpdate()
 	{
-		auto camera = mmc::mRender.GetCamera(0);
+		auto camera = mmc::mRender.GetCamera(1);
 		if (_axis.x != 0 || _axis.y != 0 || _axis.z != 0)
 		{
 			camera->SetEye(glm::quat(glm::angleAxis(_speed, _axis)) * camera->GetEye());
