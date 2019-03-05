@@ -123,7 +123,6 @@ void RenderTarget::Beg()
 
 void RenderTarget::End()
 {
-	auto n = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	ASSERT_RET(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
