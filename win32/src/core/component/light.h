@@ -81,6 +81,7 @@ public:
 	LightPoint()
 		: Light(Light::kPOINT)
 		, _shadowTex(nullptr)
+		, _shadowRT(nullptr)
 	{ }
 
 	~LightPoint()
@@ -90,8 +91,9 @@ public:
 					const std::uint32_t depthH, 
 					const float n, const float f);
 	void HideShadow();
-	const glm::mat4 & GetShadowMat(size_t idx) const;
 	const BitmapCube * GetShadowTex() const;
+	float GetNear() const { return _n; }
+	float GetFar() const { return _f; }
 	virtual void DrawShadow() override;
 
 public:
@@ -101,9 +103,8 @@ private:
 	void DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view);
 
 private:
-	RenderTarget * _shadowRT[6];
+	RenderTarget * _shadowRT;
 	BitmapCube * _shadowTex;
-	glm::mat4 _shadowMat[6];
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	float _n, _f;

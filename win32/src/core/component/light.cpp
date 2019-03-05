@@ -5,6 +5,7 @@
 #include "../asset/file.h"
 #include "../asset/shader.h"
 #include "../render/render.h"
+#include "../asset/asset_cache.h"
 
 Light::Light(LightType type): _type(type)
 {
@@ -50,7 +51,32 @@ Light::Light(LightType type): _type(type)
 
 	glBindVertexArray(0);
 
-	_shader = File::LoadShader("res/shader/light.shader");
+	if (!mmc::mAssetCore.IsReg("SHADER_LIGHT_"))
+	{
+		auto vs = R"(
+			#version 410 core
+
+			layout(location = 0) in vec3 a_pos_;
+
+			uniform mat4 matrix_mvp_;
+
+			void main()
+			{
+				gl_Position = matrix_mvp_ * vec4(a_pos_, 1.0);
+			})";
+
+		auto fs = R"(
+			#version 410 core
+
+			out vec4 color_;
+
+			void main()
+			{
+				color_ = vec4(1, 1, 1, 1);
+			})";
+		mmc::mAssetCore.Reg("SHADER_LIGHT_", new Shader(vs, fs));
+	}
+	_shader = mmc::mAssetCore.Get<Shader>("SHADER_LIGHT_");
 }
 
 Light::~Light()
@@ -166,33 +192,26 @@ void LightDirect::DrawShadow()
 void LightPoint::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f)
 {
 	assert(_shadowTex == nullptr);
-	_depthW = depthW; _depthH = depthH; _n = n; _f = f;
+	_n = n; _f = f;
+	_depthW = depthW;
+	_depthH = depthH;
+
 	_shadowTex = RenderTarget::Create3DTexture(_depthW, _depthH, RenderTarget::kDEPTH);
-	for (auto i = 0; i != 6; ++i)
-	{
-		assert(_shadowRT[i] == nullptr);
-		auto texType = RenderTarget::TextureType(RenderTarget::k3D_RIGHT + i);
-		_shadowRT[i] = new RenderTarget();
-		_shadowRT[i]->Beg();
-		_shadowRT[i]->BindAttachment(RenderTarget::kDEPTH, texType, _shadowTex->GetGLID());
-		_shadowRT[i]->CloseDraw();
-		_shadowRT[i]->CloseRead();
-		_shadowRT[i]->End();
-	}
+
+	_shadowRT = new RenderTarget();
+	_shadowRT->Beg();
+	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+							  RenderTarget::TextureType::k3D_RIGHT, 
+							  _shadowTex->GetGLID());
+	_shadowRT->CloseDraw();
+	_shadowRT->CloseRead();
+	_shadowRT->End();
 }
 
 void LightPoint::HideShadow()
 {
-	for (auto i = 0; i != 6; ++i)
-	{
-		delete _shadowRT[i]; _shadowRT[i] = nullptr;
-	}
 	delete _shadowTex; _shadowTex = nullptr;
-}
-
-const glm::mat4 & LightPoint::GetShadowMat(size_t idx) const
-{
-	return _shadowMat[idx];
+	delete _shadowRT; _shadowRT = nullptr;
 }
 
 const BitmapCube * LightPoint::GetShadowTex() const
@@ -214,40 +233,41 @@ void LightPoint::DrawShadow()
 
 		//	右
 		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
-		DrawShadow(0, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_RIGHT, proj, view);
 		//	左
 		view = glm::lookAt(world, world + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
-		DrawShadow(1, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_LEFT, proj, view);
 		//	上
 		view = glm::lookAt(world, world + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
-		DrawShadow(2, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_TOP, proj, view);
 		//	下
 		view = glm::lookAt(world, world + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
-		DrawShadow(3, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_BOTTOM, proj, view);
 		//	前
 		view = glm::lookAt(world, world + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
-		DrawShadow(4, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_FRONT, proj, view);
 		//	后
 		view = glm::lookAt(world, world + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
-		DrawShadow(5, proj, view);
+		DrawShadow(RenderTarget::TextureType::k3D_BACK, proj, view);
 	}
 }
 
 void LightPoint::DrawShadow(size_t idx, const glm::mat4 & proj, const glm::mat4 & view)
 {
-	_shadowMat[idx] = proj * view;
-
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
 	mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
 	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
 
-	_shadowRT[idx]->Beg();
+	_shadowRT->Beg();
+	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+							  (RenderTarget::TextureType)idx,
+							  _shadowTex->GetGLID());
 	glCullFace(GL_FRONT);
 	mmc::mRender.OnRenderCamera(nullptr);
 	glCullFace(GL_BACK);
-	_shadowRT[idx]->End();
+	_shadowRT->End();
 
 	mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
 	mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);

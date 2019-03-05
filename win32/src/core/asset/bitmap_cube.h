@@ -44,7 +44,7 @@ private:
 		_urls = urls;
 		glGenTextures(1, &_GLID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _GLID);
-		for (auto i = 0u; i != buffers.size(); ++i)
+		for (auto i = 0u; i != 6; ++i)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, texfmt, w, h, 0, glfmt, gltype, i < buffers.size() ? buffers.at(i) : nullptr);
 		}

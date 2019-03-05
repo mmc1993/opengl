@@ -62,8 +62,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	case kDEPTH:
@@ -72,8 +72,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	case kSTENCIL:
@@ -82,8 +82,8 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	}
@@ -123,6 +123,7 @@ void RenderTarget::Beg()
 
 void RenderTarget::End()
 {
+	auto n = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	ASSERT_RET(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

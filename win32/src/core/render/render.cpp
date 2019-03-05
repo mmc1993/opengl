@@ -61,9 +61,9 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
 				if (direct->GetShadowTex() != nullptr)
 				{
-					BindTexture(SFormat("light_.mDirect{0}ShadowTex", directNum), direct->GetShadowTex());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mShadowMat", directNum), direct->GetShadowMat());
 
-					_renderInfo.mShader->SetUniform(SFormat("light_.mDirect{0}ShadowMat", directNum), direct->GetShadowMat());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mDirects[{0}].mShadowTex", directNum), direct->GetShadowTex(), _renderInfo.mTexCount++);
 				}
 				++directNum;
 			}
@@ -81,13 +81,9 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mSpecular", pointNum), point->mSpecular);
 				if (point->GetShadowTex() != nullptr)
 				{
-					BindTexture(SFormat("light_.mPoint{0}ShadowTex", spotNum), point->GetShadowTex());
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat0", pointNum), point->GetShadowMat(0));
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat1", pointNum), point->GetShadowMat(1));
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat2", pointNum), point->GetShadowMat(2));
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat3", pointNum), point->GetShadowMat(3));
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat4", pointNum), point->GetShadowMat(4));
-					_renderInfo.mShader->SetUniform(SFormat("light_.mPoint{0}ShadowMat5", pointNum), point->GetShadowMat(5));
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mFar", pointNum), point->GetFar());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mNear", pointNum), point->GetNear());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mPoints[{0}].mShadowTex", pointNum), point->GetShadowTex(), _renderInfo.mTexCount++);
 				}
 				++pointNum;
 			}
@@ -109,9 +105,9 @@ void Render::BindLight()
 				_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mSpecular", spotNum), spot->mSpecular);
 				if (spot->GetShadowTex() != nullptr)
 				{
-					BindTexture(SFormat("light_.mSpot{0}ShadowTex", spotNum), spot->GetShadowTex());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mShadowMat", spotNum), spot->GetShadowMat());
 
-					_renderInfo.mShader->SetUniform(SFormat("light_.mSpot{0}ShadowMat", spotNum), spot->GetShadowMat());
+					_renderInfo.mShader->SetUniform(SFormat("light_.mSpots[{0}].mShadowTex", spotNum), spot->GetShadowTex(), _renderInfo.mTexCount++);
 				}
 				++spotNum;
 			}
@@ -136,11 +132,14 @@ void Render::DelLight(Light * light)
 
 void Render::Bind(Shader * shader)
 {
+	_renderInfo.mTexCount = 0;
 	if (shader != nullptr)
 	{
-		_renderInfo.mTexCount = 0;
+		if (shader != _renderInfo.mShader)
+		{
+			glUseProgram(shader->GetGLID());
+		}
 		_renderInfo.mShader = shader;
-		glUseProgram(_renderInfo.mShader->GetGLID());
 	}
 	else
 	{

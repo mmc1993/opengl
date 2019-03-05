@@ -30,9 +30,10 @@ void Sprite::OnUpdate(float dt)
 		//	ø™∆Ù…Ó∂»≤‚ ‘
 		glEnable(GL_DEPTH_TEST);
 
-		mmc::mRender.Bind(_shader);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
+			mmc::mRender.Bind(_shader);
+
 			for (auto j = 0; j != _mates.at(i).mDiffuses.size(); ++j)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mDiffuse{0}", j), _mates.at(i).mDiffuses.at(j));

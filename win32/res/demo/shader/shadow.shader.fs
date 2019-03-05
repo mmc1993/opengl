@@ -1,0 +1,293 @@
+#version 330 core
+
+uniform vec3 camera_pos_;
+uniform vec3 camera_eye_;
+
+struct LightDirect_ {
+	vec3 mNormal;
+	
+	vec3 mAmbient;
+	vec3 mDiffuse;
+	vec3 mSpecular;
+};
+
+struct LightPoint_ {
+	vec3 mPosition;
+	float mK0, mK1, mK2;
+	
+	vec3 mAmbient;
+	vec3 mDiffuse;
+	vec3 mSpecular;
+};
+
+struct LightSpot_ {
+	vec3 mNormal;
+	vec3 mPosition;
+	float mK0, mK1, mK2;
+	float mOutCone, mInCone;
+
+	vec3 mAmbient;
+	vec3 mDiffuse;
+	vec3 mSpecular;
+};
+
+uniform struct Light_ {
+	int mDirectNum;
+	int mPointNum;
+	int mSpotNum;
+	LightDirect_ mDirects[2];
+	LightPoint_ mPoints[4];
+	LightSpot_ mSpots[4];
+	sampler2D mDirect0ShadowTex;
+	sampler2D mDirect1ShadowTex;
+	samplerCube mPoint0ShadowTex;
+	samplerCube mPoint1ShadowTex;
+	samplerCube mPoint2ShadowTex;
+	samplerCube mPoint3ShadowTex;
+	sampler2D mSpot0ShadowTex;
+	sampler2D mSpot1ShadowTex;
+	sampler2D mSpot2ShadowTex;
+	sampler2D mSpot3ShadowTex;
+	mat4 mDirect0ShadowMat;
+	mat4 mDirect1ShadowMat;
+	mat4 mPoint0ShadowMat0;
+	mat4 mPoint0ShadowMat1;
+	mat4 mPoint0ShadowMat2;
+	mat4 mPoint0ShadowMat3;
+	mat4 mPoint0ShadowMat4;
+	mat4 mPoint0ShadowMat5;
+	mat4 mPoint1ShadowMat0;
+	mat4 mPoint1ShadowMat1;
+	mat4 mPoint1ShadowMat2;
+	mat4 mPoint1ShadowMat3;
+	mat4 mPoint1ShadowMat4;
+	mat4 mPoint1ShadowMat5;
+	mat4 mPoint2ShadowMat0;
+	mat4 mPoint2ShadowMat1;
+	mat4 mPoint2ShadowMat2;
+	mat4 mPoint2ShadowMat3;
+	mat4 mPoint2ShadowMat4;
+	mat4 mPoint2ShadowMat5;
+	mat4 mPoint3ShadowMat0;
+	mat4 mPoint3ShadowMat1;
+	mat4 mPoint3ShadowMat2;
+	mat4 mPoint3ShadowMat3;
+	mat4 mPoint3ShadowMat4;
+	mat4 mPoint3ShadowMat5;
+	mat4 mSpot0ShadowMat;
+	mat4 mSpot1ShadowMat;
+	mat4 mSpot2ShadowMat;
+	mat4 mSpot3ShadowMat;
+} light_;
+
+uniform struct Material_ {
+	sampler2D mNormal0;
+
+	sampler2D mDiffuse0;
+	sampler2D mDiffuse1;
+	sampler2D mDiffuse2;
+	sampler2D mDiffuse3;
+
+	sampler2D mSpecular0;
+	sampler2D mSpecular1;
+	sampler2D mSpecular2;
+	sampler2D mSpecular3;
+	float mShininess;
+} material_;
+
+in V_OUT_ {
+	vec3 mNormal;
+    vec4 mMVPPos;
+    vec3 mMVPos;
+    vec3 mMPos;
+    vec2 mUV;
+} v_out_;
+
+out vec4 color_;
+
+#define CAL_PLANE_SHADOW(outvar, shadowMat, shadowTex)		   {\
+		vec2 offset = 1.0f / textureSize(shadowTex, 0);			\
+		vec4 coord = shadowMat * vec4(v_out_.mMPos, 1);			\
+		coord.xyz = coord.xyz / coord.w * 0.5f + 0.5f;			\
+		float depth = 0.0f;										\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x,  offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x,	   0.0f)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(-offset.x, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2(		0.0f, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		depth = texture(shadowTex, coord.xy + vec2( offset.x, -offset.y)).r; outvar += (depth == 0.0f || depth > coord.z)? 1.0f: 0.0f;	\
+		outvar = outvar / 9.0f;	}
+
+
+
+float CalculateDirectShadow(const int i)
+{
+	float shadow = 0.0f;
+	switch (i)
+	{
+	case 0: CAL_PLANE_SHADOW(shadow, light_.mDirect0ShadowMat, light_.mDirect0ShadowTex); break;
+	case 1: CAL_PLANE_SHADOW(shadow, light_.mDirect1ShadowMat, light_.mDirect1ShadowTex); break;
+	}
+	return shadow;
+}
+
+int CheckInView(const vec4 pos)
+{
+	return pos.x < -pos.w || pos.x > pos.w ||
+		   pos.y < -pos.w || pos.y > pos.w ||
+		   pos.z < -pos.w || pos.z > pos.w? 0: 1;
+}
+
+#define CAL_CUBE_SHADOW(outvar, shadowMat, shadowTex, normal)	{				\
+	vec4 pos = shadowMat * vec4(v_out_.mMPos, 1);								\
+	if (CheckInView(pos) == 1) {												\
+		pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;								\
+		float d = texture(shadowTex, normal).r;									\
+		outvar = pos.z < d? 1.0f: 0.0f; break;									\
+	}																			\
+}
+
+float CalculatePointShadow(const int i)
+{
+	float shadow = 0.0f;
+	vec3 normal = normalize(v_out_.mMPos - light_.mPoints[i].mPosition);
+	switch (i)
+	{
+	case 0: 
+		{
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat0, light_.mPoint0ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat1, light_.mPoint0ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat2, light_.mPoint0ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat3, light_.mPoint0ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat4, light_.mPoint0ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint0ShadowMat5, light_.mPoint0ShadowTex, normal);
+		}
+		break;
+	case 1:
+		{
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat0, light_.mPoint1ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat1, light_.mPoint1ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat2, light_.mPoint1ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat3, light_.mPoint1ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat4, light_.mPoint1ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint1ShadowMat5, light_.mPoint1ShadowTex, normal);
+		}
+		break;
+	case 2:
+		{
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat0, light_.mPoint2ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat1, light_.mPoint2ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat2, light_.mPoint2ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat3, light_.mPoint2ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat4, light_.mPoint2ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint2ShadowMat5, light_.mPoint2ShadowTex, normal);
+		}
+		break;
+	case 3:
+		{
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat0, light_.mPoint3ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat1, light_.mPoint3ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat2, light_.mPoint3ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat3, light_.mPoint3ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat4, light_.mPoint3ShadowTex, normal);
+			CAL_CUBE_SHADOW(shadow, light_.mPoint3ShadowMat5, light_.mPoint3ShadowTex, normal);
+		}
+	break;
+	}
+	return shadow;
+}
+
+float CalculateSpotShadow(const int i)
+{
+	float shadow = 0.0f;
+	switch (i)
+	{
+	case 0: CAL_PLANE_SHADOW(shadow, light_.mSpot0ShadowMat, light_.mSpot0ShadowTex); break;
+	case 1: CAL_PLANE_SHADOW(shadow, light_.mSpot1ShadowMat, light_.mSpot1ShadowTex); break;
+	case 2: CAL_PLANE_SHADOW(shadow, light_.mSpot2ShadowMat, light_.mSpot2ShadowTex); break;
+	case 3: CAL_PLANE_SHADOW(shadow, light_.mSpot3ShadowMat, light_.mSpot3ShadowTex); break;
+	}
+	return shadow;
+}
+
+vec3 CalculateDirect(const int i, vec3 fragNormal, vec3 viewNormal)
+{
+	float shadow = CalculateDirectShadow(i);
+
+	vec3 center = (-light_.mDirects[i].mNormal + viewNormal) * 0.5;
+	float diff	= max(0, dot(fragNormal, -light_.mDirects[i].mNormal));
+	float spec	= pow(max(0, dot(fragNormal, center)), material_.mShininess);
+
+	vec3 ambient = light_.mDirects[i].mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
+	vec3 diffuse = light_.mDirects[i].mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
+	vec3 specular = light_.mDirects[i].mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+	return ambient + diffuse * shadow + specular * shadow;
+}
+
+vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 viewNormal)
+{
+	float shadow = CalculatePointShadow(i);
+
+	vec3 lightNormal = normalize(light_.mPoints[i].mPosition - v_out_.mMPos);
+	vec3 center = (lightNormal + viewNormal) * 0.5;
+	float diff = max(0, dot(fragNormal, lightNormal));
+	float spec = pow(max(0, dot(fragNormal, center)), material_.mShininess);
+
+	vec3 ambient = light_.mPoints[i].mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
+	vec3 diffuse = light_.mPoints[i].mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
+	vec3 specular = light_.mPoints[i].mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+
+	float distance = length(light_.mPoints[i].mPosition - v_out_.mMPos);
+	float weight = 1 / (light_.mPoints[i].mK0 + light_.mPoints[i].mK1 * distance + light_.mPoints[i].mK2 * distance * distance);
+
+	return (ambient + diffuse * shadow + specular * shadow) * weight;
+}
+
+vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 viewNormal)
+{
+	vec3 lightNormal	= normalize(light_.mSpots[i].mPosition - v_out_.mMPos);
+	float fragCone		= max(0, dot(lightNormal, -light_.mSpots[i].mNormal));
+	float diffCone		= light_.mSpots[i].mInCone - light_.mSpots[i].mOutCone;
+	float cutWeight		= clamp((fragCone - light_.mSpots[i].mOutCone) / diffCone, 0, 1);
+	if (cutWeight == 0) { return vec3(0, 0, 0); }
+
+	float shadow = CalculateSpotShadow(i);
+
+	vec3 center = (lightNormal + viewNormal) * 0.5;
+	float diff = max(0, dot(fragNormal, lightNormal));
+	float spec = pow(max(0, dot(fragNormal, center)), material_.mShininess);
+
+	vec3 ambient = light_.mSpots[i].mAmbient * texture(material_.mDiffuse0, v_out_.mUV).rgb;
+	vec3 diffuse = light_.mSpots[i].mDiffuse * texture(material_.mDiffuse0, v_out_.mUV).rgb * diff;
+	vec3 specular = light_.mSpots[i].mSpecular * texture(material_.mSpecular0, v_out_.mUV).rgb * spec;
+
+	float distance = length(light_.mSpots[i].mPosition - v_out_.mMPos);
+	float weight = 1 / (light_.mSpots[i].mK0 + light_.mSpots[i].mK1 * distance + light_.mSpots[i].mK2 * distance * distance);
+
+	return (ambient + diffuse * shadow + specular * shadow) * weight * cutWeight;
+}
+
+void main()
+{
+	vec3 outColor = vec3(0, 0, 0);
+	vec3 viewNormal = normalize(camera_pos_ - v_out_.mMPos);
+	for (int i = 0; i != light_.mDirectNum; ++i)
+	{
+		outColor += CalculateDirect(i, v_out_.mNormal, viewNormal);
+	}
+
+	for (int i = 0; i != light_.mPointNum; ++i)
+	{
+		outColor += CalculatePoint(i, v_out_.mNormal, viewNormal);
+	}
+
+	for (int i = 0; i != light_.mSpotNum; ++i)
+	{
+		outColor += CalculateSpot(i, v_out_.mNormal, viewNormal);
+	}
+	
+	color_ = vec4(outColor, 0);
+}
