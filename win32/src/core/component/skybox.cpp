@@ -88,6 +88,11 @@ void Skybox::BindShader(const std::string & url)
 	_shader = File::LoadShader(url);
 }
 
+void Skybox::BindBitmapCube(const BitmapCube * cube)
+{
+	_bitmapCube = cube;
+}
+
 void Skybox::BindBitmapCube(const std::string & url)
 {
 	_bitmapCube = File::LoadBitmapCube(url);

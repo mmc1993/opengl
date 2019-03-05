@@ -16,13 +16,14 @@ public:
 	void BindShader(const std::string & url);
 	Shader * GetShader() { return _shader; }
 	
+	void BindBitmapCube(const BitmapCube * cube);
 	void BindBitmapCube(const std::string & url);
-	BitmapCube * GetBitmapCube() { return _bitmapCube; }
+	const BitmapCube * GetBitmapCube() { return _bitmapCube; }
 
 private:
 	GLuint _vao;
 	GLuint _vbo;
 	GLuint _ebo;
 	Shader * _shader;
-	BitmapCube * _bitmapCube;
+	const BitmapCube * _bitmapCube;
 };
