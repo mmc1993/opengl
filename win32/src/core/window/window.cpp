@@ -5,6 +5,7 @@
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../object/object.h"
+#include "../tools/time_tool.h"
 
 Window::Window()
     : _window(nullptr)
@@ -63,9 +64,10 @@ void Window::Move(size_t x, size_t y, size_t w, size_t h)
     glfwSetWindowSize(_window, static_cast<int>(w), static_cast<int>(h));
 }
 
-void Window::SetFPS(size_t ms)
+void Window::SetFPS(size_t fps)
 {
-    _renderInfo.renderCD = std::chrono::milliseconds(1000 / ms);
+	_renderInfo.renderFPS = fps;
+    _renderInfo.renderCD = 1.0f / fps;
 }
 
 size_t Window::GetX() const
@@ -112,26 +114,24 @@ void Window::Loop()
     glfwSetWindowCloseCallback(_window, Window::OnClose);
 
     //  初始化各项数据
-    _renderInfo.renderTM = std::chrono::high_resolution_clock::now();
+    _renderInfo.renderTime = time_tool::Now();
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
 }
 
 void Window::Update()
 {
-    auto now = std::chrono::high_resolution_clock::now();
-    if (now >= _renderInfo.renderTM)
+    auto nowtime = time_tool::Now();
+    if (nowtime >= _renderInfo.renderTime + _renderInfo.renderCD)
     {
-        glfwPollEvents();
-        auto diffTM= now - _renderInfo.renderTM;
-        diffTM += std::chrono::milliseconds(16);
-        _renderInfo.renderTM += _renderInfo.renderCD;
-		mmc::mTimer.Update(now);
-        mmc::mRoot.Update(std::chrono::duration_cast
-            <std::chrono::milliseconds>
-            (diffTM).count() * 0.001f);
+		auto difftime = (nowtime - _renderInfo.renderTime) / _renderInfo.renderCD;
+		_renderInfo.renderTime = time_tool::Now(_renderInfo.renderCD);
+		glfwPollEvents();
+		mmc::mTimer.Update(nowtime);
+		mmc::mRoot.Update(difftime);
         mmc::mRender.RenderOnce();
         glfwSwapBuffers(_window);
+		std::cout << "fps: " << difftime << std::endl;
     }
 }
 

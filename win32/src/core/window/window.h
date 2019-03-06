@@ -5,10 +5,9 @@
 class Window {
 public:
     struct RenderInfo {
-        //  下一次渲染时间
-        std::chrono::high_resolution_clock::time_point renderTM;
-        //  每帧渲染CD
-        std::chrono::milliseconds renderCD;
+		size_t renderFPS;
+		float renderTime;
+		float renderCD;
     };
 
 public:
@@ -40,7 +39,7 @@ public:
     void Move(size_t x, size_t y);
     void Move(size_t x, size_t y, size_t w);
     void Move(size_t x, size_t y, size_t w, size_t h);
-    void SetFPS(size_t ms);
+    void SetFPS(size_t fps);
     size_t GetX() const;
     size_t GetY() const;
     size_t GetW() const;

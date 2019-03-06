@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include.h"
+#include "../tools/time_tool.h"
 
 class Timer {
 private:
@@ -9,16 +10,16 @@ private:
 public:
     struct Task {
         size_t mID;
-        std::function<void()> mCall;
-        std::chrono::time_point<std::chrono::high_resolution_clock> mTime;
-
-        Task()
+		float mTime;
+		std::function<void()> mCall;
+        
+		Task()
         { }
 
         Task(size_t id, 
-            const std::function<void()> & call, 
-            const std::chrono::time_point<std::chrono::high_resolution_clock> & time)
-            : mID(id), mCall(call), mTime(time)
+			 const float time,
+             const std::function<void()> & call)
+            : mID(id), mTime(time), mCall(call)
         { }
 
         bool operator ==(size_t id) const
@@ -54,7 +55,7 @@ public:
     ~Timer()
     { }
     
-    void Update(const std::chrono::time_point<std::chrono::high_resolution_clock> & time)
+    void Update(const float time)
     {
         while (!_tasks.empty() && _tasks.front().mTime <= time)
         {
@@ -67,11 +68,9 @@ public:
         }
     }
 
-    size_t Add(size_t ms, const std::function<void()> & func)
+    size_t Add(float time, const std::function<void()> & func)
     {
-        _tasks.emplace_back(Timer::s_countID, func, 
-            std::chrono::high_resolution_clock::now() + 
-            std::chrono::milliseconds(ms));
+		_tasks.emplace_back(Timer::s_countID, time_tool::Now(time), func);
         std::push_heap(_tasks.begin(), _tasks.end());
         return Timer::s_countID++;
     }
@@ -82,9 +81,7 @@ public:
         if (it != std::end(_tasks))
         {
             _tasks.erase(it);
-            std::make_heap(
-                std::begin(_tasks), 
-                std::end(_tasks));
+            std::make_heap(std::begin(_tasks), std::end(_tasks));
         }
     }
 

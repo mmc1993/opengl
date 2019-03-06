@@ -97,7 +97,7 @@ private:
 
 	void InitEvents()
 	{
-		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
+		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 		mmc::mEvent.Add(Window::EventType::kKEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
 		mmc::mEvent.Add(Window::EventType::kMOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
 		mmc::mEvent.Add(Window::EventType::kMOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
@@ -109,7 +109,7 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			//{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
+			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
@@ -119,7 +119,7 @@ private:
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			//{ glm::vec3(0, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			{ glm::vec3(0, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -173,9 +173,9 @@ private:
 			object->SetParent(&mmc::mRoot);
 			_lightSpots.push_back(light);
 		}
-		//_lightDirects.at(0)->OpenShadow(800, 600, -50, 50, -50, 50, -10, 1000, glm::vec3(0, 0, -1));
-		//_lightSpots.at(0)->OpenShadow(800, 600, 1, 1000, glm::vec3(0, 0, -1));
-		_lightPoints.at(0)->OpenShadow(800, 800, 1, 1000);
+		_lightDirects.at(0)->OpenShadow(512, 512, -50, 50, -50, 50, -10, 1000, glm::vec3(0, 0, -1));
+		_lightSpots.at(0)->OpenShadow(512, 512, 1, 1000, glm::vec3(0, 0, -1));
+		_lightPoints.at(0)->OpenShadow(512, 512, 1, 1000);
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -247,7 +247,7 @@ private:
 			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
 			camera->SetPos(pos);
 		}
-		mmc::mTimer.Add(16, std::bind(&AppWindow::OnTimerUpdate, this));
+		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
 private:
