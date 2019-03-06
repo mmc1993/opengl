@@ -56,8 +56,14 @@ public:
 					const float orthoZMin, const float orthoZMax,
 					const glm::vec3 &up);
 	void HideShadow();
-	const glm::mat4 & GetShadowMat() const;
-	const Bitmap * GetShadowTex() const;
+	const glm::mat4 & GetShadowMat() const
+	{
+		return _shadowMat;
+	}
+	const Bitmap * GetShadowTex() const
+	{
+		return _shadowTex;
+	}
 	virtual void DrawShadow() override;
 
 public:
@@ -91,8 +97,15 @@ public:
 					const std::uint32_t depthH, 
 					const float n, const float f);
 	void HideShadow();
-	const BitmapCube * GetShadowTex() const;
-	const glm::mat4 & GetShadowMat() const;
+	const BitmapCube * GetShadowTex() const
+	{
+		return _shadowTex;
+	}
+
+	const glm::mat4 & GetShadowMat(size_t i) const
+	{
+		return _shadowMat[i];
+	}
 	virtual void DrawShadow() override;
 
 public:
@@ -104,6 +117,7 @@ private:
 private:
 	RenderTarget * _shadowRT;
 	BitmapCube * _shadowTex;
+	glm::mat4 _shadowMat[6];
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
 	glm::mat4 _proj;
@@ -126,8 +140,14 @@ public:
 					const float n, const float f,
 					const glm::vec3 & up);
 	void HideShadow();
-	const glm::mat4 & GetShadowMat() const;
-	const Bitmap * GetShadowTex() const;
+	const glm::mat4 & GetShadowMat() const
+	{
+		return _shadowMat;
+	}
+	const Bitmap * GetShadowTex() const
+	{
+		return _shadowTex;
+	}
 	virtual void DrawShadow() override;
 
 public:

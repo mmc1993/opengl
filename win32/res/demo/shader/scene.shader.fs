@@ -20,7 +20,12 @@ struct LightPoint_ {
 	vec3 mAmbient;
 	vec3 mDiffuse;
 	vec3 mSpecular;
-	mat4 mShadowMat;
+	mat4 mShadowMat0;
+	mat4 mShadowMat1;
+	mat4 mShadowMat2;
+	mat4 mShadowMat3;
+	mat4 mShadowMat4;
+	mat4 mShadowMat5;
 	samplerCube mShadowTex;
 };
 
@@ -120,13 +125,23 @@ float CalculateSpotShadow(const int i)
 	return shadow / 9.0f;
 }
 
+vec4 CalculatePointNDC(const int i, vec4 pos)
+{
+	vec4 ndc = light_.mPoints[i].mShadowMat0 * pos; if (CheckInView(ndc) == 0) return ndc;
+		 ndc = light_.mPoints[i].mShadowMat1 * pos; if (CheckInView(ndc) == 0) return ndc;
+		 ndc = light_.mPoints[i].mShadowMat2 * pos; if (CheckInView(ndc) == 0) return ndc;
+		 ndc = light_.mPoints[i].mShadowMat3 * pos; if (CheckInView(ndc) == 0) return ndc;
+		 ndc = light_.mPoints[i].mShadowMat4 * pos; if (CheckInView(ndc) == 0) return ndc;
+		 ndc = light_.mPoints[i].mShadowMat5 * pos; if (CheckInView(ndc) == 0) return ndc;
+	return ndc;
+}
+
 float CalculatePointShadow(const int i)
 {
 	vec3 normal = v_out_.mMPos - light_.mPoints[i].mPosition;
-	vec4 sampla = vec4(0, 0, -abs(normal.z), 1);
-		 sampla = light_.mPoints[i].mShadowMat * sampla;
-		 sampla.z =	  sampla.z / sampla.w * 0.5f + 0.5f;
+	vec4 sampla = CalculatePointNDC(i, vec4(v_out_.mMPos,1));
 	float depth = texture(light_.mPoints[i].mShadowTex, normalize(normal)).r;
+	sampla.z = sampla.z / sampla.w * 0.5f + 0.5f;
 	return sampla.z < depth? 1: 0;
 }
 

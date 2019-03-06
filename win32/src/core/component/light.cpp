@@ -146,16 +146,6 @@ void LightDirect::HideShadow()
 	delete _shadowRT; _shadowRT = nullptr;
 }
 
-const glm::mat4 & LightDirect::GetShadowMat() const
-{
-	return _shadowMat;
-}
-
-const Bitmap * LightDirect::GetShadowTex() const
-{
-	return _shadowTex;
-}
-
 void LightDirect::DrawShadow()
 {
 	if (_shadowTex != nullptr)
@@ -215,16 +205,6 @@ void LightPoint::HideShadow()
 	delete _shadowRT; _shadowRT = nullptr;
 }
 
-const BitmapCube * LightPoint::GetShadowTex() const
-{
-	return _shadowTex;
-}
-
-const glm::mat4 & LightPoint::GetShadowMat() const
-{
-	return _proj;
-}
-
 void LightPoint::DrawShadow()
 {
 	if (_shadowTex != nullptr)
@@ -258,6 +238,8 @@ void LightPoint::DrawShadow()
 
 void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 {
+	_shadowMat[idx - RenderTarget::TextureType::k3D_RIGHT] = _proj * view;
+
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
 	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
@@ -298,16 +280,6 @@ void LightSpot::HideShadow()
 {
 	delete _shadowTex; _shadowTex = nullptr;
 	delete _shadowRT; _shadowRT = nullptr;
-}
-
-const glm::mat4 & LightSpot::GetShadowMat() const
-{
-	return _shadowMat;
-}
-
-const Bitmap * LightSpot::GetShadowTex() const
-{
-	return _shadowTex;
 }
 
 void LightSpot::DrawShadow()
