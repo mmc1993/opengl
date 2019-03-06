@@ -95,10 +95,14 @@ public:
 		size_t mTexCount;
 		Camera * mCamera;
 		Shader * mShader;
+		size_t mVertexCount;
+		size_t mRenderCount;
 		RenderInfo()
 			: mTexCount(0)
 			, mCamera(nullptr)
 			, mShader(nullptr)
+			, mVertexCount(0)
+			, mRenderCount(0)
 		{ }
 	};
 
@@ -144,6 +148,11 @@ public:
 	void BindTexture(const std::string & key, const BitmapCube * val);
 
 	void PostCommand(const Command & command);
+
+	const RenderInfo & GetRenderInfo() const
+	{
+		return _renderInfo;
+	}
 
 private:
 	glm::mat4 GetMatrixMVP() const;

@@ -188,24 +188,28 @@ Render::Matrix & Render::GetMatrix()
 void Render::RenderVexInst(GLuint vao, size_t count, size_t instanceCount)
 {
 	RenderVAO(vao);
+	_renderInfo.mVertexCount += count * instanceCount;
 	glDrawArraysInstanced(GL_TRIANGLES, 0, count, instanceCount);
 }
 
 void Render::RenderIdxInst(GLuint vao, size_t count, size_t instanceCount)
 {
 	RenderVAO(vao);
+	_renderInfo.mVertexCount += count * instanceCount;
 	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, instanceCount);
 }
 
 void Render::RenderVex(GLuint vao, size_t count)
 {
 	RenderVAO(vao);
+	_renderInfo.mVertexCount += count;
 	glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
 void Render::RenderIdx(GLuint vao, size_t count)
 {
 	RenderVAO(vao);
+	_renderInfo.mVertexCount += count;
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 }
 
@@ -235,6 +239,8 @@ void Render::RenderOnce()
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
+	_renderInfo.mVertexCount = 0;
+	_renderInfo.mRenderCount = 0;
 	for (auto light : _lights)
 	{
 		light->DrawShadow();
@@ -299,6 +305,7 @@ void Render::RenderVAO(GLuint vao)
 		_renderInfo.mShader->SetUniform("camera_pos_", _renderInfo.mCamera->GetPos());
 		_renderInfo.mShader->SetUniform("camera_eye_", _renderInfo.mCamera->GetPos());
 	}
+	++_renderInfo.mRenderCount;
 }
 
 void Render::CommandTransform::Post(size_t cameraFlag, const glm::mat4 & mat)

@@ -3,6 +3,7 @@
 #include "../event/event.h"
 #include "../timer/timer.h"
 #include "../asset/shader.h"
+#include "../third/sformat.h"
 #include "../render/render.h"
 #include "../object/object.h"
 #include "../tools/time_tool.h"
@@ -131,7 +132,12 @@ void Window::Update()
 		mmc::mRoot.Update(difftime);
         mmc::mRender.RenderOnce();
         glfwSwapBuffers(_window);
-		std::cout << "fps: " << difftime << std::endl;
+
+		std::cout <<
+			SFormat("FPS: {0} \nRenderCount: {1} \nmVertexCount: {2}", difftime,
+					mmc::mRender.GetRenderInfo().mRenderCount,
+					mmc::mRender.GetRenderInfo().mVertexCount)
+			<< std::endl;
     }
 }
 

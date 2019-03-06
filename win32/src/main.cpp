@@ -65,7 +65,8 @@ private:
 	{
 		auto modelScene = File::LoadModel("res/demo/scene.obj");
 
-		std::function<void(Model *, Object *)> createScene;
+		std::function<Object * (Model *, Object *)> createScene;
+
 		createScene = [&createScene](Model * model, Object * parent) {
 			auto sprite = new Sprite();
 			sprite->BindShader("res/demo/shader/scene.shader");
@@ -82,6 +83,7 @@ private:
 			{
 				createScene(model->mChilds.at(i), object);
 			}
+			return object;
 		};
 		createScene(modelScene, &mmc::mRoot);
 	}
@@ -268,7 +270,7 @@ int main()
 {
     AppWindow app;
     app.Create("xxx");
-    app.Move(200, 100, 512, 512);
+    app.Move(200, 100, 1024, 640);
     app.InitGame();
     app.SetFPS(60);
     app.Loop();
