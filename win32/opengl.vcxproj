@@ -292,6 +292,7 @@
     <ClInclude Include="src\core\timer\timer.h" />
     <ClInclude Include="src\core\tools\debug_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
+    <ClInclude Include="src\core\tools\time_tool.h" />
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
