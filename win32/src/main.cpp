@@ -173,7 +173,7 @@ private:
 
 	void OnKeyEvent(const std::any & any)
 	{
-		auto & param = std::any_cast<Window::EventKeyParam>(any);
+		auto & param = std::any_cast<const Window::EventKeyParam &>(any);
 		_direct = param.act == 1 && param.key == 'W' ? _direct | kFRONT :
 				  param.act == 0 && param.key == 'W' ? _direct ^ kFRONT : _direct;
 		
