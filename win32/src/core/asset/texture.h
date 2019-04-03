@@ -29,7 +29,7 @@ public:
     float GetY() const { return _y; }
     float GetW() const { return _w; }
     float GetH() const { return _h; }
-    const Bitmap * GetBitmap() const { return _bitmap; }
+    Bitmap * GetBitmap() { return _bitmap; }
 
     void BindBitmap(Bitmap * bitmap)
     {

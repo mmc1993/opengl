@@ -77,6 +77,11 @@ void Shader::SetUniform(size_t idx, float val)
     glUniform1f(static_cast<GLint>(idx), val);
 }
 
+void Shader::SetUniform(size_t idx, double val)
+{
+    glUniform1f(static_cast<GLint>(idx), static_cast<float>(val));
+}
+
 void Shader::SetUniform(size_t idx, const glm::vec3 & val)
 {
     glUniform3f(static_cast<GLint>(idx), val.x, val.y, val.z);
@@ -124,6 +129,11 @@ void Shader::SetUniform(const std::string & key, int val)
 }
 
 void Shader::SetUniform(const std::string & key, float val)
+{
+    SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
+}
+
+void Shader::SetUniform(const std::string & key, double val)
 {
     SetUniform(glGetUniformLocation(_GLID, key.c_str()), val);
 }

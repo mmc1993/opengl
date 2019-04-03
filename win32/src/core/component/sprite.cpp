@@ -38,9 +38,9 @@ void Sprite::OnUpdate(float dt)
 			{
 				mmc::mRender.BindTexture(SFormat("material_.mDiffuse{0}", j), _mates.at(i).mDiffuses.at(j));
 			}
-			if (_mates.at(i).mParallax.GetBitmap() != nullptr)
+			if (_mates.at(i).mHeight.GetBitmap() != nullptr)
 			{
-				mmc::mRender.BindTexture("material_.mParallax", _mates.at(i).mParallax);
+				mmc::mRender.BindTexture("material_.mParallax", _mates.at(i).mHeight);
 			}
 			if (_mates.at(i).mSpecular.GetBitmap() != nullptr)
 			{

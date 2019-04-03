@@ -295,7 +295,8 @@ void Render::RenderVAO(GLuint vao)
 		BindTexture("skybox_", skybox->GetBitmapCube());
 	}
 	_renderInfo.mShader->SetUniform("matrix_n_", GetMatrixN());
-	_renderInfo.mShader->SetUniform("matrix_p_", _matrix.GetP());
+    _renderInfo.mShader->SetUniform("game_time_", glfwGetTime());
+    _renderInfo.mShader->SetUniform("matrix_p_", _matrix.GetP());
 	_renderInfo.mShader->SetUniform("matrix_v_", _matrix.GetV());
 	_renderInfo.mShader->SetUniform("matrix_m_", _matrix.GetM());
 	_renderInfo.mShader->SetUniform("matrix_mv_", GetMatrixMV());

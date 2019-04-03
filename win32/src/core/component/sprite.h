@@ -11,7 +11,7 @@ public:
 	struct BlendFunc {
 		GLenum mSrc;
 		GLenum mDst;
-		BlendFunc() : mSrc(GL_ONE), mDst(GL_ZERO) { }
+		BlendFunc() : mSrc(GL_SRC_ALPHA), mDst(GL_ONE_MINUS_SRC_ALPHA) { }
 		BlendFunc(GLenum src, GLenum dst): mSrc(src), mDst(dst) { }
 	};
 public:
