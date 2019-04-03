@@ -157,20 +157,20 @@ void Render::Bind(Camera * camera)
 	if (camera != nullptr)
 	{
 		_renderInfo.mCamera = camera;
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, camera->GetView());
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, camera->GetProject());
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, camera->GetView());
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, camera->GetProject());
 		glViewport((int)camera->GetViewport().x, (int)camera->GetViewport().y, 
 				   (int)camera->GetViewport().z, (int)camera->GetViewport().w);
 	}
 	else
 	{
 		_renderInfo.mCamera = nullptr;
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
 	}
 }
 
@@ -180,7 +180,7 @@ void Render::PostCommand(const Command & command)
 	_commands.push_back(command);
 }
 
-Render::Matrix & Render::GetMatrix()
+RenderMatrix & Render::GetMatrix()
 {
 	return _matrix;
 }
@@ -314,8 +314,8 @@ void Render::CommandTransform::Post(size_t cameraFlag, const glm::mat4 & mat)
 	Command command;
 	command.mCameraFlag = cameraFlag;
 	command.mCallFn = [mat]() {
-		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, mat);
+		mmc::mRender.GetMatrix().Push(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kMODEL, mat);
 	};
 	mmc::mRender.PostCommand(command);
 }
@@ -325,7 +325,7 @@ void Render::CommandTransform::Free(size_t cameraFlag)
 	Command command;
 	command.mCameraFlag = cameraFlag;
 	command.mCallFn = []() {
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	};
 	mmc::mRender.PostCommand(command);
 }

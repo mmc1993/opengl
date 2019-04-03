@@ -161,11 +161,11 @@ void LightDirect::DrawShadow()
 		_shadowMat = proj * view;
 
 		glViewport(0, 0, _depthW, _depthH);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -173,9 +173,9 @@ void LightDirect::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}
 }
 
@@ -240,11 +240,11 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 {
 	_shadowMat[idx - RenderTarget::TextureType::k3D_RIGHT] = _proj * view;
 
-	mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
-	mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
-	mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-	mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-	mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, _proj);
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
+	mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, _proj);
 
 	_shadowRT->Beg();
 	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
@@ -255,9 +255,9 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 	glCullFace(GL_BACK);
 	_shadowRT->End();
 
-	mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
-	mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
-	mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 }
 
 void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f, const glm::vec3 & up)
@@ -293,11 +293,11 @@ void LightSpot::DrawShadow()
 		_shadowMat = proj * view;
 
 		glViewport(0, 0, _depthW, _depthH);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -305,8 +305,8 @@ void LightSpot::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kPROJECT);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}
 }

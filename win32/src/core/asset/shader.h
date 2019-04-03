@@ -1,12 +1,23 @@
 #pragma once
 
 #include "asset.h"
+#include "../render/render_type.h"
 
-class Texture;
 class Bitmap;
+class Texture;
 class BitmapCube;
 
 class Shader: public Asset {
+public:
+    struct Info {
+        //  开启混合
+        //  模板测试
+        //  深度测试
+        //  深度写入
+        //  渲染通道
+        //  渲染类型
+    };
+
 public:
     Shader(const std::string & vs, const std::string & fs, const std::string & gs = std::string());
     ~Shader();
@@ -33,8 +44,8 @@ public:
 	void SetUniform(const std::string & key, const Texture & val, size_t pos);
 	void SetUniform(const std::string & key, const BitmapCube * val, size_t pos);
 
-    GLuint GetGLID() const 
-	{ 
+    GLuint GetGLID() const
+	{
 		assert(_GLID != 0);
 		return _GLID; 
 	}

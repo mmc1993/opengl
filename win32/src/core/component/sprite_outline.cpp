@@ -30,14 +30,14 @@ void SpriteOutline::OnUpdate(float dt)
 	command2.mCameraFlag = GetOwner()->GetCameraFlag();
 	command2.mCallFn = [this]() {
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		mmc::mRender.GetMatrix().Push(Render::Matrix::kMODEL);
-		mmc::mRender.GetMatrix().Mul(Render::Matrix::kMODEL, glm::scale(glm::mat4(1), glm::vec3(_width)));
+		mmc::mRender.GetMatrix().Push(RenderMatrix::kMODEL);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kMODEL, glm::scale(glm::mat4(1), glm::vec3(_width)));
 		mmc::mRender.Bind(_outline);
 		for (auto i = 0; i != _meshs.size(); ++i)
 		{
 			mmc::mRender.RenderIdx(_meshs.at(i)->GetGLID(), _meshs.at(i)->GetIdxCount());
 		}
-		mmc::mRender.GetMatrix().Pop(Render::Matrix::kMODEL);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 		glDisable(GL_STENCIL_TEST);
 	};
 	mmc::mRender.PostCommand(command2);

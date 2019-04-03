@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include.h"
+#include "render_type.h"
 
 class Light;
 class Camera;
@@ -11,72 +12,6 @@ class Texture;
 
 class Render {
 public:
-	class Matrix {
-	public:
-		enum ModeType { kPROJECT, kVIEW, kMODEL, };
-
-	public:
-		Matrix()
-		{ }
-
-		~Matrix()
-		{ }
-
-		void Pop(ModeType mode)
-		{
-			GetStack(mode).pop();
-		}
-
-		void Push(ModeType mode)
-		{
-			GetStack(mode).push(GetStack(mode).top());
-		}
-
-		void Identity(ModeType mode)
-		{
-			GetStack(mode).push(glm::mat4(1));
-		}
-
-		void Mul(ModeType mode, const glm::mat4 & mat)
-		{
-			GetStack(mode).top() *= mat;
-		}
-
-		const glm::mat4 & Top(ModeType mode) const
-		{
-			return GetStack(mode).top();
-		}
-
-		const glm::mat4 & GetM() const
-		{
-			return Top(ModeType::kMODEL);
-		}
-
-		const glm::mat4 & GetV() const
-		{
-			return Top(ModeType::kVIEW);
-		}
-
-		const glm::mat4 & GetP() const
-		{
-			return Top(ModeType::kPROJECT);
-		}
-
-	private:
-		std::stack<glm::mat4> & GetStack(ModeType mode)
-		{
-			return _matrixs.at((size_t)mode);
-		}
-
-		const std::stack<glm::mat4> & GetStack(ModeType mode) const
-		{
-			return const_cast<Matrix *>(this)->GetStack(mode);
-		}
-
-	private:
-		std::array<std::stack<glm::mat4>, 3> _matrixs;
-	};
-
     struct CameraInfo {
 		enum Flag {
 			kFlag0 = 0x1,	kFlag1 = 0x2,	kFlag2 = 0x4,	kFlag3 = 0x8,
@@ -122,7 +57,7 @@ public:
     Render();
     ~Render();
 
-	Matrix & GetMatrix();
+	RenderMatrix & GetMatrix();
 
 	void Bind(Shader * shader);
 	void Bind(Camera * camera);
@@ -161,7 +96,7 @@ private:
 	void RenderVAO(GLuint vao);
 
 private:
-	Matrix _matrix;
+    RenderMatrix _matrix;
 	RenderInfo _renderInfo;
 	std::vector<Light *> _lights;
     std::vector<Command> _commands;
