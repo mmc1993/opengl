@@ -33,24 +33,156 @@ Shader * File::LoadShader(const std::string & url)
 {
 	CHECK_RET(!mmc::mAssetCore.IsReg(url), mmc::mAssetCore.Get<Shader>(url));
 
-	auto vs = url + ".vs";
-	auto fs = url + ".fs";
-	auto gs = url + ".gs";
-	std::ifstream vfile(vs);
-	std::ifstream ffile(fs);
-	std::ifstream gfile(gs);
-	ASSERT_RET(vfile && ffile, nullptr);
-	std::stringstream vss, fss, gss;
-	vss << vfile.rdbuf();
-	fss << ffile.rdbuf();
-	gss << gfile.rdbuf();
-	vfile.close();
-	ffile.close();
-	gfile.close();
-	auto shader = new Shader(vss.str(), fss.str(), gss.str());
-	mmc::mAssetCore.Reg(url, shader);
-	assert(shader->GetGLID());
-	return shader;
+    std::ifstream ifile(url);
+    ASSERT_RET(ifile, nullptr);
+
+    auto shader = new Shader();
+    std::string line;
+    std::string word;
+    std::string value;
+    std::stringstream sstream;
+    while (std::getline(ifile, line))
+    {
+        if (line == "Pass")
+        {
+            Shader::Pass pass;
+            std::string fs, vs, gs;
+            while (std::getline(ifile, line) && line != "End Pass")
+            {
+                sstream.str(line);
+                sstream >> word;
+                if (word == "CullFace")
+                {
+                    pass.bCullFace = true;
+                    
+                    sstream >> value;
+                    if (value == "Front") { pass.vCullFace = GL_FRONT; }
+                    else if (value == "Back") { pass.vCullFace = GL_BACK; }
+                    else if (value == "FrontBack") { pass.vCullFace = GL_FRONT_AND_BACK; }
+                }
+                else if (word == "Blend")
+                {
+                    pass.bBlend = true;
+
+                    sstream >> value;
+                    if (value == "Zero") { pass.vBlendSrc = GL_ZERO; }
+                    else if (value == "One") { pass.vBlendSrc = GL_ONE; }
+                    else if (value == "SrcColor") { pass.vBlendSrc = GL_SRC_COLOR; }
+                    else if (value == "SrcAlpha") { pass.vBlendSrc = GL_SRC_ALPHA; }
+                    else if (value == "DstAlpha") { pass.vBlendSrc = GL_DST_ALPHA; }
+                    else if (value == "OneMinusSrcColor") { pass.vBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (value == "OneMinusSrcAlpha") { pass.vBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (value == "OneMinusDstAlpha") { pass.vBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
+
+                    sstream >> value;
+                    if (value == "Zero") { pass.vBlendDst = GL_ZERO; }
+                    else if (value == "One") { pass.vBlendDst = GL_ONE; }
+                    else if (value == "SrcColor") { pass.vBlendDst = GL_SRC_COLOR; }
+                    else if (value == "SrcAlpha") { pass.vBlendDst = GL_SRC_ALPHA; }
+                    else if (value == "DstAlpha") { pass.vBlendDst = GL_DST_ALPHA; }
+                    else if (value == "OneMinusSrcColor") { pass.vBlendDst = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (value == "OneMinusSrcAlpha") { pass.vBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (value == "OneMinusDstAlpha") { pass.vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
+                }
+                else if (word == "DepthTest")
+                {
+                    pass.bDepthTest = true;
+                }
+                else if (word == "DepthWrite")
+                {
+                    pass.bDepthWrite = true;
+                }
+                else if (word == "StencilTest")
+                {
+                    pass.bStencilTest = true;
+
+                    sstream >> value;
+                    if (value == "Keep") { pass.vStencilOpFail = GL_KEEP; }
+                    else if (value == "Zero") { pass.vStencilOpFail = GL_ZERO; }
+                    else if (value == "Incr") { pass.vStencilOpFail = GL_INCR; }
+                    else if (value == "Decr") { pass.vStencilOpFail = GL_DECR; }
+                    else if (value == "Invert") { pass.vStencilOpFail = GL_INVERT; }
+                    else if (value == "Replace") { pass.vStencilOpFail = GL_REPLACE; }
+
+                    sstream >> value;
+                    if (value == "Keep") { pass.vStencilOpZFail = GL_KEEP; }
+                    else if (value == "Zero") { pass.vStencilOpZFail = GL_ZERO; }
+                    else if (value == "Incr") { pass.vStencilOpZFail = GL_INCR; }
+                    else if (value == "Decr") { pass.vStencilOpZFail = GL_DECR; }
+                    else if (value == "Invert") { pass.vStencilOpZFail = GL_INVERT; }
+                    else if (value == "Replace") { pass.vStencilOpZFail = GL_REPLACE; }
+
+                    sstream >> value;
+                    if (value == "Keep") { pass.vStencilOpZPass = GL_KEEP; }
+                    else if (value == "Zero") { pass.vStencilOpZPass = GL_ZERO; }
+                    else if (value == "Incr") { pass.vStencilOpZPass = GL_INCR; }
+                    else if (value == "Decr") { pass.vStencilOpZPass = GL_DECR; }
+                    else if (value == "Invert") { pass.vStencilOpZPass = GL_INVERT; }
+                    else if (value == "Replace") { pass.vStencilOpZPass = GL_REPLACE; }
+
+                    sstream >> value;
+                    pass.vStencilMask = std::stoi(value);
+
+                    sstream >> value;
+                    pass.vStencilRef = std::stoi(value);
+                }
+                else if (word == "RenderQueue")
+                {
+                    sstream >> value;
+                    if (value == "Background") {  }
+                    else if (value == "Geometric") { }
+                    else if (value == "Opacity") { }
+                    else if (value == "Top") { }
+                    pass.mRenderQueue = std::stoi(value);
+                }
+                else if (sstream >> value)
+                {
+                    if (value == "Shader") { }
+                    else if (value == "Forward") { }
+                    else if (value == "Deferred") { }
+                    pass.mRenderType = std::stoi(value);
+                }
+                else if (word == "Vertex")
+                {
+                    std::vector<std::string> codes;
+                    while (std::getline(ifile, line) && line != "End Vertex")
+                    {
+                        codes.emplace_back(std::move(line));
+                    }
+                    vs = string_tool::Join(codes, "\n");
+                }
+                else if (word == "Geometric")
+                {
+                    std::vector<std::string> codes;
+                    while (std::getline(ifile, line) && line != "End Geometric")
+                    {
+                        codes.emplace_back(std::move(line));
+                    }
+                    gs = string_tool::Join(codes, "\n");
+                }
+                else if (word == "Fragment")
+                {
+                    std::vector<std::string> codes;
+                    while (std::getline(ifile, line) && line != "End Fragment")
+                    {
+                        codes.emplace_back(std::move(line));
+                    }
+                    fs = string_tool::Join(codes, "\n");
+                }
+                else
+                {
+                    ASSERT_LOG(false, "Error Key Word: {0}", word);
+                }
+            }
+            ASSERT_LOG(line != "End Pass", "Not Found End Pass");
+
+            auto ret = shader->AddPass(pass, vs, fs, gs);
+            ASSERT_LOG(ret, "Shader Pass Error");
+        }
+    }
+    ASSERT_LOG(!shader->IsEmpty(), "Empty Shader Pass");
+    mmc::mAssetCore.Reg(url, shader);
+    return shader;
 }
 
 Bitmap * File::LoadBitmap(const std::string & url)
@@ -202,22 +334,6 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
 		material.mSpecular = File::LoadTexture(urlpath);
 	}
-
-	//if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
-	//{
-	//	aiMaterial->GetTexture(aiTextureType_HEIGHT, 0, &textureURL);
-	//	auto fullpath = directory + std::string(textureURL.C_Str());
-	//	auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-	//	material.mParallax = File::LoadTexture(urlpath);
-	//}
-
-	//if (0 != aiMaterial->GetTextureCount(aiTextureType_NORMALS))
-	//{
-	//	aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &textureURL);
-	//	auto fullpath = directory + std::string(textureURL.C_Str());
-	//	auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-	//	material.mNormal = File::LoadTexture(urlpath);
-	//}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
 	{
