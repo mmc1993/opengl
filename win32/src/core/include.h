@@ -25,6 +25,7 @@
 #include <math.h>
 #include <cmath>
 
+#include "third/sformat.h"
 #include "third/glew.h"
 #include "third/glfw3.h"
 #include "third/glm/glm.hpp"

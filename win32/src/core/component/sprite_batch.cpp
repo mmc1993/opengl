@@ -1,7 +1,6 @@
 #include "sprite_batch.h"
 #include "../mmc.h"
 #include "../asset/file.h"
-#include "../third/sformat.h"
 #include "../render/render.h"
 
 SpriteBatch::SpriteBatch(): _count(0)

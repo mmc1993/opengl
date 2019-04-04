@@ -1,6 +1,5 @@
 #include "sprite_outline.h"
 #include "../mmc.h"
-#include "../third/sformat.h"
 #include "../render/render.h"
 
 void SpriteOutline::OnAdd()

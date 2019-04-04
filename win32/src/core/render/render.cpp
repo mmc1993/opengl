@@ -1,6 +1,5 @@
 #include "render.h"
 #include "../mmc.h"
-#include "../third/sformat.h"
 #include "../asset/shader.h"
 #include "../component/camera.h"
 #include "../tools/debug_tool.h"

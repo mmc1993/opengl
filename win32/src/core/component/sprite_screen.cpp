@@ -1,7 +1,6 @@
 #include "sprite_screen.h"
 #include "../mmc.h"
 #include "../render/render.h"
-#include "../third/sformat.h"
 
 SpriteScreen::SpriteScreen()
 	: _flipUVX(0.0f)
