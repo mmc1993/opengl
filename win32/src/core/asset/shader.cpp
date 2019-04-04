@@ -11,7 +11,11 @@ Shader::~Shader()
     }
 }
 
-bool Shader::AddPass(const Pass & pass, const std::string & vs, const std::string & fs, const std::string & gs)
+bool Shader::AddPass(
+    const RenderPass & pass, 
+    const std::string & vs, 
+    const std::string & fs, 
+    const std::string & gs)
 {
     auto GLID = AddPass(vs.c_str(), fs.c_str(), !gs.empty() ? gs.c_str() : nullptr);
     if (GLID != 0)

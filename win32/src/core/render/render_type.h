@@ -2,6 +2,15 @@
 
 #include "../include.h"
 
+class Mesh;
+class Light;
+class Camera;
+class Shader;
+class Bitmap;
+class Texture;
+class Material;
+class BitmapCube;
+
 class RenderMatrix {
 public:
 	enum ModeType { kPROJECT, kVIEW, kMODEL, };
@@ -68,14 +77,55 @@ private:
 	std::array<std::stack<glm::mat4>, 3> _RenderMatrixs;
 };
 
-enum RenderQueue {
-    kGEOMETRIC,     //  常规绘制
-    kOPCITY,        //  透明绘制
-    kUI,            //  顶层绘制
+struct RenderPass {
+    //  面剔除
+    bool    bCullFace;          //  开启面剔除
+    int     vCullFace;
+    //  混合
+    bool    bBlend;             //  开启混合
+    int     vBlendSrc;
+    int     vBlendDst;
+    //  深度测试
+    bool    bDepthTest;         //  开启深度测试
+    bool    bDepthWrite;        //  开启深度写入
+    //  模板测试
+    bool    bStencilTest;       //  开启模板测试
+    int     vStencilOpFail;
+    int     vStencilOpZFail;
+    int     vStencilOpZPass;
+    int     vStencilMask;       //  模板测试值
+    int     vStencilRef;        //  模板测试值
+    //  渲染
+    int     mRenderType;        //  渲染类型
+    int     mRenderQueue;       //  渲染通道
+    GLuint  GLID;
+
+    RenderPass() : GLID(0), bCullFace(false), bBlend(false), bDepthTest(false), bStencilTest(false)
+    { }
 };
 
-enum RenderType {
+enum RenderQueueEnum {
+    kBACKGROUND,    //  底层绘制
+    kGEOMETRIC,     //  常规绘制
+    kOPACITY,       //  透明绘制
+    kTOP,           //  顶层绘制
+};
+
+enum RenderTypeEnum {
     kSHADOW,        //  烘培阴影贴图
     kFORWARD,       //  正向渲染
     kDEFERRED,      //  延迟渲染
 };
+
+//  用于渲染的命令结构
+struct RenderCommand {
+    const RenderPass *  mPass;          //  绑定的Shader
+    Mesh *              mMeshs;         //  绑定的网格
+    size_t              mMeshNum;       //  绑定的网格数量
+    Material *          mMaterials;     //  绑定的材质
+    size_t              mMaterialNum;   //  绑定的材质数量
+    glm::mat4           mTransform;     //  绑定的变换矩阵
+    size_t              mCameraFlag;    //  绑定的相机标识
+};
+
+using RenderQueue = std::vector<RenderCommand>;

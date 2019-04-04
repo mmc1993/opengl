@@ -6,6 +6,7 @@
 #include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
+#include "../render/render_type.h"
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third/stb_image.h"
@@ -45,7 +46,7 @@ Shader * File::LoadShader(const std::string & url)
     {
         if (line == "Pass")
         {
-            Shader::Pass pass;
+            RenderPass pass;
             std::string fs, vs, gs;
             while (std::getline(ifile, line) && line != "End Pass")
             {
@@ -129,18 +130,16 @@ Shader * File::LoadShader(const std::string & url)
                 else if (word == "RenderQueue")
                 {
                     sstream >> value;
-                    if (value == "Background") {  }
-                    else if (value == "Geometric") { }
-                    else if (value == "Opacity") { }
-                    else if (value == "Top") { }
-                    pass.mRenderQueue = std::stoi(value);
+                    if (value == "Background") { pass.mRenderQueue = RenderQueueEnum::kBACKGROUND; }
+                    else if (value == "Geometric") { pass.mRenderQueue = RenderQueueEnum::kGEOMETRIC; }
+                    else if (value == "Opacity") { pass.mRenderQueue = RenderQueueEnum::kOPACITY; }
+                    else if (value == "Top") { pass.mRenderQueue = RenderQueueEnum::kTOP; }
                 }
                 else if (sstream >> value)
                 {
-                    if (value == "Shader") { }
-                    else if (value == "Forward") { }
-                    else if (value == "Deferred") { }
-                    pass.mRenderType = std::stoi(value);
+                    if (value == "Shadow") { pass.mRenderType = RenderTypeEnum::kSHADOW; }
+                    else if (value == "Forward") { pass.mRenderType = RenderTypeEnum::kFORWARD; }
+                    else if (value == "Deferred") { pass.mRenderType = RenderTypeEnum::kDEFERRED; }
                 }
                 else if (word == "Vertex")
                 {

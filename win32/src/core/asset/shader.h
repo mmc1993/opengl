@@ -9,33 +9,6 @@ class BitmapCube;
 
 class Shader : public Asset {
 public:
-    struct Pass {
-        //  面剔除
-        bool    bCullFace;          //  开启面剔除
-        int     vCullFace;
-        //  混合
-        bool    bBlend;             //  开启混合
-        int     vBlendSrc;
-        int     vBlendDst;
-        //  深度测试
-        bool    bDepthTest;         //  开启深度测试
-        bool    bDepthWrite;        //  开启深度写入
-        //  模板测试
-        bool    bStencilTest;       //  开启模板测试
-        int     vStencilOpFail;
-        int     vStencilOpZFail;
-        int     vStencilOpZPass;
-        int     vStencilMask;       //  模板测试值
-        int     vStencilRef;        //  模板测试值
-        //  渲染
-        int     mRenderType;        //  渲染类型
-        int     mRenderQueue;       //  渲染通道
-        GLuint  GLID;
-
-        Pass() : GLID(0), bCullFace(false), bBlend(false), bDepthTest(false), bStencilTest(false)
-        { }
-    };
-public:
     ~Shader();
 
     bool IsEmpty() const
@@ -43,13 +16,18 @@ public:
         return _passs.empty();
     }
 
-    const Pass & GetPass(size_t idx) const
+    const RenderPass & GetPass(size_t idx) const
     {
         return _passs.at(idx);
     }
 
+    const std::vector<RenderPass> & GetPasss() const
+    {
+        return _passs;
+    }
+
     bool AddPass(
-        const Pass & pass,
+        const RenderPass & pass,
         const std::string & vs,
         const std::string & fs,
         const std::string & gs);
@@ -81,5 +59,5 @@ private:
     void CheckPass(GLuint GLID, const std::string & string);
 
 private:
-    std::vector<Pass> _passs;
+    std::vector<RenderPass> _passs;
 };
