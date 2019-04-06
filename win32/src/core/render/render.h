@@ -77,7 +77,7 @@ private:
 	//	绑定每一次渲染都可能变化的参数
 	void BindEveryParam(const RenderCommand & command);
 	//	执行绘制命令
-	void Draw(DrawTypeEnum drawType, const Mesh & mesh);
+	void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
 
 private:
     RenderMatrix _matrix;

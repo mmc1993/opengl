@@ -1,6 +1,5 @@
 #include "render.h"
 #include "../mmc.h"
-#include "../asset/mesh.h"
 #include "../asset/shader.h"
 #include "../asset/material.h"
 #include "../component/camera.h"
@@ -301,7 +300,7 @@ void Render::BindFrameParam()
 	auto skybox = mmc::mRoot.GetComponent<Skybox>();
 	if (skybox != nullptr)
 	{
-		BindTexture("skybox_", skybox->GetBitmapCube());
+		BindTexture("skybox_", skybox->GetTexture());
 	}
 }
 
@@ -383,9 +382,11 @@ void Render::BindLightParam()
 	Shader::SetUniform(_renderInfo.mPass->GLID, "light_.mSpotNum", spotNum);
 }
 
-void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
+void Render::Draw(DrawTypeEnum drawType, const RenderMesh & mesh)
 {
-	glBindVertexArray(mesh.GetGLID());
+	assert(mesh.mVBO != 0);
+	assert(mesh.mVAO != 0);
+	glBindVertexArray(mesh.mVAO);
 	switch (drawType)
 	{
 	case DrawTypeEnum::kINSTANCE:
@@ -395,14 +396,14 @@ void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
 		break;
 	case DrawTypeEnum::kVERTEX:
 		{
-			_renderInfo.mVertexCount += mesh.GetVerCount();
-			glDrawArrays(GL_TRIANGLES, 0, mesh.GetVerCount());
+			_renderInfo.mVertexCount += mesh.mVtxCount;
+			glDrawArrays(GL_TRIANGLES, 0, mesh.mVtxCount);
 		}
 		break;
 	case DrawTypeEnum::kINDEX:
 		{
-			_renderInfo.mVertexCount += mesh.GetIdxCount();
-			glDrawElements(GL_TRIANGLES, mesh.GetIdxCount(), GL_UNSIGNED_INT, nullptr);
+			_renderInfo.mVertexCount += mesh.mIdxCount;
+			glDrawElements(GL_TRIANGLES, mesh.mIdxCount, GL_UNSIGNED_INT, nullptr);
 		}
 		break;
 	}

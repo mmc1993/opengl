@@ -281,46 +281,6 @@ Model * File::LoadModel(aiNode * node, const aiScene * scene, const std::string 
 	return model;
 }
 
-Mesh * File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory)
-{
-	std::vector<std::uint32_t> indices;
-	std::vector<Mesh::Vertex> vertexs;
-	for (auto i = 0; i != mesh->mNumVertices; ++i)
-	{
-		Mesh::Vertex vertex;
-		//	vertex
-		vertex.v.x = mesh->mVertices[i].x;
-		vertex.v.y = mesh->mVertices[i].y;
-		vertex.v.z = mesh->mVertices[i].z;
-		//	normal
-		vertex.n.x = mesh->mNormals[i].x;
-		vertex.n.y = mesh->mNormals[i].y;
-		vertex.n.z = mesh->mNormals[i].z;
-		//	tan
-		vertex.tan.x = mesh->mTangents[i].x;
-		vertex.tan.y = mesh->mTangents[i].y;
-		vertex.tan.z = mesh->mTangents[i].z;
-		//	bitan
-		vertex.bitan.x = mesh->mBitangents[i].x;
-		vertex.bitan.y = mesh->mBitangents[i].y;
-		vertex.bitan.z = mesh->mBitangents[i].z;
-		//	uv
-		if (mesh->mTextureCoords[0])
-		{
-			vertex.uv.u = mesh->mTextureCoords[0][i].x;
-			vertex.uv.v = mesh->mTextureCoords[0][i].y;
-		}
-		vertexs.push_back(vertex);
-	}
-	for (auto i = 0; i != mesh->mNumFaces; ++i)
-	{
-		for (auto j = 0; j != mesh->mFaces[i].mNumIndices; ++j)
-		{
-			indices.push_back(mesh->mFaces[i].mIndices[j]);
-		}
-	}
-	return new Mesh(std::move(vertexs), std::move(indices));
-}
 
 Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string & directory)
 {
@@ -360,4 +320,45 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 	}
 
 	return std::move(material);
+}
+
+RenderMesh File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory)
+{
+	std::vector<std::uint32_t>		indices;
+	std::vector<RenderMesh::Vertex> vertexs;
+	for (auto i = 0; i != mesh->mNumVertices; ++i)
+	{
+		RenderMesh::Vertex vertex;
+		//	vertex
+		vertex.v.x = mesh->mVertices[i].x;
+		vertex.v.y = mesh->mVertices[i].y;
+		vertex.v.z = mesh->mVertices[i].z;
+		//	normal
+		vertex.n.x = mesh->mNormals[i].x;
+		vertex.n.y = mesh->mNormals[i].y;
+		vertex.n.z = mesh->mNormals[i].z;
+		//	tan
+		vertex.tan.x = mesh->mTangents[i].x;
+		vertex.tan.y = mesh->mTangents[i].y;
+		vertex.tan.z = mesh->mTangents[i].z;
+		//	bitan
+		vertex.bitan.x = mesh->mBitangents[i].x;
+		vertex.bitan.y = mesh->mBitangents[i].y;
+		vertex.bitan.z = mesh->mBitangents[i].z;
+		//	uv
+		if (mesh->mTextureCoords[0])
+		{
+			vertex.uv.u = mesh->mTextureCoords[0][i].x;
+			vertex.uv.v = mesh->mTextureCoords[0][i].y;
+		}
+		vertexs.push_back(vertex);
+	}
+	for (auto i = 0; i != mesh->mNumFaces; ++i)
+	{
+		for (auto j = 0; j != mesh->mFaces[i].mNumIndices; ++j)
+		{
+			indices.push_back(mesh->mFaces[i].mIndices[j]);
+		}
+	}
+	return RenderMesh::Create(vertexs, indices);
 }

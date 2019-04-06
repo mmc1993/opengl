@@ -2,7 +2,6 @@
 
 #include "component.h"
 
-class Shader;
 class Bitmap;
 class BitmapCube;
 class RenderTarget;
@@ -29,12 +28,6 @@ public:
 	glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
-
-private:
-	GLuint _vbo;
-	GLuint _ebo;
-	GLuint _vao;
-	Shader * _shader;
 
 private:
 	LightType _type;

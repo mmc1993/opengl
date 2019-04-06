@@ -2,7 +2,6 @@
 
 #include "../include.h"
 
-class Mesh;
 class Light;
 class Camera;
 class Shader;
@@ -97,6 +96,203 @@ private:
 	std::array<std::stack<glm::mat4>, 3> _RenderMatrixs;
 };
 
+struct RenderMesh {
+
+	struct Vertex {
+		glm::vec3 v;
+		struct {
+			float u;
+			float v;
+		} uv; 
+		glm::vec3 n;
+		glm::vec3 tan;
+		glm::vec3 bitan;
+
+		Vertex(const glm::vec3 & _v, 
+			   float _tx, float _ty, 
+			   const glm::vec3 & _n, 
+			   const glm::vec3 & _tan, 
+			   const glm::vec3 & _bitan) : v(_v), uv{ _tx, _ty }, n(_n), tan(_tan), bitan(_bitan)
+		{ }
+
+		Vertex(const glm::vec3 & _v,
+			   float _tx, float _ty,
+			   const glm::vec3 & _n) : v(_v), uv{ _tx, _ty }, n(_n)
+		{ }
+
+		Vertex(const glm::vec3 & _v,
+			   float _tx, float _ty) : v(_v), uv{ _tx, _ty }
+		{ }
+
+		Vertex(const glm::vec3 & _v) : v(_v)
+		{ }
+
+		Vertex() 
+		{ }
+	};
+
+	GLuint mVAO, mVBO, mEBO;
+	
+	size_t mVtxCount, mIdxCount;
+
+	RenderMesh() 
+		: mVAO(0), mVBO(0), mEBO(0)
+		, mVtxCount(0), mIdxCount(0)
+	{ }
+
+	//	顶点数据
+	//		顶点坐标，纹理坐标，法线，切线，副切线
+	static RenderMesh Create(const std::vector<Vertex> & vertexs)
+	{
+		RenderMesh mesh;
+		mesh.mVtxCount = vertexs.size();
+		glGenVertexArrays(1, &mesh.mVAO);
+		glBindVertexArray(mesh.mVAO);
+
+		glGenBuffers(1, &mesh.mVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+		glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, n));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, tan));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitan));
+		glEnableVertexAttribArray(4);
+
+		glBindVertexArray(0);
+		return mesh;
+	}
+
+	//	索引数据
+	//		顶点坐标，纹理坐标，法线，切线，副切线
+	static RenderMesh Create(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	{
+		RenderMesh mesh;
+		mesh.mIdxCount = indexs.size();
+		mesh.mVtxCount = vertexs.size();
+		glGenVertexArrays(1, &mesh.mVAO);
+		glBindVertexArray(mesh.mVAO);
+
+		glGenBuffers(1, &mesh.mVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+		glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &mesh.mEBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, n));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, tan));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitan));
+		glEnableVertexAttribArray(4);
+
+		glBindVertexArray(0);
+		return mesh;
+	}
+
+	//	索引数据
+	//		顶点坐标，纹理坐标，法线
+	static RenderMesh CreateVTN(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	{
+		RenderMesh mesh;
+		mesh.mIdxCount = indexs.size();
+		mesh.mVtxCount = vertexs.size();
+		glGenVertexArrays(1, &mesh.mVAO);
+		glBindVertexArray(mesh.mVAO);
+
+		glGenBuffers(1, &mesh.mVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+		glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &mesh.mEBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, n));
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		return mesh;
+	}
+
+	//	索引数据
+	//		顶点坐标，纹理坐标
+	static RenderMesh CreateVT(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	{
+		RenderMesh mesh;
+		mesh.mIdxCount = indexs.size();
+		mesh.mVtxCount = vertexs.size();
+		glGenVertexArrays(1, &mesh.mVAO);
+		glBindVertexArray(mesh.mVAO);
+
+		glGenBuffers(1, &mesh.mVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+		glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &mesh.mEBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+		glEnableVertexAttribArray(1);
+
+		glBindVertexArray(0);
+		return mesh;
+	}
+
+	//	索引数据
+	//		顶点坐标
+	static RenderMesh CreateV(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	{
+		RenderMesh mesh;
+		mesh.mIdxCount = indexs.size();
+		mesh.mVtxCount = vertexs.size();
+		glGenVertexArrays(1, &mesh.mVAO);
+		glBindVertexArray(mesh.mVAO);
+
+		glGenBuffers(1, &mesh.mVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+		glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+		glGenBuffers(1, &mesh.mEBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
+		return mesh;
+	}
+
+
+	static void Delete(RenderMesh & mesh)
+	{
+		glDeleteBuffers(1, &mesh.mEBO);
+		glDeleteBuffers(1, &mesh.mVBO);
+		glDeleteVertexArrays(1, &mesh.mVAO);
+		mesh.mVtxCount = mesh.mIdxCount = mesh.mVAO = mesh.mVBO = mesh.mEBO = 0;
+	}
+};
+
+
 struct RenderPass {
     //  面剔除
     bool    bCullFace;          //  开启面剔除
@@ -130,7 +326,7 @@ struct RenderPass {
 //  用于渲染的命令结构
 struct RenderCommand {
     const RenderPass *  mPass;          //  绑定的Shader
-    const Mesh *        mMeshs;         //  绑定的网格
+    const RenderMesh *  mMeshs;         //  绑定的网格
 	size_t              mMeshNum;       //  绑定的网格数量
 	const Material *    mMaterials;     //  绑定的材质(材质与网格数量必须一致)
 	glm::mat4           mTransform;     //  绑定的变换矩阵

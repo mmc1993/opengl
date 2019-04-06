@@ -4,7 +4,6 @@
 #include "../asset/material.h"
 #include "../asset/texture.h"
 #include "../asset/shader.h"
-#include "../asset/mesh.h"
 
 class Sprite : public Component {
 public:
@@ -14,7 +13,7 @@ public:
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
 
-	void AddMesh(Mesh * mesh, const Material & material)
+	void AddMesh(const RenderMesh & mesh, const Material & material)
 	{
 		_meshs.push_back(mesh);
 		_mates.push_back(material);
@@ -25,6 +24,6 @@ public:
 
 protected:
 	Shader * _shader;
-	std::vector<Mesh *> _meshs;
 	std::vector<Material> _mates;
+	std::vector<RenderMesh> _meshs;
 };
