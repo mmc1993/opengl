@@ -150,7 +150,8 @@ void Object::Update(float dt)
 {
 	OnUpdate(dt);
 
-	Render::CommandTransform::Post(GetCameraFlag(), GetTransform()->GetMatrix());
+	mmc::mRender.GetMatrix().Push(RenderMatrix::ModeType::kMODEL);
+	mmc::mRender.GetMatrix().Mul(RenderMatrix::ModeType::kMODEL, GetTransform()->GetMatrix());
 
 	for (auto component : _components)
 	{
@@ -168,7 +169,7 @@ void Object::Update(float dt)
 		}
 	}
 
-	Render::CommandTransform::Free(GetCameraFlag());
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }
 
 void Object::SetParent(Object * parent)
