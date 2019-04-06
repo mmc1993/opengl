@@ -163,9 +163,9 @@ void LightDirect::DrawShadow()
 		glViewport(0, 0, _depthW, _depthH);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -173,7 +173,7 @@ void LightDirect::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}
@@ -242,9 +242,9 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 
 	mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
 	mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-	mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 	mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-	mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, _proj);
+	mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
 
 	_shadowRT->Beg();
 	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
@@ -255,7 +255,7 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 	glCullFace(GL_BACK);
 	_shadowRT->End();
 
-	mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 	mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
 	mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 }
@@ -295,9 +295,9 @@ void LightSpot::DrawShadow()
 		glViewport(0, 0, _depthW, _depthH);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -305,7 +305,7 @@ void LightSpot::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}

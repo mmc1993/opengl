@@ -46,7 +46,7 @@ public:
 	const glm::vec3 & GetEye() const;
 	const glm::vec3 & GetPos() const;
 	const glm::mat4 & GetView();
-	const glm::mat4 & GetProject();
+	const glm::mat4 & GetProj();
 	const glm::vec4 & GetViewport() const;
 
 	virtual void OnAdd() override {}

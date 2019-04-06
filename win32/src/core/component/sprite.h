@@ -8,13 +8,6 @@
 
 class Sprite : public Component {
 public:
-	struct BlendFunc {
-		GLenum mSrc;
-		GLenum mDst;
-		BlendFunc() : mSrc(GL_SRC_ALPHA), mDst(GL_ONE_MINUS_SRC_ALPHA) { }
-		BlendFunc(GLenum src, GLenum dst): mSrc(src), mDst(dst) { }
-	};
-public:
 	Sprite();
 	virtual ~Sprite() {}
 	virtual void OnAdd() override;
@@ -30,40 +23,7 @@ public:
 	void BindShader(const std::string & url);
 	Shader * GetShader() { return _shader; }
 
-	void SetBlendFunc(const BlendFunc & blend)
-	{
-		_blend = blend;
-	}
-
-	const BlendFunc & GetBlendFunc() const
-	{
-		return _blend;
-	}
-
-	void SetFlipUVX(bool isTrue)
-	{
-		_flipUVX = isTrue ? 1.0f : 0.0f;
-	}
-
-	void SetFlipUVY(bool isTrue)
-	{
-		_flipUVY = isTrue ? 1.0f : 0.0f;
-	}
-
-	bool GetFlipUVX() const
-	{
-		return _flipUVX != 0.0f;
-	}
-
-	bool GetFlipUVY() const
-	{
-		return _flipUVY != 0.0f;
-	}
-
 protected:
-	float _flipUVX;
-	float _flipUVY;
-	BlendFunc _blend;
 	Shader * _shader;
 	std::vector<Mesh *> _meshs;
 	std::vector<Material> _mates;
