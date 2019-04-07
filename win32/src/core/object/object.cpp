@@ -21,7 +21,7 @@ Object::~Object()
 
 	while (!_childs.empty())
 	{
-		DelChild(_childs.front());
+		DelChild(_childs.back());
 	}
 }
 
@@ -148,10 +148,10 @@ bool Object::IsActive() const
 
 void Object::Update(float dt)
 {
-	OnUpdate(dt);
-
 	mmc::mRender.GetMatrix().Push(RenderMatrix::ModeType::kMODEL);
 	mmc::mRender.GetMatrix().Mul(RenderMatrix::ModeType::kMODEL, GetTransform()->GetMatrix());
+
+	OnUpdate(dt);
 
 	for (auto component : _components)
 	{
@@ -168,6 +168,15 @@ void Object::Update(float dt)
 			child->Update(dt);
 		}
 	}
+
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
+}
+
+void Object::UpdateFromThis(float dt)
+{
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::ModeType::kMODEL);
+	
+	Update(dt);
 
 	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }

@@ -48,7 +48,6 @@ public:
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     
-	void OnRenderCamera(CameraInfo * camera);
 	void RenderOnce();
 
 	void PostCommand(const Shader * shader, const RenderCommand & command);
@@ -56,6 +55,8 @@ public:
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
+	void OnRenderShadow(Light * light);
+	void OnRenderCamera(CameraInfo * camera);
     void OnRenderForward(CameraInfo * camera);
     void OnRenderDeferred(CameraInfo * camera);
 	void OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & commands);

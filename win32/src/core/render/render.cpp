@@ -52,7 +52,8 @@ void Render::AddLight(Light * light)
 
 void Render::DelLight(Light * light)
 {
-    _lights.erase(std::remove(_lights.begin(), _lights.end(), light), _lights.end());
+	auto it = std::remove(_lights.begin(), _lights.end(), light);
+	if (it != _lights.end()) { _lights.erase(it); }
 }
 
 void Render::PostCommand(const Shader * shader, const RenderCommand & command)
@@ -78,34 +79,16 @@ RenderMatrix & Render::GetMatrix()
 	return _matrix;
 }
 
-void Render::OnRenderCamera(CameraInfo * camera)
-{
-	//	camera != nullptr 的时候，表示本次渲染是多相机渲染，
-	//	而多相机渲染需要保留每个相机渲染的结果，因此不需要glClear。
-	if (camera == nullptr)
-	{
-		glClear(GL_COLOR_BUFFER_BIT |
-				GL_DEPTH_BUFFER_BIT |
-				GL_STENCIL_BUFFER_BIT);
-	}
-    //  延迟渲染
-    OnRenderDeferred(camera);
-    //  正向渲染
-    OnRenderForward(camera);
-	//	后期处理
-}
-
 void Render::RenderOnce()
 {
+	_renderInfo.mVertexCount = 0;
+	_renderInfo.mRenderCount = 0;
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
-	_renderInfo.mVertexCount = 0;
-	_renderInfo.mRenderCount = 0;
-	for (auto light : _lights)
-	{
-		light->DrawShadow();
-	}
+	//	烘培深度贴图
+	std::for_each(_lights.begin(), _lights.end(), Render::OnRenderShadow);
+	//	逐相机执行渲染命令
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(camera.mCamera);
@@ -115,6 +98,20 @@ void Render::RenderOnce()
     for (auto & queue : _shadowCommands) { queue.clear(); }
     for (auto & queue : _forwardCommands) { queue.clear(); }
     for (auto & queue : _deferredCommands) { queue.clear(); }
+}
+
+void Render::OnRenderShadow(Light * light)
+{
+
+}
+
+void Render::OnRenderCamera(CameraInfo * camera)
+{
+	//  延迟渲染
+	OnRenderDeferred(camera);
+	//  正向渲染
+	OnRenderForward(camera);
+	//	后期处理
 }
 
 void Render::OnRenderForward(CameraInfo * camera)
@@ -176,7 +173,6 @@ void Render::Bind(Camera * camera)
 	if (camera != nullptr)
 	{
 		_renderInfo.mCamera = camera;
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, camera->GetView());
@@ -187,7 +183,6 @@ void Render::Bind(Camera * camera)
 	else
 	{
 		_renderInfo.mCamera = nullptr;
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 	}
@@ -197,7 +192,6 @@ bool Render::Bind(const RenderPass & pass)
 {
 	if (_renderInfo.mPass != &pass)
 	{
-		_renderInfo.mTexCount = 0;
 		_renderInfo.mPass = &pass;
 
 		//	开启面剔除
@@ -249,25 +243,27 @@ bool Render::Bind(const RenderPass & pass)
 
 void Render::Bind(const Material & material)
 {
+	_renderInfo.mTexCount = 0;
+
 	for (auto i = 0; i != material.mDiffuses.size(); ++i)
 	{
-		mmc::mRender.BindTexture(SFormat("material_.mDiffuse{0}", i), material.mDiffuses.at(i));
-	}
-	if (material.mHeight.GetBitmap() != nullptr)
-	{
-		mmc::mRender.BindTexture("material_.mParallax", material.mHeight);
+		BindTexture(SFormat("material_.mDiffuse{0}", i), material.mDiffuses.at(i));
 	}
 	if (material.mSpecular.GetBitmap() != nullptr)
 	{
-		mmc::mRender.BindTexture("material_.mSpecular", material.mSpecular);
+		BindTexture("material_.mSpecular", material.mSpecular);
 	}
 	if (material.mReflect.GetBitmap() != nullptr)
 	{
-		mmc::mRender.BindTexture("material_.mReflect", material.mReflect);
+		BindTexture("material_.mReflect", material.mReflect);
 	}
 	if (material.mNormal.GetBitmap() != nullptr)
 	{
-		mmc::mRender.BindTexture("material_.mNormal", material.mNormal);
+		BindTexture("material_.mNormal", material.mNormal);
+	}
+	if (material.mHeight.GetBitmap() != nullptr)
+	{
+		BindTexture("material_.mHeight", material.mHeight);
 	}
 	Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mShininess", material.mShininess);
 }

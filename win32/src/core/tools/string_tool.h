@@ -12,8 +12,13 @@ namespace string_tool {
 		for (auto & s : vec) { count += s.size(); }
 		
 		ret.reserve(count);
-		auto it = vec.begin(); ret.append(*it++);
-		while (it != vec.end()) { ret.append(*it++); }
+		auto it = vec.begin(); 
+		ret.append(*it++); 
+		while (it != vec.end()) 
+		{
+			ret.append(str);
+			ret.append(*it++); 
+		}
 		return std::move(ret);
 	}
 

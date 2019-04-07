@@ -27,9 +27,6 @@
     <ClInclude Include="src\core\asset\material.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\asset\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -810,9 +807,6 @@
     <ClInclude Include="src\core\asset\model.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\component\sprite_outline.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\render_target.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -820,9 +814,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\asset\bitmap_cube.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\component\sprite_batch.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\component\sprite_screen.h">
@@ -835,6 +826,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\component\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\tools\time_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -872,16 +866,10 @@
     <ClCompile Include="src\core\component\light.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\component\sprite_outline.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\render_target.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\skybox.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\component\sprite_batch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\sprite_screen.cpp">

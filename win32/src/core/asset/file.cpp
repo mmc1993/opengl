@@ -50,8 +50,10 @@ Shader * File::LoadShader(const std::string & url)
             std::string fs, vs, gs;
             while (std::getline(ifile, line) && line != "End Pass")
             {
+				word.clear();
                 sstream.str(line);
-                sstream >> word;
+				sstream.clear();
+				sstream >> word;
                 if (word == "CullFace")
                 {
                     pass.bCullFace = true;
@@ -187,10 +189,10 @@ Shader * File::LoadShader(const std::string & url)
                 }
                 else
                 {
-                    ASSERT_LOG(false, "Error Key Word: {0}", word);
+                    ASSERT_LOG(word.empty(), "Error Key Word: {0}", word);
                 }
             }
-            ASSERT_LOG(line != "End Pass", "Not Found End Pass");
+            ASSERT_LOG(line == "End Pass", "Not Found End Pass");
 
             auto ret = shader->AddPass(pass, vs, fs, gs);
             ASSERT_LOG(ret, "Shader Pass Error");
