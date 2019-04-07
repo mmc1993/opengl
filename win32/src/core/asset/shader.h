@@ -9,6 +9,18 @@ class BitmapCube;
 
 class Shader : public Asset {
 public:
+	static void SetUniform(GLuint GLID, const std::string & key, int val);
+	static void SetUniform(GLuint GLID, const std::string & key, float val);
+	static void SetUniform(GLuint GLID, const std::string & key, double val);
+	static void SetUniform(GLuint GLID, const std::string & key, const glm::vec3 & val);
+	static void SetUniform(GLuint GLID, const std::string & key, const glm::vec4 & val);
+	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat3 & val);
+	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat4 & val);
+	static void SetUniform(GLuint GLID, const std::string & key, const Bitmap * val, size_t pos);
+	static void SetUniform(GLuint GLID, const std::string & key, const Texture & val, size_t pos);
+	static void SetUniform(GLuint GLID, const std::string & key, const BitmapCube * val, size_t pos);
+
+public:
     ~Shader();
 
     bool IsEmpty() const
@@ -32,30 +44,11 @@ public:
         const std::string & fs,
         const std::string & gs);
 
-    void SetUniform(size_t idx, int val);
-    void SetUniform(size_t idx, float val);
-    void SetUniform(size_t idx, double val);
-    void SetUniform(size_t idx, const glm::vec3 & val);
-    void SetUniform(size_t idx, const glm::vec4 & val);
-    void SetUniform(size_t idx, const glm::mat3 & val);
-    void SetUniform(size_t idx, const glm::mat4 & val);
-    void SetUniform(size_t idx, const Bitmap * val, size_t pos);
-    void SetUniform(size_t idx, const Texture & val, size_t pos);
-    void SetUniform(size_t idx, const BitmapCube * val, size_t pos);
-
-    void SetUniform(size_t pass, const std::string & key, int val);
-    void SetUniform(size_t pass, const std::string & key, float val);
-    void SetUniform(size_t pass, const std::string & key, double val);
-    void SetUniform(size_t pass, const std::string & key, const glm::vec3 & val);
-    void SetUniform(size_t pass, const std::string & key, const glm::vec4 & val);
-    void SetUniform(size_t pass, const std::string & key, const glm::mat3 & val);
-    void SetUniform(size_t pass, const std::string & key, const glm::mat4 & val);
-    void SetUniform(size_t pass, const std::string & key, const Bitmap * val, size_t pos);
-    void SetUniform(size_t pass, const std::string & key, const Texture & val, size_t pos);
-    void SetUniform(size_t pass, const std::string & key, const BitmapCube * val, size_t pos);
-
 private:
-    GLuint AddPass(const char * vs, const char * fs, const char * gs);
+    GLuint AddPass(const char * vs, 
+				   const char * fs, 
+				   const char * gs);
+
     void CheckPass(GLuint GLID, const std::string & string);
 
 private:

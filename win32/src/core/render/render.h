@@ -54,18 +54,14 @@ public:
 
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
+    void OnRenderCamera(CameraInfo * camera);
+
 private:
 	void OnRenderShadow(Light * light);
-	void OnRenderCamera(CameraInfo * camera);
     void OnRenderForward(CameraInfo * camera);
     void OnRenderDeferred(CameraInfo * camera);
 	void OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & commands);
 	void OnRenderDeferredCommands(CameraInfo * camera, const RenderQueue & commands);
-
-	//	绑定纹理到着色器
-	void BindTexture(const std::string & key, const Bitmap * val);
-	void BindTexture(const std::string & key, const Texture & val);
-	void BindTexture(const std::string & key, const BitmapCube * val);
 
 	void Bind(Camera * camera);
 	bool Bind(const RenderPass & pass);

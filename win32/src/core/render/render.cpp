@@ -87,7 +87,10 @@ void Render::RenderOnce()
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
 	//	ºæÅàÉî¶ÈÌùÍ¼
-	std::for_each(_lights.begin(), _lights.end(), Render::OnRenderShadow);
+    for (auto & light : _lights)
+    {
+        OnRenderShadow(light);
+    }
 	//	ÖðÏà»úÖ´ÐÐäÖÈ¾ÃüÁî
 	for (auto & camera : _cameraInfos)
 	{
@@ -102,7 +105,7 @@ void Render::RenderOnce()
 
 void Render::OnRenderShadow(Light * light)
 {
-
+    light->DrawShadow();
 }
 
 void Render::OnRenderCamera(CameraInfo * camera)
@@ -129,19 +132,21 @@ void Render::OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & co
 {
 	for (const auto & command : commands)
 	{
-		if (camera == nullptr || camera != nullptr &&
+		if (camera == nullptr ||
+            camera != nullptr &&
 			(camera->mFlag & command.mCameraFlag) != 0)
 		{
 			if (Bind(*command.mPass))
 			{
 				BindFrameParam();
-				BindLightParam();
 			}
 			BindEveryParam(command);
 
 			for (auto i = 0; i != command.mMeshNum; ++i)
 			{
-				Bind(command.mMaterials[i]);
+                Bind(command.mMaterials[i]);
+
+                BindLightParam();
 
 				Draw(command.mPass->mDrawType, command.mMeshs[i]);
 			}
@@ -151,21 +156,6 @@ void Render::OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & co
 
 void Render::OnRenderDeferredCommands(CameraInfo * camera, const RenderQueue & commands)
 {
-}
-
-void Render::BindTexture(const std::string & key, const Texture & val)
-{
-	Shader::SetUniform(_renderInfo.mPass->GLID, key, val, _renderInfo.mTexCount++);
-}
-
-void Render::BindTexture(const std::string & key, const Bitmap * val)
-{
-	Shader::SetUniform(_renderInfo.mPass->GLID, key, val, _renderInfo.mTexCount++);
-}
-
-void Render::BindTexture(const std::string & key, const BitmapCube * val)
-{
-	Shader::SetUniform(_renderInfo.mPass->GLID, key, val, _renderInfo.mTexCount++);
 }
 
 void Render::Bind(Camera * camera)
@@ -247,23 +237,23 @@ void Render::Bind(const Material & material)
 
 	for (auto i = 0; i != material.mDiffuses.size(); ++i)
 	{
-		BindTexture(SFormat("material_.mDiffuse{0}", i), material.mDiffuses.at(i));
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("material_.mDiffuse{0}", i), material.mDiffuses.at(i), _renderInfo.mTexCount++);
 	}
 	if (material.mSpecular.GetBitmap() != nullptr)
 	{
-		BindTexture("material_.mSpecular", material.mSpecular);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mSpecular", material.mSpecular, _renderInfo.mTexCount++);
 	}
 	if (material.mReflect.GetBitmap() != nullptr)
 	{
-		BindTexture("material_.mReflect", material.mReflect);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mReflect", material.mReflect, _renderInfo.mTexCount++);
 	}
 	if (material.mNormal.GetBitmap() != nullptr)
 	{
-		BindTexture("material_.mNormal", material.mNormal);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mNormal", material.mNormal, _renderInfo.mTexCount++);
 	}
 	if (material.mHeight.GetBitmap() != nullptr)
 	{
-		BindTexture("material_.mHeight", material.mHeight);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mHeight", material.mHeight, _renderInfo.mTexCount++);
 	}
 	Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mShininess", material.mShininess);
 }
@@ -293,11 +283,6 @@ void Render::BindEveryParam(const RenderCommand & command)
 
 void Render::BindFrameParam()
 {
-	auto skybox = mmc::mRoot.GetComponent<Skybox>();
-	if (skybox != nullptr)
-	{
-		BindTexture("skybox_", skybox->GetTexture());
-	}
 }
 
 void Render::BindLightParam()
