@@ -68,7 +68,7 @@ const glm::mat4 & Camera::GetView()
 	return _view;
 }
 
-const glm::mat4 & Camera::GetProject()
+const glm::mat4 & Camera::GetProj()
 {
 	Update();
 	return _project;

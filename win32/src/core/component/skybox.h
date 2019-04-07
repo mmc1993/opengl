@@ -3,6 +3,7 @@
 #include "component.h"
 #include "../asset/shader.h"
 #include "../asset/texture.h"
+#include "../asset/material.h"
 #include "../asset/bitmap_cube.h"
 
 class Skybox : public Component {
@@ -13,17 +14,15 @@ public:
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
 	
+	void BindShader(Shader * shader);
 	void BindShader(const std::string & url);
-	Shader * GetShader() { return _shader; }
 	
-	void BindBitmapCube(const BitmapCube * cube);
-	void BindBitmapCube(const std::string & url);
-	const BitmapCube * GetBitmapCube() { return _bitmapCube; }
+	void BindTexture(BitmapCube * texture);
+	void BindTexture(const std::string & url);
+	const BitmapCube * GetTexture() { return _material.mTexCube; }
 
 private:
-	GLuint _vao;
-	GLuint _vbo;
-	GLuint _ebo;
 	Shader * _shader;
-	const BitmapCube * _bitmapCube;
+	Material _material;
+	RenderMesh _meshCube;
 };

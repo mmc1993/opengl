@@ -1,22 +1,22 @@
 #include "sprite_screen.h"
 #include "../mmc.h"
+#include "../asset/file.h"
 #include "../render/render.h"
 
 SpriteScreen::SpriteScreen()
-	: _flipUVX(0.0f)
-	, _flipUVY(0.0f)
-	, _shader(nullptr)
-	, _meshQuat({
-			{ { -1.0f, -1.0f, 0.0f },{ 0, 0 },{ 0, 0, 0 },{ 0, 0, 0 },{ 0, 0, 0 } },
-			{ {  1.0f, -1.0f, 0.0f },{ 1, 0 },{ 0, 0, 0 },{ 0, 0, 0 },{ 0, 0, 0 } },
-			{ {  1.0f,  1.0f, 0.0f },{ 1, 1 },{ 0, 0, 0 },{ 0, 0, 0 },{ 0, 0, 0 } },
-			{ { -1.0f,  1.0f, 0.0f },{ 0, 1 },{ 0, 0, 0 },{ 0, 0, 0 },{ 0, 0, 0 } },
-		}, { 0, 1, 2, 0, 2, 3 })
+	: _shader(nullptr)
+	, _meshQuat(RenderMesh::CreateVT({
+			{ { -1.0f, -1.0f, 0.0f }, 0, 0 },
+			{ {  1.0f, -1.0f, 0.0f }, 1, 0 },
+			{ {  1.0f,  1.0f, 0.0f }, 1, 1 },
+			{ { -1.0f,  1.0f, 0.0f }, 0, 1 },
+		}, { 0, 1, 2, 0, 2, 3 }))
 {
 }
 
 SpriteScreen::~SpriteScreen()
 {
+	RenderMesh::Delete(_meshQuat);
 }
 
 void SpriteScreen::OnAdd()
@@ -29,17 +29,36 @@ void SpriteScreen::OnDel()
 
 void SpriteScreen::OnUpdate(float dt)
 {
-	Render::Command command;
-	command.mCameraFlag = GetOwner()->GetCameraFlag();
-	command.mCallFn = [this]() {
-		mmc::mRender.Bind(_shader);
-		_shader->SetUniform("material_.mFlipUVX", _flipUVX);
-		_shader->SetUniform("material_.mFlipUVY", _flipUVY);
-		for (auto i = 0; i != _textures.size(); ++i)
-		{
-			mmc::mRender.BindTexture(SFormat("material_.mTexture{0}", i), _textures.at(i));
-		}
-		mmc::mRender.RenderIdx(_meshQuat.GetGLID(), _meshQuat.GetIdxCount());
-	};
-	mmc::mRender.PostCommand(command);
+	RenderCommand command;
+	command.mCameraFlag		= GetOwner()->GetCameraFlag();
+	command.mTransform		= mmc::mRender.GetMatrix().GetM();
+	command.mMaterials		= &_material;
+	command.mMeshs			= &_meshQuat;
+	command.mMeshNum		= 1;
+	mmc::mRender.PostCommand(_shader, command);
+}
+
+void SpriteScreen::BindShader(Shader * shader)
+{
+	_shader = shader;
+}
+
+void SpriteScreen::BindShader(const std::string & url)
+{
+	BindShader(File::LoadShader(url));
+}
+
+void SpriteScreen::ClearTexture()
+{
+	_material.mDiffuses.clear();
+}
+
+void SpriteScreen::BindTexture(const Texture & texture)
+{
+	_material.mDiffuses.push_back(texture);
+}
+
+void SpriteScreen::BindTexture(const std::string & url)
+{
+	BindTexture(File::LoadTexture(url));
 }

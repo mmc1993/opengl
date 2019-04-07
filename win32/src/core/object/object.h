@@ -9,7 +9,6 @@ class Object {
 public:
     Object();
     virtual ~Object();
-
     virtual void OnUpdate(float dt);
 
     void AddChild(Object * child, size_t tag = (size_t)-1);
@@ -30,10 +29,7 @@ public:
     T * GetComponent()
     {
         auto iter = std::find_if(_components.begin(), _components.end(),
-            [](Component * component) 
-            { 
-                return typeid(*component) == typeid(T); 
-            });
+           [](Component * component) { return typeid(*component) == typeid(T); });
         return reinterpret_cast<T *>(iter != _components.end() ? *iter : nullptr);
     }
 
@@ -54,13 +50,13 @@ public:
         return std::move(result);
     }
 
-    void Update(float dt);
-
     Transform * GetTransform();
     size_t GetCameraFlag() const;
     void SetCameraFlag(size_t flag);
     void SetActive(bool active);
     bool IsActive() const;
+	void Update(float dt);
+	void UpdateFromThis(float dt);
 
     void SetParent(Object * parent);
     Object * GetParent();

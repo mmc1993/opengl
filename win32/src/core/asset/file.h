@@ -6,8 +6,8 @@
 #include "../third/assimp/postprocess.h"
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
+#include "../render/render_type.h"
 
-class Mesh;
 class Model;
 class Shader;
 class BitmapCube;
@@ -22,6 +22,6 @@ public:
 
 private:
 	static Model * LoadModel(aiNode * node, const aiScene * scene, const std::string & directory);
-	static Mesh * LoadMesh(aiMesh * node, const aiScene * scene, const std::string & directory);
-	static Material LoadMate(aiMesh * node, const aiScene * scene, const std::string & directory);
+	static Material LoadMate(aiMesh * mesh, const aiScene * scene, const std::string & directory);
+	static RenderMesh LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory);
 };

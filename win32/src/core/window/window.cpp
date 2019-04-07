@@ -127,9 +127,13 @@ void Window::Update()
 		auto difftime = (nowtime - _renderInfo.renderTime) / _renderInfo.renderCD;
 		_renderInfo.renderTime = time_tool::Now(_renderInfo.renderCD);
 		glfwPollEvents();
+		//	更新定时器
 		mmc::mTimer.Update(nowtime);
-		mmc::mRoot.Update(difftime);
+		//	以Root为起点，开始逐节点更新
+		mmc::mRoot.UpdateFromThis(difftime);
+		//	处理本帧渲染命令
         mmc::mRender.RenderOnce();
+		//	显示画面
         glfwSwapBuffers(_window);
 
 		std::cout <<

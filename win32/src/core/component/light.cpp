@@ -9,81 +9,10 @@
 
 Light::Light(LightType type): _type(type)
 {
-	float vertexs[] = {
-		 0.1f, -0.1f, -0.1f,
-		 0.1f, -0.1f,  0.1f,
-		-0.1f, -0.1f,  0.1f,
-		-0.1f, -0.1f, -0.1f,
-		 0.1f,  0.1f, -0.1f,
-		 0.1f,  0.1f,  0.1f,
-		-0.1f,  0.1f,  0.1f,
-		-0.1f,  0.1f, -0.1f,
-	};
-
-	std::uint32_t indices[] = {
-		4, 0, 3,
-		4, 3, 7,
-		2, 6, 7,
-		2, 7, 3,
-		1, 5, 2,
-		5, 6, 2,
-		0, 4, 1,
-		4, 5, 1,
-		4, 7, 5,
-		7, 6, 5,
-		0, 1, 2,
-		0, 2, 3,
-	};
-
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
-
-	glGenBuffers(1, &_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexs), vertexs, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
-
-	if (!mmc::mAssetCore.IsReg("SHADER_LIGHT_"))
-	{
-		auto vs = R"(
-			#version 410 core
-
-			layout(location = 0) in vec3 a_pos_;
-
-			uniform mat4 matrix_mvp_;
-
-			void main()
-			{
-				gl_Position = matrix_mvp_ * vec4(a_pos_, 1.0);
-			})";
-
-		auto fs = R"(
-			#version 410 core
-
-			out vec4 color_;
-
-			void main()
-			{
-				color_ = vec4(1, 1, 1, 1);
-			})";
-		mmc::mAssetCore.Reg("SHADER_LIGHT_", new Shader(vs, fs));
-	}
-	_shader = mmc::mAssetCore.Get<Shader>("SHADER_LIGHT_");
 }
 
 Light::~Light()
 {
-	glDeleteBuffers(1, &_vbo);
-	glDeleteBuffers(1, &_ebo);
-	glDeleteVertexArrays(1, &_vao);
 }
 
 void Light::OnAdd()
@@ -98,18 +27,6 @@ void Light::OnDel()
 
 void Light::OnUpdate(float dt)
 {
-	if (mIsDraw)
-	{
-		Render::Command command;
-		command.mCameraFlag = GetOwner()->GetCameraFlag();
-		command.mCallFn = [this]() {
-			glEnable(GL_DEPTH_TEST);
-			mmc::mRender.Bind(_shader);
-			mmc::mRender.RenderIdx(_vao, 36);
-			glDisable(GL_DEPTH_TEST);
-		};
-		mmc::mRender.PostCommand(command);
-	}
 }
 
 LightDirect::~LightDirect()
@@ -162,10 +79,9 @@ void LightDirect::DrawShadow()
 
 		glViewport(0, 0, _depthW, _depthH);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -173,9 +89,8 @@ void LightDirect::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}
 }
 
@@ -214,7 +129,6 @@ void LightPoint::DrawShadow()
 		glViewport(0, 0, _depthW, _depthH);
 
 		auto world = GetOwner()->GetTransform()->GetWorldPosition();
-
 		//	ср
 		view = glm::lookAt(world, world + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
 		DrawShadow(RenderTarget::TextureType::k3D_RIGHT, view);
@@ -241,10 +155,9 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 	_shadowMat[idx - RenderTarget::TextureType::k3D_RIGHT] = _proj * view;
 
 	mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-	mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-	mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 	mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-	mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, _proj);
+	mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
 
 	_shadowRT->Beg();
 	_shadowRT->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
@@ -255,9 +168,8 @@ void LightPoint::DrawShadow(size_t idx, const glm::mat4 & view)
 	glCullFace(GL_BACK);
 	_shadowRT->End();
 
-	mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+	mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 	mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
-	mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 }
 
 void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depthH, const float n, const float f, const glm::vec3 & up)
@@ -294,10 +206,9 @@ void LightSpot::DrawShadow()
 
 		glViewport(0, 0, _depthW, _depthH);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kMODEL);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJECT, proj);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, proj);
 
 		_shadowRT->Beg();
 		glCullFace(GL_FRONT);
@@ -305,8 +216,7 @@ void LightSpot::DrawShadow()
 		glCullFace(GL_BACK);
 		_shadowRT->End();
 
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJECT);
+		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kMODEL);
 	}
 }

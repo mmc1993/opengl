@@ -8,7 +8,6 @@
 #include "core/asset/material.h"
 #include "core/component/sprite.h"
 #include "core/component/render_target.h"
-#include "core/component/sprite_batch.h"
 #include "core/component/sprite_screen.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
@@ -36,8 +35,6 @@ public:
 public:
     void InitGame()
     {
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
 		InitCamera();
 		InitAssets();
 		InitEvents();
@@ -54,7 +51,7 @@ private:
 			glm::vec3(14.9228725f, 11.5230131f, 10.9647131f),
 			glm::vec3(-5, 0, -5),
 			glm::vec3(-0.287246555f, 0.787977219f, -0.290789485f));
-		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFlag0, 0);
+		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFLAG0, 0);
 	}
 
 	void InitAssets()
@@ -107,12 +104,12 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
+			//{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -167,8 +164,8 @@ private:
 			_lightSpots.push_back(light);
 		}
 		_lightDirects.at(0)->OpenShadow(512, 512, -50, 50, -50, 50, -10, 1000, glm::vec3(0, 0, -1));
-		_lightSpots.at(0)->OpenShadow(512, 512, 0.01f, 1000, glm::vec3(0, 0, -1));
-		_lightPoints.at(0)->OpenShadow(512, 512, 0.01f, 1000);
+		//_lightSpots.at(0)->OpenShadow(512, 512, 0.01f, 1000, glm::vec3(0, 0, -1));
+		//_lightPoints.at(0)->OpenShadow(512, 512, 0.01f, 1000);
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -241,14 +238,14 @@ private:
 			camera->SetPos(pos);
 		}
 
-		_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
-																  8 + std::cos(_pointCos) * 3, 
-																  3 + std::sin(_pointCos) * 3);
+		//_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
+		//														  8 + std::cos(_pointCos) * 3, 
+		//														  3 + std::sin(_pointCos) * 3);
 		_pointCos += 0.1f;
 
-		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-																 8,
-																 0 + std::sin(_spotCos) * 5);
+		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
+		//														 8,
+		//														 0 + std::sin(_spotCos) * 5);
 		_spotCos += 0.1f;
 
 		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
