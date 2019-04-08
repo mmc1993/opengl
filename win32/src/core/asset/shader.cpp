@@ -56,7 +56,7 @@ void Shader::SetUniform(GLuint GLID, const std::string & key, const Texture & va
 
 void Shader::SetUniform(GLuint GLID, const std::string & key, const BitmapCube * val, size_t pos)
 {
-	glActiveTexture(GL_TEXTURE_2D + pos);
+	glActiveTexture(GL_TEXTURE0 + pos);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, GLID);
 	glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
 }

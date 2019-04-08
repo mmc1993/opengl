@@ -110,6 +110,10 @@ void Render::OnRenderShadow(Light * light)
 
 void Render::OnRenderCamera(CameraInfo * camera)
 {
+	if (camera == nullptr)
+	{
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 	//  ÑÓ³ÙäÖÈ¾
 	OnRenderDeferred(camera);
 	//  ÕýÏòäÖÈ¾
@@ -273,7 +277,6 @@ void Render::BindEveryParam(const RenderCommand & command)
 	Shader::SetUniform(_renderInfo.mPass->GLID, "matrix_mv_", matrixMV);
 	Shader::SetUniform(_renderInfo.mPass->GLID, "matrix_mvp_", matrixMVP);
 	Shader::SetUniform(_renderInfo.mPass->GLID, "game_time_", glfwGetTime());
-
 	if (_renderInfo.mCamera != nullptr)
 	{
 		Shader::SetUniform(_renderInfo.mPass->GLID, "camera_pos_", _renderInfo.mCamera->GetPos());

@@ -137,7 +137,8 @@ void Window::Update()
         glfwSwapBuffers(_window);
 
 		std::cout <<
-			SFormat("FPS: {0} \nRenderCount: {1} \nmVertexCount: {2}", difftime,
+			SFormat("Error: {0} FPS: {1} RenderCount: {2} mVertexCount: {3}", 
+					glGetError(), difftime,
 					mmc::mRender.GetRenderInfo().mRenderCount,
 					mmc::mRender.GetRenderInfo().mVertexCount)
 			<< std::endl;
