@@ -244,7 +244,7 @@ vec3 CalculateDirect(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 paral
 
 vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
 {
-	float shadow = 1;
+	float shadow = CalculatePointShadow(i);
 
 	vec3 lightNormal = normalize(light_.mPoints[i].mPosition - v_out_.mMPos);
 	float diff = CalculateDiffuseScale(fragNormal, lightNormal, cameraNormal);
@@ -261,7 +261,7 @@ vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 parall
 
 vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
 {
-	float shadow = 1;
+	float shadow = CalculateSpotShadow(i);
 
 	vec3 lightNormal = normalize(light_.mSpots[i].mPosition - v_out_.mMPos);
 
