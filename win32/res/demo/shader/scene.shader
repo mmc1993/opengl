@@ -120,12 +120,12 @@ uniform struct Material_ {
 
 in V_OUT_{
 	vec3 mNormal;
-vec4 mMVPPos;
-vec3 mMVPos;
-vec3 mMPos;
-mat3 mTBNR;
-mat3 mTBN;
-vec2 mUV;
+    vec4 mMVPPos;
+    vec3 mMVPos;
+    vec3 mMPos;
+    mat3 mTBNR;
+    mat3 mTBN;
+    vec2 mUV;
 } v_out_;
 
 out vec4 color_;
@@ -150,15 +150,15 @@ float CalculateDirectShadow(const int i)
 	float shadow = 0.0f;
 	position.xyz = position.xyz / position.w * 0.5f + 0.5f;
 	vec2 texstep = 1.0f / textureSize(light_.mDirects[i].mShadowTex, 0);
-	float depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(0, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(texstep.x, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(0, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(texstep.x, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(0, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	float depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(         0,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2( texstep.x,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(         0,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2( texstep.x,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(-texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2(         0, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mDirects[i].mShadowTex, position.xy + vec2( texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
 	return shadow / 9.0f;
 }
 
@@ -170,15 +170,15 @@ float CalculateSpotShadow(const int i)
 	float shadow = 0.0f;
 	position.xyz = position.xyz / position.w * 0.5f + 0.5f;
 	vec2 texstep = 1.0f / textureSize(light_.mSpots[i].mShadowTex, 0);
-	float depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(0, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(texstep.x, texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(0, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(texstep.x, 0)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(0, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
-	depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	float depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(         0,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2( texstep.x,  texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(         0,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2( texstep.x,          0)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(-texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2(         0, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
+	      depth = texture(light_.mSpots[i].mShadowTex, position.xy + vec2( texstep.x, -texstep.y)).r; shadow += position.z < depth ? 1 : 0;
 	return shadow / 9.0f;
 }
 
@@ -202,27 +202,27 @@ float CalculatePointShadow(const int i)
 	return sampla.z < depth ? 1 : 0;
 }
 
-//	¼ÆËãÂþ·´ÉäËõ·ÅÒò×Ó
+//	è®¡ç®—æ¼«åå°„ç¼©æ”¾å› å­
 float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
 {
 	return max(dot(fragNormal, lightNormal), 0);
 }
 
-//	¼ÆËã¾µÃæ·´ÉäËõ·ÅÒò×Ó
+//	è®¡ç®—é•œé¢åå°„ç¼©æ”¾å› å­
 float CalculateSpecularScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
 {
 	vec3 h = (lightNormal + cameraNormal) * 0.5f;
 	return pow(max(dot(fragNormal, h), 0), material_.mShininess);
 }
 
-//	¼ÆËã¾àÀëË¥¼õËõ·ÅÒò×Ó
+//	è®¡ç®—è·ç¦»è¡°å‡ç¼©æ”¾å› å­
 float CalculateDistanceScale(vec3 fragPosition, vec3 lightPosition, float k0, float k1, float k2)
 {
 	float len = length(fragPosition - lightPosition);
 	return 1.0f / (k0 + k1 * len + k2 * len * len);
 }
 
-//	¼ÆËãÍâ×¶Ë¥¼õËõ·ÅÒò×Ó
+//	è®¡ç®—å¤–é”¥è¡°å‡ç¼©æ”¾å› å­
 float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 lightToFrag)
 {
 	float cone = dot(lightNormal, lightToFrag);
@@ -272,10 +272,10 @@ vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 paralla
 	vec3 diffuse = light_.mSpots[i].mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
 	vec3 specular = light_.mSpots[i].mSpecular * texture(material_.mSpecular, parallaxUV).rgb * spec;
 
-	//	¹â×¶Ë¥¼õ
+	//	å…‰é”¥è¡°å‡
 	float weight = CalculateOutConeScale(light_.mSpots[i].mInCone, light_.mSpots[i].mOutCone, light_.mSpots[i].mNormal, -lightNormal);
 
-	//	¾àÀëË¥¼õ
+	//	è·ç¦»è¡°å‡
 	float distance = CalculateDistanceScale(v_out_.mMPos, light_.mSpots[i].mPosition, light_.mSpots[i].mK0, light_.mSpots[i].mK1, light_.mSpots[i].mK2);
 
 	return (ambient + (diffuse + specular) * shadow) * distance * weight;
