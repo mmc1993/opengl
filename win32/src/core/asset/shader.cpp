@@ -81,7 +81,7 @@ bool Shader::AddPass(
         _passs.push_back(pass);
         _passs.back().GLID = GLID;
     }
-    return GLID;
+    return GLID != 0;
 }
 
 GLuint Shader::AddPass(const char * vs, const char * fs, const char * gs)
