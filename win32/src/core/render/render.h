@@ -3,6 +3,8 @@
 #include "../include.h"
 #include "render_type.h"
 
+class RenderTarget;
+
 class Render {
 public:
     struct CameraInfo {
@@ -20,16 +22,14 @@ public:
     };
 
 	struct RenderInfo {
-        Camera * mCamera;
         size_t mTexCount;
 		size_t mVertexCount;
 		size_t mRenderCount;
-		const RenderPass * mPass;
+        const RenderPass * mPass;
 		RenderInfo()
 			: mTexCount(0)
 			, mVertexCount(0)
 			, mRenderCount(0)
-            , mCamera(nullptr)
 			, mPass(nullptr)
 		{ }
 	};
@@ -40,48 +40,62 @@ public:
 
 	RenderMatrix & GetMatrix();
 
+    //  相机
     void AddCamera(Camera * camera, size_t flag, size_t order = ~0);
 	Camera * GetCamera(size_t order);
 	void DelCamera(Camera * camera);
 	void DelCamera(size_t order);
 
+    //  光源
 	void AddLight(Light * light);
 	void DelLight(Light * light);
     
+    //  渲染
 	void RenderOnce();
 
 	void PostCommand(const Shader * shader, const RenderCommand & command);
 
+    //  辅助
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
-    void OnRenderCamera(CameraInfo * camera);
-
 private:
+    void Bind(Light * light);
+    void Bind(CameraInfo * camera);
+    bool Bind(const RenderPass * pass);
+    void Bind(const Material * material);
+
+    //	执行绘制命令
+    void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
+
+    void ClearCommands();
+
+    //  生成ShadowMap
 	void OnRenderShadow(Light * light);
+
+    //  逐相机渲染
+    void OnRenderCamera();
     void OnRenderForward(CameraInfo * camera);
     void OnRenderDeferred(CameraInfo * camera);
-	void OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & commands);
-	void OnRenderDeferredCommands(CameraInfo * camera, const RenderQueue & commands);
-
-	void Bind(Camera * camera);
-	bool Bind(const RenderPass & pass);
-	void Bind(const Material & material);
-
+	void OnRenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
+	void OnRenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
+	
 	//	绑定光照参数到着色器
 	void BindLightParam();
 	//	绑定每一帧渲染都可能变化的参数
-	void BindFrameParam();
+	void BindFrameParam(CameraInfo * camera, Light * light);
 	//	绑定每一次渲染都可能变化的参数
-	void BindEveryParam(const RenderCommand & command);
-	//	执行绘制命令
-	void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
+	void BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command);
 
 private:
-    RenderMatrix _matrix;
-	RenderInfo _renderInfo;
-	std::vector<Light *> _lights;
+    RenderMatrix    _matrix;
+    RenderTarget *  _shadowRT;
+	RenderInfo      _renderInfo;
+
+	std::vector<Light *>    _lights;
     std::vector<CameraInfo> _cameraInfos;
-    std::array<RenderQueue, 4> _shadowCommands;
+
+	//	渲染队列, 阴影不需要区分队列类型
+    RenderQueue _shadowCommands;
     std::array<RenderQueue, 4> _forwardCommands;
     std::array<RenderQueue, 4> _deferredCommands;
 };

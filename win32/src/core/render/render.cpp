@@ -7,12 +7,23 @@
 #include "../component/light.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
+#include "../component/render_target.h"
 
-Render::Render()
-{ }
+Render::Render(): _shadowRT(new RenderTarget())
+{
+    _shadowRT->CloseDraw();
+    _shadowRT->CloseRead();
+}
 
 Render::~Render()
-{ }
+{
+    delete _shadowRT;
+}
+
+RenderMatrix & Render::GetMatrix()
+{
+    return _matrix;
+}
 
 void Render::AddCamera(Camera * camera, size_t flag, size_t order)
 {
@@ -56,29 +67,6 @@ void Render::DelLight(Light * light)
 	if (it != _lights.end()) { _lights.erase(it); }
 }
 
-void Render::PostCommand(const Shader * shader, const RenderCommand & command)
-{
-    for (const auto & pass : shader->GetPasss())
-    {
-        auto cmd = command;
-        cmd.mPass = &pass;
-        switch (cmd.mPass->mRenderType)
-        {
-        case RenderTypeEnum::kSHADOW:
-            _shadowCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-        case RenderTypeEnum::kFORWARD:
-            _forwardCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-        case RenderTypeEnum::kDEFERRED:
-            _deferredCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-        }
-    }
-}
-
-RenderMatrix & Render::GetMatrix()
-{
-	return _matrix;
-}
-
 void Render::RenderOnce()
 {
 	_renderInfo.mVertexCount = 0;
@@ -94,37 +82,67 @@ void Render::RenderOnce()
 	//	逐相机执行渲染命令
 	for (auto & camera : _cameraInfos)
 	{
-		Bind(camera.mCamera);
-		OnRenderCamera(&camera);
-		Bind((Camera *)nullptr);
+		Bind(&camera);
+		OnRenderCamera();
+		Bind((CameraInfo *)nullptr);
 	}
-    for (auto & queue : _shadowCommands) { queue.clear(); }
-    for (auto & queue : _forwardCommands) { queue.clear(); }
-    for (auto & queue : _deferredCommands) { queue.clear(); }
+ 
+	ClearCommands();
+}
+
+void Render::PostCommand(const Shader * shader, const RenderCommand & command)
+{
+    for (const auto & pass : shader->GetPasss())
+    {
+        auto cmd = command;
+        cmd.mPass = &pass;
+        switch (cmd.mPass->mRenderType)
+        {
+        case RenderTypeEnum::kSHADOW:
+            _shadowCommands.push_back(cmd); break;
+        case RenderTypeEnum::kFORWARD:
+            _forwardCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+        case RenderTypeEnum::kDEFERRED:
+            _deferredCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+        }
+    }
 }
 
 void Render::OnRenderShadow(Light * light)
 {
-    light->DrawShadow();
+    auto count = 0;
+	while (light->NextDrawShadow(count++, _shadowRT))
+	{
+		for (auto & command : _shadowCommands)
+		{
+            if (Bind(command.mPass)) { Bind(light); }
+            for (auto i = 0; i != command.mMeshNum; ++i)
+            {
+                Draw(command.mPass->mDrawType, command.mMeshs[i]);
+            }
+		}
+	}
 }
 
-void Render::OnRenderCamera(CameraInfo * camera)
+void Render::OnRenderCamera()
 {
-	if (camera == nullptr)
-	{
-		glClear(GL_DEPTH_BUFFER_BIT);
-	}
 	//  延迟渲染
-	OnRenderDeferred(camera);
+	OnRenderDeferred();
 	//  正向渲染
-	OnRenderForward(camera);
+	OnRenderForward();
 	//	后期处理
 }
 
 void Render::OnRenderForward(CameraInfo * camera)
 {
+    //  逐光源渲染
+    for (auto light : _lights)
+    {
+        std::for_each(_forwardCommands.begin(), _forwardCommands.end(),
+            std::bind(&Render::OnRenderForwardCommands, this, light, std::placeholders::_1));
+    }
 	std::for_each(_forwardCommands.begin(), _forwardCommands.end(),
-		std::bind(&Render::OnRenderForwardCommands, this, camera, std::placeholders::_1));
+		std::bind(&Render::OnRenderForwardCommands, this, std::placeholders::_1));
 }
 
 void Render::OnRenderDeferred(CameraInfo * camera)
@@ -132,25 +150,21 @@ void Render::OnRenderDeferred(CameraInfo * camera)
 	
 }
 
-void Render::OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & commands)
+void Render::OnRenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands)
 {
 	for (const auto & command : commands)
 	{
-		if (camera == nullptr ||
-            camera != nullptr &&
-			(camera->mFlag & command.mCameraFlag) != 0)
+		if ((camera->mFlag & command.mCameraFlag) != 0)
 		{
-			if (Bind(*command.mPass))
+			if (Bind(command.mPass))
 			{
 				BindFrameParam();
 			}
 			BindEveryParam(command);
-
-			for (auto i = 0; i != command.mMeshNum; ++i)
+			
+            for (auto i = 0; i != command.mMeshNum; ++i)
 			{
-                Bind(command.mMaterials[i]);
-
-                BindLightParam();
+                Bind(command.mMaterials + i);
 
 				Draw(command.mPass->mDrawType, command.mMeshs[i]);
 			}
@@ -158,58 +172,64 @@ void Render::OnRenderForwardCommands(CameraInfo * camera, const RenderQueue & co
 	}
 }
 
-void Render::OnRenderDeferredCommands(CameraInfo * camera, const RenderQueue & commands)
+void Render::OnRenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands)
 {
 }
 
-void Render::Bind(Camera * camera)
+void Render::Bind(CameraInfo * camera)
 {
 	if (camera != nullptr)
 	{
-		_renderInfo.mCamera = camera;
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, camera->GetView());
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, camera->GetProj());
-		glViewport((int)camera->GetViewport().x, (int)camera->GetViewport().y,
-				   (int)camera->GetViewport().z, (int)camera->GetViewport().w);
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, camera->mCamera->GetView());
+		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, camera->mCamera->GetProj());
+		glViewport((int)camera->mCamera->GetViewport().x, (int)camera->mCamera->GetViewport().y,
+				   (int)camera->mCamera->GetViewport().z, (int)camera->mCamera->GetViewport().w);
 	}
 	else
 	{
-		_renderInfo.mCamera = nullptr;
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
 		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
 	}
 }
 
-bool Render::Bind(const RenderPass & pass)
+void Render::Bind(Light * light)
 {
-	if (_renderInfo.mPass != &pass)
+    assert(_renderInfo.mPass != nullptr);
+    auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, light->mUBOName);
+    glUniformBlockBinding(_renderInfo.mPass->GLID, idx, UniformBlockEnum::kLIGHT_DIRECT);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetBlockID());
+}
+
+bool Render::Bind(const RenderPass * pass)
+{
+	if (_renderInfo.mPass != pass)
 	{
-		_renderInfo.mPass = &pass;
+		_renderInfo.mPass = pass;
 
 		//	开启面剔除
-		if (pass.bCullFace)
+		if (pass->bCullFace)
 		{
 			glEnable(GL_CULL_FACE);
-			glCullFace(pass.vCullFace);
+			glCullFace(pass->vCullFace);
 		}
 		else
 		{
 			glDisable(GL_CULL_FACE);
 		}
 		//	启用颜色混合
-		if (pass.bBlend)
+		if (pass->bBlend)
 		{
 			glEnable(GL_BLEND);
-			glBlendFunc(pass.vBlendSrc, pass.vBlendDst);
+			glBlendFunc(pass->vBlendSrc, pass->vBlendDst);
 		}
 		else
 		{
 			glDisable(GL_BLEND);
 		}
 		//	启用深度测试
-		if (pass.bDepthTest)
+		if (pass->bDepthTest)
 		{
 			glEnable(GL_DEPTH_TEST);
 		}
@@ -218,51 +238,59 @@ bool Render::Bind(const RenderPass & pass)
 			glDisable(GL_DEPTH_TEST);
 		}
 		//	启用模板测试
-		if (pass.bStencilTest)
+		if (pass->bStencilTest)
 		{
 			glEnable(GL_STENCIL_TEST);
 			glStencilMask(0xFF);
-			glStencilFunc(pass.vStencilFunc, pass.vStencilRef, pass.vStencilMask);
-			glStencilOp(pass.vStencilOpFail, pass.vStencilOpZFail, pass.vStencilOpZPass);
+			glStencilFunc(pass->vStencilFunc, pass->vStencilRef, pass->vStencilMask);
+			glStencilOp(pass->vStencilOpFail, pass->vStencilOpZFail, pass->vStencilOpZPass);
 		}
 		else
 		{
 			glDisable(GL_STENCIL_TEST);
 		}
-		glUseProgram(pass.GLID);
+		glUseProgram(pass->GLID);
 		return true;
 	}
 	return false;
 }
 
-void Render::Bind(const Material & material)
+void Render::Bind(const Material * material)
 {
+    assert(_renderInfo.mPass != nullptr);
 	_renderInfo.mTexCount = 0;
 
-	for (auto i = 0; i != material.mDiffuses.size(); ++i)
+	for (auto i = 0; i != material->mDiffuses.size(); ++i)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("material_.mDiffuse{0}", i), material.mDiffuses.at(i), _renderInfo.mTexCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("material_.mDiffuse{0}", i), material->mDiffuses.at(i), _renderInfo.mTexCount++);
 	}
-	if (material.mSpecular.GetBitmap() != nullptr)
+	if (material->mSpecular.GetBitmap() != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mSpecular", material.mSpecular, _renderInfo.mTexCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mSpecular", material->mSpecular, _renderInfo.mTexCount++);
 	}
-	if (material.mReflect.GetBitmap() != nullptr)
+	if (material->mReflect.GetBitmap() != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mReflect", material.mReflect, _renderInfo.mTexCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mReflect", material->mReflect, _renderInfo.mTexCount++);
 	}
-	if (material.mNormal.GetBitmap() != nullptr)
+	if (material->mNormal.GetBitmap() != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mNormal", material.mNormal, _renderInfo.mTexCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mNormal", material->mNormal, _renderInfo.mTexCount++);
 	}
-	if (material.mHeight.GetBitmap() != nullptr)
+	if (material->mHeight.GetBitmap() != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mHeight", material.mHeight, _renderInfo.mTexCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mHeight", material->mHeight, _renderInfo.mTexCount++);
 	}
-	Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mShininess", material.mShininess);
+	Shader::SetUniform(_renderInfo.mPass->GLID, "material_.mShininess", material->mShininess);
 }
 
-void Render::BindEveryParam(const RenderCommand & command)
+void Render::ClearCommands()
+{
+	_shadowCommands.clear();
+	for (auto & queue : _forwardCommands) { queue.clear(); }
+	for (auto & queue : _deferredCommands) { queue.clear(); }
+}
+
+void Render::BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command)
 {
 	auto & matrixM			= command.mTransform;
 	auto & matrixV			= _matrix.GetV();
@@ -279,12 +307,12 @@ void Render::BindEveryParam(const RenderCommand & command)
 	Shader::SetUniform(_renderInfo.mPass->GLID, "game_time_", glfwGetTime());
 	if (_renderInfo.mCamera != nullptr)
 	{
-		Shader::SetUniform(_renderInfo.mPass->GLID, "camera_pos_", _renderInfo.mCamera->GetPos());
-		Shader::SetUniform(_renderInfo.mPass->GLID, "camera_eye_", _renderInfo.mCamera->GetEye());
+		Shader::SetUniform(_renderInfo.mPass->GLID, "camera_pos_", _renderInfo.mCamera->mCamera->GetPos());
+		Shader::SetUniform(_renderInfo.mPass->GLID, "camera_eye_", _renderInfo.mCamera->mCamera->GetEye());
 	}
 }
 
-void Render::BindFrameParam()
+void Render::BindFrameParam(CameraInfo * camera, Light * light)
 {
 }
 
@@ -297,17 +325,17 @@ void Render::BindLightParam()
 		{
 		case Light::kDIRECT:
 			{
-				auto direct = reinterpret_cast<LightDirect *>(_lights.at(i));
-				Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mNormal", directNum), direct->mNormal);
-				Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
-				Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
-				Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
-				if (direct->GetShadowTex() != nullptr)
-				{
-					Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mShadowMat", directNum), direct->GetShadowMat());
+				//auto direct = reinterpret_cast<LightDirect *>(_lights.at(i));
+				//Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mNormal", directNum), direct->mNormal);
+				//Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mAmbient", directNum), direct->mAmbient);
+				//Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mDiffuse", directNum), direct->mDiffuse);
+				//Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mSpecular", directNum), direct->mSpecular);
+				//if (direct->GetShadowTex() != nullptr)
+				//{
+				//	Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mShadowMat", directNum), direct->GetShadowMat());
 
-					Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mShadowTex", directNum), direct->GetShadowTex(), _renderInfo.mTexCount++);
-				}
+				//	Shader::SetUniform(_renderInfo.mPass->GLID, SFormat("light_.mDirects[{0}].mShadowTex", directNum), direct->GetShadowTex(), _renderInfo.mTexCount++);
+				//}
 				++directNum;
 			}
 			break;

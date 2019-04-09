@@ -29,6 +29,15 @@ enum DrawTypeEnum {
 	kINDEX,			//	索引draw
 };
 
+enum UniformBlockEnum {
+    kLIGHT_DIRECT,      //  方向光绑定点
+    kLIGHT_POINT,       //  点光源绑定点
+    kLIGHT_SPOT,        //  聚光灯绑定点
+};
+
+static const char * UBO_NAME_LIGHT_DIRECT = "light_direct_";
+static const char * UBO_NAME_LIGHT_POINT = "light_point_";
+static const char * UBO_NAME_LIGHT_SPOT = "light_spot_";
 
 class RenderMatrix {
 public:

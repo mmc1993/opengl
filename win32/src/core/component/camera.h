@@ -54,7 +54,7 @@ public:
 	virtual void OnUpdate(float dt) override {}
 
 private:
-	void Update();
+    void Update();
 
 private:
 	Type _type;
