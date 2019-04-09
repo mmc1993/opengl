@@ -1,7 +1,6 @@
 #pragma once
 
 #include "component.h"
-#include "../render/render_type.h"
 
 class Bitmap;
 class BitmapCube;
@@ -9,18 +8,15 @@ class RenderTarget;
 
 class Light : public Component {
 public:
-	enum LightType {
+	enum Type {
 		kDIRECT,
 		kPOINT,
 		kSPOT,
 	};
 
 public:
-	Light(LightType type)
+	Light(Type type)
         : _type(type), _blockID(0)
-        , mUBOName(type == LightType::kDIRECT? UBO_NAME_LIGHT_DIRECT
-                 : type == LightType::kPOINT? UBO_NAME_LIGHT_POINT
-                 : UBO_NAME_LIGHT_SPOT)
     { }
 
     virtual ~Light()
@@ -33,20 +29,22 @@ public:
 	virtual void OnUpdate(float dt) {	}
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
+    const glm::vec3 & GetPos() const { return _position; }
     GLuint GetBlockID() const { return _blockID; }
-    LightType GetType() const { return _type; }
+    Type GetType() const { return _type; }
 
 public:
 	glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
-    const char * const mUBOName;
 
 protected:
+    //  UBO
     GLuint _blockID;
-
+    //  世界坐标, 该坐标在每次NextDrawShadow后更新
+    glm::vec3 _position;
 private:
-	LightType _type;
+	Type _type;
 };
 
 class LightDirect : public Light {
@@ -119,7 +117,6 @@ public:
 private:
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
-    glm::vec3 _world;
 	glm::mat4 _proj;
 };
 

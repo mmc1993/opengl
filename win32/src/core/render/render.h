@@ -42,7 +42,7 @@ public:
 
     //  相机
     void AddCamera(Camera * camera, size_t flag, size_t order = ~0);
-	Camera * GetCamera(size_t order);
+	Camera *GetCamera(size_t order);
 	void DelCamera(Camera * camera);
 	void DelCamera(size_t order);
 
@@ -62,7 +62,11 @@ private:
     void Bind(Light * light);
     void Bind(CameraInfo * camera);
     bool Bind(const RenderPass * pass);
-    void Bind(const Material * material);
+
+    //  绑定材质/ShadowMap
+    void BindTextures(const Light * light, const Material * material);
+    //	绑定每一次渲染都可能变化的参数
+    void BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command);
 
     //	执行绘制命令
     void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
@@ -70,21 +74,14 @@ private:
     void ClearCommands();
 
     //  生成ShadowMap
-	void OnRenderShadow(Light * light);
+	void RenderShadow(Light * light);
 
     //  逐相机渲染
-    void OnRenderCamera();
-    void OnRenderForward(CameraInfo * camera);
-    void OnRenderDeferred(CameraInfo * camera);
-	void OnRenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
-	void OnRenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
-	
-	//	绑定光照参数到着色器
-	void BindLightParam();
-	//	绑定每一帧渲染都可能变化的参数
-	void BindFrameParam(CameraInfo * camera, Light * light);
-	//	绑定每一次渲染都可能变化的参数
-	void BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command);
+    void RenderCamera(CameraInfo * camera);
+    void RenderForward(CameraInfo * camera);
+    void RenderDeferred(CameraInfo * camera);
+	void RenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
+	void RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
 
 private:
     RenderMatrix    _matrix;

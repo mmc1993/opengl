@@ -44,8 +44,6 @@ public:
 	virtual void OnUpdate(float dt) override;
 
 	void BindAttachment(AttachmentType attachment, TextureType type, int texid);
-	void CloseDraw() { glDrawBuffer(GL_NONE); }
-	void CloseRead() { glReadBuffer(GL_NONE); }
 	void Beg();
 	void End();
 

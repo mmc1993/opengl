@@ -52,13 +52,13 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
     assert(mShadowTex != nullptr);
     if (0 == count)
     {
-	    auto world  = GetOwner()->GetTransform()->GetWorldPosition();
+        _position   = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = mNormal.y > 0.999999f 
                     ? glm::vec3(0, 0, 1) 
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
         up          = glm::cross(mNormal, right);
-	    auto view   = glm::lookAt(world, world + mNormal, up);
+	    auto view   = glm::lookAt(_position, _position + mNormal, up);
         auto matrix = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
@@ -117,7 +117,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
     {
         glViewport(0, 0, _depthW, _depthH);
 
-        _world = GetOwner()->GetTransform()->GetWorldPosition();
+        _position = GetOwner()->GetTransform()->GetWorldPosition();
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0), sizeof(UBOData::mK0), &mK0);
@@ -126,7 +126,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse), sizeof(UBOData::mDiffuse), &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_world);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_position);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -141,8 +141,8 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
             {   glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_BACK      },
         };
 
-        auto view = glm::lookAt(_world, 
-                    std::get<0>(s_faceInfo[count]) + _world,
+        auto view = glm::lookAt(_position,
+                    std::get<0>(s_faceInfo[count]) + _position,
                     std::get<1>(s_faceInfo[count]));
 
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
@@ -179,13 +179,13 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
 {
     if (count == 0)
     {
-        auto world  = GetOwner()->GetTransform()->GetWorldPosition();
+        _position   = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = mNormal.y > 0.999999f
                     ? glm::vec3(0, 0, 1)
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
         up          = glm::cross(mNormal, right);
-        auto view   = glm::lookAt(world, world + mNormal, up);
+        auto view   = glm::lookAt(_position, _position + mNormal, up);
         auto matrix = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
@@ -197,7 +197,7 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse), sizeof(UBOData::mDiffuse), &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &world);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_position);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
     else

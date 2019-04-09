@@ -35,9 +35,55 @@ enum UniformBlockEnum {
     kLIGHT_SPOT,        //  聚光灯绑定点
 };
 
-static const char * UBO_NAME_LIGHT_DIRECT = "light_direct_";
-static const char * UBO_NAME_LIGHT_POINT = "light_point_";
-static const char * UBO_NAME_LIGHT_SPOT = "light_spot_";
+//  UBO 方向光数据
+static const char * const UBO_NAME_LIGHT_DIRECT = "light_direct_";
+//  UBO 点光源数据
+static const char * const UBO_NAME_LIGHT_POINT = "light_point_";
+//  UBO 聚光灯数据
+static const char * const UBO_NAME_LIGHT_SPOT = "light_spot_";
+
+//  光源位置
+static const char * const UNIFORM_NAME_LIGHT_POS = "light_pos_";
+//  光源类型
+static const char * const UNIFORM_NAME_LIGHT_TYPE = "light_type_";
+//  法线矩阵
+static const char * const UNIFORM_NAME_MATRIX_N = "matrix_n_";
+//  模型矩阵
+static const char * const UNIFORM_NAME_MATRIX_M = "matrix_m_";
+//  视图矩阵
+static const char * const UNIFORM_NAME_MATRIX_V = "matrix_v_";
+//  投影矩阵
+static const char * const UNIFORM_NAME_MATRIX_P = "matrix_p_";
+//  模型视图矩阵
+static const char * const UNIFORM_NAME_MATRIX_MV = "matrix_mv_";
+//  模型视图投影矩阵
+static const char * const UNIFORM_NAME_MATRIX_MVP = "matrix_mvp_";
+//  游戏时间
+static const char * const UNIFORM_NAME_GAME_TIME = "game_time_";
+
+//  相机位置
+static const char * const UNIFORM_NAME_CAMERA_POS = "camera_pos_";
+//  相机朝向
+static const char * const UNIFORM_NAME_CAMERA_EYE = "camera_eye_";
+
+//  材质.漫反射
+static const char * const UNIFORM_NAME_MATERIAL_DIFFUSE = "material_.mDiffuse{0}";
+//  材质.镜面反射
+static const char * const UNIFORM_NAME_MATERIAL_SPECULAR    = "material_.mSpecular";
+//  材质.反射贴图
+static const char * const UNIFORM_NAME_MATERIAL_REFLECT     = "material_.mReflect";
+//  材质.法线贴图
+static const char * const UNIFORM_NAME_MATERIAL_NORMAL      = "material_.mNormal";
+//  材质.高度贴图
+static const char * const UNIFORM_NAME_MATERIAL_HEIGHT      = "material_.mHeight";
+//  材质.高光强度
+static const char * const UNIFORM_NAME_MATERIAL_SHININESS   = "material_.mShininess";
+//  方向光阴影贴图
+static const char * const UNIFORM_NAME_LIGHT_DIRECT_SHADOW_MAP = "light_direct_shadow_map_";
+//  点光源阴影贴图
+static const char * const UNIFORM_NAME_LIGHT_POINT_SHADOW_MAP = "light_point_shadow_map_";
+//  聚光灯阴影贴图
+static const char * const UNIFORM_NAME_LIGHT_SPOT_SHADOW_MAP = "light_spot_shadow_map_";
 
 class RenderMatrix {
 public:
