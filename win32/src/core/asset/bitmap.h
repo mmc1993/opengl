@@ -4,9 +4,9 @@
 
 class Bitmap: public Asset {
 public:
-	Bitmap(int w, int h, int texfmt, int glfmt, int gltype, const std::string & url, const void * buffer): _GLID(0)
+	Bitmap(int w, int h, int texfmt, int rawfmt, int pixtype, const std::string & url, const void * buffer): _GLID(0)
 	{
-		Init(w, h, texfmt, glfmt, gltype, url, buffer);
+		Init(w, h, texfmt, rawfmt, pixtype, url, buffer);
 	}
 
     ~Bitmap()
@@ -43,12 +43,12 @@ public:
     }
 
 private:
-	void Init(int w, int h, int texfmt, int glfmt, int gltype, const std::string & url, const void * buffer)
+	void Init(int w, int h, int texfmt, int rawfmt, int pixtype, const std::string & url, const void * buffer)
 	{
 		_w = w; _h = h; _url = url;
 		glGenTextures(1, &_GLID);
 		glBindTexture(GL_TEXTURE_2D, _GLID);
-		glTexImage2D(GL_TEXTURE_2D, 0, texfmt, w, h, 0, glfmt, gltype, buffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, texfmt, w, h, 0, rawfmt, pixtype, buffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -58,3 +58,5 @@ private:
     GLuint _GLID;
 	std::string _url;
 };
+
+using RenderTexture2D = Bitmap;
