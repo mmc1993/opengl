@@ -3,9 +3,18 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-RenderBuffer * RenderTarget::CreateBuffer(int fmt, int w, int h)
+RenderBuffer * RenderTarget::CreateBuffer(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int fmt)
 {
-    return nullptr;
+    return attachment == kCOLOR0
+        || attachment == kCOLOR1
+        || attachment == kCOLOR2
+        || attachment == kCOLOR3
+        || attachment == kCOLOR4
+        || attachment == kCOLOR5
+        || attachment == kCOLOR6
+        || attachment == kDEPTH
+        ? new RenderBuffer(w, h, fmt)
+        : new RenderBuffer(w, h, GL_DEPTH24_STENCIL8);
 }
 
 RenderTexture2D * RenderTarget::CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype)

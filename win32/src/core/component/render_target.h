@@ -7,7 +7,7 @@
 
 class RenderBuffer {
 public:
-    RenderBuffer(int w, int h, int fmt)
+    RenderBuffer(const std::uint32_t w, const std::uint32_t h, int fmt)
     {
         _w = w; _h = h; _format = fmt;
         glGenRenderbuffers(1, &_GLID);
@@ -24,8 +24,9 @@ public:
     
     GLuint GetGLID() const { return _GLID; }
 private:
-    int _w, _h;
     int _format;
+    std::uint32_t _w;
+    std::uint32_t _h;
     GLuint _GLID;
 };
 
@@ -61,7 +62,7 @@ public:
 	};
 
 public:
-    static RenderBuffer * CreateBuffer(int fmt, int w, int h);
+    static RenderBuffer * CreateBuffer(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int fmt);
 	static RenderTexture2D * CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 	static RenderTexture3D * CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 
