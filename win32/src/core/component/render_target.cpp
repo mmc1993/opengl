@@ -3,9 +3,9 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int glfmt, int gltype)
+RenderTexture2D * RenderTarget::CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype)
 {
-	Bitmap * bitmap = nullptr;
+    RenderTexture2D * texture2D = nullptr;
 	switch (attachment)
 	{
 	case kCOLOR0:
@@ -16,38 +16,38 @@ Bitmap * RenderTarget::Create2DTexture(const std::uint32_t w, const std::uint32_
 	case kCOLOR5:
 	case kCOLOR6:
 		{
-			bitmap = new Bitmap(w, h, texfmt, glfmt, gltype, "RenderTarget Color", nullptr);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			texture2D = new RenderTexture2D(w, h, texfmt, rawfmt, pixtype, "RenderTarget Color", nullptr);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			texture2D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kDEPTH:
 		{
-			bitmap = new Bitmap(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, gltype, "RenderTarget Depth", nullptr);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			texture2D = new RenderTexture2D(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, pixtype, "RenderTarget Depth", nullptr);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			texture2D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	case kSTENCIL:
 		{
-			bitmap = new Bitmap(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, "RenderTarget Stencil", nullptr);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			texture2D = new RenderTexture2D(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, "RenderTarget Stencil", nullptr);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture2D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			texture2D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		break;
 	}
-	return bitmap;
+	return texture2D;
 }
 
-BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment)
+RenderTexture3D * RenderTarget::CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype)
 {
-	BitmapCube * bitmap = nullptr;
+    RenderTexture3D * texture3D = nullptr;
 	switch (attachment)
 	{
 	case kCOLOR0:
@@ -58,36 +58,36 @@ BitmapCube * RenderTarget::Create3DTexture(const std::uint32_t w, const std::uin
 	case kCOLOR5:
 	case kCOLOR6:
 		{
-			bitmap = new BitmapCube(w, h, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, { }, { });
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			texture3D = new RenderTexture3D(w, h, texfmt, rawfmt, pixtype);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			texture3D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	case kDEPTH:
 		{
-			bitmap = new BitmapCube(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, { }, { });
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			texture3D = new RenderTexture3D(w, h, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, pixtype);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			texture3D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	case kSTENCIL:
 		{
-			bitmap = new BitmapCube(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, { }, { });
-			bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			bitmap->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			texture3D = new RenderTexture3D(w, h, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			texture3D->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			texture3D->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		}
 		break;
 	}
-	return bitmap;
+	return texture3D;
 }
 
 RenderTarget::RenderTarget() : _fbo(0)

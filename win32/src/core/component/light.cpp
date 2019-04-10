@@ -29,13 +29,10 @@ void LightDirect::OpenShadow(
 	const glm::vec2 & orthoY,
 	const glm::vec2 & orthoZ)
 {
-	_depthW = depthW; 
-	_depthH = depthH;
-    _proj = glm::ortho(orthoX.x, orthoX.y,
-                       orthoY.x, orthoY.y,
-                       orthoZ.x, orthoZ.y);
-	mShadowTex = RenderTarget::Create2DTexture(
-		_depthW, _depthH, RenderTarget::kDEPTH);
+	_depthW     = depthW; 
+	_depthH     = depthH;
+    _proj       = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
+	mShadowTex  = RenderTarget::CreateTexture2D(_depthW, _depthH, RenderTarget::kDEPTH, GL_NONE, GL_NONE, GL_UNSIGNED_BYTE);
 
     //  环境光, 漫反射, 镜面反射, 法线, 矩阵
     if (_blockID == 0) 
@@ -94,7 +91,7 @@ void LightPoint::OpenShadow(const std::uint32_t depthW, const std::uint32_t dept
 	_depthW     = depthW;
 	_depthH     = depthH;
 	_proj       = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, n, f);
-	mShadowTex  = RenderTarget::Create3DTexture(_depthW, _depthH, RenderTarget::kDEPTH);
+	mShadowTex  = RenderTarget::CreateTexture3D(_depthW, _depthH, RenderTarget::kDEPTH, GL_NONE, GL_NONE, GL_UNSIGNED_BYTE);
 
     //  光线衰减系数k0, k1, k2, 环境光, 漫反射, 镜面反射, 世界坐标
     if (_blockID == 0) 
@@ -163,7 +160,7 @@ void LightSpot::OpenShadow(const std::uint32_t depthW, const std::uint32_t depth
 	_depthW     = depthW; 
     _depthH     = depthH;
     _proj       = glm::perspective(glm::radians(90.0f), (float)_depthW / (float)_depthH, n, f);
-	mShadowTex  = RenderTarget::Create2DTexture(_depthW, _depthH, RenderTarget::kDEPTH);
+	mShadowTex  = RenderTarget::CreateTexture2D(_depthW, _depthH, RenderTarget::kDEPTH, GL_NONE, GL_NONE, GL_UNSIGNED_BYTE);
 
     //  光线衰减系数k0, k1, k2, 内锥, 外锥, 环境光, 漫反射, 镜面反射, 世界坐标
     if (_blockID == 0)

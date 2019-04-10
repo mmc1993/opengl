@@ -3,9 +3,36 @@
 #include "component.h"
 #include "../asset/bitmap.h"
 #include "../asset/bitmap_cube.h"
+#include "../tools/debug_tool.h"
 
 class Bitmap;
 class BitmapCube;
+using RenderTexture2D = Bitmap;
+using RenderTexture3D = BitmapCube;
+
+class RenderBuffer {
+public:
+    RenderBuffer(int w, int h, int fmt)
+    {
+        _w = w; _h = h; _format = fmt;
+        glGenRenderbuffers(1, &_GLID);
+        glBindRenderbuffer(GL_RENDERBUFFER, _GLID);
+        glRenderbufferStorage(GL_RENDERBUFFER, fmt, w, h);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        ASSERT_LOG(glGetError() == 0, "Create RBO Error");
+    }
+
+    ~RenderBuffer()
+    {
+        glDeleteRenderbuffers(1, &_GLID);
+    }
+    
+    GLuint GetGLID() const { return _GLID; }
+private:
+    int _w, _h;
+    int _format;
+    GLuint _GLID;
+};
 
 class RenderTarget : public Component {
 public:
@@ -32,10 +59,9 @@ public:
 	};
 
 public:
-	static Bitmap * Create2DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, 
-									int texfmt = GL_RGBA, int glfmt = GL_RGBA, int gltype = GL_UNSIGNED_BYTE);
-
-	static BitmapCube * Create3DTexture(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment);
+    //static RenderBuffer * CreateBuffer()
+	static RenderTexture2D * CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
+	static RenderTexture3D * CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 
 	RenderTarget();
 	~RenderTarget();
