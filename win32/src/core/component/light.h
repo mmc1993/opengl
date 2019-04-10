@@ -1,9 +1,9 @@
 #pragma once
 
 #include "component.h"
+#include "../asset/bitmap.h"
+#include "../asset/bitmap_cube.h"
 
-class Bitmap;
-class BitmapCube;
 class RenderTarget;
 
 class Light : public Component {
@@ -75,8 +75,9 @@ public:
 	virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
 
 public:
-	Bitmap *  mShadowTex;
-	glm::vec3 mNormal;
+    glm::vec3 mNormal;
+    
+    RenderTexture2D * mShadowTex;
 
 private:
 	std::uint32_t _depthW;
@@ -112,7 +113,7 @@ public:
 public:
 	float mK0, mK1, mK2;
 
-    BitmapCube * mShadowTex;
+    RenderTexture3D * mShadowTex;
 
 private:
 	std::uint32_t _depthW;
@@ -149,9 +150,9 @@ public:
 
 public:
 	glm::vec3 mNormal;
-    Bitmap * mShadowTex;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
+    RenderTexture2D * mShadowTex;
 
 private:
 	std::uint32_t _depthW;

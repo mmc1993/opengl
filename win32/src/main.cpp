@@ -115,7 +115,6 @@ private:
 		for (auto & data : directs)
 		{
 			auto light = new LightDirect();
-			light->mIsDraw = OPEN_DRAW;
 			light->mAmbient = data[1];
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
@@ -130,7 +129,6 @@ private:
 		for (auto & data : points)
 		{
 			auto light = new LightPoint();
-			light->mIsDraw = OPEN_DRAW;
 			light->mAmbient = data[1];
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
@@ -147,7 +145,6 @@ private:
 		for (auto & data : spots)
 		{
 			auto light = new LightSpot();
-			light->mIsDraw = OPEN_DRAW;
 			light->mAmbient = data[1];
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
@@ -163,8 +160,8 @@ private:
 			object->SetParent(&mmc::mRoot);
 			_lightSpots.push_back(light);
 		}
-		_lightDirects.at(0)->OpenShadow(512, 512, -50, 50, -50, 50, -10, 1000, glm::vec3(0, 0, -1));
-		_lightSpots.at(0)->OpenShadow(512, 512, 0.01f, 1000, glm::vec3(0, 0, -1));
+        _lightDirects.at(0)->OpenShadow(512, 512, { -50, 50 }, { -50, 50 }, { -10, 1000 });
+		_lightSpots.at(0)->OpenShadow(512, 512, 0.01f, 1000);
 		_lightPoints.at(0)->OpenShadow(512, 512, 0.01f, 1000);
 	}
 

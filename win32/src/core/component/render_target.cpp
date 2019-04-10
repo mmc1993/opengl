@@ -3,6 +3,11 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
+RenderBuffer * RenderTarget::CreateBuffer(int fmt, int w, int h)
+{
+    return nullptr;
+}
+
 RenderTexture2D * RenderTarget::CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype)
 {
     RenderTexture2D * texture2D = nullptr;
@@ -107,23 +112,41 @@ void RenderTarget::OnDel()
 void RenderTarget::OnUpdate(float dt)
 { }
 
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, int texid)
+void RenderTarget::BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType)
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, type, texid, 0);
+    if (bindType == BindType::kNONE) { bindType = _bindType; }
+
+    glFramebufferRenderbuffer(bindType, attachment, GL_RENDERBUFFER, buffer->GetGLID());
 }
 
-void RenderTarget::Beg()
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType)
+{
+    if (bindType == BindType::kNONE) { bindType = _bindType; }
+
+    glFramebufferTexture2D(bindType, attachment, type, texture2D->GetGLID(), 0);
+}
+
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType)
+{
+    if (bindType == BindType::kNONE) { bindType = _bindType; }
+
+    glFramebufferTexture2D(bindType, attachment, type, texture3D->GetGLID(), 0);
+}
+
+void RenderTarget::Beg(BindType bindType)
 {
 	if (_fbo == 0)
 	{
 		glGenFramebuffers(1, &_fbo);
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+	glBindFramebuffer(_bindType, _fbo);
+    
+    _bindType = bindType;
 }
 
 void RenderTarget::End()
 {
-	ASSERT_RET(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	ASSERT_RET(glCheckFramebufferStatus(_bindType) == GL_FRAMEBUFFER_COMPLETE);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(_bindType, 0);
 }

@@ -5,11 +5,6 @@
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-class Bitmap;
-class BitmapCube;
-using RenderTexture2D = Bitmap;
-using RenderTexture3D = BitmapCube;
-
 class RenderBuffer {
 public:
     RenderBuffer(int w, int h, int fmt)
@@ -36,6 +31,13 @@ private:
 
 class RenderTarget : public Component {
 public:
+    enum BindType {
+        kDRAW_READ = GL_FRAMEBUFFER,
+        kDRAW = GL_DRAW_FRAMEBUFFER,
+        kREAD = GL_READ_FRAMEBUFFER,
+        kNONE = GL_NONE,
+    };
+
 	enum AttachmentType {
 		kCOLOR0 = GL_COLOR_ATTACHMENT0,
 		kCOLOR1 = GL_COLOR_ATTACHMENT0 + 1,
@@ -59,7 +61,7 @@ public:
 	};
 
 public:
-    //static RenderBuffer * CreateBuffer()
+    static RenderBuffer * CreateBuffer(int fmt, int w, int h);
 	static RenderTexture2D * CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 	static RenderTexture3D * CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 
@@ -69,10 +71,15 @@ public:
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
 
-	void BindAttachment(AttachmentType attachment, TextureType type, int texid);
-	void Beg();
+    void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
+    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType = BindType::kNONE);
+    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType = BindType::kNONE);
+	
+    void Beg(BindType bindType = BindType::kDRAW_READ);
 	void End();
 
 private:
 	GLuint _fbo;
+
+    BindType _bindType;
 };

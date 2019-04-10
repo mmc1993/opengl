@@ -71,7 +71,7 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, mShadowTex->GetGLID());
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, mShadowTex);
     }
     else
     {
@@ -146,6 +146,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, std::get<2>(s_faceInfo[count]), mShadowTex);
     }
     return count != 7;
 }
@@ -196,6 +197,12 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_position);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
+        mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
+        mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
+        mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, mShadowTex);
     }
     else
     {
