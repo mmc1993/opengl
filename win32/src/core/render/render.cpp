@@ -146,6 +146,10 @@ void Render::RenderCamera(CameraInfo * camera)
 
 void Render::RenderForward(CameraInfo * camera)
 {
+    //  打包光源数据
+
+
+    //  渲染
     for (auto light : _lights)
     {
         for (auto & commands : _forwardCommands)
