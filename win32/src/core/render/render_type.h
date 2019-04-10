@@ -6,7 +6,6 @@ class Light;
 class Camera;
 class Shader;
 class Bitmap;
-class Texture;
 class Material;
 class BitmapCube;
 

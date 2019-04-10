@@ -17,8 +17,8 @@ public:
 	void BindShader(const std::string & url);
 
 	void ClearTexture();
-	void BindTexture(const Texture & texture);
-	void BindTexture(const std::string & url);
+	void BindBitmap(Bitmap * bitmap);
+	void BindBitmap(const std::string & url);
 
 private:
 	Shader * _shader;

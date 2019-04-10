@@ -47,13 +47,6 @@ void Shader::SetUniform(GLuint GLID, const std::string & key, const Bitmap * val
 	glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
 }
 
-void Shader::SetUniform(GLuint GLID, const std::string & key, const Texture & val, size_t pos)
-{
-	glActiveTexture(GL_TEXTURE0 + pos);
-	glBindTexture(GL_TEXTURE_2D, val.GetBitmap()->GetGLID());
-	glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
-}
-
 void Shader::SetUniform(GLuint GLID, const std::string & key, const BitmapCube * val, size_t pos)
 {
 	glActiveTexture(GL_TEXTURE0 + pos);

@@ -294,7 +294,7 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 		aiMaterial->GetTexture(aiTextureType_DIFFUSE, i, &textureURL);
 		auto fullpath = directory + std::string(textureURL.C_Str());
 		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-		material.mDiffuses.push_back(File::LoadTexture(urlpath));
+		material.mDiffuses.push_back(File::LoadBitmap(urlpath));
 	}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_REFLECTION))
@@ -302,7 +302,7 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 		aiMaterial->GetTexture(aiTextureType_REFLECTION, 0, &textureURL);
 		auto fullpath = directory + std::string(textureURL.C_Str());
 		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-		material.mReflect = File::LoadTexture(urlpath);
+		material.mReflect = File::LoadBitmap(urlpath);
 	}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_SPECULAR))
@@ -310,7 +310,7 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 		aiMaterial->GetTexture(aiTextureType_SPECULAR, 0, &textureURL);
 		auto fullpath = directory + std::string(textureURL.C_Str());
 		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-		material.mSpecular = File::LoadTexture(urlpath);
+		material.mSpecular = File::LoadBitmap(urlpath);
 	}
 
 	if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
@@ -318,7 +318,7 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 		aiMaterial->GetTexture(aiTextureType_HEIGHT, 0, &textureURL);
 		auto fullpath = directory + std::string(textureURL.C_Str());
 		auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-		material.mNormal = File::LoadTexture(urlpath);
+		material.mNormal = File::LoadBitmap(urlpath);
 	}
 
 	return std::move(material);

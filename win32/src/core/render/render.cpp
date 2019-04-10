@@ -296,19 +296,19 @@ void Render::BindTextures(const Light * light, const Material * material)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_NAME_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), count++);
 	}
-	if (material->mSpecular.GetBitmap() != nullptr)
+	if (material->mSpecular != nullptr)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_MATERIAL_SPECULAR, material->mSpecular, count++);
 	}
-	if (material->mReflect.GetBitmap() != nullptr)
+	if (material->mReflect != nullptr)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_MATERIAL_REFLECT, material->mReflect, count++);
 	}
-	if (material->mNormal.GetBitmap() != nullptr)
+	if (material->mNormal != nullptr)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_MATERIAL_NORMAL, material->mNormal, count++);
 	}
-	if (material->mHeight.GetBitmap() != nullptr)
+	if (material->mHeight != nullptr)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_MATERIAL_HEIGHT, material->mHeight, count++);
 	}

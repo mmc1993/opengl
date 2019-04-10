@@ -4,7 +4,6 @@
 #include "../render/render_type.h"
 
 class Bitmap;
-class Texture;
 class BitmapCube;
 
 class Shader : public Asset {
@@ -17,7 +16,6 @@ public:
 	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat3 & val);
 	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat4 & val);
 	static void SetUniform(GLuint GLID, const std::string & key, const Bitmap * val, size_t pos);
-	static void SetUniform(GLuint GLID, const std::string & key, const Texture & val, size_t pos);
 	static void SetUniform(GLuint GLID, const std::string & key, const BitmapCube * val, size_t pos);
 
 public:

@@ -48,17 +48,17 @@ void SpriteScreen::BindShader(const std::string & url)
 	BindShader(File::LoadShader(url));
 }
 
-void SpriteScreen::ClearTexture()
+void SpriteScreen::ClearBitmap()
 {
 	_material.mDiffuses.clear();
 }
 
-void SpriteScreen::BindTexture(const Texture & texture)
+void SpriteScreen::BindBitmap(Bitmap * bitmap)
 {
-	_material.mDiffuses.push_back(texture);
+	_material.mDiffuses.push_back(bitmap);
 }
 
-void SpriteScreen::BindTexture(const std::string & url)
+void SpriteScreen::BindBitmap(const std::string & url)
 {
-	BindTexture(File::LoadTexture(url));
+	BindBitmap(File::LoadBitmap(url));
 }
