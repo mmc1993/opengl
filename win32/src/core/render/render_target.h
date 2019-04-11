@@ -71,6 +71,7 @@ public:
     void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType = BindType::kNONE);
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType = BindType::kNONE);
+    void BindAttachment(AttachmentType attachment, TextureType type, uint texture2D, uint textureOrder, BindType bindType = BindType::kNONE);
 	
     void Beg(BindType bindType = BindType::kDRAW_READ);
 	void End();

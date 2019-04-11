@@ -34,13 +34,13 @@ public:
 public:
     static void Init(uint texW, uint texH)
     {
-        s_texW = texW; 
-        s_texH = texH;
+        s_VIEW_W = texW;
+        s_VIEW_H = texH;
     }
 
 protected:
-    static uint s_texW;
-    static uint s_texH;
+    static uint s_VIEW_W;
+    static uint s_VIEW_H;
     static TexPool s_texPool;
 
 public:
@@ -106,16 +106,13 @@ public:
     };
 
 public:
-	LightDirect()
-        : Light(Light::kDIRECT)
-        , mShadowTex(nullptr)
+	LightDirect(): Light(Light::kDIRECT)
 	{ }
 
-	~LightDirect();
+    ~LightDirect()
+    { }
 
-	void OpenShadow(const std::uint32_t depthW, 
-					const std::uint32_t depthH,
-					const glm::vec2 & orthoX,	//	左右
+	void OpenShadow(const glm::vec2 & orthoX,	//	左右
 					const glm::vec2 & orthoY,	//	上下
 					const glm::vec2 & orthoZ);	//	前后
 
@@ -123,12 +120,8 @@ public:
 
 public:
     glm::vec3 mNormal;
-    
-    RenderTexture2D * mShadowTex;
 
 private:
-	std::uint32_t _depthW;
-	std::uint32_t _depthH;
 	glm::mat4 _proj;
 };
 
@@ -144,27 +137,20 @@ public:
     };
 
 public:
-	LightPoint()
-		: Light(Light::kPOINT)
-        , mShadowTex(nullptr)
+	LightPoint(): Light(Light::kPOINT)
 	{ }
 
-    ~LightPoint();
+    ~LightPoint()
+    { }
 
-	void OpenShadow(const std::uint32_t depthW,
-					const std::uint32_t depthH, 
-					const float n, const float f);
+	void OpenShadow(const float n, const float f);
 
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
 
 public:
 	float mK0, mK1, mK2;
 
-    RenderTexture3D * mShadowTex;
-
 private:
-	std::uint32_t _depthW;
-	std::uint32_t _depthH;
     glm::mat4 _proj;
     glm::vec3 _pos;
 };
@@ -183,16 +169,13 @@ public:
     };
 
 public:
-	LightSpot()
-		: Light(Light::kSPOT)
-		, mShadowTex(nullptr)
+	LightSpot(): Light(Light::kSPOT)
 	{ }
 
-    ~LightSpot();
+    ~LightSpot()
+    { }
 
-	void OpenShadow(const std::uint32_t depthW, 
-					const std::uint32_t depthH,
-					const float n, const float f);
+	void OpenShadow(const float n, const float f);
 
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
 
@@ -200,11 +183,8 @@ public:
 	glm::vec3 mNormal;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
-    RenderTexture2D * mShadowTex;
 
 private:
-	std::uint32_t _depthW;
-	std::uint32_t _depthH;
     glm::mat4 _proj;
     glm::vec3 _pos;
 };

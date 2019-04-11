@@ -233,7 +233,6 @@ void Render::Bind(Light * light)
         }
         break;
     }
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_LIGHT_POS, light->GetPos());
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_NAME_LIGHT_TYPE, light->GetType());
 }
 

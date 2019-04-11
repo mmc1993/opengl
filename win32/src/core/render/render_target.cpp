@@ -133,6 +133,13 @@ void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, R
     glFramebufferTexture2D(bindType, attachment, type, texture3D->GetGLID(), 0);
 }
 
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture2D, uint textureOrder, BindType bindType)
+{
+    if (bindType == BindType::kNONE) { bindType = _bindType; }
+
+    glFramebufferTexture3D(bindType, attachment, type, texture2D, 0, textureOrder);
+}
+
 void RenderTarget::Beg(BindType bindType)
 {
 	if (_fbo == 0)
