@@ -112,15 +112,6 @@ RenderTarget::~RenderTarget()
 	glDeleteFramebuffers(1, &_fbo);
 }
 
-void RenderTarget::OnAdd()
-{ }
-
-void RenderTarget::OnDel()
-{ }
-
-void RenderTarget::OnUpdate(float dt)
-{ }
-
 void RenderTarget::BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType)
 {
     if (bindType == BindType::kNONE) { bindType = _bindType; }

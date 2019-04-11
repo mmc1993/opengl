@@ -7,15 +7,13 @@
 #include "../component/light.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
-#include "../component/render_target.h"
 
-Render::Render(): _shadowRT(new RenderTarget())
+Render::Render()
 {
 }
 
 Render::~Render()
 {
-    delete _shadowRT;
 }
 
 RenderMatrix & Render::GetMatrix()
@@ -109,10 +107,10 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
 void Render::RenderShadow(Light * light)
 {
     auto count = 0;
-    _shadowRT->Beg();
+    _shadowRT.Beg();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-	while (light->NextDrawShadow(count++, _shadowRT))
+	while (light->NextDrawShadow(count++, &_shadowRT))
 	{
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -127,7 +125,7 @@ void Render::RenderShadow(Light * light)
             }
 		}
 	}
-    _shadowRT->End();
+    _shadowRT.End();
 }
 
 void Render::RenderCamera(CameraInfo * camera)

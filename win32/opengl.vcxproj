@@ -41,6 +41,7 @@
     <ClInclude Include="src\core\component\camera.h" />
     <ClInclude Include="src\core\object\object.h" />
     <ClInclude Include="src\core\render\render.h" />
+    <ClInclude Include="src\core\render\render_target.h" />
     <ClInclude Include="src\core\render\render_type.h" />
     <ClInclude Include="src\core\third\assimp\ai_assert.h" />
     <ClInclude Include="src\core\third\assimp\anim.h" />
@@ -366,13 +367,13 @@
     <ClInclude Include="src\core\tools\debug_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\tools\time_tool.h" />
+    <ClInclude Include="src\core\type.h" />
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp" />
     <ClCompile Include="src\core\asset\shader.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
-    <ClCompile Include="src\core\component\render_target.cpp" />
     <ClCompile Include="src\core\component\skybox.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\sprite_screen.cpp" />
@@ -382,6 +383,7 @@
     <ClCompile Include="src\core\component\camera.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
+    <ClCompile Include="src\core\render\render_target.cpp" />
     <ClCompile Include="src\core\third\glm\detail\glm.cpp" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />

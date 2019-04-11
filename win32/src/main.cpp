@@ -35,6 +35,8 @@ public:
 public:
     void InitGame()
     {
+        Light::Init(512, 512);
+
 		InitCamera();
 		InitAssets();
 		InitEvents();

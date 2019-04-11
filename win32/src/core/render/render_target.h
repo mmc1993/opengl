@@ -1,6 +1,5 @@
 #pragma once
 
-#include "component.h"
 #include "../asset/bitmap.h"
 #include "../asset/bitmap_cube.h"
 #include "../tools/debug_tool.h"
@@ -30,7 +29,7 @@ private:
     uint _GLID;
 };
 
-class RenderTarget : public Component {
+class RenderTarget {
 public:
     enum BindType {
         kDRAW_READ = GL_FRAMEBUFFER,
@@ -68,9 +67,6 @@ public:
 
 	RenderTarget();
 	~RenderTarget();
-	virtual void OnAdd() override;
-	virtual void OnDel() override;
-	virtual void OnUpdate(float dt) override;
 
     void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType = BindType::kNONE);

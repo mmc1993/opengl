@@ -1059,6 +1059,12 @@
     <ClInclude Include="src\core\third\assimp\XMLTools.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\render\render_target.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\type.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -1094,9 +1100,6 @@
     <ClCompile Include="src\core\component\light.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\component\render_target.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\skybox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -1110,6 +1113,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\render_target.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

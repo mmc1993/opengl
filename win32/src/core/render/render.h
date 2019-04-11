@@ -2,8 +2,7 @@
 
 #include "../include.h"
 #include "render_type.h"
-
-class RenderTarget;
+#include "render_target.h"
 
 class Render {
 public:
@@ -85,7 +84,7 @@ private:
 
 private:
     RenderMatrix    _matrix;
-    RenderTarget *  _shadowRT;
+    RenderTarget    _shadowRT;
 	RenderInfo      _renderInfo;
 
 	std::vector<Light *>    _lights;
