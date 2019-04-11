@@ -52,7 +52,7 @@ public:
 
 public:
 	Light(Type type)
-        : _type(type), _blockID(0)
+        : _type(type), _uboID(0)
     { 
         _texOrder = _type == Type::kDIRECT? s_texPool.GetTexOrder2D()
                   : _type == Type::kPOINT? s_texPool.GetTexOrder3D()
@@ -67,7 +67,7 @@ public:
         case Light::kPOINT: { s_texPool.FreeTexOrder3D(_texOrder); } break;
         case Light::kSPOT: { s_texPool.FreeTexOrder2D(_texOrder); } break;
         }
-        glDeleteBuffers(1, &_blockID);
+        glDeleteBuffers(1, &_uboID);
     }
 
 	virtual void OnAdd();
@@ -75,8 +75,10 @@ public:
 	virtual void OnUpdate(float dt) { }
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
-    uint GetBlockID() const { return _blockID; }
-    Type GetType() const    { return _type; }
+    uint GetTex2D() const { return s_texPool.GetTexture2D(); }
+    uint GetTex3D() const { return s_texPool.GetTexture3D(); }
+    uint GetUBOID() const { return _uboID; }
+    Type GetType() const { return _type; }
 
 public:
 	glm::vec3 mAmbient;
@@ -85,7 +87,7 @@ public:
 
 protected:
     //  UBO
-    uint _blockID;
+    uint _uboID;
     //  Tex–Ú∫≈
     uint _texOrder;
 private:

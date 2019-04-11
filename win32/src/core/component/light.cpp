@@ -122,11 +122,11 @@ void LightDirect::OpenShadow(
     _proj       = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
 
     //  环境光, 漫反射, 镜面反射, 法线, 矩阵
-    if (_blockID == 0) 
+    if (_uboID == 0) 
     {
-        glGenBuffers(1, &_blockID); 
+        glGenBuffers(1, &_uboID); 
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+    glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -144,7 +144,7 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
 	    auto view   = glm::lookAt(pos, pos + mNormal, up);
         auto matrix = _proj * view;
 
-        glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mMatrix), sizeof(UBOData::mMatrix), &matrix);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mNormal), sizeof(UBOData::mNormal), &mNormal);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
@@ -173,11 +173,11 @@ void LightPoint::OpenShadow(const float n, const float f)
 	_proj       = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_W, n, f);
 
     //  光线衰减系数k0, k1, k2, 环境光, 漫反射, 镜面反射, 世界坐标
-    if (_blockID == 0) 
+    if (_uboID == 0) 
     { 
-        glGenBuffers(1, &_blockID); 
+        glGenBuffers(1, &_uboID); 
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+    glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -195,7 +195,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
 
         _pos = GetOwner()->GetTransform()->GetWorldPosition();
 
-        glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0), sizeof(UBOData::mK0), &mK0);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK1), sizeof(UBOData::mK1), &mK1);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK2), sizeof(UBOData::mK1), &mK2);
@@ -235,11 +235,11 @@ void LightSpot::OpenShadow(const float n, const float f)
     _proj       = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_H, n, f);
 
     //  光线衰减系数k0, k1, k2, 内锥, 外锥, 环境光, 漫反射, 镜面反射, 世界坐标
-    if (_blockID == 0)
+    if (_uboID == 0)
     {
-        glGenBuffers(1, &_blockID);
+        glGenBuffers(1, &_uboID);
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+    glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -257,7 +257,7 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         auto view   = glm::lookAt(_pos, _pos + mNormal, up);
         auto matrix = _proj * view;
 
-        glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboID);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0), sizeof(UBOData::mK0), &mK0);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK1), sizeof(UBOData::mK1), &mK1);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK2), sizeof(UBOData::mK1), &mK2);
