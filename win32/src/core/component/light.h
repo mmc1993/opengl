@@ -8,6 +8,40 @@ class RenderTarget;
 
 class Light : public Component {
 public:
+    class TexPool {
+    public:
+        void Clear();
+        uint GetTexture2D();
+        uint GetTexture3D();
+        void FreeTexture2D(uint id);
+        void FreeTexture3D(uint id);
+
+    private:
+        void AllocTexture2D();
+        void AllocTexture3D();
+
+    private:
+        std::vector<uint> _texture2Ds;
+        std::vector<uint> _texture3Ds;
+        size_t _len2D;
+        size_t _len3D;
+        uint _tex2D;
+        uint _tex3D;
+    };
+
+public:
+    static void Init(uint texW, uint texH)
+    {
+        s_texW = texW; 
+        s_texH = texH;
+    }
+
+protected:
+    static uint s_texW;
+    static uint s_texH;
+    static TexPool s_texPool;
+
+public:
 	enum Type {
 		kDIRECT,
 		kPOINT,
@@ -17,10 +51,20 @@ public:
 public:
 	Light(Type type)
         : _type(type), _blockID(0)
-    { }
+    { 
+        _texOrder = _type == Type::kDIRECT? s_texPool.GetTexture2D()
+                  : _type == Type::kPOINT? s_texPool.GetTexture3D()
+                  : s_texPool.GetTexture2D();
+    }
 
     virtual ~Light()
     {
+        switch (_type)
+        {
+        case Light::kDIRECT: { s_texPool.FreeTexture2D(_texOrder); } break;
+        case Light::kPOINT: { s_texPool.FreeTexture3D(_texOrder); } break;
+        case Light::kSPOT: { s_texPool.FreeTexture2D(_texOrder); } break;
+        }
         glDeleteBuffers(1, &_blockID);
     }
 
@@ -41,21 +85,13 @@ public:
 protected:
     //  UBO
     uint _blockID;
-
+    //  Tex序号
+    uint _texOrder;
     //  世界坐标, 该坐标在每次NextDrawShadow后更新
     glm::vec3 _position;
 private:
 	Type _type;
 
-protected:
-    static void AllocTexture2D();
-    static void AllocTexture3D();
-    static uint32_t GetTexture2D();
-    static uint32_t GetTexture3D();
-    static void FreeTexture2D(uint32_t id);
-    static void FreeTexture3D(uint32_t id);
-    static std::stack<uint32_t> _textureStock2Ds;
-    static std::stack<uint32_t> _textureStock3Ds;
 };
 
 class LightDirect : public Light {

@@ -7,6 +7,89 @@
 #include "../render/render.h"
 #include "../asset/asset_cache.h"
 
+uint Light::s_texW = 0;
+uint Light::s_texH = 0;
+Light::TexPool Light::s_texPool;
+
+void Light::TexPool::Clear()
+{
+    glDeleteTextures(1, &_tex2D);
+    glDeleteTextures(1, &_tex3D);
+    _len2D = 0; _len3D = 0;
+    _tex2D = 0; _tex3D = 0;
+    _texture2Ds.clear();
+    _texture3Ds.clear();
+}
+
+uint Light::TexPool::GetTexture2D()
+{
+    if (_texture2Ds.empty())
+    {
+        AllocTexture2D();
+    }
+    auto top = _texture2Ds.back();
+    _texture2Ds.pop_back();
+    return top;
+}
+
+uint Light::TexPool::GetTexture3D()
+{
+    if (_texture3Ds.empty())
+    {
+        AllocTexture3D();
+    }
+    auto top = _texture3Ds.back();
+    _texture3Ds.pop_back();
+    return top;
+}
+
+void Light::TexPool::FreeTexture2D(uint id)
+{
+    _texture2Ds.push_back(id);
+
+    if (_texture2Ds.size() == _len2D)
+    {
+        glDeleteTextures(1, &_tex2D);
+        _tex2D = 0; _len2D = 1;
+        _texture2Ds.clear();
+    }
+}
+
+void Light::TexPool::FreeTexture3D(uint id)
+{
+    _texture3Ds.push_back(id);
+
+    if (_texture3Ds.size() == _len3D)
+    {
+        glDeleteTextures(1, &_tex3D);
+        _tex3D = 0; _len3D = 1;
+        _texture3Ds.clear();
+    }
+}
+
+void Light::TexPool::AllocTexture2D()
+{
+    if ((_len2D *= 2) == 0)
+    {
+        glGenTextures(1, &_len2D);
+    }
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_texW, s_texH, _len2D);
+    for (auto i = 0; i != _len2D; ++i)
+    {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, s_texW, s_texH, 1,
+                            GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+    }
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+}
+
+void Light::TexPool::AllocTexture3D()
+{
+
+}
+
+
 void Light::OnAdd()
 {
 	mmc::mRender.AddLight(this);
