@@ -16,57 +16,67 @@ void Light::TexPool::Clear()
     glDeleteTextures(1, &_tex3D);
     _len2D = 0; _len3D = 0;
     _tex2D = 0; _tex3D = 0;
-    _texture2Ds.clear();
-    _texture3Ds.clear();
+    _texOrder2Ds.clear();
+    _texOrder3Ds.clear();
 }
 
 uint Light::TexPool::GetTexture2D()
 {
-    if (_texture2Ds.empty())
-    {
-        AllocTexture2D();
-    }
-    auto top = _texture2Ds.back();
-    _texture2Ds.pop_back();
-    return top;
+    return _tex2D;
 }
 
 uint Light::TexPool::GetTexture3D()
 {
-    if (_texture3Ds.empty())
+    return _tex3D;
+}
+
+uint Light::TexPool::GetTexOrder2D()
+{
+    if (_texOrder2Ds.empty())
     {
-        AllocTexture3D();
+        AllocTexOrder2D();
     }
-    auto top = _texture3Ds.back();
-    _texture3Ds.pop_back();
+    auto top = _texOrder2Ds.back();
+    _texOrder2Ds.pop_back();
     return top;
 }
 
-void Light::TexPool::FreeTexture2D(uint id)
+uint Light::TexPool::GetTexOrder3D()
 {
-    _texture2Ds.push_back(id);
+    if (_texOrder3Ds.empty())
+    {
+        AllocTexOrder3D();
+    }
+    auto top = _texOrder3Ds.back();
+    _texOrder3Ds.pop_back();
+    return top;
+}
 
-    if (_texture2Ds.size() == _len2D)
+void Light::TexPool::FreeTexOrder2D(uint id)
+{
+    _texOrder2Ds.push_back(id);
+
+    if (_texOrder2Ds.size() == _len2D)
     {
         glDeleteTextures(1, &_tex2D);
         _tex2D = 0; _len2D = 1;
-        _texture2Ds.clear();
+        _texOrder2Ds.clear();
     }
 }
 
-void Light::TexPool::FreeTexture3D(uint id)
+void Light::TexPool::FreeTexOrder3D(uint id)
 {
-    _texture3Ds.push_back(id);
+    _texOrder3Ds.push_back(id);
 
-    if (_texture3Ds.size() == _len3D)
+    if (_texOrder3Ds.size() == _len3D)
     {
         glDeleteTextures(1, &_tex3D);
         _tex3D = 0; _len3D = 1;
-        _texture3Ds.clear();
+        _texOrder3Ds.clear();
     }
 }
 
-void Light::TexPool::AllocTexture2D()
+void Light::TexPool::AllocTexOrder2D()
 {
     if ((_len2D *= 2) == 0)
     {
@@ -83,12 +93,13 @@ void Light::TexPool::AllocTexture2D()
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void Light::TexPool::AllocTexture3D()
+void Light::TexPool::AllocTexOrder3D()
 {
 
 }
 
-
+//  --------------------------------------------------------------------------------
+//  光源实现
 void Light::OnAdd()
 {
 	mmc::mRender.AddLight(this);
@@ -131,13 +142,13 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
     assert(mShadowTex != nullptr);
     if (0 == count)
     {
-        _position   = GetOwner()->GetTransform()->GetWorldPosition();
+        auto pos    = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = mNormal.y > 0.999999f 
                     ? glm::vec3(0, 0, 1) 
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
         up          = glm::cross(mNormal, right);
-	    auto view   = glm::lookAt(_position, _position + mNormal, up);
+	    auto view   = glm::lookAt(pos, pos + mNormal, up);
         auto matrix = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
@@ -146,6 +157,7 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse), sizeof(UBOData::mDiffuse), &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mSpecular), &pos);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glViewport(0, 0, _depthW, _depthH);
@@ -196,7 +208,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
     {
         glViewport(0, 0, _depthW, _depthH);
 
-        _position = GetOwner()->GetTransform()->GetWorldPosition();
+        _pos = GetOwner()->GetTransform()->GetWorldPosition();
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0), sizeof(UBOData::mK0), &mK0);
@@ -205,7 +217,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse), sizeof(UBOData::mDiffuse), &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_position);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_pos);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -220,8 +232,8 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
             {   glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_BACK      },
         };
 
-        auto view = glm::lookAt(_position,
-                    std::get<0>(s_faceInfo[count]) + _position,
+        auto view = glm::lookAt(_pos,
+                    std::get<0>(s_faceInfo[count]) + _pos,
                     std::get<1>(s_faceInfo[count]));
 
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
@@ -259,13 +271,13 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
 {
     if (count == 0)
     {
-        _position   = GetOwner()->GetTransform()->GetWorldPosition();
+        _pos        = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = mNormal.y > 0.999999f
                     ? glm::vec3(0, 0, 1)
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
         up          = glm::cross(mNormal, right);
-        auto view   = glm::lookAt(_position, _position + mNormal, up);
+        auto view   = glm::lookAt(_pos, _pos + mNormal, up);
         auto matrix = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _blockID);
@@ -277,7 +289,7 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient), sizeof(UBOData::mAmbient), &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse), sizeof(UBOData::mDiffuse), &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular), sizeof(UBOData::mSpecular), &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_position);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition), sizeof(UBOData::mPosition), &_pos);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);

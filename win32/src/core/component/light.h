@@ -13,16 +13,18 @@ public:
         void Clear();
         uint GetTexture2D();
         uint GetTexture3D();
-        void FreeTexture2D(uint id);
-        void FreeTexture3D(uint id);
+        uint GetTexOrder2D();
+        uint GetTexOrder3D();
+        void FreeTexOrder2D(uint id);
+        void FreeTexOrder3D(uint id);
 
     private:
-        void AllocTexture2D();
-        void AllocTexture3D();
+        void AllocTexOrder2D();
+        void AllocTexOrder3D();
 
     private:
-        std::vector<uint> _texture2Ds;
-        std::vector<uint> _texture3Ds;
+        std::vector<uint> _texOrder2Ds;
+        std::vector<uint> _texOrder3Ds;
         size_t _len2D;
         size_t _len3D;
         uint _tex2D;
@@ -52,18 +54,18 @@ public:
 	Light(Type type)
         : _type(type), _blockID(0)
     { 
-        _texOrder = _type == Type::kDIRECT? s_texPool.GetTexture2D()
-                  : _type == Type::kPOINT? s_texPool.GetTexture3D()
-                  : s_texPool.GetTexture2D();
+        _texOrder = _type == Type::kDIRECT? s_texPool.GetTexOrder2D()
+                  : _type == Type::kPOINT? s_texPool.GetTexOrder3D()
+                  : s_texPool.GetTexOrder2D();
     }
 
     virtual ~Light()
     {
         switch (_type)
         {
-        case Light::kDIRECT: { s_texPool.FreeTexture2D(_texOrder); } break;
-        case Light::kPOINT: { s_texPool.FreeTexture3D(_texOrder); } break;
-        case Light::kSPOT: { s_texPool.FreeTexture2D(_texOrder); } break;
+        case Light::kDIRECT: { s_texPool.FreeTexOrder2D(_texOrder); } break;
+        case Light::kPOINT: { s_texPool.FreeTexOrder3D(_texOrder); } break;
+        case Light::kSPOT: { s_texPool.FreeTexOrder2D(_texOrder); } break;
         }
         glDeleteBuffers(1, &_blockID);
     }
@@ -73,9 +75,8 @@ public:
 	virtual void OnUpdate(float dt) { }
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
-    const glm::vec3 & GetPos() const { return _position; }
     uint GetBlockID() const { return _blockID; }
-    Type GetType() const { return _type; }
+    Type GetType() const    { return _type; }
 
 public:
 	glm::vec3 mAmbient;
@@ -87,8 +88,6 @@ protected:
     uint _blockID;
     //  Tex序号
     uint _texOrder;
-    //  世界坐标, 该坐标在每次NextDrawShadow后更新
-    glm::vec3 _position;
 private:
 	Type _type;
 
@@ -103,6 +102,7 @@ public:
         glm::vec3 mAmbient;
         glm::vec3 mDiffuse;
         glm::vec3 mSpecular;
+        glm::vec3 mPosition;
     };
 
 public:
@@ -165,7 +165,8 @@ public:
 private:
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
-	glm::mat4 _proj;
+    glm::mat4 _proj;
+    glm::vec3 _pos;
 };
 
 class LightSpot : public Light {
@@ -205,4 +206,5 @@ private:
 	std::uint32_t _depthW;
 	std::uint32_t _depthH;
     glm::mat4 _proj;
+    glm::vec3 _pos;
 };
