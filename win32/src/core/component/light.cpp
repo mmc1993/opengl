@@ -88,7 +88,7 @@ void Light::TexPool::AllocTexOrder2D()
     for (auto i = 0; i != _len2D; ++i)
     {
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, s_VIEW_W, s_VIEW_H, 1,
-                            GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+                                GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
     }
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
