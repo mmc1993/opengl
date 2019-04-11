@@ -32,10 +32,8 @@ uint Light::TexPool::GetTexture3D()
 
 uint Light::TexPool::GetTexOrder2D()
 {
-    if (_texOrder2Ds.empty())
-    {
-        AllocTexOrder2D();
-    }
+    AllocTexOrder2D();
+    
     auto top = _texOrder2Ds.back();
     _texOrder2Ds.pop_back();
     return top;
@@ -43,10 +41,8 @@ uint Light::TexPool::GetTexOrder2D()
 
 uint Light::TexPool::GetTexOrder3D()
 {
-    if (_texOrder3Ds.empty())
-    {
-        AllocTexOrder3D();
-    }
+    AllocTexOrder3D();
+
     auto top = _texOrder3Ds.back();
     _texOrder3Ds.pop_back();
     return top;
@@ -78,19 +74,27 @@ void Light::TexPool::FreeTexOrder3D(uint id)
 
 void Light::TexPool::AllocTexOrder2D()
 {
-    if ((_len2D *= 2) == 0)
+    if (_tex2D == 0)
     {
-        glGenTextures(1, &_len2D);
+        glGenTextures(1, &_tex2D);
     }
+    if (_texOrder2Ds.empty())
+    {
+        auto n = _len2D;
+        auto it = std::back_inserter(_texOrder2Ds);
+        auto fn = [&n](){ return n++; };
+        std::generate_n(it, _len2D, fn);
+        _len2D *= 2;
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
-    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, _len2D);
-    for (auto i = 0; i != _len2D; ++i)
-    {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, s_VIEW_W, s_VIEW_H, 1,
-                                GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, _len2D);
+        for (auto i = 0; i != _len2D; ++i)
+        {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, s_VIEW_W, s_VIEW_H, 1,
+                                    GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 void Light::TexPool::AllocTexOrder3D()

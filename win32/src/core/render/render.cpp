@@ -154,8 +154,6 @@ void Render::RenderForward(CameraInfo * camera)
         {
             RenderForwardCommands(camera, light, commands);
         }
-        //  TODO
-        //  Ð´»º³å
     }
 }
 
