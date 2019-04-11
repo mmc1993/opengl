@@ -8,23 +8,23 @@ class RenderTarget;
 
 class Light : public Component {
 public:
-    class TexPool {
+    class ShadowMapPool {
     public:
         void Clear();
-        uint GetTexture2D();
-        uint GetTexture3D();
-        uint GetTexOrder2D();
-        uint GetTexOrder3D();
-        void FreeTexOrder2D(uint id);
-        void FreeTexOrder3D(uint id);
+        uint GetTex2D();
+        uint GetTex3D();
+        uint GetPos2D();
+        uint GetPos3D();
+        void FreePos2D(uint id);
+        void FreePos3D(uint id);
 
     private:
-        void AllocTexOrder2D();
-        void AllocTexOrder3D();
+        void AllocPos2D();
+        void AllocPos3D();
 
     private:
-        std::vector<uint> _texOrder2Ds;
-        std::vector<uint> _texOrder3Ds;
+        std::vector<uint> _posStock2D;
+        std::vector<uint> _posStock3D;
         size_t _len2D;
         size_t _len3D;
         uint _tex2D;
@@ -41,7 +41,7 @@ public:
 protected:
     static uint s_VIEW_W;
     static uint s_VIEW_H;
-    static TexPool s_texPool;
+    static ShadowMapPool s_shadowMapPool;
 
 public:
 	enum Type {
@@ -52,22 +52,22 @@ public:
 
 public:
 	Light(Type type)
-        : _type(type), _uboID(0)
+        : _type(type), _uniformBlock(0)
     { 
-        _texOrder = _type == Type::kDIRECT? s_texPool.GetTexOrder2D()
-                  : _type == Type::kPOINT? s_texPool.GetTexOrder3D()
-                  : s_texPool.GetTexOrder2D();
+        _shadowMapPos = _type == Type::kDIRECT? s_shadowMapPool.GetPos2D()
+                      : _type == Type::kPOINT? s_shadowMapPool.GetPos3D()
+                      : s_shadowMapPool.GetPos2D();
     }
 
     virtual ~Light()
     {
         switch (_type)
         {
-        case Light::kDIRECT: { s_texPool.FreeTexOrder2D(_texOrder); } break;
-        case Light::kPOINT: { s_texPool.FreeTexOrder3D(_texOrder); } break;
-        case Light::kSPOT: { s_texPool.FreeTexOrder2D(_texOrder); } break;
+        case Light::kDIRECT: { s_shadowMapPool.FreePos2D(_shadowMapPos); } break;
+        case Light::kPOINT: { s_shadowMapPool.FreePos3D(_shadowMapPos); } break;
+        case Light::kSPOT: { s_shadowMapPool.FreePos2D(_shadowMapPos); } break;
         }
-        glDeleteBuffers(1, &_uboID);
+        glDeleteBuffers(1, &_uniformBlock);
     }
 
 	virtual void OnAdd();
@@ -75,9 +75,10 @@ public:
 	virtual void OnUpdate(float dt) { }
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
-    uint GetTex2D() const { return s_texPool.GetTexture2D(); }
-    uint GetTex3D() const { return s_texPool.GetTexture3D(); }
-    uint GetUBOID() const { return _uboID; }
+    uint GetShadowMap2D() const { return s_shadowMapPool.GetTex2D(); }
+    uint GetShadowMap3D() const { return s_shadowMapPool.GetTex3D(); }
+    uint GetUniformBlock() const { return _uniformBlock; }
+    uint GetShadowMapPos() const { return _shadowMapPos; }
     Type GetType() const { return _type; }
 
 public:
@@ -87,9 +88,9 @@ public:
 
 protected:
     //  UBO
-    uint _uboID;
+    uint _uniformBlock;
     //  Tex–Ú∫≈
-    uint _texOrder;
+    uint _shadowMapPos;
 private:
 	Type _type;
 

@@ -42,47 +42,55 @@ static const char * const UBO_NAME_LIGHT_POINT = "light_point_";
 static const char * const UBO_NAME_LIGHT_SPOT = "light_spot_";
 
 //  光源位置
-static const char * const UNIFORM_NAME_LIGHT_POS = "light_pos_";
+static const char * const UNIFORM_LIGHT_POS = "light_pos_";
 //  光源类型
-static const char * const UNIFORM_NAME_LIGHT_TYPE = "light_type_";
+static const char * const UNIFORM_LIGHT_TYPE = "light_type_";
 //  法线矩阵
-static const char * const UNIFORM_NAME_MATRIX_N = "matrix_n_";
+static const char * const UNIFORM_MATRIX_N = "matrix_n_";
 //  模型矩阵
-static const char * const UNIFORM_NAME_MATRIX_M = "matrix_m_";
+static const char * const UNIFORM_MATRIX_M = "matrix_m_";
 //  视图矩阵
-static const char * const UNIFORM_NAME_MATRIX_V = "matrix_v_";
+static const char * const UNIFORM_MATRIX_V = "matrix_v_";
 //  投影矩阵
-static const char * const UNIFORM_NAME_MATRIX_P = "matrix_p_";
+static const char * const UNIFORM_MATRIX_P = "matrix_p_";
 //  模型视图矩阵
-static const char * const UNIFORM_NAME_MATRIX_MV = "matrix_mv_";
+static const char * const UNIFORM_MATRIX_MV = "matrix_mv_";
 //  模型视图投影矩阵
-static const char * const UNIFORM_NAME_MATRIX_MVP = "matrix_mvp_";
+static const char * const UNIFORM_MATRIX_MVP = "matrix_mvp_";
 //  游戏时间
-static const char * const UNIFORM_NAME_GAME_TIME = "game_time_";
+static const char * const UNIFORM_GAME_TIME = "game_time_";
 
 //  相机位置
-static const char * const UNIFORM_NAME_CAMERA_POS = "camera_pos_";
+static const char * const UNIFORM_CAMERA_POS = "camera_pos_";
 //  相机朝向
-static const char * const UNIFORM_NAME_CAMERA_EYE = "camera_eye_";
+static const char * const UNIFORM_CAMERA_EYE = "camera_eye_";
 
 //  材质.漫反射
-static const char * const UNIFORM_NAME_MATERIAL_DIFFUSE = "material_.mDiffuse{0}";
+static const char * const UNIFORM_MATERIAL_DIFFUSE      = "material_.mDiffuse{0}";
 //  材质.镜面反射
-static const char * const UNIFORM_NAME_MATERIAL_SPECULAR    = "material_.mSpecular";
+static const char * const UNIFORM_MATERIAL_SPECULAR     = "material_.mSpecular";
 //  材质.反射贴图
-static const char * const UNIFORM_NAME_MATERIAL_REFLECT     = "material_.mReflect";
+static const char * const UNIFORM_MATERIAL_REFLECT      = "material_.mReflect";
 //  材质.法线贴图
-static const char * const UNIFORM_NAME_MATERIAL_NORMAL      = "material_.mNormal";
+static const char * const UNIFORM_MATERIAL_NORMAL       = "material_.mNormal";
 //  材质.高度贴图
-static const char * const UNIFORM_NAME_MATERIAL_HEIGHT      = "material_.mHeight";
+static const char * const UNIFORM_MATERIAL_HEIGHT       = "material_.mHeight";
 //  材质.高光强度
-static const char * const UNIFORM_NAME_MATERIAL_SHININESS   = "material_.mShininess";
+static const char * const UNIFORM_MATERIAL_SHININESS    = "material_.mShininess";
 //  方向光阴影贴图
-static const char * const UNIFORM_NAME_LIGHT_DIRECT_SHADOW_MAP = "light_direct_shadow_map_";
+static const char * const UNIFORM_SHADOW_MAP_DIRECT_    = "shadow_map_direct_";
 //  点光源阴影贴图
-static const char * const UNIFORM_NAME_LIGHT_POINT_SHADOW_MAP = "light_point_shadow_map_";
+static const char * const UNIFORM_SHADOW_MAP_POINT_     = "shadow_map_point_";
 //  聚光灯阴影贴图
-static const char * const UNIFORM_NAME_LIGHT_SPOT_SHADOW_MAP = "light_spot_shadow_map_";
+static const char * const UNIFORM_SHADOW_MAP_SPOT_      = "shadow_map_spot_";
+//  方向光深度贴图长度
+static const char * const UNIFORM_SHADOW_MAP_COUNT_DIRECT_  = "shadow_map_count_direct_";
+//  点光源深度贴图长度
+static const char * const UNIFORM_SHADOW_MAP_COUNT_POINT_   = "shadow_map_count_point_";
+//  聚光灯深度贴图长度
+static const char * const UNIFORM_SHADOW_MAP_COUNT_SPOT_    = "shadow_map_count_spot_";
+//  当前光源深度贴图所在位置
+static const char * const UNIFORM_SHADOW_MAP_POS_           = "shadow_map_pos_";
 
 class RenderMatrix {
 public:

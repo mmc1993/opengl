@@ -21,15 +21,15 @@ public:
     };
 
 	struct RenderInfo {
-        size_t mTexCount;
 		size_t mVertexCount;
 		size_t mRenderCount;
+        size_t mTextureCount;
         const RenderPass * mPass;
 		RenderInfo()
-			: mTexCount(0)
-			, mVertexCount(0)
+            : mPass(nullptr)
+            , mVertexCount(0)
 			, mRenderCount(0)
-			, mPass(nullptr)
+            , mTextureCount(0)
 		{ }
 	};
 
@@ -61,9 +61,7 @@ private:
     void Bind(Light * light);
     void Bind(CameraInfo * camera);
     bool Bind(const RenderPass * pass);
-
-    //  绑定材质/ShadowMap
-    void BindTextures(const Light * light, const Material * material);
+    void Bind(const Material * material);
     //	绑定每一次渲染都可能变化的参数
     void BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command);
 
