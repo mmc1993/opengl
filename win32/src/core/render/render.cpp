@@ -413,4 +413,7 @@ void Render::LightInfo::AllocBlock(const std::vector<Light*>& lights)
     };  
 */
     auto offset = 0;
+
+    auto size = GL_UBO_SIZEOF_STD140(LightDirect::UBOData::mAmbient);
+
 }
