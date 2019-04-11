@@ -33,6 +33,20 @@ public:
 		{ }
 	};
 
+    struct LightInfo {
+        uint mBlockLength;
+        uint mUniformBlock;
+
+        LightInfo()
+            : mBlockLength(0)
+            , mUniformBlock(0)
+        { }
+
+    private:
+        void BindBlock(const std::vector<Light * > & lights);
+        void AllocBlock(const std::vector<Light * > & lights);
+    };
+
 public:
     Render();
     ~Render();

@@ -117,6 +117,7 @@ void Render::RenderShadow(Light * light)
 		for (auto & command : _shadowCommands)
 		{
             if (Bind(command.mPass)){ Bind(light); }
+
             BindEveryParam(nullptr, light, command);
 
             for (auto i = 0; i != command.mMeshNum; ++i)
@@ -130,18 +131,26 @@ void Render::RenderShadow(Light * light)
 
 void Render::RenderCamera(CameraInfo * camera)
 {
-	//  延迟渲染
-    _renderInfo.mTextureCount = 0;
+    //  延迟渲染
+    //      逐命令队列渲染
+    //          生成GBuffer
+    //      逐光源渲染
+    //          绑定光源UBO
+    //          渲染光源包围体
+    
+    //  正向渲染
+    //      打包光源数据
+    //      逐命令队列渲染
+
+    //  延迟渲染
     _renderInfo.mPass = nullptr;
     RenderDeferred(camera);
 
 	//  正向渲染
-    _renderInfo.mTextureCount = 0;
     _renderInfo.mPass = nullptr;
 	RenderForward(camera);
 
 	//	后期处理
-    _renderInfo.mTextureCount = 0;
     _renderInfo.mPass = nullptr;
 }
 
@@ -217,7 +226,6 @@ void Render::Bind(Light * light)
             auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_DIRECT);
             glUniformBlockBinding(_renderInfo.mPass->GLID, idx, UniformBlockEnum::kLIGHT_DIRECT);
             glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetUniformBlock());
-            Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_POS_, light->GetShadowMap2D(), light->)
         }
         break;
     case Light::Type::kPOINT:
@@ -379,4 +387,30 @@ void Render::Draw(DrawTypeEnum drawType, const RenderMesh & mesh)
 		break;
 	}
 	++_renderInfo.mRenderCount;
+}
+
+void Render::LightInfo::BindBlock(const std::vector<Light*>& lights)
+{
+}
+
+void Render::LightInfo::AllocBlock(const std::vector<Light*>& lights)
+{
+/*
+    layout (std140) uniform ExampleBlock
+    {
+                         // 基准对齐量       // 对齐偏移量
+        float value;     // 4               // 0 
+        vec3 vector;     // 16              // 16  (必须是16的倍数，所以 4->16)
+        mat4 matrix;     // 16              // 32  (列 0)
+                         // 16              // 48  (列 1)
+                         // 16              // 64  (列 2)
+                         // 16              // 80  (列 3)
+        float values[3]; // 16              // 96  (values[0])
+                         // 16              // 112 (values[1])
+                         // 16              // 128 (values[2])
+        bool boolean;    // 4               // 144
+        int integer;     // 4               // 148
+    };  
+*/
+    auto offset = 0;
 }

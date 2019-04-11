@@ -93,7 +93,6 @@ protected:
     uint _shadowMapPos;
 private:
 	Type _type;
-
 };
 
 class LightDirect : public Light {
