@@ -26,11 +26,11 @@ public:
 
 	virtual void OnAdd();
 	virtual void OnDel();
-	virtual void OnUpdate(float dt) {	}
+	virtual void OnUpdate(float dt) { }
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
     const glm::vec3 & GetPos() const { return _position; }
-    GLuint GetBlockID() const { return _blockID; }
+    uint GetBlockID() const { return _blockID; }
     Type GetType() const { return _type; }
 
 public:
@@ -40,11 +40,22 @@ public:
 
 protected:
     //  UBO
-    GLuint _blockID;
+    uint _blockID;
+
     //  世界坐标, 该坐标在每次NextDrawShadow后更新
     glm::vec3 _position;
 private:
 	Type _type;
+
+protected:
+    static void AllocTexture2D();
+    static void AllocTexture3D();
+    static uint32_t GetTexture2D();
+    static uint32_t GetTexture3D();
+    static void FreeTexture2D(uint32_t id);
+    static void FreeTexture3D(uint32_t id);
+    static std::stack<uint32_t> _textureStock2Ds;
+    static std::stack<uint32_t> _textureStock3Ds;
 };
 
 class LightDirect : public Light {

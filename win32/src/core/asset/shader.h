@@ -8,15 +8,15 @@ class BitmapCube;
 
 class Shader : public Asset {
 public:
-	static void SetUniform(GLuint GLID, const std::string & key, int val);
-	static void SetUniform(GLuint GLID, const std::string & key, float val);
-	static void SetUniform(GLuint GLID, const std::string & key, double val);
-	static void SetUniform(GLuint GLID, const std::string & key, const glm::vec3 & val);
-	static void SetUniform(GLuint GLID, const std::string & key, const glm::vec4 & val);
-	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat3 & val);
-	static void SetUniform(GLuint GLID, const std::string & key, const glm::mat4 & val);
-	static void SetUniform(GLuint GLID, const std::string & key, const Bitmap * val, size_t pos);
-	static void SetUniform(GLuint GLID, const std::string & key, const BitmapCube * val, size_t pos);
+	static void SetUniform(uint GLID, const std::string & key, int val);
+	static void SetUniform(uint GLID, const std::string & key, float val);
+	static void SetUniform(uint GLID, const std::string & key, double val);
+	static void SetUniform(uint GLID, const std::string & key, const glm::vec3 & val);
+	static void SetUniform(uint GLID, const std::string & key, const glm::vec4 & val);
+	static void SetUniform(uint GLID, const std::string & key, const glm::mat3 & val);
+	static void SetUniform(uint GLID, const std::string & key, const glm::mat4 & val);
+	static void SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos);
+	static void SetUniform(uint GLID, const std::string & key, const BitmapCube * val, iint pos);
 
 public:
     ~Shader();
@@ -43,11 +43,11 @@ public:
         const std::string & gs);
 
 private:
-    GLuint AddPass(const char * vs, 
+    uint AddPass(const char * vs, 
 				   const char * fs, 
 				   const char * gs);
 
-    void CheckPass(GLuint GLID, const std::string & string);
+    void CheckPass(uint GLID, const std::string & string);
 
 private:
     std::vector<RenderPass> _passs;

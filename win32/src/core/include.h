@@ -32,6 +32,9 @@
 #include "third/glm/gtc/type_ptr.hpp"
 #include "third/glm/gtc/matrix_transform.hpp"
 
+#include "type.h"
+
 #pragma comment(lib, "lib/glew32.lib")
 #pragma comment(lib, "lib/glfw3.lib")
 #pragma comment(lib, "OpenGL32.lib")
+

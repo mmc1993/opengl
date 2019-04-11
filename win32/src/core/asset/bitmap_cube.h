@@ -22,7 +22,7 @@ public:
         glDeleteTextures(1, &_GLID);
     }
 
-	void SetParameter(GLenum key, GLint val)
+	void SetParameter(GLenum key, iint val)
 	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _GLID);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, key, val);
@@ -34,7 +34,7 @@ public:
         return _urls;
     }
 
-    GLuint GetGLID() const
+    uint GetGLID() const
     {
 		assert(_GLID != 0);
         return _GLID;
@@ -59,7 +59,7 @@ private:
 	}
 
 private:
-	GLuint _GLID;
+	uint _GLID;
 	
 	std::vector<std::string> _urls;
 };

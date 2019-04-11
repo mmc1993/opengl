@@ -22,12 +22,12 @@ public:
         glDeleteRenderbuffers(1, &_GLID);
     }
     
-    GLuint GetGLID() const { return _GLID; }
+    uint GetGLID() const { return _GLID; }
 private:
-    int _format;
     std::uint32_t _w;
     std::uint32_t _h;
-    GLuint _GLID;
+    int _format;
+    uint _GLID;
 };
 
 class RenderTarget : public Component {
@@ -80,7 +80,7 @@ public:
 	void End();
 
 private:
-	GLuint _fbo;
+	uint _fbo;
 
     BindType _bindType;
 };

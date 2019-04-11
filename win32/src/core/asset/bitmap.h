@@ -14,7 +14,7 @@ public:
         glDeleteTextures(1, &_GLID);
     }
 
-	void SetParameter(GLenum key, GLint val)
+	void SetParameter(GLenum key, iint val)
 	{
 		glBindTexture(GL_TEXTURE_2D, _GLID);
 		glTexParameteri(GL_TEXTURE_2D, key, val);
@@ -36,7 +36,7 @@ public:
         return _url;
     }
 
-    GLuint GetGLID() const
+    uint GetGLID() const
     {
 		assert(_GLID != 0);
         return _GLID;
@@ -55,7 +55,7 @@ private:
 private:
 	int _w;
 	int _h;
-    GLuint _GLID;
+    uint _GLID;
 	std::string _url;
 };
 

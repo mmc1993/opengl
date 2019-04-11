@@ -185,7 +185,7 @@ struct RenderMesh {
 		{ }
 	};
 
-	GLuint mVAO, mVBO, mEBO;
+	uint mVAO, mVBO, mEBO;
 	
 	size_t mVtxCount, mIdxCount;
 
@@ -224,7 +224,7 @@ struct RenderMesh {
 
 	//	索引数据
 	//		顶点坐标，纹理坐标，法线，切线，副切线
-	static RenderMesh Create(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	static RenderMesh Create(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
 		mesh.mIdxCount = indexs.size();
@@ -238,7 +238,7 @@ struct RenderMesh {
 
 		glGenBuffers(1, &mesh.mEBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(uint), indexs.data(), GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
 		glEnableVertexAttribArray(0);
@@ -257,7 +257,7 @@ struct RenderMesh {
 
 	//	索引数据
 	//		顶点坐标，纹理坐标，法线
-	static RenderMesh CreateVTN(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	static RenderMesh CreateVTN(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
 		mesh.mIdxCount = indexs.size();
@@ -271,7 +271,7 @@ struct RenderMesh {
 
 		glGenBuffers(1, &mesh.mEBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(uint), indexs.data(), GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
 		glEnableVertexAttribArray(0);
@@ -286,7 +286,7 @@ struct RenderMesh {
 
 	//	索引数据
 	//		顶点坐标，纹理坐标
-	static RenderMesh CreateVT(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	static RenderMesh CreateVT(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
 		mesh.mIdxCount = indexs.size();
@@ -300,7 +300,7 @@ struct RenderMesh {
 
 		glGenBuffers(1, &mesh.mEBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(uint), indexs.data(), GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
 		glEnableVertexAttribArray(0);
@@ -313,7 +313,7 @@ struct RenderMesh {
 
 	//	索引数据
 	//		顶点坐标
-	static RenderMesh CreateV(const std::vector<Vertex> & vertexs, const std::vector<GLuint> & indexs)
+	static RenderMesh CreateV(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
 		mesh.mIdxCount = indexs.size();
@@ -327,7 +327,7 @@ struct RenderMesh {
 
 		glGenBuffers(1, &mesh.mEBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(size_t), indexs.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(uint), indexs.data(), GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
 		glEnableVertexAttribArray(0);
@@ -371,7 +371,7 @@ struct RenderPass {
     RenderTypeEnum		mRenderType;        //  渲染类型
     RenderQueueEnum     mRenderQueue;       //  渲染通道
 	//	Shader ID
-    GLuint  GLID;
+    uint  GLID;
 
     RenderPass() : GLID(0), bCullFace(false), bBlend(false), bDepthTest(false), bStencilTest(false)
     { }
