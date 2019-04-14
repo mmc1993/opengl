@@ -4,6 +4,24 @@
 #include "render_type.h"
 #include "render_target.h"
 
+template <class T>
+constexpr uint UBOOffsetOf(const uint base) const
+{
+    return (base + UBOTypeLen<T> -1)
+        / UBOTypeLen<T>
+        * UBOTypeLen<T>
+        +UBOTypeLen<T>;
+}
+
+template <class T>
+constexpr uint UBOTypeLen() const
+{
+    return sizeof(T) > 16 ? 16
+        : sizeof(T) > 8 ? 16
+        : sizeof(T) > 4 ? 8
+        : 4;
+}
+
 class Render {
 public:
     struct CameraInfo {
@@ -33,18 +51,16 @@ public:
 		{ }
 	};
 
-    struct LightInfo {
-        uint mBlockLength;
-        uint mUniformBlock;
+    //  正向渲染光源数限制
+    static constexpr uint LIMIT_FORWARD_LIGHT_DIRECT = 2;
+    static constexpr uint LIMIT_FORWARD_LIGHT_POINT = 4;
+    static constexpr uint LIMIT_FORWARD_LIGHT_SPOT = 4;
 
-        LightInfo()
-            : mBlockLength(0)
-            , mUniformBlock(0)
-        { }
-
-    private:
-        void BindBlock(const std::vector<Light * > & lights);
-        void AllocBlock(const std::vector<Light * > & lights);
+    //  对应 _uboLightForward[3]
+    enum UBOLightForwardTypeEnum {
+        kDIRECT,
+        kPOINT,
+        kSPOT,
     };
 
 public:
@@ -94,6 +110,11 @@ private:
 	void RenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
 	void RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
 
+    //  正向渲染光源相关
+    void InitUBOLightForward();
+    void PackUBOLightForward();
+    void BindUBOLightForward();
+
 private:
     RenderMatrix    _matrix;
     RenderTarget    _shadowRT;
@@ -106,4 +127,8 @@ private:
     RenderQueue _shadowCommands;
     std::array<RenderQueue, 4> _forwardCommands;
     std::array<RenderQueue, 4> _deferredCommands;
+
+    //  光源UBO
+    uint _uboLightForward[3];
 };
+

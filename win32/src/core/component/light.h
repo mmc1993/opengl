@@ -52,9 +52,9 @@ public:
 
 public:
 	Light(Type type)
-        : _type(type), _uniformBlock(0)
+        : _type(type), _ubo(0)
     { 
-        _shadowMapPos = _type == Type::kDIRECT? s_shadowMapPool.GetPos2D()
+        _smp = _type == Type::kDIRECT? s_shadowMapPool.GetPos2D()
                       : _type == Type::kPOINT? s_shadowMapPool.GetPos3D()
                       : s_shadowMapPool.GetPos2D();
     }
@@ -63,11 +63,11 @@ public:
     {
         switch (_type)
         {
-        case Light::kDIRECT: { s_shadowMapPool.FreePos2D(_shadowMapPos); } break;
-        case Light::kPOINT: { s_shadowMapPool.FreePos3D(_shadowMapPos); } break;
-        case Light::kSPOT: { s_shadowMapPool.FreePos2D(_shadowMapPos); } break;
+        case Light::kDIRECT: { s_shadowMapPool.FreePos2D(_smp); } break;
+        case Light::kPOINT: { s_shadowMapPool.FreePos3D(_smp); } break;
+        case Light::kSPOT: { s_shadowMapPool.FreePos2D(_smp); } break;
         }
-        glDeleteBuffers(1, &_uniformBlock);
+        glDeleteBuffers(1, &_ubo);
     }
 
 	virtual void OnAdd();
@@ -77,9 +77,11 @@ public:
 
     uint GetShadowMap2D() const { return s_shadowMapPool.GetTex2D(); }
     uint GetShadowMap3D() const { return s_shadowMapPool.GetTex3D(); }
-    uint GetUniformBlock() const { return _uniformBlock; }
-    uint GetShadowMapPos() const { return _shadowMapPos; }
-    Type GetType() const { return _type; }
+    const glm::vec3 & GetWorldPos() const { return _pos; }
+    const glm::mat4 &  GetMatrix() const { return _proj; }
+    const uint & GetUniformBlock() const { return _ubo; }
+    const uint & GetShadowMapPos() const { return _smp; }
+    const Type & GetType() const { return _type; }
 
 public:
 	glm::vec3 mAmbient;
@@ -88,9 +90,15 @@ public:
 
 protected:
     //  UBO
-    uint _uniformBlock;
-    //  Tex序号
-    uint _shadowMapPos;
+    uint _ubo;
+    //  Shadow Map Pos
+    uint _smp;
+    //  光源世界坐标
+    glm::vec3 _pos;
+    //  光源投影矩阵
+    glm::mat4 _proj;
+    //  光源视图矩阵
+    glm::mat4 _matrix;
 private:
 	Type _type;
 };
@@ -99,6 +107,7 @@ class LightDirect : public Light {
 public:
     //  这个结构定义仅仅起到说明作用, 该结构对应Shader里的定义
     struct UBOData {
+        uint mSMP;
         glm::mat4 mMatrix;
         glm::vec3 mNormal;
         glm::vec3 mAmbient;
@@ -122,15 +131,13 @@ public:
 
 public:
     glm::vec3 mNormal;
-
-private:
-	glm::mat4 _proj;
 };
 
 class LightPoint : public Light {
 public:
     //  这个结构定义仅仅起到说明作用, 该结构对应Shader里的定义
     struct UBOData {
+        uint mSMP;
         float mK0, mK1, mK2;
         glm::vec3 mAmbient;
         glm::vec3 mDiffuse;
@@ -151,16 +158,13 @@ public:
 
 public:
 	float mK0, mK1, mK2;
-
-private:
-    glm::mat4 _proj;
-    glm::vec3 _pos;
 };
 
 class LightSpot : public Light {
 public:
     //  这个结构定义仅仅起到说明作用, 该结构对应Shader里的定义
     struct UBOData {
+        uint mSMP;
         float mK0, mK1, mK2;
         float mInCone, mOutCone;
         glm::vec3 mNormal;
@@ -185,8 +189,4 @@ public:
 	glm::vec3 mNormal;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
-
-private:
-    glm::mat4 _proj;
-    glm::vec3 _pos;
 };

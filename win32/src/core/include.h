@@ -33,7 +33,6 @@
 #include "third/glm/gtc/matrix_transform.hpp"
 
 #include "type.h"
-#include "utility.h"
 
 #pragma comment(lib, "lib/glew32.lib")
 #pragma comment(lib, "lib/glfw3.lib")

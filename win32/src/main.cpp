@@ -7,7 +7,6 @@
 #include "core/asset/shader.h"
 #include "core/asset/material.h"
 #include "core/component/sprite.h"
-#include "core/component/render_target.h"
 #include "core/component/sprite_screen.h"
 #include "core/tools/debug_tool.h"
 #include "core/component/light.h"
@@ -97,8 +96,6 @@ private:
 
 	void InitLights()
 	{
-		static auto OPEN_DRAW = false;
-
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
 			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
@@ -162,9 +159,9 @@ private:
 			object->SetParent(&mmc::mRoot);
 			_lightSpots.push_back(light);
 		}
-        _lightDirects.at(0)->OpenShadow(512, 512, { -50, 50 }, { -50, 50 }, { -10, 1000 });
-		_lightSpots.at(0)->OpenShadow(512, 512, 0.01f, 1000);
-		_lightPoints.at(0)->OpenShadow(512, 512, 0.01f, 1000);
+        _lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
+		_lightSpots.at(0)->OpenShadow(0.01f, 1000);
+		_lightPoints.at(0)->OpenShadow(0.01f, 1000);
 	}
 
 	void OnKeyEvent(const std::any & any)

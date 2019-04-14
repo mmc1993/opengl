@@ -10,10 +10,21 @@
 
 Render::Render()
 {
+
 }
 
 Render::~Render()
 {
+    //  释放用于正向渲染的光源UBO
+    if (    _uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0
+        ||  _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0
+        || _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
+    {
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0);
+        glDeleteBuffers(3, _uboLightForward);
+    }
 }
 
 RenderMatrix & Render::GetMatrix()
@@ -138,10 +149,6 @@ void Render::RenderCamera(CameraInfo * camera)
     //          绑定光源UBO
     //          渲染光源包围体
     
-    //  正向渲染
-    //      打包光源数据
-    //      逐命令队列渲染
-
     //  延迟渲染
     _renderInfo.mPass = nullptr;
     RenderDeferred(camera);
@@ -157,8 +164,8 @@ void Render::RenderCamera(CameraInfo * camera)
 void Render::RenderForward(CameraInfo * camera)
 {
     //  打包光源数据
-
-
+    InitUBOLightForward();
+    PackUBOLightForward();
     //  渲染
     for (auto light : _lights)
     {
@@ -180,7 +187,10 @@ void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const Ren
 	{
 		if ((camera->mFlag & command.mCameraFlag) != 0)
 		{
-			if (Bind(command.mPass)) {Bind(light);}
+			if (Bind(command.mPass)) 
+            {
+                BindUBOLightForward();
+            }
 			
             BindEveryParam(camera, light, command);
 			
@@ -196,6 +206,219 @@ void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const Ren
 
 void Render::RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands)
 {
+}
+
+void Render::InitUBOLightForward()
+{
+    if (    _uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0
+        ||  _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0
+        || _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
+    {
+/*
+    layout (std140) uniform ExampleBlock
+    {
+                         // 基准对齐量       // 对齐偏移量
+        float value;     // 4               // 0 
+        vec3 vector;     // 16              // 16  (必须是16的倍数，所以 4->16)
+        mat4 matrix;     // 16              // 32  (列 0)
+                         // 16              // 48  (列 1)
+                         // 16              // 64  (列 2)
+                         // 16              // 80  (列 3)
+        float values[3]; // 16              // 96  (values[0])
+                         // 16              // 112 (values[1])
+                         // 16              // 128 (values[2])
+        bool boolean;    // 4               // 144
+        int integer;     // 4               // 148
+    };  
+*/
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0);
+
+        glGenBuffers(3, _uboLightForward);
+
+        auto base = 0;
+        //  方向光UBO
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mMatrix)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mNormal)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mAmbient)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mDiffuse)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mSpecular)>(base);
+        base = UBOOffsetOf<decltype(LightDirect::UBOData::mPosition)>(base);
+        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_DIRECT; ++i)
+        {
+            base = UBOOffsetOf<LightDirect::UBOData>(base);
+        }
+        glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
+
+        //  点光源UBO
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mSMP)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK0)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK1)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK2)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mAmbient)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mDiffuse)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mSpecular)>(base);
+        base = UBOOffsetOf<decltype(LightPoint::UBOData::mPosition)>(base);
+        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_POINT; ++i)
+        {
+            base = UBOOffsetOf<LightPoint::UBOData>(base);
+        }
+        glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
+
+        //  聚光灯UBO
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mSMP)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK0)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK1)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK2)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mInCone)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mOutCone)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mNormal)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mAmbient)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mDiffuse)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mSpecular)>(base);
+        base = UBOOffsetOf<decltype(LightSpot::UBOData::mPosition)>(base);
+        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_SPOT; ++i)
+        {
+            base = UBOOffsetOf<LightSpot::UBOData>(base);
+        }
+        glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+}
+
+void Render::PackUBOLightForward()
+{
+    uint8_t directNum = 0;
+    uint8_t pointNum = 0;
+    uint8_t spotNum = 0;
+    size_t directBase = 0;
+    size_t pointBase = 0;
+    size_t spotBase = 0;
+    for (auto & light : _lights)
+    {
+        if (light->GetType() == Light::Type::kDIRECT && directNum++ >= LIMIT_FORWARD_LIGHT_DIRECT ||
+            light->GetType() == Light::Type::kPOINT && pointNum++ >= LIMIT_FORWARD_LIGHT_POINT ||
+            light->GetType() == Light::Type::kSPOT && spotNum++ >= LIMIT_FORWARD_LIGHT_SPOT)
+        {
+            continue;
+        }
+
+        switch (light->GetType())
+        {
+        case Light::Type::kDIRECT:
+            {
+                auto direct = reinterpret_cast<LightDirect *>(light);
+                //  方向光UBO
+                directBase = UBOOffsetOf<LightDirect::UBOData>(directBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mSMP),        &direct->GetShadowMapPos());
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mMatrix),     &direct->GetMatrix());
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mMatrix)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mNormal),     &direct->mNormal);
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mNormal)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mAmbient),    &direct->mAmbient);
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mAmbient)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mDiffuse),    &direct->mDiffuse);
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mDiffuse)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mSpecular),   &direct->mSpecular);
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSpecular)>(directBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mPosition),   &direct->GetWorldPos());
+                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mPosition)>(directBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            }
+            break;
+        case Light::Type::kPOINT:
+            {
+                auto point = reinterpret_cast<LightPoint *>(light);
+                //  方向光UBO
+                pointBase = UBOOffsetOf<LightDirect::UBOData>(pointBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mSMP),         &point->GetShadowMapPos());
+                pointBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK0),          &point->mK0);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK0)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK1),          &point->mK1);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK1)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK2),          &point->mK2);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK2)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mAmbient),     &point->mAmbient);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mAmbient)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mDiffuse),     &point->mDiffuse);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mDiffuse)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mSpecular),    &point->mSpecular);
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mSpecular)>(pointBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mPosition),    &point->GetWorldPos());
+                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mPosition)>(pointBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            }
+            break;
+        case Light::Type::kSPOT:
+            {
+                auto spot = reinterpret_cast<LightSpot *>(light);
+                //  方向光UBO
+                spotBase = UBOOffsetOf<LightDirect::UBOData>(spotBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mSMP),          &spot->GetShadowMapPos());
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mSMP)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK0),           &spot->mK0);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK0)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK1),           &spot->mK1);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK1)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK2),           &spot->mK2);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK2)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mInCone),       &spot->mInCone);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mInCone)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mOutCone),      &spot->mOutCone);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mOutCone)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mNormal),       &spot->mNormal);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mNormal)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mAmbient),      &spot->mAmbient);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mAmbient)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mDiffuse),      &spot->mDiffuse);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mDiffuse)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mSpecular),     &spot->mSpecular);
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mSpecular)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mPosition),     &spot->GetWorldPos());
+                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mPosition)>(spotBase);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            }
+            break;
+        }
+    }
+}
+
+void Render::BindUBOLightForward()
+{
+    static const std::tuple<const char *, uint, uint> FIND_TABLE[] = {
+        { UBO_NAME_LIGHT_DIRECT, UniformBlockEnum::kLIGHT_DIRECT, UBOLightForwardTypeEnum::kDIRECT },
+        { UBO_NAME_LIGHT_POINT, UniformBlockEnum::kLIGHT_POINT, UBOLightForwardTypeEnum::kPOINT },
+        { UBO_NAME_LIGHT_SPOT, UniformBlockEnum::kLIGHT_SPOT, UBOLightForwardTypeEnum::kSPOT },
+    };
+
+    uint8_t directNum = 0;
+    uint8_t pointNum = 0;
+    uint8_t spotNum = 0;
+    for (auto & light : _lights)
+    {
+        if (light->GetType() == Light::Type::kDIRECT && directNum++ != LIMIT_FORWARD_LIGHT_DIRECT ||
+            light->GetType() == Light::Type::kPOINT && pointNum++ != LIMIT_FORWARD_LIGHT_POINT ||
+            light->GetType() == Light::Type::kSPOT && spotNum++ != LIMIT_FORWARD_LIGHT_SPOT)
+        {
+            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, std::get<0>(FIND_TABLE[light->GetType()]));
+
+            glUniformBlockBinding(_renderInfo.mPass->GLID, idx, std::get<1>(FIND_TABLE[light->GetType()]));
+
+            glBindBufferBase(GL_UNIFORM_BUFFER, std::get<1>(FIND_TABLE[light->GetType()]),
+                             _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
+        }
+    }
 }
 
 void Render::Bind(CameraInfo * camera)
@@ -245,13 +468,13 @@ void Render::Bind(Light * light)
     }
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
 
-    //  绑定阴影贴图
-    switch (light->GetType())
-    {
-    case Light::Type::kDIRECT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_DIRECT_, reinterpret_cast<const LightDirect *>(light)->mShadowTex, count++); break;
-    case Light::Type::kPOINT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_POINT_, reinterpret_cast<const LightPoint *>(light)->mShadowTex, count++); break;
-    case Light::Type::kSPOT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_SPOT_, reinterpret_cast<const LightSpot *>(light)->mShadowTex, count++); break;
-    }
+    ////  绑定阴影贴图
+    //switch (light->GetType())
+    //{
+    //case Light::Type::kDIRECT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_DIRECT_, reinterpret_cast<const LightDirect *>(light)->mShadowTex, count++); break;
+    //case Light::Type::kPOINT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_POINT_, reinterpret_cast<const LightPoint *>(light)->mShadowTex, count++); break;
+    //case Light::Type::kSPOT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_SPOT_, reinterpret_cast<const LightSpot *>(light)->mShadowTex, count++); break;
+    //}
 }
 
 bool Render::Bind(const RenderPass * pass)
@@ -387,33 +610,4 @@ void Render::Draw(DrawTypeEnum drawType, const RenderMesh & mesh)
 		break;
 	}
 	++_renderInfo.mRenderCount;
-}
-
-void Render::LightInfo::BindBlock(const std::vector<Light*>& lights)
-{
-}
-
-void Render::LightInfo::AllocBlock(const std::vector<Light*>& lights)
-{
-/*
-    layout (std140) uniform ExampleBlock
-    {
-                         // 基准对齐量       // 对齐偏移量
-        float value;     // 4               // 0 
-        vec3 vector;     // 16              // 16  (必须是16的倍数，所以 4->16)
-        mat4 matrix;     // 16              // 32  (列 0)
-                         // 16              // 48  (列 1)
-                         // 16              // 64  (列 2)
-                         // 16              // 80  (列 3)
-        float values[3]; // 16              // 96  (values[0])
-                         // 16              // 112 (values[1])
-                         // 16              // 128 (values[2])
-        bool boolean;    // 4               // 144
-        int integer;     // 4               // 148
-    };  
-*/
-    auto offset = 0;
-
-    auto size = GL_UBO_SIZEOF_STD140(LightDirect::UBOData::mAmbient);
-
 }
