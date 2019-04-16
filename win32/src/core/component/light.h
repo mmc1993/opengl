@@ -10,6 +10,15 @@ class Light : public Component {
 public:
     class ShadowMapPool {
     public:
+        static const size_t s_LEN_STEP = 0x8;
+
+    public:
+        ShadowMapPool()
+            : _len2D(0)
+            , _len3D(0)
+            , _tex2D(0)
+            , _tex3D(0)
+        {}
         void Clear();
         uint GetTex2D();
         uint GetTex3D();
@@ -55,8 +64,8 @@ public:
         : _type(type), _ubo(0)
     { 
         _smp = _type == Type::kDIRECT? s_shadowMapPool.GetPos2D()
-                      : _type == Type::kPOINT? s_shadowMapPool.GetPos3D()
-                      : s_shadowMapPool.GetPos2D();
+             : _type == Type::kPOINT? s_shadowMapPool.GetPos3D()
+             : s_shadowMapPool.GetPos2D();
     }
 
     virtual ~Light()
@@ -75,8 +84,8 @@ public:
 	virtual void OnUpdate(float dt) { }
     virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
 
-    uint GetShadowMap2D() const { return s_shadowMapPool.GetTex2D(); }
-    uint GetShadowMap3D() const { return s_shadowMapPool.GetTex3D(); }
+    static uint GetShadowMap2D() { return s_shadowMapPool.GetTex2D(); }
+    static uint GetShadowMap3D() { return s_shadowMapPool.GetTex3D(); }
     const glm::vec3 & GetWorldPos() const { return _pos; }
     const glm::mat4 &  GetMatrix() const { return _proj; }
     const uint & GetUniformBlock() const { return _ubo; }

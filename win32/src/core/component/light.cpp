@@ -33,7 +33,7 @@ uint Light::ShadowMapPool::GetTex3D()
 uint Light::ShadowMapPool::GetPos2D()
 {
     AllocPos2D();
-    
+
     auto top = _posStock2D.back();
     _posStock2D.pop_back();
     return top;
@@ -80,18 +80,15 @@ void Light::ShadowMapPool::AllocPos2D()
     }
     if (_posStock2D.empty())
     {
-        auto n = _len2D;
-        auto it = std::back_inserter(_posStock2D);
-        auto fn = [&n](){ return n++; };
-        std::generate_n(it, _len2D, fn);
-        _len2D *= 2;
+        std::generate_n(std::back_inserter(_posStock2D), 
+                        ShadowMapPool::s_LEN_STEP, 
+                        [this]() { return _len2D++; });
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, _len2D);
         for (auto i = 0; i != _len2D; ++i)
         {
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, s_VIEW_W, s_VIEW_H, 1,
-                                    GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
+                              _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
         }
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
@@ -119,7 +116,7 @@ void LightDirect::OpenShadow(
 	const glm::vec2 & orthoY,
 	const glm::vec2 & orthoZ)
 {
-    _proj       = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
+    _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
 
     //  环境光, 漫反射, 镜面反射, 法线, 矩阵
     if (_ubo == 0) 
@@ -159,7 +156,9 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, Light::s_shadowMapPool.GetTex2D(), _smp);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+                           RenderTarget::TextureType::k2D_ARRAY, 
+                           0, Light::s_shadowMapPool.GetTex2D(), _smp);
     }
     else
     {
@@ -171,7 +170,7 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
 
 void LightPoint::OpenShadow(const float n, const float f)
 {
-	_proj       = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_W, n, f);
+	_proj = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_W, n, f);
 
     //  光线衰减系数k0, k1, k2, 环境光, 漫反射, 镜面反射, 世界坐标
     if (_ubo == 0) 
@@ -210,13 +209,13 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
 
     if (count < 7)
     {
-        static std::tuple<glm::vec3, glm::vec3, RenderTarget::TextureType> s_faceInfo[6] = {
-            {   glm::vec3( 1,  0,  0), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_RIGHT     },
-            {   glm::vec3(-1,  0,  0), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_LEFT      },
-            {   glm::vec3( 0,  1,  0), glm::vec3(0,  0,  1), RenderTarget::TextureType::k3D_TOP       },
-            {   glm::vec3( 0, -1,  0), glm::vec3(0,  0, -1), RenderTarget::TextureType::k3D_BOTTOM    },
-            {   glm::vec3( 0,  0,  1), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_FRONT     },
-            {   glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0), RenderTarget::TextureType::k3D_BACK      },
+        static std::tuple<glm::vec3, glm::vec3> s_faceInfo[6] = {
+            { glm::vec3( 1,  0,  0), glm::vec3(0, -1,  0) },
+            { glm::vec3(-1,  0,  0), glm::vec3(0, -1,  0) },
+            { glm::vec3( 0,  1,  0), glm::vec3(0,  0,  1) },
+            { glm::vec3( 0, -1,  0), glm::vec3(0,  0, -1) },
+            { glm::vec3( 0,  0,  1), glm::vec3(0, -1,  0) },
+            { glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0) },
         };
 
         auto view = glm::lookAt(_pos,
@@ -227,14 +226,16 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, std::get<2>(s_faceInfo[count]), Light::s_shadowMapPool.GetTex3D(), _smp);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+                           RenderTarget::TextureType::k3D_ARRAY, 
+                           count, Light::s_shadowMapPool.GetTex3D(), _smp);
     }
     return count != 7;
 }
 
 void LightSpot::OpenShadow(const float n, const float f)
 {
-    _proj       = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_H, n, f);
+    _proj = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_H, n, f);
 
     //  光线衰减系数k0, k1, k2, 内锥, 外锥, 环境光, 漫反射, 镜面反射, 世界坐标
     if (_ubo == 0)
@@ -276,7 +277,9 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
         mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, Light::s_shadowMapPool.GetTex2D(), _smp);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+                           RenderTarget::TextureType::k2D_ARRAY, 
+                           0, Light::s_shadowMapPool.GetTex2D(), _smp);
     }
     else
     {

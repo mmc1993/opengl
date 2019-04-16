@@ -103,7 +103,7 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-			{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
+			//{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -161,7 +161,7 @@ private:
 		}
         _lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
 		_lightSpots.at(0)->OpenShadow(0.01f, 1000);
-		_lightPoints.at(0)->OpenShadow(0.01f, 1000);
+		//_lightPoints.at(0)->OpenShadow(0.01f, 1000);
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -234,10 +234,10 @@ private:
 			camera->SetPos(pos);
 		}
 
-		_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
-																  8 + std::cos(_pointCos) * 3, 
-																  3 + std::sin(_pointCos) * 3);
-		_pointCos += 0.1f;
+		//_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
+		//														  8 + std::cos(_pointCos) * 3, 
+		//														  3 + std::sin(_pointCos) * 3);
+		//_pointCos += 0.1f;
 
 		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
 																 8,

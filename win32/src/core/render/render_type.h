@@ -83,20 +83,16 @@ static const char * const UNIFORM_MATERIAL_NORMAL       = "material_.mNormal";
 static const char * const UNIFORM_MATERIAL_HEIGHT       = "material_.mHeight";
 //  材质.高光强度
 static const char * const UNIFORM_MATERIAL_SHININESS    = "material_.mShininess";
-//  方向光阴影贴图
-static const char * const UNIFORM_SHADOW_MAP_DIRECT_    = "shadow_map_direct_";
-//  点光源阴影贴图
-static const char * const UNIFORM_SHADOW_MAP_POINT_     = "shadow_map_point_";
-//  聚光灯阴影贴图
-static const char * const UNIFORM_SHADOW_MAP_SPOT_      = "shadow_map_spot_";
-//  方向光深度贴图长度
-static const char * const UNIFORM_SHADOW_MAP_COUNT_DIRECT_  = "shadow_map_count_direct_";
-//  点光源深度贴图长度
-static const char * const UNIFORM_SHADOW_MAP_COUNT_POINT_   = "shadow_map_count_point_";
-//  聚光灯深度贴图长度
-static const char * const UNIFORM_SHADOW_MAP_COUNT_SPOT_    = "shadow_map_count_spot_";
-//  当前光源深度贴图所在位置
-static const char * const UNIFORM_SHADOW_MAP_POS_           = "shadow_map_pos_";
+//  2D阴影贴图(方向光, 聚光灯)
+static const char * const UNIFORM_SHADOW_MAP_2D_        = "shadow_map_2d_";
+//  3D阴影贴图(点光源)
+static const char * const UNIFORM_SHADOW_MAP_3D_        = "shadow_map_3d_";
+//  方向光数量
+static const char * const UNIFORM_LIGHT_COUNT_DIRECT_   = "light_count_direct_";
+//  点光源数量
+static const char * const UNIFORM_LIGHT_COUNT_POINT_    = "light_count_point_";
+//  聚光灯数量
+static const char * const UNIFORM_LIGHT_COUNT_SPOT_     = "light_count_spot_";
 
 class RenderMatrix {
 public:

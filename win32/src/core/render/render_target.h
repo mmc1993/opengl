@@ -58,6 +58,8 @@ public:
 		k3D_BOTTOM		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 3,
 		k3D_FRONT		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4,
 		k3D_BACK		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5,
+        k2D_ARRAY       = GL_TEXTURE_2D_ARRAY,
+        k3D_ARRAY       = GL_TEXTURE_CUBE_MAP_ARRAY,
 	};
 
 public:
@@ -68,10 +70,16 @@ public:
 	RenderTarget();
 	~RenderTarget();
 
+    //  绑定 RenderBuffer
     void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
+    //  绑定 Texture2D
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType = BindType::kNONE);
+    //  绑定 TextureCube
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType = BindType::kNONE);
-    void BindAttachment(AttachmentType attachment, TextureType type, uint texture, uint texturePos, BindType bindType = BindType::kNONE);
+    //  绑定 Texture Array
+    //  如果绑定 Texture2D  Array, face == 0
+    //  如果绑定 TextureCube Array, 0 <= face <= 6
+    void BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType = BindType::kNONE);
 	
     void Beg(BindType bindType = BindType::kDRAW_READ);
 	void End();

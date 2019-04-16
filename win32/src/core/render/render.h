@@ -5,21 +5,21 @@
 #include "render_target.h"
 
 template <class T>
-constexpr uint UBOOffsetOf(const uint base) const
-{
-    return (base + UBOTypeLen<T> -1)
-        / UBOTypeLen<T>
-        * UBOTypeLen<T>
-        +UBOTypeLen<T>;
-}
-
-template <class T>
-constexpr uint UBOTypeLen() const
+constexpr uint UBOTypeLen()
 {
     return sizeof(T) > 16 ? 16
         : sizeof(T) > 8 ? 16
         : sizeof(T) > 4 ? 8
         : 4;
+}
+
+template <class T>
+constexpr uint UBOOffsetOf(const uint base)
+{
+    return (UBOTypeLen<T>() + base - 1)
+          / UBOTypeLen<T>()
+          * UBOTypeLen<T>()
+          + UBOTypeLen<T>();
 }
 
 class Render {
@@ -41,12 +41,14 @@ public:
 	struct RenderInfo {
 		size_t mVertexCount;
 		size_t mRenderCount;
+        size_t mTextureBase;
         size_t mTextureCount;
         const RenderPass * mPass;
 		RenderInfo()
             : mPass(nullptr)
             , mVertexCount(0)
 			, mRenderCount(0)
+            , mTextureBase(0)
             , mTextureCount(0)
 		{ }
 	};

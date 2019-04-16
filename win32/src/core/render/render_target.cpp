@@ -133,11 +133,25 @@ void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, R
     glFramebufferTexture2D(bindType, attachment, type, texture3D->GetGLID(), 0);
 }
 
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture, uint texturePos, BindType bindType)
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType)
 {
+    assert(type == RenderTarget::k2D_ARRAY || type == RenderTarget::k3D_ARRAY);
+
     if (bindType == BindType::kNONE) { bindType = _bindType; }
 
-    glFramebufferTexture3D(bindType, attachment, type, texture, 0, texturePos);
+    switch (type)
+    {
+    case RenderTarget::k2D_ARRAY:
+        {
+            glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos);
+        }
+        break;
+    case RenderTarget::k3D_ARRAY:
+        {
+            glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos * 6 + face);
+        }
+        break;
+    }
 }
 
 void RenderTarget::Beg(BindType bindType)
@@ -146,9 +160,7 @@ void RenderTarget::Beg(BindType bindType)
 	{
 		glGenFramebuffers(1, &_fbo);
 	}
-	glBindFramebuffer(_bindType, _fbo);
-    
-    _bindType = bindType;
+	glBindFramebuffer(_bindType = bindType, _fbo);
 }
 
 void RenderTarget::End()

@@ -9,20 +9,18 @@
 #include "../component/transform.h"
 
 Render::Render()
-{
-
-}
+{ }
 
 Render::~Render()
 {
     //  释放用于正向渲染的光源UBO
-    if (    _uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0
-        ||  _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0
-        || _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
+    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0 ||
+        _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0 ||
+        _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
     {
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0);
         glDeleteBuffers(3, _uboLightForward);
     }
 }
@@ -86,6 +84,7 @@ void Render::RenderOnce()
     {
         RenderShadow(light);
     }
+
 	//	逐相机执行渲染命令
 	for (auto & camera : _cameraInfos)
 	{
@@ -93,7 +92,6 @@ void Render::RenderOnce()
 		RenderCamera(&camera);
 		Bind((CameraInfo *)nullptr);
 	}
- 
 	ClearCommands();
 }
 
@@ -189,16 +187,30 @@ void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const Ren
 		{
 			if (Bind(command.mPass)) 
             {
+                std::cout << glGetError() << std::endl;
+
                 BindUBOLightForward();
+                std::cout << glGetError() << std::endl;
+
             }
 			
+            std::cout << glGetError() << std::endl;
+
             BindEveryParam(camera, light, command);
+            std::cout << glGetError() << std::endl;
+
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
+                std::cout << glGetError() << std::endl;
+
                 Bind(&command.mMaterials[i]);
 
+                std::cout << glGetError() << std::endl;
+
 				Draw(command.mPass->mDrawType, command.mMeshs[i]);
+                std::cout << glGetError() << std::endl;
+
 			}
 		}
 	}
@@ -210,10 +222,6 @@ void Render::RenderDeferredCommands(CameraInfo * camera, Light * light, const Re
 
 void Render::InitUBOLightForward()
 {
-    if (    _uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0
-        ||  _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0
-        || _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
-    {
 /*
     layout (std140) uniform ExampleBlock
     {
@@ -231,9 +239,13 @@ void Render::InitUBOLightForward()
         int integer;     // 4               // 148
     };  
 */
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0);
+    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0 ||
+        _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0 ||
+        _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
+    {
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0);
+        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0);
 
         glGenBuffers(3, _uboLightForward);
 
@@ -313,8 +325,8 @@ void Render::PackUBOLightForward()
         {
         case Light::Type::kDIRECT:
             {
-                auto direct = reinterpret_cast<LightDirect *>(light);
                 //  方向光UBO
+                auto direct = reinterpret_cast<LightDirect *>(light);
                 directBase = UBOOffsetOf<LightDirect::UBOData>(directBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mSMP),        &direct->GetShadowMapPos());
@@ -336,8 +348,8 @@ void Render::PackUBOLightForward()
             break;
         case Light::Type::kPOINT:
             {
+                //  点光源UBO
                 auto point = reinterpret_cast<LightPoint *>(light);
-                //  方向光UBO
                 pointBase = UBOOffsetOf<LightDirect::UBOData>(pointBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mSMP),         &point->GetShadowMapPos());
@@ -361,8 +373,8 @@ void Render::PackUBOLightForward()
             break;
         case Light::Type::kSPOT:
             {
+                //  聚光灯UBO
                 auto spot = reinterpret_cast<LightSpot *>(light);
-                //  方向光UBO
                 spotBase = UBOOffsetOf<LightDirect::UBOData>(spotBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mSMP),          &spot->GetShadowMapPos());
@@ -419,6 +431,11 @@ void Render::BindUBOLightForward()
                              _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
         }
     }
+    //  绑定阴影贴图
+    _renderInfo.mTextureCount = _renderInfo.mTextureBase;
+    Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), _renderInfo.mTextureCount++);
+    Shader::SetUniformTexArray3D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_3D_, Light::GetShadowMap3D(), _renderInfo.mTextureCount++);
+    _renderInfo.mTextureBase = _renderInfo.mTextureCount;
 }
 
 void Render::Bind(CameraInfo * camera)
@@ -467,14 +484,6 @@ void Render::Bind(Light * light)
         break;
     }
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
-
-    ////  绑定阴影贴图
-    //switch (light->GetType())
-    //{
-    //case Light::Type::kDIRECT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_DIRECT_, reinterpret_cast<const LightDirect *>(light)->mShadowTex, count++); break;
-    //case Light::Type::kPOINT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_POINT_, reinterpret_cast<const LightPoint *>(light)->mShadowTex, count++); break;
-    //case Light::Type::kSPOT: Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_SPOT_, reinterpret_cast<const LightSpot *>(light)->mShadowTex, count++); break;
-    //}
 }
 
 bool Render::Bind(const RenderPass * pass)
@@ -482,6 +491,9 @@ bool Render::Bind(const RenderPass * pass)
 	if (_renderInfo.mPass != pass)
 	{
 		_renderInfo.mPass = pass;
+
+        //  切换 Shader 后, 重置 Texture 绑定索引
+        _renderInfo.mTextureBase = 0;
 
 		//	开启面剔除
 		if (pass->bCullFace)
@@ -532,6 +544,8 @@ bool Render::Bind(const RenderPass * pass)
 
 void Render::Bind(const Material * material)
 {
+    _renderInfo.mTextureCount = _renderInfo.mTextureBase;
+
 	for (auto i = 0; i != material->mDiffuses.size(); ++i)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), _renderInfo.mTextureCount++);
