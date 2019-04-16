@@ -187,30 +187,16 @@ void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const Ren
 		{
 			if (Bind(command.mPass)) 
             {
-                std::cout << glGetError() << std::endl;
-
                 BindUBOLightForward();
-                std::cout << glGetError() << std::endl;
-
             }
 			
-            std::cout << glGetError() << std::endl;
-
             BindEveryParam(camera, light, command);
-            std::cout << glGetError() << std::endl;
-
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
-                std::cout << glGetError() << std::endl;
-
                 Bind(&command.mMaterials[i]);
 
-                std::cout << glGetError() << std::endl;
-
 				Draw(command.mPass->mDrawType, command.mMeshs[i]);
-                std::cout << glGetError() << std::endl;
-
 			}
 		}
 	}
@@ -423,12 +409,12 @@ void Render::BindUBOLightForward()
             light->GetType() == Light::Type::kPOINT && pointNum++ != LIMIT_FORWARD_LIGHT_POINT ||
             light->GetType() == Light::Type::kSPOT && spotNum++ != LIMIT_FORWARD_LIGHT_SPOT)
         {
-            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, std::get<0>(FIND_TABLE[light->GetType()]));
+            //auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, std::get<0>(FIND_TABLE[light->GetType()]));
 
-            glUniformBlockBinding(_renderInfo.mPass->GLID, idx, std::get<1>(FIND_TABLE[light->GetType()]));
+            //glUniformBlockBinding(_renderInfo.mPass->GLID, idx, std::get<1>(FIND_TABLE[light->GetType()]));
 
-            glBindBufferBase(GL_UNIFORM_BUFFER, std::get<1>(FIND_TABLE[light->GetType()]),
-                             _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
+            //glBindBufferBase(GL_UNIFORM_BUFFER, std::get<1>(FIND_TABLE[light->GetType()]),
+            //                 _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
         }
     }
     //  ∞Û∂®“ı”∞Ã˘Õº
