@@ -121,7 +121,7 @@ void LightDirect::OpenShadow(
     //  环境光, 漫反射, 镜面反射, 法线, 矩阵
     if (_ubo == 0) 
     {
-        glGenBuffers(1, &_ubo); 
+        glGenBuffers(1, &_ubo);
     }
     glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
