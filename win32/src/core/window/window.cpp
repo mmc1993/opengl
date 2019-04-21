@@ -67,7 +67,8 @@ void Window::Move(size_t x, size_t y, size_t w, size_t h)
 void Window::SetFPS(size_t fps)
 {
 	_renderInfo.renderFPS = fps;
-    _renderInfo.renderCD = 1.0f / fps;
+    //  渲染一帧需要的时间
+    _renderInfo.renderTimeStep = 1.0f / fps;
 }
 
 size_t Window::GetX() const
@@ -114,7 +115,9 @@ void Window::Loop()
     glfwSetWindowCloseCallback(_window, Window::OnClose);
 
     //  初始化各项数据
-    _renderInfo.renderTime = time_tool::Now();
+    _renderInfo.prevRenderTime = time_tool::Now();
+    _renderInfo.nextRenderTime = time_tool::Now(_renderInfo.renderTimeStep);
+
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
 }
@@ -122,11 +125,14 @@ void Window::Loop()
 void Window::Update()
 {
     auto nowtime = time_tool::Now();
-    if (nowtime >= _renderInfo.renderTime + _renderInfo.renderCD)
+    if (nowtime >= _renderInfo.nextRenderTime)
     {
-        auto difftime = time_tool::UnLerp(_renderInfo.renderCD,
-                                          _renderInfo.renderTime, nowtime);
-		_renderInfo.renderTime = time_tool::Now(_renderInfo.renderCD);
+        auto difftime = time_tool::UnLerp(_renderInfo.renderTimeStep,
+                                          _renderInfo.prevRenderTime, nowtime);
+        //  计算下一帧渲染时间
+        _renderInfo.nextRenderTime = nowtime + _renderInfo.renderTimeStep;
+        //  保留这一帧渲染时间
+        _renderInfo.prevRenderTime = nowtime;
         //  更新输入事件
 		glfwPollEvents();
         //	更新定时器

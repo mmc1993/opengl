@@ -6,8 +6,9 @@ class Window {
 public:
     struct RenderInfo {
 		size_t renderFPS;
-		float renderTime;
-		float renderCD;
+        float renderTimeStep;
+        float prevRenderTime;
+        float nextRenderTime;
     };
 
 public:
