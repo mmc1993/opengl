@@ -57,6 +57,7 @@ private:
 
 	void InitAssets()
 	{
+        File::LoadShader("res/demo/shader/scene.shader");
 	}
 
 	void InitObject()
@@ -98,7 +99,7 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
+			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.8f, 0.8f, 0.8f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
@@ -108,7 +109,7 @@ private:
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -160,7 +161,7 @@ private:
 			_lightSpots.push_back(light);
 		}
         _lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
-		_lightSpots.at(0)->OpenShadow(0.01f, 1000);
+		//_lightSpots.at(0)->OpenShadow(0.01f, 1000);
 		//_lightPoints.at(0)->OpenShadow(0.01f, 1000);
 	}
 
@@ -239,10 +240,10 @@ private:
 		//														  3 + std::sin(_pointCos) * 3);
 		//_pointCos += 0.1f;
 
-		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-																 8,
-																 0 + std::sin(_spotCos) * 5);
-		_spotCos += 0.1f;
+		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
+		//														 8,
+		//														 0 + std::sin(_spotCos) * 5);
+		//_spotCos += 0.1f;
 
 		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
