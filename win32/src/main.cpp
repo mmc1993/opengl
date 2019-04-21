@@ -265,7 +265,7 @@ int main()
     app.Create("xxx");
     app.Move(200, 100, 512, 512);
     app.InitGame();
-    app.SetFPS(144);
+    app.SetFPS(60);
     app.Loop();
     return 0;
 }

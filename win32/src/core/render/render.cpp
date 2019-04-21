@@ -418,10 +418,10 @@ void Render::BindUBOLightForward()
         }
     }
     //  绑定阴影贴图
-    _renderInfo.mTextureCount = _renderInfo.mTextureBase;
-    Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), _renderInfo.mTextureCount++);
-    Shader::SetUniformTexArray3D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_3D_, Light::GetShadowMap3D(), _renderInfo.mTextureCount++);
-    _renderInfo.mTextureBase = _renderInfo.mTextureCount;
+    auto count = _renderInfo.mTexBase;
+    Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), count++);
+    Shader::SetUniformTexArray3D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_3D_, Light::GetShadowMap3D(), count++);
+    _renderInfo.mTexBase = count;
 }
 
 void Render::Bind(CameraInfo * camera)
@@ -477,9 +477,7 @@ bool Render::Bind(const RenderPass * pass)
 	if (_renderInfo.mPass != pass)
 	{
 		_renderInfo.mPass = pass;
-
-        //  切换 Shader 后, 重置 Texture 绑定索引
-        _renderInfo.mTextureBase = 0;
+        _renderInfo.mTexBase = 0;
 
 		//	开启面剔除
 		if (pass->bCullFace)
@@ -530,27 +528,27 @@ bool Render::Bind(const RenderPass * pass)
 
 void Render::Bind(const Material * material)
 {
-    _renderInfo.mTextureCount = _renderInfo.mTextureBase;
+    auto count = _renderInfo.mTexBase;
 
 	for (auto i = 0; i != material->mDiffuses.size(); ++i)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), _renderInfo.mTextureCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), count++);
 	}
 	if (material->mSpecular != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material->mSpecular, _renderInfo.mTextureCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material->mSpecular, count++);
 	}
 	if (material->mReflect != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material->mReflect, _renderInfo.mTextureCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material->mReflect, count++);
 	}
 	if (material->mNormal != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material->mNormal, _renderInfo.mTextureCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material->mNormal, count++);
 	}
 	if (material->mHeight != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material->mHeight, _renderInfo.mTextureCount++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material->mHeight, count++);
 	}
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SHININESS, material->mShininess);
 }

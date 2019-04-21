@@ -51,12 +51,15 @@ public:
     }
 
     Transform * GetTransform();
-    size_t GetCameraFlag() const;
+
     void SetCameraFlag(size_t flag);
+    size_t GetCameraFlag() const;
+
     void SetActive(bool active);
     bool IsActive() const;
-	void Update(float dt);
-	void UpdateFromThis(float dt);
+
+    void AsRootUpdate(float dt);
+    void Update(float dt);
 
     void SetParent(Object * parent);
     Object * GetParent();

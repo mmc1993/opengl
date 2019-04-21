@@ -41,15 +41,13 @@ public:
 	struct RenderInfo {
 		size_t mVertexCount;
 		size_t mRenderCount;
-        size_t mTextureBase;
-        size_t mTextureCount;
+        size_t mTexBase;
         const RenderPass * mPass;
 		RenderInfo()
             : mPass(nullptr)
             , mVertexCount(0)
 			, mRenderCount(0)
-            , mTextureBase(0)
-            , mTextureCount(0)
+            , mTexBase(0)
 		{ }
 	};
 

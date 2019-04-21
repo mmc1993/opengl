@@ -124,21 +124,24 @@ void Window::Update()
     auto nowtime = time_tool::Now();
     if (nowtime >= _renderInfo.renderTime + _renderInfo.renderCD)
     {
-		auto difftime = (nowtime - _renderInfo.renderTime) / _renderInfo.renderCD;
+        auto difftime = time_tool::UnLerp(_renderInfo.renderCD,
+                                          _renderInfo.renderTime, nowtime);
 		_renderInfo.renderTime = time_tool::Now(_renderInfo.renderCD);
+        //  更新输入事件
 		glfwPollEvents();
-		//	更新定时器
+        //	更新定时器
 		mmc::mTimer.Update(nowtime);
-		//	以Root为起点，开始逐节点更新
-		mmc::mRoot.UpdateFromThis(difftime);
-		//	处理本帧渲染命令
+		//	更新根节点
+        mmc::mRoot.AsRootUpdate(difftime);
+        //	更新渲染队列
         mmc::mRender.RenderOnce();
-		//	显示画面
+        //	显示画面
         glfwSwapBuffers(_window);
 
 		std::cout <<
-			SFormat("Error: {0} FPS: {1} RenderCount: {2} mVertexCount: {3}", 
-					glGetError(), difftime,
+			SFormat("Error: {0} DT: {1} FPS: {2} RenderCount: {3} mVertexCount: {4}", 
+					glGetError(),difftime, 
+                    _renderInfo.renderFPS,
 					mmc::mRender.GetRenderInfo().mRenderCount,
 					mmc::mRender.GetRenderInfo().mVertexCount)
 			<< std::endl;

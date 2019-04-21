@@ -172,7 +172,7 @@ void Object::Update(float dt)
 	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }
 
-void Object::UpdateFromThis(float dt)
+void Object::AsRootUpdate(float dt)
 {
 	mmc::mRender.GetMatrix().Identity(RenderMatrix::ModeType::kMODEL);
 	
