@@ -63,4 +63,23 @@ namespace string_tool {
 		}
 		return Join(vec, "");
 	}
+
+    //  ±È½Ï×Ö·û´®ÊÇ·ñÒ»Ñù
+    //  Í¬Ê±ºöÂÔ¿Õ°××Ö·û
+    inline bool IsEqualSkipSpace(const std::string & str0, const char * str1)
+    {
+        static auto onFind = [](const std::string::value_type & ch) {
+            return (int)ch > 32;
+        };
+        auto len = std::strlen(str1);
+        auto it = std::find_if(str0.begin(), 
+                               str0.end(), 
+                               onFind);
+        if (it == str0.end())
+        {
+            return len == 0;
+        }
+        auto pos = std::distance(str0.begin(), it);
+        return str0.compare(pos, len, str1, len) == 0;
+    }
 }
