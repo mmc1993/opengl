@@ -44,11 +44,11 @@ Shader * File::LoadShader(const std::string & url)
     std::stringstream sstream;
     while (std::getline(ifile, line))
     {
-        if (line == "Pass")
+        if (string_tool::IsEqualSkipSpace(line, "Pass"))
         {
             RenderPass pass;
             std::string fs, vs, gs;
-            while (std::getline(ifile, line) && line != "End Pass")
+            while (std::getline(ifile, line) && !string_tool::IsEqualSkipSpace(line, "End Pass"))
             {
 				word.clear();
                 sstream.str(line);
@@ -163,7 +163,7 @@ Shader * File::LoadShader(const std::string & url)
                 else if (word == "Vertex")
                 {
                     std::vector<std::string> codes;
-                    while (std::getline(ifile, line) && line != "End Vertex")
+                    while (std::getline(ifile, line) && !string_tool::IsEqualSkipSpace(line, "End Vertex"))
                     {
                         codes.emplace_back(std::move(line));
                     }
@@ -172,7 +172,7 @@ Shader * File::LoadShader(const std::string & url)
                 else if (word == "Geometric")
                 {
                     std::vector<std::string> codes;
-                    while (std::getline(ifile, line) && line != "End Geometric")
+                    while (std::getline(ifile, line) && !string_tool::IsEqualSkipSpace(line, "End Geometric"))
                     {
                         codes.emplace_back(std::move(line));
                     }
@@ -181,7 +181,7 @@ Shader * File::LoadShader(const std::string & url)
                 else if (word == "Fragment")
                 {
                     std::vector<std::string> codes;
-                    while (std::getline(ifile, line) && line != "End Fragment")
+                    while (std::getline(ifile, line) && !string_tool::IsEqualSkipSpace(line, "End Fragment"))
                     {
                         codes.emplace_back(std::move(line));
                     }
@@ -192,7 +192,7 @@ Shader * File::LoadShader(const std::string & url)
                     ASSERT_LOG(word.empty(), "Error Key Word: {0}", word);
                 }
             }
-            ASSERT_LOG(line == "End Pass", "Not Found End Pass");
+            ASSERT_LOG(string_tool::IsEqualSkipSpace(line, "End Pass"), "Not Found End Pass");
 
             auto ret = shader->AddPass(pass, vs, fs, gs);
             ASSERT_LOG(ret, "Shader Pass Error");
