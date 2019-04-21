@@ -3,6 +3,7 @@
 #include "../asset/shader.h"
 #include "../asset/material.h"
 #include "../component/camera.h"
+#include "../tools/glsl_tool.h"
 #include "../tools/debug_tool.h"
 #include "../component/light.h"
 #include "../component/skybox.h"
@@ -121,13 +122,18 @@ void Render::RenderShadow(Light * light)
     glReadBuffer(GL_NONE);
 	while (light->NextDrawShadow(count++, &_shadowRT))
 	{
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT |
+                GL_DEPTH_BUFFER_BIT |
+                GL_STENCIL_BUFFER_BIT);
 
 		for (auto & command : _shadowCommands)
 		{
-            if (Bind(command.mPass)){ Bind(light); }
+            if (Bind(command.mPass))
+            { 
+                Bind(light);
+            }
 
-            BindEveryParam(nullptr, light, command);
+            BindEveryParam(nullptr, command);
 
             for (auto i = 0; i != command.mMeshNum; ++i)
             {
@@ -165,12 +171,9 @@ void Render::RenderForward(CameraInfo * camera)
     InitUBOLightForward();
     PackUBOLightForward();
     //  渲染
-    for (auto light : _lights)
+    for (auto & commands : _forwardCommands)
     {
-        for (auto & commands : _forwardCommands)
-        {
-            RenderForwardCommands(camera, light, commands);
-        }
+        RenderForwardCommands(camera, commands);
     }
 }
 
@@ -179,7 +182,7 @@ void Render::RenderDeferred(CameraInfo * camera)
 	
 }
 
-void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands)
+void Render::RenderForwardCommands(CameraInfo * camera, const RenderQueue & commands)
 {
 	for (const auto & command : commands)
 	{
@@ -190,7 +193,7 @@ void Render::RenderForwardCommands(CameraInfo * camera, Light * light, const Ren
                 BindUBOLightForward();
             }
 			
-            BindEveryParam(camera, light, command);
+            BindEveryParam(camera, command);
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
@@ -235,55 +238,49 @@ void Render::InitUBOLightForward()
 
         glGenBuffers(3, _uboLightForward);
 
-        auto base = 0;
+        uint base = 0;
         //  方向光UBO
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mMatrix)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mNormal)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mAmbient)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mDiffuse)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mSpecular)>(base);
-        base = UBOOffsetOf<decltype(LightDirect::UBOData::mPosition)>(base);
-        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_DIRECT; ++i)
-        {
-            base = UBOOffsetOf<LightDirect::UBOData>(base);
-        }
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mSMP)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mMatrix)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mNormal)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mAmbient)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mDiffuse)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mSpecular)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mPosition)>(base);
+        base = glsl_tool::UBOOffsetBase<glm::vec4>(base);
+        base = base * LIMIT_FORWARD_LIGHT_DIRECT;
         glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
 
         //  点光源UBO
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mSMP)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK0)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK1)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mK2)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mAmbient)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mDiffuse)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mSpecular)>(base);
-        base = UBOOffsetOf<decltype(LightPoint::UBOData::mPosition)>(base);
-        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_POINT; ++i)
-        {
-            base = UBOOffsetOf<LightPoint::UBOData>(base);
-        }
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mSMP)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK0)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK1)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK2)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mAmbient)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mDiffuse)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mSpecular)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mPosition)>(base);
+        base = glsl_tool::UBOOffsetBase<glm::vec4>(base);
+        base = base * LIMIT_FORWARD_LIGHT_POINT;
         glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
 
         //  聚光灯UBO
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mSMP)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK0)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK1)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mK2)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mInCone)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mOutCone)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mNormal)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mAmbient)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mDiffuse)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mSpecular)>(base);
-        base = UBOOffsetOf<decltype(LightSpot::UBOData::mPosition)>(base);
-        for (auto i = 0; i != LIMIT_FORWARD_LIGHT_SPOT; ++i)
-        {
-            base = UBOOffsetOf<LightSpot::UBOData>(base);
-        }
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mSMP)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK0)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK1)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK2)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mInCone)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mOutCone)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mNormal)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mAmbient)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mDiffuse)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mSpecular)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mPosition)>(base);
+        base = glsl_tool::UBOOffsetBase<glm::vec4>(base);
+        base = base * LIMIT_FORWARD_LIGHT_SPOT;
         glBufferData(GL_UNIFORM_BUFFER, base, nullptr, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -313,22 +310,31 @@ void Render::PackUBOLightForward()
             {
                 //  方向光UBO
                 auto direct = reinterpret_cast<LightDirect *>(light);
-                directBase = UBOOffsetOf<LightDirect::UBOData>(directBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mSMP),        &direct->GetShadowMapPos());
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mSMP)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mMatrix),     &direct->GetMatrix());
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mMatrix)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mMatrix)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mNormal),     &direct->mNormal);
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mNormal)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mNormal)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mAmbient),    &direct->mAmbient);
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mAmbient)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mAmbient)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mDiffuse),    &direct->mDiffuse);
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mDiffuse)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mDiffuse)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mSpecular),   &direct->mSpecular);
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSpecular)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mSpecular)>(directBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, directBase, sizeof(LightDirect::UBOData::mPosition),   &direct->GetWorldPos());
-                directBase = UBOOffsetOf<decltype(LightDirect::UBOData::mPosition)>(directBase);
+                directBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mPosition)>(directBase);
+
+                directBase = glsl_tool::UBOOffsetBase<glm::vec4>(directBase);
+
                 glBindBuffer(GL_UNIFORM_BUFFER, 0);
             }
             break;
@@ -336,24 +342,34 @@ void Render::PackUBOLightForward()
             {
                 //  点光源UBO
                 auto point = reinterpret_cast<LightPoint *>(light);
-                pointBase = UBOOffsetOf<LightDirect::UBOData>(pointBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mSMP),         &point->GetShadowMapPos());
-                pointBase = UBOOffsetOf<decltype(LightDirect::UBOData::mSMP)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightDirect::UBOData::mSMP)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK0),          &point->mK0);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK0)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK0)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK1),          &point->mK1);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK1)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK1)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mK2),          &point->mK2);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mK2)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mK2)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mAmbient),     &point->mAmbient);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mAmbient)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mAmbient)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mDiffuse),     &point->mDiffuse);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mDiffuse)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mDiffuse)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mSpecular),    &point->mSpecular);
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mSpecular)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mSpecular)>(pointBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, pointBase, sizeof(LightPoint::UBOData::mPosition),    &point->GetWorldPos());
-                pointBase = UBOOffsetOf<decltype(LightPoint::UBOData::mPosition)>(pointBase);
+                pointBase = glsl_tool::UBOOffsetFill<decltype(LightPoint::UBOData::mPosition)>(pointBase);
+
+                pointBase = glsl_tool::UBOOffsetBase<glm::vec4>(pointBase);
+
                 glBindBuffer(GL_UNIFORM_BUFFER, 0);
             }
             break;
@@ -361,30 +377,43 @@ void Render::PackUBOLightForward()
             {
                 //  聚光灯UBO
                 auto spot = reinterpret_cast<LightSpot *>(light);
-                spotBase = UBOOffsetOf<LightDirect::UBOData>(spotBase);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mSMP),          &spot->GetShadowMapPos());
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mSMP)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mSMP)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK0),           &spot->mK0);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK0)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK0)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK1),           &spot->mK1);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK1)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK1)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mK2),           &spot->mK2);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mK2)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK2)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mInCone),       &spot->mInCone);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mInCone)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mInCone)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mOutCone),      &spot->mOutCone);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mOutCone)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mOutCone)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mNormal),       &spot->mNormal);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mNormal)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mNormal)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mAmbient),      &spot->mAmbient);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mAmbient)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mAmbient)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mDiffuse),      &spot->mDiffuse);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mDiffuse)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mDiffuse)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mSpecular),     &spot->mSpecular);
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mSpecular)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mSpecular)>(spotBase);
+
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mPosition),     &spot->GetWorldPos());
-                spotBase = UBOOffsetOf<decltype(LightSpot::UBOData::mPosition)>(spotBase);
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mPosition)>(spotBase);
+
+                spotBase = glsl_tool::UBOOffsetBase<glm::vec4>(spotBase);
+
                 glBindBuffer(GL_UNIFORM_BUFFER, 0);
             }
             break;
@@ -409,14 +438,19 @@ void Render::BindUBOLightForward()
             light->GetType() == Light::Type::kPOINT && pointNum++ != LIMIT_FORWARD_LIGHT_POINT ||
             light->GetType() == Light::Type::kSPOT && spotNum++ != LIMIT_FORWARD_LIGHT_SPOT)
         {
-            //auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, std::get<0>(FIND_TABLE[light->GetType()]));
+            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, std::get<0>(FIND_TABLE[light->GetType()]));
 
-            //glUniformBlockBinding(_renderInfo.mPass->GLID, idx, std::get<1>(FIND_TABLE[light->GetType()]));
+            glUniformBlockBinding(_renderInfo.mPass->GLID, idx, std::get<1>(FIND_TABLE[light->GetType()]));
 
-            //glBindBufferBase(GL_UNIFORM_BUFFER, std::get<1>(FIND_TABLE[light->GetType()]),
-            //                 _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
+            glBindBufferBase(GL_UNIFORM_BUFFER, std::get<1>(FIND_TABLE[light->GetType()]),
+                             _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
         }
     }
+
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_DIRECT_, directNum);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, pointNum);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, spotNum);
+
     //  绑定阴影贴图
     auto count = _renderInfo.mTexBase;
     Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), count++);
@@ -560,7 +594,7 @@ void Render::ClearCommands()
 	for (auto & queue : _deferredCommands) { queue.clear(); }
 }
 
-void Render::BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command)
+void Render::BindEveryParam(CameraInfo * camera, const RenderCommand & command)
 {
 	auto & matrixM			= command.mTransform;
 	auto & matrixV			= _matrix.GetV();

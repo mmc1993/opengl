@@ -4,24 +4,6 @@
 #include "render_type.h"
 #include "render_target.h"
 
-template <class T>
-constexpr uint UBOTypeLen()
-{
-    return sizeof(T) > 16 ? 16
-        : sizeof(T) > 8 ? 16
-        : sizeof(T) > 4 ? 8
-        : 4;
-}
-
-template <class T>
-constexpr uint UBOOffsetOf(const uint base)
-{
-    return (UBOTypeLen<T>() + base - 1)
-          / UBOTypeLen<T>()
-          * UBOTypeLen<T>()
-          + UBOTypeLen<T>();
-}
-
 class Render {
 public:
     struct CameraInfo {
@@ -93,7 +75,7 @@ private:
     bool Bind(const RenderPass * pass);
     void Bind(const Material * material);
     //	绑定每一次渲染都可能变化的参数
-    void BindEveryParam(CameraInfo * camera, Light * light, const RenderCommand & command);
+    void BindEveryParam(CameraInfo * camera, const RenderCommand & command);
 
     //	执行绘制命令
     void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
@@ -107,7 +89,7 @@ private:
     void RenderCamera(CameraInfo * camera);
     void RenderForward(CameraInfo * camera);
     void RenderDeferred(CameraInfo * camera);
-	void RenderForwardCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
+	void RenderForwardCommands(CameraInfo * camera, const RenderQueue & commands);
 	void RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
 
     //  正向渲染光源相关

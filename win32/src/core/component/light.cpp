@@ -133,7 +133,7 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
     if (0 == count)
     {
         _pos        = GetOwner()->GetTransform()->GetWorldPosition();
-        auto up     = mNormal.y > 0.999999f 
+        auto up     = mNormal.y > 0.999f 
                     ? glm::vec3(0, 0, 1) 
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
@@ -252,7 +252,7 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
     if (count == 0)
     {
         _pos        = GetOwner()->GetTransform()->GetWorldPosition();
-        auto up     = mNormal.y > 0.999999f
+        auto up     = mNormal.y > 0.999f
                     ? glm::vec3(0, 0, 1)
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);

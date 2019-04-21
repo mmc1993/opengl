@@ -35,11 +35,11 @@ enum UniformBlockEnum {
 };
 
 //  UBO 方向光数据
-static const char * const UBO_NAME_LIGHT_DIRECT = "light_direct_";
+static const char * const UBO_NAME_LIGHT_DIRECT = "LightDirect_";
 //  UBO 点光源数据
-static const char * const UBO_NAME_LIGHT_POINT = "light_point_";
+static const char * const UBO_NAME_LIGHT_POINT = "LightPoint_";
 //  UBO 聚光灯数据
-static const char * const UBO_NAME_LIGHT_SPOT = "light_spot_";
+static const char * const UBO_NAME_LIGHT_SPOT = "LightSpot_";
 //  UBO 方向光数组数据
 static const char * const UBO_NAME_LIGHT_DIRECT_ARRAY = "light_direct{0}_";
 //  UBO 点光源数组数据
