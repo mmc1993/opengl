@@ -85,18 +85,29 @@ void Light::ShadowMapPool::AllocPos2D()
                         [this]() { return _len2D++; });
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
-        for (auto i = 0; i != _len2D; ++i)
-        {
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
-                              _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
-        }
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
+                          _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
 }
 
 void Light::ShadowMapPool::AllocPos3D()
 {
+    if (_tex3D == 0)
+    {
+        glGenTextures(1, &_tex3D);
+    }
+    if (_posStock3D.empty())
+    {
+        std::generate_n(std::back_inserter(_posStock3D),
+                        ShadowMapPool::s_LEN_STEP,
+                        [this]() { return _len3D++; });
 
+        glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, _tex3D);
+        glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H,
+                            _len3D * 6, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+        glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, 0);
+    }
 }
 
 //  --------------------------------------------------------------------------------
@@ -207,7 +218,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    if (count < 7)
+    if (count < 6)
     {
         static std::tuple<glm::vec3, glm::vec3> s_faceInfo[6] = {
             { glm::vec3( 1,  0,  0), glm::vec3(0, -1,  0) },
@@ -230,7 +241,7 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
                            RenderTarget::TextureType::k3D_ARRAY, 
                            count, Light::s_shadowMapPool.GetTex3D(), _smp);
     }
-    return count != 7;
+    return count != 6;
 }
 
 void LightSpot::OpenShadow(const float n, const float f)

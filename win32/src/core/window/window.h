@@ -7,8 +7,7 @@ public:
     struct RenderInfo {
 		size_t renderFPS;
         float renderTimeStep;
-        float prevRenderTime;
-        float nextRenderTime;
+        float renderTimeLast;
     };
 
 public:

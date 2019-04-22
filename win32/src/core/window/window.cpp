@@ -68,6 +68,7 @@ void Window::SetFPS(size_t fps)
 {
 	_renderInfo.renderFPS = fps;
     //  渲染一帧需要的时间
+    _renderInfo.renderTimeLast = 0.0f;
     _renderInfo.renderTimeStep = 1.0f / fps;
 }
 
@@ -113,40 +114,29 @@ void Window::Loop()
     glfwSetWindowSizeCallback(_window, Window::OnSize);
     glfwSetMouseButtonCallback(_window, Window::OnBtn);
     glfwSetWindowCloseCallback(_window, Window::OnClose);
-
-    //  初始化各项数据
-    _renderInfo.prevRenderTime = time_tool::Now();
-    _renderInfo.nextRenderTime = time_tool::Now(_renderInfo.renderTimeStep);
-
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
 }
 
 void Window::Update()
 {
-    auto nowtime = time_tool::Now();
-    if (nowtime >= _renderInfo.nextRenderTime)
+    auto lasttime = time_tool::Now();
+    auto difftime = -_renderInfo.renderTimeLast + lasttime;
+    if ( difftime >= _renderInfo.renderTimeStep)
     {
-        auto difftime = time_tool::UnLerp(_renderInfo.renderTimeStep,
-                                          _renderInfo.prevRenderTime, nowtime);
-        //  计算下一帧渲染时间
-        _renderInfo.nextRenderTime = nowtime + _renderInfo.renderTimeStep;
-        //  保留这一帧渲染时间
-        _renderInfo.prevRenderTime = nowtime;
-        //  更新输入事件
+        auto dt = difftime / _renderInfo.renderTimeStep;
+        
+        _renderInfo.renderTimeLast = lasttime;
+
 		glfwPollEvents();
-        //	更新定时器
-		mmc::mTimer.Update(nowtime);
-		//	更新根节点
-        mmc::mRoot.AsRootUpdate(difftime);
-        //	更新渲染队列
+		mmc::mTimer.Update(lasttime);
+        mmc::mRoot.AsRootUpdate(dt);
         mmc::mRender.RenderOnce();
-        //	显示画面
         glfwSwapBuffers(_window);
 
 		std::cout <<
 			SFormat("Error: {0} DT: {1} FPS: {2} RenderCount: {3} mVertexCount: {4}", 
-					glGetError(),difftime, 
+					glGetError(), dt,
                     _renderInfo.renderFPS,
 					mmc::mRender.GetRenderInfo().mRenderCount,
 					mmc::mRender.GetRenderInfo().mVertexCount)

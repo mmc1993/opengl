@@ -57,7 +57,7 @@ public:
     
     void Update(const float time)
     {
-        while (!_tasks.empty() && _tasks.front().mTime <= time)
+        while (!_tasks.empty() && _tasks.front().mTime < time)
         {
 			auto fn = _tasks.front().mCall;
             std::pop_heap(

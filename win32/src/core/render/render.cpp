@@ -101,7 +101,7 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
     for (const auto & pass : shader->GetPasss())
     {
         auto cmd = command;
-        cmd.mPass = &pass;
+        cmd.mPass  = &pass;
         switch (cmd.mPass->mRenderType)
         {
         case RenderTypeEnum::kSHADOW:

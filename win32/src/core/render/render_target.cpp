@@ -165,7 +165,7 @@ void RenderTarget::Beg(BindType bindType)
 
 void RenderTarget::End()
 {
-	ASSERT_RET(glCheckFramebufferStatus(_bindType) == GL_FRAMEBUFFER_COMPLETE);
+ 	ASSERT_RET(glCheckFramebufferStatus(_bindType) == GL_FRAMEBUFFER_COMPLETE);
 
 	glBindFramebuffer(_bindType, 0);
 }
