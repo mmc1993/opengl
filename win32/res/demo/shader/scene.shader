@@ -58,41 +58,52 @@ Pass
 		#version 410 core
 
 		struct LightDirectParam_ {
-			int mSMP;			//		0
-			mat4 mMatrix;		//		16
-								//		16
-								//		16
-								//		16
-			vec3 mNormal;		//		80
-			vec3 mAmbient;		//		96
-			vec3 mDiffuse;		//		112
-			vec3 mSpecular;		//		128
-			vec3 mPosition;		//		144
+			int mSMP;
+			mat4 mMatrix;
+			vec3 mNormal;
+			vec3 mAmbient;
+			vec3 mDiffuse;
+			vec3 mSpecular;
+			vec3 mPosition;
 		};
 
+        struct LightPointParam_ {
+            int mSMP;
+            float mK0, mK1, mK2;
+            vec3 mAmbient;
+            vec3 mDiffuse;
+            vec3 mSpecular;
+            vec3 mPosition;
+        };
+
 		struct LightSpotParam_ {
-			int mSMP;			//		0
-			float mK0;			//		4
-			float mK1;			//		8
-			float mK2;			//		12
-			float mInCone;		//		16
-			float mOutCone;		//		20
-			vec3 mNormal;		//		32
-			vec3 mAmbient;		//		48
-			vec3 mDiffuse;		//		64
-			vec3 mSpecular;		//		80
-			vec3 mPosition;		//		96
+			int mSMP;	
+			float mK0;
+            float mK1;
+            float mK2;
+			float mInCone;
+            float mOutCone;
+			vec3 mNormal;
+			vec3 mAmbient;
+			vec3 mDiffuse;
+			vec3 mSpecular;
+			vec3 mPosition;
 		};
 
 		layout (std140) uniform LightDirect_ {
 			LightDirectParam_ mParam[2];
 		} light_direct_;
 
+        layout (std140) uniform LightPoint_ {
+            LightPointParam_ mParam[4];
+        } light_point_;
+
 		layout (std140) uniform LightSpot_ {
 			LightSpotParam_ mParam[4];
 		} light_spot_;
 
 		uniform int light_count_direct_;
+        uniform int light_count_point_;
 		uniform int light_count_spot_;
 		uniform vec3 camera_pos_;
 		uniform vec3 camera_eye_;
@@ -146,35 +157,62 @@ Pass
 			return clamp((cone - outCone) / (inCone - outCone), 0, 1);
 		}
 
-		vec3 CalculateDirect(const LightDirectParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
+		vec3 CalculateDirect(const LightDirectParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
 		{
 			float diff = CalculateDiffuseScale(fragNormal, -lightParam.mNormal, cameraNormal);
 			float spec = CalculateSpecularScale(fragNormal, -lightParam.mNormal, cameraNormal);
 
-			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, parallaxUV).rgb;
-			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
-			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, parallaxUV).rgb * spec;
+			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, uv).rgb;
+			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
+			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, uv).rgb * spec;
 			return ambient + diffuse + specular;
 		}
 
-		vec3 CalculateSpot(const LightSpotParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 parallaxUV)
+        vec3 CalculatePoint(const LightPointParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
+        {
+            vec3 fragToLight = normalize(lightParam.mPosition - v_out_.mMPos);
+
+			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal);
+
+			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, uv).rgb;
+			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
+			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, uv).rgb * spec;
+
+			//	距离衰减
+			float distance = CalculateDistanceScale(v_out_.mMPos, 
+                                                    lightParam.mPosition, 
+                                                    lightParam.mK0, 
+                                                    lightParam.mK1, 
+                                                    lightParam.mK2);
+
+			return (ambient + diffuse + specular) * distance;
+        }
+
+		vec3 CalculateSpot(const LightSpotParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
 		{
 			vec3 fragToLight = normalize(lightParam.mPosition - v_out_.mMPos);
 
 			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
 			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal);
 
-			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, parallaxUV).rgb;
-			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, parallaxUV).rgb * diff;
-			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, parallaxUV).rgb * spec;
+			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, uv).rgb;
+			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
+			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, uv).rgb * spec;
 
 			//	光锥衰减
-			float weight = CalculateOutConeScale(lightParam.mInCone, lightParam.mOutCone, lightParam.mNormal, -fragToLight);
+			float weight = CalculateOutConeScale(lightParam.mInCone, 
+                                                 lightParam.mOutCone, 
+                                                 lightParam.mNormal, -fragToLight);
 
 			//	距离衰减
-			float distance = CalculateDistanceScale(v_out_.mMPos, lightParam.mPosition, lightParam.mK0, lightParam.mK1, lightParam.mK2);
+			float distance = CalculateDistanceScale(v_out_.mMPos, 
+                                                    lightParam.mPosition, 
+                                                    lightParam.mK0, 
+                                                    lightParam.mK1, 
+                                                    lightParam.mK2);
 
-			return (ambient + diffuse + specular) * distance * weight;
+			return (ambient + diffuse + specular) * weight * distance;
 		}
 
 		void main()
@@ -187,12 +225,17 @@ Pass
 			vec3 outColor = vec3(0, 0, 0);
 			for (int i = 0; i != light_count_direct_; ++i)
 			{
-				outColor += CalculateDirect(light_direct_.mParam[i] , fragNormal, cameraNormal, v_out_.mUV);
+				outColor += CalculateDirect(light_direct_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
 			}
+
+            for (int i = 0; i != light_count_point_; ++i)
+            {
+                outColor += CalculatePoint(light_point_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
+            }
 
 			for (int i = 0; i != light_count_spot_; ++i)
 			{
-				outColor += CalculateSpot(light_spot_.mParam[i] , fragNormal, cameraNormal, v_out_.mUV);
+				outColor += CalculateSpot(light_spot_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
 			}
 
 			color_ = vec4(outColor, 1.0f);
