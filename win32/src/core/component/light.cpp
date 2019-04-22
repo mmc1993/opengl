@@ -80,9 +80,7 @@ void Light::ShadowMapPool::AllocPos2D()
     }
     if (_posStock2D.empty())
     {
-        std::generate_n(std::back_inserter(_posStock2D), 
-                        ShadowMapPool::s_LEN_STEP, 
-                        [this]() { return _len2D++; });
+        std::generate_n(std::back_inserter(_posStock2D), ShadowMapPool::s_LEN_STEP, [this]() { return _len2D++; });
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
@@ -99,9 +97,7 @@ void Light::ShadowMapPool::AllocPos3D()
     }
     if (_posStock3D.empty())
     {
-        std::generate_n(std::back_inserter(_posStock3D),
-                        ShadowMapPool::s_LEN_STEP,
-                        [this]() { return _len3D++; });
+        std::generate_n(std::back_inserter(_posStock3D), ShadowMapPool::s_LEN_STEP, [this]() { return _len3D++; });
 
         glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, _tex3D);
         glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H,
