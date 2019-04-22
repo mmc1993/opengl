@@ -276,6 +276,7 @@ void Render::InitUBOLightForward()
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mK2)>(base);
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mInCone)>(base);
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mOutCone)>(base);
+        base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mMatrix)>(base);
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mNormal)>(base);
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mAmbient)>(base);
         base = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mDiffuse)>(base);
@@ -419,6 +420,10 @@ void Render::PackUBOLightForward()
                 spotBase = glsl_tool::UBOOffsetBase<decltype(LightSpot::UBOData::mOutCone)>(spotBase);
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mOutCone),      &spot->mOutCone);
                 spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mOutCone)>(spotBase);
+
+                spotBase = glsl_tool::UBOOffsetBase<decltype(LightSpot::UBOData::mMatrix)>(spotBase);
+                glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mMatrix),       &spot->GetMatrix());
+                spotBase = glsl_tool::UBOOffsetFill<decltype(LightSpot::UBOData::mMatrix)>(spotBase);
 
                 spotBase = glsl_tool::UBOOffsetBase<decltype(LightSpot::UBOData::mNormal)>(spotBase);
                 glBufferSubData(GL_UNIFORM_BUFFER, spotBase, sizeof(LightSpot::UBOData::mNormal),       &spot->mNormal);

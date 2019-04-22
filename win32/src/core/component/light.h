@@ -87,7 +87,7 @@ public:
     static uint GetShadowMap2D() { return s_shadowMapPool.GetTex2D(); }
     static uint GetShadowMap3D() { return s_shadowMapPool.GetTex3D(); }
     const glm::vec3 & GetWorldPos() const { return _pos; }
-    const glm::mat4 &  GetMatrix() const { return _proj; }
+    const glm::mat4 & GetMatrix() const {return _matrix; }
     const uint & GetUniformBlock() const { return _ubo; }
     const uint & GetShadowMapPos() const { return _smp; }
     const Type & GetType() const { return _type; }
@@ -176,6 +176,7 @@ public:
         uint mSMP;
         float mK0, mK1, mK2;
         float mInCone, mOutCone;
+        glm::mat4 mMatrix;
         glm::vec3 mNormal;
         glm::vec3 mAmbient;
         glm::vec3 mDiffuse;

@@ -5,6 +5,7 @@
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../asset/asset_cache.h"
+#include "../tools/glsl_tool.h"
 
 uint Light::s_VIEW_W = 0;
 uint Light::s_VIEW_H = 0;
@@ -84,7 +85,11 @@ void Light::ShadowMapPool::AllocPos2D()
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
-                          _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+                     _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
 }
@@ -130,6 +135,7 @@ void LightDirect::OpenShadow(
     {
         glGenBuffers(1, &_ubo);
     }
+    //  TODO 计算正确UBO大小
     glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -274,6 +280,7 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK2),              sizeof(UBOData::mK1),           &mK2);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mInCone),          sizeof(UBOData::mInCone),       &mInCone);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mOutCone),         sizeof(UBOData::mOutCone),      &mOutCone);
+        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mMatrix),          sizeof(UBOData::mMatrix),       &_matrix);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient),         sizeof(UBOData::mAmbient),      &mAmbient);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse),         sizeof(UBOData::mDiffuse),      &mDiffuse);
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular),        sizeof(UBOData::mSpecular),     &mSpecular);
