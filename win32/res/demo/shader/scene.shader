@@ -1,4 +1,68 @@
 Pass
+	CullFace Front
+	DepthTest
+	DepthWrite
+	RenderType Shadow
+	DrawType Index
+
+	Vertex
+		#version 440 core
+
+		layout(location = 0) in vec3 a_pos_;
+
+		uniform mat4 matrix_mvp_;
+		uniform mat4 matrix_m_;
+
+		out V_OUT_ {
+			vec3 mMPos;
+		} v_out_;
+
+		void main()
+		{
+			vec4 apos       = vec4(a_pos_, 1);
+			v_out_.mMPos    = vec3(matrix_m_ * apos);
+			gl_Position     = vec4(matrix_mvp_ * apos);
+		}
+	End Vertex
+
+	Fragment
+		#version 410 core
+
+		in V_OUT_{
+			vec3 mMPos;
+		} v_out_;
+
+        uniform int light_type_;
+
+        #define LIGHT_TYPE_DIRECT_ 0
+        #define LIGHT_TYPE_POINT_ 1
+        #define LIGHT_TYPE_SPOT_ 2
+
+		void main()
+		{
+            switch (light_type_)
+            {
+            case LIGHT_TYPE_DIRECT_:
+                { 
+
+                }
+                break;
+            case LIGHT_TYPE_POINT_:
+                {
+
+                }
+                break;
+            case LIGHT_TYPE_SPOT_:
+                {
+
+                }
+                break;
+            }
+		}
+	End Fragment
+End Pass
+
+Pass
 	CullFace Back
 	DepthTest
 	DepthWrite
@@ -102,6 +166,8 @@ Pass
 			LightSpotParam_ mParam[4];
 		} light_spot_;
 
+        uniform samplerCubeArray shadow_map_3d_;
+        uniform sampler2DArray shadow_map_2d_;
 		uniform int light_count_direct_;
         uniform int light_count_point_;
 		uniform int light_count_spot_;
@@ -129,6 +195,40 @@ Pass
 		} v_out_;
 
 		out vec4 color_;
+
+        int CheckInView(vec4 vec)
+        {
+            int ret = 0;
+            if		(vec.x < -vec.w) ret |= 1;
+            else if (vec.x >  vec.w) ret |= 2;
+            else if (vec.y < -vec.w) ret |= 4;
+            else if (vec.y >  vec.w) ret |= 8;
+            else if (vec.z < -vec.w) ret |= 16;
+            else if (vec.z >  vec.w) ret |= 32;
+            return ret;
+        }
+
+        float CalculateDirectShadow(const LightDirectParam_ lightParam)
+        {
+            vec4 position = lightParam.mMatrix * vec4(v_out_.mMPos, 1);
+            if (CheckInView(position) != 0) { return 0; }
+
+            float shadow = 0.0f;
+            position.xyz = position.xyz / position.w * 0.5f + 0.5f;
+            float zorder = position.z;
+            position.z   = lightParam.mSMP;
+            vec3 texstep = 1.0f / textureSize(shadow_map_2d_, 0);
+            float depth = texture(shadow_map_2d_, position.xyz + vec3(-texstep.x,  texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( 0,          texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( texstep.x,  texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3(-texstep.x,  0		, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( 0,          0	    , 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( texstep.x,  0	    , 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3(-texstep.x, -texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( 0,		  -texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_2d_, position.xyz + vec3( texstep.x, -texstep.y, 0)).r; shadow += zorder < depth? 1: 0;
+            return shadow / 9.0f;
+        }
 
 		//	计算漫反射缩放因子
 		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
@@ -159,13 +259,15 @@ Pass
 
 		vec3 CalculateDirect(const LightDirectParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
 		{
+            float shadow = CalculateDirectShadow(lightParam);
+
 			float diff = CalculateDiffuseScale(fragNormal, -lightParam.mNormal, cameraNormal);
 			float spec = CalculateSpecularScale(fragNormal, -lightParam.mNormal, cameraNormal);
 
 			vec3 ambient = lightParam.mAmbient * texture(material_.mDiffuse0, uv).rgb;
 			vec3 diffuse = lightParam.mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
 			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, uv).rgb * spec;
-			return ambient + diffuse + specular;
+			return ambient + (diffuse + specular) * shadow;
 		}
 
         vec3 CalculatePoint(const LightPointParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
