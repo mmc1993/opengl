@@ -59,12 +59,3 @@ private:
     AssetCache * _assetCache;
     ConfigCache * _configCache;
 };
-
-namespace mmc {
-    extern Event mEvent;
-    extern Timer mTimer;
-    extern Object mRoot;
-    extern Render mRender;
-	extern AssetCache mAssetCache;
-    extern ConfigCache mConfigCache;
-}

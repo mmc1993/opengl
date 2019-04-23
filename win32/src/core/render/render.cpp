@@ -494,17 +494,17 @@ void Render::Bind(CameraInfo * camera)
 {
 	if (camera != nullptr)
 	{
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, camera->mCamera->GetView());
-		mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, camera->mCamera->GetProj());
+		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
+		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
+		Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, camera->mCamera->GetView());
+		Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, camera->mCamera->GetProj());
 		glViewport((int)camera->mCamera->GetViewport().x, (int)camera->mCamera->GetViewport().y,
 				   (int)camera->mCamera->GetViewport().z, (int)camera->mCamera->GetViewport().w);
 	}
 	else
 	{
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
-		mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
+		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
+		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
 	}
 }
 

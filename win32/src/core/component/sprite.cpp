@@ -19,11 +19,11 @@ void Sprite::OnUpdate(float dt)
 {
 	RenderCommand command;
 	command.mCameraFlag			= GetOwner()->GetCameraFlag();
-	command.mTransform			= mmc::mRender.GetMatrix().GetM();
+	command.mTransform			= Global::Ref().RefRender().GetMatrix().GetM();
 	command.mMeshs				= _meshs.data();
 	command.mMaterials			= _mates.data();
 	command.mMeshNum			= _meshs.size();
-	mmc::mRender.PostCommand(_shader, command);
+	Global::Ref().RefRender().PostCommand(_shader, command);
 }
 
 void Sprite::BindShader(const std::string & url)

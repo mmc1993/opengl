@@ -53,7 +53,7 @@ private:
 			glm::vec3(14.9228725f, 11.5230131f, 10.9647131f),
 			glm::vec3(-5, 0, -5),
 			glm::vec3(-0.287246555f, 0.787977219f, -0.290789485f));
-		mmc::mRender.AddCamera(camera, Render::CameraInfo::kFLAG0, 0);
+		Global::Ref().RefRender().AddCamera(camera, Render::CameraInfo::kFLAG0, 0);
 	}
 
 	void InitAssets()
@@ -85,15 +85,15 @@ private:
 			}
 			return object;
 		};
-		createScene(modelScene, &mmc::mRoot);
+		createScene(modelScene, &Global::Ref().RefObject());
 	}
 
 	void InitEvents()
 	{
-		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
-		mmc::mEvent.Add(Window::EventType::kKEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
-		mmc::mEvent.Add(Window::EventType::kMOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
-		mmc::mEvent.Add(Window::EventType::kMOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
+		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
+		Global::Ref().RefEvent().Add(Window::EventType::kKEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
+		Global::Ref().RefEvent().Add(Window::EventType::kMOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
+		Global::Ref().RefEvent().Add(Window::EventType::kMOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
 	}
 
 	void InitLights()
@@ -123,7 +123,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(&Global::Ref().RefObject());
 			_lightDirects.push_back(light);
 		}
 
@@ -139,7 +139,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(&Global::Ref().RefObject());
 			_lightPoints.push_back(light);
 		}
 
@@ -158,7 +158,7 @@ private:
 			auto object = new Object();
 			object->AddComponent(light);
 			object->GetTransform()->Translate(data[0]);
-			object->SetParent(&mmc::mRoot);
+			object->SetParent(&Global::Ref().RefObject());
 			_lightSpots.push_back(light);
 		}
         //_lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
@@ -203,7 +203,7 @@ private:
 		}
 		else
 		{
-			auto camera = mmc::mRender.GetCamera(0);
+			auto camera = Global::Ref().RefRender().GetCamera(0);
 			auto cos = std::acos(glm::dot(glm::vec2(1, 0), glm::normalize(v)));
 			cos = v.y < 0 ? cos : -cos;
 
@@ -219,7 +219,7 @@ private:
 	
 	void OnTimerUpdate()
 	{
-		auto camera = mmc::mRender.GetCamera(0);
+		auto camera = Global::Ref().RefRender().GetCamera(0);
 		if (_axis.x != 0 || _axis.y != 0 || _axis.z != 0)
 		{
 			camera->SetEye(glm::quat(glm::angleAxis(_speed, _axis)) * camera->GetEye());
@@ -246,7 +246,7 @@ private:
 																 0 + std::sin(_spotCos) * 5);
 		_spotCos += 0.1f;
 
-		mmc::mTimer.Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
+		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 	
 private:
@@ -263,7 +263,7 @@ private:
 
 int main()
 {
-    //Global::Ref().Start();
+    Global::Ref().Start();
 
     AppWindow app;
     app.Create("xxx");
@@ -272,7 +272,7 @@ int main()
     app.SetFPS(60);
     app.Loop();
 
-    //Global::Ref().Start();
+    Global::Ref().Clean();
 
     return 0;
 }

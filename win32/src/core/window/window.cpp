@@ -128,17 +128,17 @@ void Window::Update()
         _renderInfo.renderTimeLast = lasttime;
 
 		glfwPollEvents();
-		mmc::mTimer.Update(lasttime);
-        mmc::mRoot.AsRootUpdate(dt);
-        mmc::mRender.RenderOnce();
+		Global::Ref().RefTimer().Update(lasttime);
+        Global::Ref().RefObject().AsRootUpdate(dt);
+        Global::Ref().RefRender().RenderOnce();
         glfwSwapBuffers(_window);
 
 		std::cout <<
 			SFormat("Error: {0} DT: {1} FPS: {2} RenderCount: {3} mVertexCount: {4}", 
 					glGetError(), dt,
                     _renderInfo.renderFPS,
-					mmc::mRender.GetRenderInfo().mRenderCount,
-					mmc::mRender.GetRenderInfo().mVertexCount)
+					Global::Ref().RefRender().GetRenderInfo().mRenderCount,
+					Global::Ref().RefRender().GetRenderInfo().mVertexCount)
 			<< std::endl;
     }
 }
@@ -149,7 +149,7 @@ void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
     param.act = act;
     param.btn = btn;
     param.stat = stat;
-    mmc::mEvent.Post(EventType::kMOUSE_BUTTON, param);
+    Global::Ref().RefEvent().Post(EventType::kMOUSE_BUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
@@ -157,7 +157,7 @@ void Window::OnCur(GLFWwindow * window, double x, double y)
     EventMouseParam param;
     param.x = static_cast<float>(x);
     param.y = static_cast<float>(y);
-    mmc::mEvent.Post(EventType::kMOUSE_MOVEED, param);
+    Global::Ref().RefEvent().Post(EventType::kMOUSE_MOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
@@ -166,7 +166,7 @@ void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
     param.key = key;
     param.act = act;
     param.stat = stat;
-    mmc::mEvent.Post(EventType::kKEYBOARD, param);
+    Global::Ref().RefEvent().Post(EventType::kKEYBOARD, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)

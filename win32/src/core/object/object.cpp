@@ -147,8 +147,8 @@ bool Object::IsActive() const
 
 void Object::Update(float dt)
 {
-	mmc::mRender.GetMatrix().Push(RenderMatrix::ModeType::kMODEL);
-	mmc::mRender.GetMatrix().Mul(RenderMatrix::ModeType::kMODEL, GetTransform()->GetMatrix());
+	Global::Ref().RefRender().GetMatrix().Push(RenderMatrix::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::ModeType::kMODEL, GetTransform()->GetMatrix());
 
 	OnUpdate(dt);
 
@@ -168,16 +168,16 @@ void Object::Update(float dt)
 		}
 	}
 
-	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }
 
 void Object::AsRootUpdate(float dt)
 {
-	mmc::mRender.GetMatrix().Identity(RenderMatrix::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::ModeType::kMODEL);
 	
 	Update(dt);
 
-	mmc::mRender.GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }
 
 void Object::SetParent(Object * parent)

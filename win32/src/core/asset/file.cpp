@@ -14,7 +14,7 @@
 
 Model * File::LoadModel(const std::string & url)
 {
-	CHECK_RET(!mmc::mAssetCache.IsReg(url), mmc::mAssetCache.Get<Model>(url));
+	CHECK_RET(!Global::Ref().RefAssetCache().IsReg(url), Global::Ref().RefAssetCache().Get<Model>(url));
 
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(url,
@@ -25,13 +25,13 @@ Model * File::LoadModel(const std::string & url)
 	ASSERT_RET(scene->mRootNode != nullptr, nullptr);
 	auto model = File::LoadModel(scene->mRootNode, scene, url.substr(0, 1 + url.find_last_of('/')));
 	ASSERT_RET(model != nullptr, nullptr);
-	mmc::mAssetCache.Reg(url, model);
+    Global::Ref().RefAssetCache().Reg(url, model);
 	return model;
 }
 
 Shader * File::LoadShader(const std::string & url)
 {
-	CHECK_RET(!mmc::mAssetCache.IsReg(url), mmc::mAssetCache.Get<Shader>(url));
+	CHECK_RET(!Global::Ref().RefAssetCache().IsReg(url), Global::Ref().RefAssetCache().Get<Shader>(url));
 
     std::ifstream ifile(url);
     ASSERT_RET(ifile, nullptr);
@@ -198,13 +198,13 @@ Shader * File::LoadShader(const std::string & url)
         }
     }
     ASSERT_LOG(!shader->IsEmpty(), "Empty Shader Pass");
-    mmc::mAssetCache.Reg(url, shader);
+    Global::Ref().RefAssetCache().Reg(url, shader);
     return shader;
 }
 
 Bitmap * File::LoadBitmap(const std::string & url)
 {
-	CHECK_RET(!mmc::mAssetCache.IsReg(url), mmc::mAssetCache.Get<Bitmap>(url));
+	CHECK_RET(!Global::Ref().RefAssetCache().IsReg(url), Global::Ref().RefAssetCache().Get<Bitmap>(url));
 	
 	auto w = 0, h = 0, c = 0, fmt = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
@@ -220,7 +220,7 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
 	bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-	mmc::mAssetCache.Reg(url, bitmap);
+	Global::Ref().RefAssetCache().Reg(url, bitmap);
 	stbi_image_free(buffer);
 	return bitmap;
 }
@@ -232,7 +232,7 @@ Texture File::LoadTexture(const std::string & url)
 
 BitmapCube * File::LoadBitmapCube(const std::string & url)
 {
-	CHECK_RET(!mmc::mAssetCache.IsReg(url), mmc::mAssetCache.Get<BitmapCube>(url));
+	CHECK_RET(!Global::Ref().RefAssetCache().IsReg(url), Global::Ref().RefAssetCache().Get<BitmapCube>(url));
 	std::vector<std::string> urls{
 		url + ".right.jpg",		url + ".left.jpg",
 		url + ".top.jpg",		url + ".bottom.jpg",
@@ -259,7 +259,7 @@ BitmapCube * File::LoadBitmapCube(const std::string & url)
 	bitmapCube->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	bitmapCube->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	bitmapCube->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	mmc::mAssetCache.Reg(url, bitmapCube);
+	Global::Ref().RefAssetCache().Reg(url, bitmapCube);
 	for (auto buffer : buffers)
 	{
 		stbi_image_free(const_cast<void *>(buffer));

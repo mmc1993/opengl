@@ -27,11 +27,11 @@ void Skybox::OnUpdate(float dt)
 {
 	RenderCommand command;
 	command.mCameraFlag		= GetOwner()->GetCameraFlag();
-	command.mTransform		= mmc::mRender.GetMatrix().GetM();
+	command.mTransform		= Global::Ref().RefRender().GetMatrix().GetM();
 	command.mMaterials		= &_material;
 	command.mMeshs			= &_meshCube;
 	command.mMeshNum		= 1;
-	mmc::mRender.PostCommand(_shader, command);
+	Global::Ref().RefRender().PostCommand(_shader, command);
 }
 
 void Skybox::BindShader(Shader * shader)

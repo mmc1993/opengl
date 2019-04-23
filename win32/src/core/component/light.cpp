@@ -114,12 +114,12 @@ void Light::ShadowMapPool::AllocPos3D()
 //  光源实现
 void Light::OnAdd()
 {
-	mmc::mRender.AddLight(this);
+	Global::Ref().RefRender().AddLight(this);
 }
 
 void Light::OnDel()
 {
-	mmc::mRender.DelLight(this);
+	Global::Ref().RefRender().DelLight(this);
 }
 
 void LightDirect::OpenShadow(
@@ -164,18 +164,18 @@ bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glViewport(0, 0, Light::s_VIEW_W, Light::s_VIEW_H);
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k2D_ARRAY, 
                            0, Light::s_shadowMapPool.GetTex2D(), _smp);
     }
     else
     {
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
     }
     return count == 0;
 }
@@ -198,8 +198,8 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
 {
     if (count != 0)
     {
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
     }
     else
     {
@@ -234,10 +234,10 @@ bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
                     std::get<0>(s_faceInfo[count]) + _pos,
                     std::get<1>(s_faceInfo[count]));
 
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k3D_ARRAY, 
                            count, Light::s_shadowMapPool.GetTex3D(), _smp);
@@ -286,18 +286,18 @@ bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
         glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition),        sizeof(UBOData::mPosition),     &_pos);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kVIEW);
-        mmc::mRender.GetMatrix().Identity(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kVIEW, view);
-        mmc::mRender.GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k2D_ARRAY, 
                            0, Light::s_shadowMapPool.GetTex2D(), _smp);
     }
     else
     {
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kPROJ);
-        mmc::mRender.GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
     }
     return count == 0;
 }

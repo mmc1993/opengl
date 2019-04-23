@@ -6,15 +6,6 @@
 #include "asset/asset_cache.h"
 #include "config/config_cache.h"
 
-namespace mmc {
-    Event mEvent;
-    Timer mTimer;
-    Object mRoot;
-    Render mRender;
-	AssetCache mAssetCache;
-    ConfigCache mConfigCache;
-}
-
 template <class T>
 void SafeDelete(T & ptr)
 {
