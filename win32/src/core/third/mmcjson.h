@@ -228,7 +228,7 @@ namespace mmc {
             std::copy(std::istream_iterator<char>(ifile),
                 std::istream_iterator<char>(),
                 std::back_inserter(buffer));
-            return FromValue(buffer);
+            return FromBuffer(buffer);
         }
 
         //  ·ÃÎÊº¯Êı

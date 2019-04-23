@@ -4,6 +4,7 @@
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../asset/asset_cache.h"
+#include "../config/config_cache.h"
 #include "../tools/glsl_tool.h"
 
 uint Light::s_VIEW_W = 0;
@@ -30,7 +31,7 @@ uint Light::ShadowMapPool::GetTex3D()
     return _tex3D;
 }
 
-uint Light::ShadowMapPool::GetPos2D()
+uint Light::ShadowMapPool::NewPos2D()
 {
     AllocPos2D();
 
@@ -39,7 +40,7 @@ uint Light::ShadowMapPool::GetPos2D()
     return top;
 }
 
-uint Light::ShadowMapPool::GetPos3D()
+uint Light::ShadowMapPool::NewPos3D()
 {
     AllocPos3D();
 
@@ -76,6 +77,8 @@ void Light::ShadowMapPool::AllocPos2D()
 {
     if (_tex2D == 0)
     {
+        s_VIEW_W = Global::Ref().RefConfigCache().At("init")->At("shadow_map", "w")->ToInt();
+        s_VIEW_H = Global::Ref().RefConfigCache().At("init")->At("shadow_map", "h")->ToInt();
         glGenTextures(1, &_tex2D);
     }
     if (_posStock2D.empty())
@@ -97,6 +100,8 @@ void Light::ShadowMapPool::AllocPos3D()
 {
     if (_tex3D == 0)
     {
+        s_VIEW_W = Global::Ref().RefConfigCache().At("init")->At("shadow_map", "w")->ToInt();
+        s_VIEW_H = Global::Ref().RefConfigCache().At("init")->At("shadow_map", "w")->ToInt();
         glGenTextures(1, &_tex3D);
     }
     if (_posStock3D.empty())

@@ -14,16 +14,14 @@ public:
 
     public:
         ShadowMapPool()
-            : _len2D(0)
-            , _len3D(0)
-            , _tex2D(0)
-            , _tex3D(0)
+            : _len2D(0) , _len3D(0)
+            , _tex2D(0) , _tex3D(0)
         {}
         void Clear();
         uint GetTex2D();
         uint GetTex3D();
-        uint GetPos2D();
-        uint GetPos3D();
+        uint NewPos2D();
+        uint NewPos3D();
         void FreePos2D(uint id);
         void FreePos3D(uint id);
 
@@ -32,20 +30,11 @@ public:
         void AllocPos3D();
 
     private:
+        uint _len2D, _len3D;
+        uint _tex2D, _tex3D;
         std::vector<uint> _posStock2D;
         std::vector<uint> _posStock3D;
-        uint _len2D;
-        uint _len3D;
-        uint _tex2D;
-        uint _tex3D;
     };
-
-public:
-    static void Init(uint texW, uint texH)
-    {
-        s_VIEW_W = texW;
-        s_VIEW_H = texH;
-    }
 
 protected:
     static uint s_VIEW_W;
@@ -63,9 +52,9 @@ public:
 	Light(Type type)
         : _type(type), _ubo(0)
     { 
-        _smp = _type == Type::kDIRECT? s_shadowMapPool.GetPos2D()
-             : _type == Type::kPOINT? s_shadowMapPool.GetPos3D()
-             : s_shadowMapPool.GetPos2D();
+        _smp = _type == Type::kDIRECT? s_shadowMapPool.NewPos2D()
+             : _type == Type::kPOINT? s_shadowMapPool.NewPos3D()
+             : s_shadowMapPool.NewPos2D();
     }
 
     virtual ~Light()

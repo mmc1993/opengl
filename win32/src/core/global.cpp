@@ -6,6 +6,9 @@
 #include "asset/asset_cache.h"
 #include "config/config_cache.h"
 
+//  配置根目录
+constexpr auto DIR_CONFIG_ROOT = "res/config";
+
 template <class T>
 void SafeDelete(T & ptr)
 {
@@ -35,12 +38,24 @@ void Global::Start()
         && _render == nullptr 
         && _assetCache == nullptr
         && _configCache == nullptr);
+    //  初始化 event
     _event = new Event();
+
+    //  初始化timer
     _timer = new Timer();
+
+    //  初始化object
     _object = new Object();
+
+    //  初始化render
     _render = new Render();
+
+    //  初始化assetCache
     _assetCache = new AssetCache();
+
+    //  初始化configCache
     _configCache = new ConfigCache();
+    _configCache->Init(DIR_CONFIG_ROOT);
 }
 
 void Global::Clean()

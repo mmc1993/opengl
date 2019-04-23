@@ -35,8 +35,6 @@ public:
 public:
     void InitGame()
     {
-        Light::Init(512, 512);
-
 		InitCamera();
 		InitAssets();
 		InitEvents();
@@ -265,11 +263,20 @@ int main()
 {
     Global::Ref().Start();
 
+    auto renderFPS = Global::Ref().RefConfigCache().At("init")->At("render", "fps")->ToInt();
+
+    auto windowX = Global::Ref().RefConfigCache().At("init")->At("window", "x")->ToInt();
+    auto windowY = Global::Ref().RefConfigCache().At("init")->At("window", "y")->ToInt();
+    auto windowW = Global::Ref().RefConfigCache().At("init")->At("window", "w")->ToInt();
+    auto windowH = Global::Ref().RefConfigCache().At("init")->At("window", "h")->ToInt();
+    auto windowTitle = Global::Ref().RefConfigCache().At("init")->At("window", "title")->ToString();
+
     AppWindow app;
-    app.Create("xxx");
-    app.Move(200, 100, 512, 512);
+    app.Create(windowTitle);
+    app.Move(windowX, windowY, 
+             windowW, windowH);
+    app.SetFPS(renderFPS);
     app.InitGame();
-    app.SetFPS(60);
     app.Loop();
 
     Global::Ref().Clean();
