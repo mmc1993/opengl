@@ -262,18 +262,9 @@ private:
 	float _pointCos;
 };
 
-void Start()
-{
-}
-
-void Clean()
-{
-
-}
-
 int main()
 {
-    Start();
+    Global::Ref().Start();
 
     AppWindow app;
     app.Create("xxx");
@@ -282,7 +273,7 @@ int main()
     app.SetFPS(60);
     app.Loop();
 
-    Clean();
+    Global::Ref().Start();
 
     return 0;
 }
