@@ -82,4 +82,31 @@ namespace string_tool {
         auto pos = std::distance(str0.begin(), it);
         return str0.compare(pos, len, str1, len) == 0;
     }
+
+    //  返回文件名 没后缀
+    inline std::string QueryFileName(const std::string & fname)
+    {
+        assert(std::string::npos == fname.find_first_of('\\'));
+        auto dot = fname.find_last_of('.');
+        auto pos = fname.find_last_of('/');
+        return fname.substr(pos + 1, dot - (pos + 1));
+    }
+
+    //  返回后缀名
+    inline std::string QueryFileSuffix(const std::string & fname)
+    {
+        assert(std::string::npos == fname.find_first_of('\\'));
+        auto pos = fname.find_last_of('.');
+        return pos != std::string::npos
+            ? fname.substr(pos + 1)
+            : std::string();
+    }
+
+    //  返回文件名 有后缀
+    inline std::string QueryFileFullName(const std::string & fname)
+    {
+        assert(std::string::npos == fname.find_first_of('\\'));
+        auto pos = fname.find_last_of('/');
+        return fname.substr(pos + 1);
+    }
 }

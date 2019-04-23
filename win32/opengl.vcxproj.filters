@@ -777,9 +777,6 @@
     <ClInclude Include="src\core\third\glfw3.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\third\json.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\third\sformat.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1063,6 +1060,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\type.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\json\mmcjson.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\config\config_cache.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\mmcjson.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

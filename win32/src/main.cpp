@@ -16,6 +16,8 @@
 #include "core/asset/file.h"
 #include "core/asset/asset_cache.h"
 #include "core/tools/string_tool.h"
+#include "core/config/config_cache.h"
+#include <filesystem>
 
 class AppWindow : public Window {
 public:
@@ -260,13 +262,27 @@ private:
 	float _pointCos;
 };
 
+void Start()
+{
+}
+
+void Clean()
+{
+
+}
+
 int main()
 {
+    Start();
+
     AppWindow app;
     app.Create("xxx");
     app.Move(200, 100, 512, 512);
     app.InitGame();
     app.SetFPS(60);
     app.Loop();
+
+    Clean();
+
     return 0;
 }

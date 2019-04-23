@@ -4,11 +4,13 @@
 #include "object/object.h"
 #include "render/render.h"
 #include "asset/asset_cache.h"
+#include "config/config_cache.h"
 
 namespace mmc {
     Event mEvent;
     Timer mTimer;
     Object mRoot;
     Render mRender;
-	AssetCache mAssetCore;
+	AssetCache mAssetCache;
+    ConfigCache mConfigCache;
 }

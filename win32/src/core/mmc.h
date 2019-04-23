@@ -5,11 +5,13 @@ class Timer;
 class Object;
 class Render;
 class AssetCache;
+class ConfigCache;
 
 namespace mmc {
     extern Event mEvent;
     extern Timer mTimer;
     extern Object mRoot;
     extern Render mRender;
-	extern AssetCache mAssetCore;
+	extern AssetCache mAssetCache;
+    extern ConfigCache mConfigCache;
 }
