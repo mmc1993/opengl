@@ -226,7 +226,7 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
 
     if (count < 6)
     {
-        static std::tuple<glm::vec3, glm::vec3> s_faceInfo[6] = {
+        static const std::tuple<glm::vec3, glm::vec3> s_faceInfo[6] = {
             { glm::vec3( 1,  0,  0), glm::vec3(0, -1,  0) },
             { glm::vec3(-1,  0,  0), glm::vec3(0, -1,  0) },
             { glm::vec3( 0,  1,  0), glm::vec3(0,  0,  1) },
