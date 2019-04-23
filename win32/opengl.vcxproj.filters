@@ -795,9 +795,6 @@
     <ClInclude Include="src\core\include.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\mmc.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\light.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1071,6 +1068,15 @@
     <ClInclude Include="src\core\third\mmcjson.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\tools\glsl_tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\base.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\asset\file.cpp">
@@ -1100,9 +1106,6 @@
     <ClCompile Include="src\core\window\window.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\mmc.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\light.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -1122,6 +1125,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\render_target.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\global.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
