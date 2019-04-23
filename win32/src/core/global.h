@@ -47,7 +47,7 @@ public:
 
     static Global & Ref()
     {
-        Global global;
+        static Global global;
         return global;
     }
 

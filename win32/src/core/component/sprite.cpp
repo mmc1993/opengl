@@ -1,5 +1,4 @@
 #include "sprite.h"
-#include "../mmc.h"
 #include "../asset/file.h"
 #include "../render/render.h"
 

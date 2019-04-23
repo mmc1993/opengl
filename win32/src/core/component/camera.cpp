@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "../mmc.h"
 
 Camera::Camera() : _change(true)
 { }

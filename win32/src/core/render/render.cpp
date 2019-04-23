@@ -1,5 +1,4 @@
 #include "render.h"
-#include "../mmc.h"
 #include "../asset/shader.h"
 #include "../asset/material.h"
 #include "../component/camera.h"

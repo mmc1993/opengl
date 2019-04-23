@@ -1,6 +1,5 @@
 #include "light.h"
 #include "transform.h"
-#include "../mmc.h"
 #include "../asset/file.h"
 #include "../asset/shader.h"
 #include "../render/render.h"

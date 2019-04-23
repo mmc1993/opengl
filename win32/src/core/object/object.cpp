@@ -1,5 +1,4 @@
 #include "object.h"
-#include "../mmc.h"
 #include "../asset/shader.h"
 #include "../render/render.h"
 #include "../component/component.h"

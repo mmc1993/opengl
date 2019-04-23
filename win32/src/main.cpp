@@ -1,4 +1,3 @@
-#include "core/mmc.h"
 #include "core/timer/timer.h"
 #include "core/event/event.h"
 #include "core/window/window.h"
@@ -264,7 +263,7 @@ private:
 
 int main()
 {
-    Global::Ref().Start();
+    //Global::Ref().Start();
 
     AppWindow app;
     app.Create("xxx");
@@ -273,7 +272,7 @@ int main()
     app.SetFPS(60);
     app.Loop();
 
-    Global::Ref().Start();
+    //Global::Ref().Start();
 
     return 0;
 }

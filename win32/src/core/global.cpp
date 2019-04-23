@@ -1,4 +1,4 @@
-#include "mmc.h"
+#include "global.h"
 #include "event/event.h"
 #include "timer/timer.h"
 #include "object/object.h"
