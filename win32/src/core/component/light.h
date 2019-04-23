@@ -10,7 +10,7 @@ class Light : public Component {
 public:
     class ShadowMapPool {
     public:
-        static const size_t s_LEN_STEP = 0x8;
+        static const uint s_LEN_STEP = 0x8;
 
     public:
         ShadowMapPool()
@@ -34,8 +34,8 @@ public:
     private:
         std::vector<uint> _posStock2D;
         std::vector<uint> _posStock3D;
-        size_t _len2D;
-        size_t _len3D;
+        uint _len2D;
+        uint _len3D;
         uint _tex2D;
         uint _tex3D;
     };
@@ -82,7 +82,7 @@ public:
 	virtual void OnAdd();
 	virtual void OnDel();
 	virtual void OnUpdate(float dt) { }
-    virtual bool NextDrawShadow(size_t count, RenderTarget * rt) = 0;
+    virtual bool NextDrawShadow(uint count, RenderTarget * rt) = 0;
 
     static uint GetShadowMap2D() { return s_shadowMapPool.GetTex2D(); }
     static uint GetShadowMap3D() { return s_shadowMapPool.GetTex3D(); }
@@ -136,7 +136,7 @@ public:
 					const glm::vec2 & orthoY,	//	上下
 					const glm::vec2 & orthoZ);	//	前后
 
-	virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
+	virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
 
 public:
     glm::vec3 mNormal;
@@ -163,7 +163,7 @@ public:
 
 	void OpenShadow(const float n, const float f);
 
-    virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
+    virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
 
 public:
 	float mK0, mK1, mK2;
@@ -193,7 +193,7 @@ public:
 
 	void OpenShadow(const float n, const float f);
 
-    virtual bool NextDrawShadow(size_t count, RenderTarget * rt) override;
+    virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
 
 public:
 	glm::vec3 mNormal;

@@ -22,7 +22,7 @@ void Sprite::OnUpdate(float dt)
 	command.mTransform			= Global::Ref().RefRender().GetMatrix().GetM();
 	command.mMeshs				= _meshs.data();
 	command.mMaterials			= _mates.data();
-	command.mMeshNum			= _meshs.size();
+	command.mMeshNum			= static_cast<uint>(_meshs.size());
 	Global::Ref().RefRender().PostCommand(_shader, command);
 }
 

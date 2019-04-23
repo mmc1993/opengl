@@ -6,8 +6,8 @@ namespace string_tool {
 	
 	inline std::string Join(const std::vector<std::string> & vec, const std::string & str)
 	{
-		std::string ret;
-		auto count = 0;
+		std::string  ret;
+		size_t count = 0;
 		if (vec.empty()) { return std::move(ret); }
 		for (auto & s : vec) { count += s.size(); }
 		

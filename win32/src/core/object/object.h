@@ -11,13 +11,13 @@ public:
     virtual ~Object();
     virtual void OnUpdate(float dt);
 
-    void AddChild(Object * child, size_t tag = (size_t)-1);
+    void AddChild(Object * child, uint tag = ~0);
     void DelChild(Object * child);
-    void DelChildIdx(size_t idx);
-    void DelChildTag(size_t tag);
+    void DelChildIdx(uint idx);
+    void DelChildTag(uint tag);
 	void DelThis();
-    Object * GetChildTag(size_t tag);
-    Object * GetChildIdx(size_t idx);
+	Object * GetChildIdx(uint idx);    
+	Object * GetChildTag(uint tag);
     std::vector<Object *> & GetChilds();
 
 	void DelComponentAll();
@@ -52,13 +52,13 @@ public:
 
     Transform * GetTransform();
 
-    void SetCameraFlag(size_t flag);
-    size_t GetCameraFlag() const;
+    void SetCameraFlag(uint flag);
+    uint GetCameraFlag() const;
 
     void SetActive(bool active);
     bool IsActive() const;
 
-    void AsRootUpdate(float dt);
+    void RootUpdate(float dt);
     void Update(float dt);
 
     void SetParent(Object * parent);
@@ -69,10 +69,10 @@ protected:
     void DelChild(Object * child, bool del);
 
 private:
-    size_t _tag;
+    uint _tag;
     bool _active;
+	uint _cameraFlag;
     Object * _parent;
-	size_t _cameraFlag;
 	Transform * _transform;
     std::vector<Object *> _childs;
     std::vector<Component *> _components;

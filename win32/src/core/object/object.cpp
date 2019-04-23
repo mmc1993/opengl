@@ -5,7 +5,7 @@
 #include "../component/transform.h"
 
 Object::Object()
-    : _tag((size_t)-1)
+    : _tag(~0)
 	, _parent(nullptr)
 	, _active(true)
 	, _cameraFlag(1)
@@ -28,7 +28,7 @@ void Object::OnUpdate(float dt)
 {
 }
 
-void Object::AddChild(Object * child, size_t tag)
+void Object::AddChild(Object * child, uint tag)
 {
     child->_tag = tag;
     child->_parent = this;
@@ -40,12 +40,12 @@ void Object::DelChild(Object * child)
     DelChild(child, true);
 }
 
-void Object::DelChildIdx(size_t idx)
+void Object::DelChildIdx(uint idx)
 {
     DelChild(idx, true);
 }
 
-void Object::DelChildTag(size_t tag)
+void Object::DelChildTag(uint tag)
 {
     auto it = std::find_if(_childs.begin(), _childs.end(), 
         [tag](Object * child) { return child->_tag == tag; });
@@ -67,14 +67,14 @@ void Object::DelThis()
 	}
 }
 
-Object * Object::GetChildTag(size_t tag)
+Object * Object::GetChildTag(uint tag)
 {
     auto it = std::find_if(_childs.begin(), _childs.end(),
         [tag](Object * child) { return child->_tag == tag; });
     return it != _childs.end() ? *it : nullptr;
 }
 
-Object * Object::GetChildIdx(size_t idx)
+Object * Object::GetChildIdx(uint idx)
 {
     assert(idx < _childs.size());
     return *std::next(_childs.begin(), idx);
@@ -125,12 +125,12 @@ Transform * Object::GetTransform()
     return _transform;
 }
 
-size_t Object::GetCameraFlag() const
+uint Object::GetCameraFlag() const
 {
     return _cameraFlag;
 }
 
-void Object::SetCameraFlag(size_t flag)
+void Object::SetCameraFlag(uint flag)
 {
     _cameraFlag = flag;
 }
@@ -171,7 +171,7 @@ void Object::Update(float dt)
 	Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::ModeType::kMODEL);
 }
 
-void Object::AsRootUpdate(float dt)
+void Object::RootUpdate(float dt)
 {
 	Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::ModeType::kMODEL);
 	

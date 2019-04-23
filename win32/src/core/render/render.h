@@ -21,9 +21,9 @@ public:
     };
 
 	struct RenderInfo {
-		size_t mVertexCount;
-		size_t mRenderCount;
-        size_t mTexBase;
+		uint mVertexCount;
+		uint mRenderCount;
+        uint mTexBase;
         const RenderPass * mPass;
 		RenderInfo()
             : mPass(nullptr)

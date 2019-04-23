@@ -294,9 +294,9 @@ void Render::PackUBOLightForward()
     uint8_t directNum = 0;
     uint8_t pointNum = 0;
     uint8_t spotNum = 0;
-    size_t directBase = 0;
-    size_t pointBase = 0;
-    size_t spotBase = 0;
+    uint directBase = 0;
+    uint pointBase = 0;
+    uint spotBase = 0;
     for (auto & light : _lights)
     {
         if (light->GetType() == Light::Type::kDIRECT && directNum++ >= LIMIT_FORWARD_LIGHT_DIRECT ||

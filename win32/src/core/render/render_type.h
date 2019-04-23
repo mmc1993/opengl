@@ -197,7 +197,7 @@ struct RenderMesh {
 
 	uint mVAO, mVBO, mEBO;
 	
-	size_t mVtxCount, mIdxCount;
+	uint mVtxCount, mIdxCount;
 
 	RenderMesh() 
 		: mVAO(0), mVBO(0), mEBO(0)
@@ -209,7 +209,7 @@ struct RenderMesh {
 	static RenderMesh Create(const std::vector<Vertex> & vertexs)
 	{
 		RenderMesh mesh;
-		mesh.mVtxCount = vertexs.size();
+		mesh.mVtxCount = static_cast<uint>(vertexs.size());
 		glGenVertexArrays(1, &mesh.mVAO);
 		glBindVertexArray(mesh.mVAO);
 
@@ -237,8 +237,8 @@ struct RenderMesh {
 	static RenderMesh Create(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
-		mesh.mIdxCount = indexs.size();
-		mesh.mVtxCount = vertexs.size();
+		mesh.mIdxCount = static_cast<uint>(indexs.size());
+		mesh.mVtxCount = static_cast<uint>(vertexs.size());
 		glGenVertexArrays(1, &mesh.mVAO);
 		glBindVertexArray(mesh.mVAO);
 
@@ -270,8 +270,8 @@ struct RenderMesh {
 	static RenderMesh CreateVTN(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
-		mesh.mIdxCount = indexs.size();
-		mesh.mVtxCount = vertexs.size();
+		mesh.mIdxCount = static_cast<uint>(indexs.size());
+		mesh.mVtxCount = static_cast<uint>(vertexs.size());
 		glGenVertexArrays(1, &mesh.mVAO);
 		glBindVertexArray(mesh.mVAO);
 
@@ -299,8 +299,8 @@ struct RenderMesh {
 	static RenderMesh CreateVT(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
-		mesh.mIdxCount = indexs.size();
-		mesh.mVtxCount = vertexs.size();
+		mesh.mIdxCount = static_cast<uint>(indexs.size());
+		mesh.mVtxCount = static_cast<uint>(vertexs.size());
 		glGenVertexArrays(1, &mesh.mVAO);
 		glBindVertexArray(mesh.mVAO);
 
@@ -326,8 +326,8 @@ struct RenderMesh {
 	static RenderMesh CreateV(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		RenderMesh mesh;
-		mesh.mIdxCount = indexs.size();
-		mesh.mVtxCount = vertexs.size();
+		mesh.mIdxCount = static_cast<uint>(indexs.size());
+		mesh.mVtxCount = static_cast<uint>(vertexs.size());
 		glGenVertexArrays(1, &mesh.mVAO);
 		glBindVertexArray(mesh.mVAO);
 
@@ -391,10 +391,10 @@ struct RenderPass {
 struct RenderCommand {
     const RenderPass *  mPass;          //  绑定的Shader
     const RenderMesh *  mMeshs;         //  绑定的网格
-	size_t              mMeshNum;       //  绑定的网格数量
+	uint                mMeshNum;       //  绑定的网格数量
 	const Material *    mMaterials;     //  绑定的材质(材质与网格数量必须一致)
 	glm::mat4           mTransform;     //  绑定的变换矩阵
-    size_t              mCameraFlag;    //  绑定的相机标识
+    uint                mCameraFlag;    //  绑定的相机标识
 };
 
 using RenderQueue = std::vector<RenderCommand>;

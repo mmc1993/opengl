@@ -140,7 +140,7 @@ void LightDirect::OpenShadow(
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-bool LightDirect::NextDrawShadow(size_t count, RenderTarget * rt)
+bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (0 == count)
     {
@@ -194,7 +194,7 @@ void LightPoint::OpenShadow(const float n, const float f)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-bool LightPoint::NextDrawShadow(size_t count, RenderTarget * rt)
+bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (count != 0)
     {
@@ -259,7 +259,7 @@ void LightSpot::OpenShadow(const float n, const float f)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-bool LightSpot::NextDrawShadow(size_t count, RenderTarget * rt)
+bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (count == 0)
     {
