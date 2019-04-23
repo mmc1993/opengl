@@ -128,8 +128,9 @@ void Window::Update()
         _renderInfo.renderTimeLast = lasttime;
 
 		glfwPollEvents();
+        
 		Global::Ref().RefTimer().Update(lasttime);
-        Global::Ref().RefObject().AsRootUpdate(dt);
+        Global::Ref().RefObject().RootUpdate(dt);
         Global::Ref().RefRender().RenderOnce();
         glfwSwapBuffers(_window);
 
