@@ -239,9 +239,9 @@ private:
 		//														  3 + std::sin(_pointCos) * 3);
 		//_pointCos += 0.1f;
 
-		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-		//														 8,
-		//														 0 + std::sin(_spotCos) * 5);
+		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
+																 8,
+																 0 + std::sin(_spotCos) * 5);
 		_spotCos += 0.1f;
 
 		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
