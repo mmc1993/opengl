@@ -33,6 +33,7 @@ Pass
 		} v_out_;
 
         uniform int light_type_;
+		uniform vec3 light_point_pos_;
 
         #define LIGHT_TYPE_DIRECT_ 0
         #define LIGHT_TYPE_POINT_ 1
@@ -48,6 +49,7 @@ Pass
                 break;
             case LIGHT_TYPE_POINT_:
                 {
+					// gl_FragDepth = 0.5;
                 }
                 break;
             case LIGHT_TYPE_SPOT_:
@@ -250,6 +252,14 @@ Pass
             return shadow / 9.0f;
 		}
 
+		float CalculatePointShadow(const LightPointParam_ lightParam)
+		{
+			vec3 diff = v_out_.mMPos - lightParam.mPosition;
+			vec4 pos = vec4(normalize(diff), lightParam.mSMP);
+			float depth = texture(shadow_map_3d_, pos).r;
+			return length(diff) > depth? 0: 1;
+		}
+
 		//	计算漫反射缩放因子
 		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
 		{
@@ -292,6 +302,8 @@ Pass
 
         vec3 CalculatePoint(const LightPointParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
         {
+			float shadow = CalculatePointShadow(lightParam);
+
             vec3 fragToLight = normalize(lightParam.mPosition - v_out_.mMPos);
 
 			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
@@ -302,13 +314,11 @@ Pass
 			vec3 specular = lightParam.mSpecular * texture(material_.mSpecular, uv).rgb * spec;
 
 			//	距离衰减
-			float distance = CalculateDistanceScale(v_out_.mMPos, 
-                                                    lightParam.mPosition, 
-                                                    lightParam.mK0, 
-                                                    lightParam.mK1, 
-                                                    lightParam.mK2);
+			float distance = CalculateDistanceScale(v_out_.mMPos, lightParam.mPosition, lightParam.mK0, 
+																						lightParam.mK1,
+																						lightParam.mK2);
 
-			return (ambient + diffuse + specular) * distance;
+			return (ambient + (diffuse + specular) * shadow) * distance;
         }
 
 		vec3 CalculateSpot(const LightSpotParam_ lightParam, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
@@ -352,10 +362,10 @@ Pass
 				outColor += CalculateDirect(light_direct_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
 			}
 
-            // for (int i = 0; i != light_count_point_; ++i)
-            // {
-            //     outColor += CalculatePoint(light_point_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
-            // }
+            for (int i = 0; i != light_count_point_; ++i)
+            {
+                outColor += CalculatePoint(light_point_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
+            }
 
 			for (int i = 0; i != light_count_spot_; ++i)
 			{
