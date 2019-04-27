@@ -210,7 +210,6 @@ Pass
         {
             vec4 pos = lightParam.mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
-
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
 			float zorder 	= pos.z;
 			pos.z = lightParam.mSMP;
@@ -233,7 +232,6 @@ Pass
 		{
 			vec4 pos = lightParam.mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
-
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
 			float zorder 	= pos.z;
 			pos.z = lightParam.mSMP;
@@ -354,10 +352,10 @@ Pass
 				outColor += CalculateDirect(light_direct_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
 			}
 
-            for (int i = 0; i != light_count_point_; ++i)
-            {
-                outColor += CalculatePoint(light_point_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
-            }
+            // for (int i = 0; i != light_count_point_; ++i)
+            // {
+            //     outColor += CalculatePoint(light_point_.mParam[i], fragNormal, cameraNormal, v_out_.mUV);
+            // }
 
 			for (int i = 0; i != light_count_spot_; ++i)
 			{

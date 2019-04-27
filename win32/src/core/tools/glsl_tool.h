@@ -53,4 +53,12 @@ namespace glsl_tool {
         constexpr auto size = UBOTypeSize<T>();
         return UBOOffsetBase<T>(base) + size;
     }
+
+    template <class T>
+    constexpr uint UBOAddData(uint base, const T & v)
+    {
+        base = UBOOffsetBase<T>(base);
+        glBufferSubData(GL_UNIFORM_BUFFER, base, sizeof(T), &v);
+        return UBOOffsetFill<T>(base);
+    }
 }

@@ -52,7 +52,7 @@ public:
 	Light(Type type)
         : _type(type), _ubo(0)
     { 
-        _smp = _type == Type::kDIRECT? s_shadowMapPool.NewPos2D()
+        mSMP = _type == Type::kDIRECT? s_shadowMapPool.NewPos2D()
              : _type == Type::kPOINT? s_shadowMapPool.NewPos3D()
              : s_shadowMapPool.NewPos2D();
     }
@@ -61,9 +61,9 @@ public:
     {
         switch (_type)
         {
-        case Light::kDIRECT: { s_shadowMapPool.FreePos2D(_smp); } break;
-        case Light::kPOINT: { s_shadowMapPool.FreePos3D(_smp); } break;
-        case Light::kSPOT: { s_shadowMapPool.FreePos2D(_smp); } break;
+        case Light::kDIRECT: { s_shadowMapPool.FreePos2D(mSMP); } break;
+        case Light::kPOINT: { s_shadowMapPool.FreePos3D(mSMP); } break;
+        case Light::kSPOT: { s_shadowMapPool.FreePos2D(mSMP); } break;
         }
         glDeleteBuffers(1, &_ubo);
     }
@@ -75,28 +75,22 @@ public:
 
     static uint GetShadowMap2D() { return s_shadowMapPool.GetTex2D(); }
     static uint GetShadowMap3D() { return s_shadowMapPool.GetTex3D(); }
-    const glm::vec3 & GetWorldPos() const { return _pos; }
-    const glm::mat4 & GetMatrix() const {return _matrix; }
-    const uint & GetUniformBlock() const { return _ubo; }
-    const uint & GetShadowMapPos() const { return _smp; }
     const Type & GetType() const { return _type; }
+    const uint & GetUBO() const { return _ubo; }
 
 public:
-	glm::vec3 mAmbient;
+    glm::uint mSMP;
+    glm::mat4 mMatrix;
+    glm::vec3 mAmbient;
 	glm::vec3 mDiffuse;
 	glm::vec3 mSpecular;
+    glm::vec3 mPosition;
 
 protected:
     //  UBO
     uint _ubo;
-    //  Shadow Map Pos
-    uint _smp;
-    //  光源世界坐标
-    glm::vec3 _pos;
     //  光源投影矩阵
     glm::mat4 _proj;
-    //  光源视图矩阵
-    glm::mat4 _matrix;
 private:
 	Type _type;
 };
@@ -113,6 +107,8 @@ public:
         glm::vec3 mSpecular;
         glm::vec3 mPosition;
     };
+
+    static uint GetUBOLength();
 
 public:
 	LightDirect(): Light(Light::kDIRECT)
@@ -143,6 +139,8 @@ public:
         glm::vec3 mPosition;
     };
 
+    static uint GetUBOLength();
+
 public:
 	LightPoint(): Light(Light::kPOINT)
 	{ }
@@ -172,6 +170,8 @@ public:
         glm::vec3 mSpecular;
         glm::vec3 mPosition;
     };
+
+    static uint GetUBOLength();
 
 public:
 	LightSpot(): Light(Light::kSPOT)
