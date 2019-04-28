@@ -148,8 +148,7 @@ void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, u
         break;
     case RenderTarget::k3D_ARRAY:
         {
-            glFramebufferTexture2D(bindType, attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture, 0);
-            //glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos * 6 + face);
+            glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos * 6 + face);
         }
         break;
     }

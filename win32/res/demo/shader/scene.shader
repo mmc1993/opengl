@@ -177,8 +177,7 @@ Pass
 			LightSpotParam_ mParam[4];
 		} light_spot_;
 
-        uniform samplerCube shadow_map_3d_;
-        // uniform samplerCubeArray shadow_map_3d_;
+        uniform samplerCubeArray shadow_map_3d_;
         uniform sampler2DArray shadow_map_2d_;
 		uniform int light_count_direct_;
         uniform int light_count_point_;
@@ -267,8 +266,8 @@ Pass
 		float CalculatePointShadow(const LightPointParam_ lightParam)
 		{
 			vec3 normal = v_out_.mMPos - lightParam.mPosition;
-			// vec4 pos 	= vec4(normal, lightParam.mSMP);
-			float z 	= texture(shadow_map_3d_, normal).r;
+			vec4 pos 	= vec4(normal, lightParam.mSMP);
+			float z 	= texture(shadow_map_3d_, pos).r;
 			return length(normal) > z * lightParam.mFar? 0: 1;
 		}
 
