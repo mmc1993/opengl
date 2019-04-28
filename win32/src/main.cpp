@@ -160,7 +160,7 @@ private:
 			_lightSpots.push_back(light);
 		}
         //_lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
-		_lightPoints.at(0)->OpenShadow(1, 10);
+		_lightPoints.at(0)->OpenShadow(1, 100);
         //_lightSpots.at(0)->OpenShadow(0.01f, 1000);
 	}
 
@@ -234,10 +234,10 @@ private:
 			camera->SetPos(pos);
 		}
 
-		_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
-																  8 + std::cos(_pointCos) * 3, 
-																  3 + std::sin(_pointCos) * 3);
-		_pointCos += 0.001f;
+		//_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
+		//														  8 + std::cos(_pointCos) * 3, 
+		//														  3 + std::sin(_pointCos) * 3);
+		//_pointCos += 0.001f;
 
 		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
 		//														 8,

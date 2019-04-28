@@ -64,8 +64,12 @@ void Shader::SetUniformTexArray2D(uint GLID, const std::string & key, const uint
 void Shader::SetUniformTexArray3D(uint GLID, const std::string & key, const uint tex, iint pos)
 {
     glActiveTexture(GL_TEXTURE0 + pos);
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, tex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
     glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+
+    //glActiveTexture(GL_TEXTURE0 + pos);
+    //glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, tex);
+    //glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
 }
 
 Shader::~Shader()
