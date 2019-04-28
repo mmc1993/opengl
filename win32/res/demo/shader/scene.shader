@@ -28,12 +28,21 @@ Pass
 	Fragment
 		#version 410 core
 
+        layout (std140) uniform LightPoint_ {
+            int mSMP;
+			float mNear, mFar;
+            float mK0, mK1, mK2;
+            vec3 mAmbient;
+            vec3 mDiffuse;
+            vec3 mSpecular;
+            vec3 mPosition;
+        } light_point_;
+
 		in V_OUT_{
 			vec3 mMPos;
 		} v_out_;
 
         uniform int light_type_;
-		uniform vec3 light_point_pos_;
 
         #define LIGHT_TYPE_DIRECT_ 0
         #define LIGHT_TYPE_POINT_ 1
@@ -49,7 +58,8 @@ Pass
                 break;
             case LIGHT_TYPE_POINT_:
                 {
-					// gl_FragDepth = 0.5;
+					vec3 normal = v_out_.mMPos - light_point_.mPosition;
+					gl_FragDepth = length(normal) / light_point_.mFar;
                 }
                 break;
             case LIGHT_TYPE_SPOT_:
@@ -132,6 +142,7 @@ Pass
 
         struct LightPointParam_ {
             int mSMP;
+			float mNear, mFar;
             float mK0, mK1, mK2;
             vec3 mAmbient;
             vec3 mDiffuse;
@@ -254,10 +265,10 @@ Pass
 
 		float CalculatePointShadow(const LightPointParam_ lightParam)
 		{
-			vec3 diff = v_out_.mMPos - lightParam.mPosition;
-			vec4 pos = vec4(normalize(diff), lightParam.mSMP);
-			float depth = texture(shadow_map_3d_, pos).r;
-			return length(diff) > depth? 0: 1;
+			vec3 normal = v_out_.mMPos - lightParam.mPosition;
+			vec4 pos 	= vec4(normal, lightParam.mSMP);
+			float z 	= texture(shadow_map_3d_, pos).r;
+			return length(normal) > z * lightParam.mFar? 0: 1;
 		}
 
 		//	计算漫反射缩放因子

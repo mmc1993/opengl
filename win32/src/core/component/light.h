@@ -55,6 +55,7 @@ public:
         mSMP = _type == Type::kDIRECT? s_shadowMapPool.NewPos2D()
              : _type == Type::kPOINT? s_shadowMapPool.NewPos3D()
              : s_shadowMapPool.NewPos2D();
+        glGenBuffers(1, &_ubo);
     }
 
     virtual ~Light()
@@ -132,6 +133,7 @@ public:
     //  这个结构定义仅仅起到说明作用, 该结构对应Shader里的定义
     struct UBOData {
         uint mSMP;
+        float mNear, mFar;
         float mK0, mK1, mK2;
         glm::vec3 mAmbient;
         glm::vec3 mDiffuse;
@@ -153,7 +155,8 @@ public:
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
 
 public:
-	float mK0, mK1, mK2;
+    float mNear, mFar;
+    float mK0, mK1, mK2;
 };
 
 class LightSpot : public Light {

@@ -40,12 +40,6 @@ static const char * const UBO_NAME_LIGHT_DIRECT = "LightDirect_";
 static const char * const UBO_NAME_LIGHT_POINT = "LightPoint_";
 //  UBO 聚光灯数据
 static const char * const UBO_NAME_LIGHT_SPOT = "LightSpot_";
-//  UBO 方向光数组数据
-static const char * const UBO_NAME_LIGHT_DIRECT_ARRAY = "light_direct{0}_";
-//  UBO 点光源数组数据
-static const char * const UBO_NAME_LIGHT_POINT_ARRAY = "light_point{0}_";
-//  UBO 聚光灯数组数据
-static const char * const UBO_NAME_LIGHT_SPOT_ARRAY = "light_spot{0}_";
 
 //  光源位置
 static const char * const UNIFORM_LIGHT_POS = "light_pos_";

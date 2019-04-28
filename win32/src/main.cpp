@@ -35,8 +35,6 @@ public:
 public:
     void InitGame()
     {
-        glEnable(GL_TEXTURE_CUBE_MAP);
-        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		InitCamera();
 		InitAssets();
 		InitEvents();
@@ -162,7 +160,7 @@ private:
 			_lightSpots.push_back(light);
 		}
         //_lightDirects.at(0)->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
-		_lightPoints.at(0)->OpenShadow(0.01f, 1000);
+		_lightPoints.at(0)->OpenShadow(1, 10);
         //_lightSpots.at(0)->OpenShadow(0.01f, 1000);
 	}
 

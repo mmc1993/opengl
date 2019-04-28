@@ -149,17 +149,11 @@ void LightDirect::OpenShadow(
 	const glm::vec2 & orthoY,
 	const glm::vec2 & orthoZ)
 {
-    _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
-
-    //  环境光, 漫反射, 镜面反射, 法线, 矩阵
-    if (_ubo == 0) 
-    {
-        glGenBuffers(1, &_ubo);
-    }
-    //  TODO 计算正确UBO大小
     glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
 }
 
 bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
@@ -167,7 +161,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
     if (0 == count)
     {
         mPosition   = GetOwner()->GetTransform()->GetWorldPosition();
-        auto up     = mNormal.y > 0.999f 
+        auto up     = std::abs(mNormal.y) > 0.999f
                     ? glm::vec3(0, 0, 1) 
                     : glm::vec3(0, 1, 0);
         auto right  = glm::cross(up, mNormal);
@@ -176,13 +170,13 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         mMatrix     = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSMP),             sizeof(UBOData::mSMP),          &mSMP);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mMatrix),          sizeof(UBOData::mMatrix),       &mMatrix);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mNormal),          sizeof(UBOData::mNormal),       &mNormal);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient),         sizeof(UBOData::mAmbient),      &mAmbient);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse),         sizeof(UBOData::mDiffuse),      &mDiffuse);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular),        sizeof(UBOData::mSpecular),     &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition),        sizeof(UBOData::mSpecular),     &mPosition);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(base, mMatrix);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glViewport(0, 0, Light::s_VIEW_W, Light::s_VIEW_H);
@@ -190,8 +184,8 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
         Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
         Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
-                           RenderTarget::TextureType::k2D_ARRAY, 
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
+                           RenderTarget::TextureType::k2D_ARRAY,
                            0, Light::s_shadowMapPool.GetTex2D(), mSMP);
     }
     else
@@ -205,6 +199,8 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 uint LightPoint::GetUBOLength()
 {
     auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0u);
+    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNear)>(base);
+    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mFar)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK1)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK2)>(base);
@@ -217,16 +213,13 @@ uint LightPoint::GetUBOLength()
 
 void LightPoint::OpenShadow(const float n, const float f)
 {
-	_proj = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_W, n, f);
-
-    //  光线衰减系数k0, k1, k2, 环境光, 漫反射, 镜面反射, 世界坐标
-    if (_ubo == 0) 
-    { 
-        glGenBuffers(1, &_ubo); 
-    }
     glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    auto wdivh = (float)Light::s_VIEW_W / (float)Light::s_VIEW_W;
+	_proj = glm::perspective(glm::radians(90.0f), wdivh, n, f);
+    mFar = f; mNear = n;
 }
 
 bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
@@ -243,14 +236,16 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
         mPosition = GetOwner()->GetTransform()->GetWorldPosition();
 
         glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSMP),             sizeof(UBOData::mSMP),          &mSMP);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0),              sizeof(UBOData::mK0),           &mK0);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK1),              sizeof(UBOData::mK1),           &mK1);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK2),              sizeof(UBOData::mK1),           &mK2);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient),         sizeof(UBOData::mAmbient),      &mAmbient);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse),         sizeof(UBOData::mDiffuse),      &mDiffuse);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular),        sizeof(UBOData::mSpecular),     &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition),        sizeof(UBOData::mPosition),     &mPosition);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(base, mFar);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mNear)>(base, mNear);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -299,16 +294,12 @@ uint LightSpot::GetUBOLength()
 
 void LightSpot::OpenShadow(const float n, const float f)
 {
-    _proj = glm::perspective(glm::radians(90.0f), (float)Light::s_VIEW_W / (float)Light::s_VIEW_H, n, f);
-
-    //  光线衰减系数k0, k1, k2, 内锥, 外锥, 环境光, 漫反射, 镜面反射, 世界坐标
-    if (_ubo == 0)
-    {
-        glGenBuffers(1, &_ubo);
-    }
     glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    auto wdivh = (float)Light::s_VIEW_W / (float)Light::s_VIEW_H;
+    _proj = glm::perspective(glm::radians(90.0f), wdivh, n, f);
 }
 
 bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
@@ -325,17 +316,18 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         mMatrix     = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSMP),             sizeof(UBOData::mSMP),          &mSMP);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK0),              sizeof(UBOData::mK0),           &mK0);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK1),              sizeof(UBOData::mK1),           &mK1);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mK2),              sizeof(UBOData::mK1),           &mK2);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mInCone),          sizeof(UBOData::mInCone),       &mInCone);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mOutCone),         sizeof(UBOData::mOutCone),      &mOutCone);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mMatrix),          sizeof(UBOData::mMatrix),       &mMatrix);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mAmbient),         sizeof(UBOData::mAmbient),      &mAmbient);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mDiffuse),         sizeof(UBOData::mDiffuse),      &mDiffuse);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mSpecular),        sizeof(UBOData::mSpecular),     &mSpecular);
-        glBufferSubData(GL_UNIFORM_BUFFER, offsetof(UBOData, mPosition),        sizeof(UBOData::mPosition),     &mPosition);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mInCone)>(base, mInCone);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mOutCone)>(base, mOutCone);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(base, mMatrix);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
