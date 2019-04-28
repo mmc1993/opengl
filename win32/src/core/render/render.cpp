@@ -291,8 +291,8 @@ void Render::PackUBOLightForward()
                 auto point = reinterpret_cast<LightPoint *>(light);
                 glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
                 pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mSMP)>(pointBase, point->mSMP);
-                pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mNear)>(pointBase, point->mNear);
                 pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mFar)>(pointBase, point->mFar);
+                pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mNear)>(pointBase, point->mNear);
                 pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK0)>(pointBase, point->mK0);
                 pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK1)>(pointBase, point->mK1);
                 pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK2)>(pointBase, point->mK2);

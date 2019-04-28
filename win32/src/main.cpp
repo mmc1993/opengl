@@ -234,10 +234,10 @@ private:
 			camera->SetPos(pos);
 		}
 
-		//_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
-		//														  8 + std::cos(_pointCos) * 3, 
-		//														  3 + std::sin(_pointCos) * 3);
-		//_pointCos += 0.001f;
+		_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f, 
+																  8 + std::cos(_pointCos) * 3, 
+																  3 + std::sin(_pointCos) * 3);
+		_pointCos += 0.1f;
 
 		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
 		//														 8,

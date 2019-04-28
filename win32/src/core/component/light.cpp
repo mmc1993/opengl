@@ -213,8 +213,8 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 uint LightPoint::GetUBOLength()
 {
     auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0u);
-    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNear)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mFar)>(base);
+    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNear)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK1)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK2)>(base);

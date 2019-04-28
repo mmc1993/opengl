@@ -133,7 +133,7 @@ public:
     //  这个结构定义仅仅起到说明作用, 该结构对应Shader里的定义
     struct UBOData {
         uint mSMP;
-        float mNear, mFar;
+        float mFar, mNear;
         float mK0, mK1, mK2;
         glm::vec3 mAmbient;
         glm::vec3 mDiffuse;
@@ -155,7 +155,7 @@ public:
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
 
 public:
-    float mNear, mFar;
+    float mFar, mNear;
     float mK0, mK1, mK2;
 };
 

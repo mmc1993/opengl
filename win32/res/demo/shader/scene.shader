@@ -30,7 +30,7 @@ Pass
 
         layout (std140) uniform LightPoint_ {
             int mSMP;
-			float mNear, mFar;
+			float mFar, mNear;
             float mK0, mK1, mK2;
             vec3 mAmbient;
             vec3 mDiffuse;
@@ -58,8 +58,8 @@ Pass
                 break;
             case LIGHT_TYPE_POINT_:
                 {
-					// vec3 normal = v_out_.mMPos - light_point_.mPosition;
-					// gl_FragDepth = length(normal) / (light_point_.mFar*2);
+					vec3 normal = v_out_.mMPos - light_point_.mPosition;
+					gl_FragDepth = length(normal) / light_point_.mFar;
                 }
                 break;
             case LIGHT_TYPE_SPOT_:
@@ -142,7 +142,7 @@ Pass
 
         struct LightPointParam_ {
             int mSMP;
-			float mNear, mFar;
+			float mFar, mNear;
             float mK0, mK1, mK2;
             vec3 mAmbient;
             vec3 mDiffuse;
@@ -268,9 +268,8 @@ Pass
 		{
 			vec3 normal = v_out_.mMPos - lightParam.mPosition;
 			// vec4 pos 	= vec4(normal, lightParam.mSMP);
-			// float z 	= texture(shadow_map_3d_, pos).r;
-			return 1;
-			// return length(normal) > z * lightParam.mFar? 0: 1;
+			float z 	= texture(shadow_map_3d_, normal).r;
+			return length(normal) > z * lightParam.mFar? 0: 1;
 		}
 
 		//	计算漫反射缩放因子
