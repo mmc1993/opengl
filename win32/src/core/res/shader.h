@@ -1,7 +1,7 @@
 #pragma once
 
 #include "res.h"
-#include "../render/render_type.h"
+#include "pass.h"
 
 class Bitmap;
 class BitmapCube;
@@ -29,18 +29,18 @@ public:
         return _passs.empty();
     }
 
-    const RenderPass & GetPass(size_t idx) const
+    const Pass & GetPass(size_t idx) const
     {
         return _passs.at(idx);
     }
 
-    const std::vector<RenderPass> & GetPasss() const
+    const std::vector<Pass> & GetPasss() const
     {
         return _passs;
     }
 
     bool AddPass(
-        const RenderPass & pass,
+        const Pass & pass,
         const std::string & vs,
         const std::string & fs,
         const std::string & gs);
@@ -53,5 +53,5 @@ private:
     void CheckPass(uint GLID, const std::string & string);
 
 private:
-    std::vector<RenderPass> _passs;
+    std::vector<Pass> _passs;
 };

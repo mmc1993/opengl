@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.h"
+#include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"
 #include "../res/bitmap_cube.h"
@@ -21,7 +22,7 @@ public:
 	const BitmapCube * GetTexture() { return _material.mTexCube; }
 
 private:
-	Shader * _shader;
+    Mesh _meshCube;
+    Shader * _shader;
 	Material _material;
-	RenderMesh _meshCube;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.h"
+#include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"
 
@@ -22,5 +23,5 @@ public:
 private:
 	Shader * _shader;
 	Material _material;
-	RenderMesh _meshQuat;
+	Mesh _meshQuat;
 };

@@ -1,10 +1,12 @@
 #include "render.h"
+#include "../res/pass.h"
+#include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"
-#include "../component/camera.h"
 #include "../tools/glsl_tool.h"
 #include "../tools/debug_tool.h"
 #include "../component/light.h"
+#include "../component/camera.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
 
@@ -24,9 +26,9 @@ Render::~Render()
     }
 }
 
-RenderMatrix & Render::GetMatrix()
+MatrixStack & Render::GetMatrix()
 {
-    return _matrix;
+    return _matrixStack;
 }
 
 void Render::AddCamera(Camera * camera, size_t flag, size_t order)
@@ -360,18 +362,18 @@ void Render::Bind(const CameraInfo * camera)
 {
 	if (camera != nullptr)
 	{
-		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
-		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
-		Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, camera->mCamera->GetView());
-		Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, camera->mCamera->GetProj());
+		Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kVIEW);
+		Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kPROJ);
+		Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kVIEW, camera->mCamera->GetView());
+		Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kPROJ, camera->mCamera->GetProj());
 		glViewport((int)camera->mCamera->GetViewport().x, (int)camera->mCamera->GetViewport().y,
 				   (int)camera->mCamera->GetViewport().z, (int)camera->mCamera->GetViewport().w);
         _renderInfo.mCamera = camera;
 	}
 	else
 	{
-		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
-		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
+		Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kVIEW);
+		Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kPROJ);
         _renderInfo.mCamera = nullptr;
 	}
 }
@@ -414,7 +416,7 @@ void Render::Post(const Light * light)
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
 }
 
-bool Render::Bind(const RenderPass * pass)
+bool Render::Bind(const Pass * pass)
 {
 	if (_renderInfo.mPass != pass)
 	{
@@ -504,8 +506,8 @@ void Render::ClearCommands()
 void Render::Post(const RenderCommand & command)
 {
 	auto & matrixM			= command.mTransform;
-	auto & matrixV			= _matrix.GetV();
-	auto & matrixP			= _matrix.GetP();
+	auto & matrixV			= _matrixStack.GetV();
+	auto & matrixP			= _matrixStack.GetP();
 	const auto & matrixN	= glm::transpose(glm::inverse(glm::mat3(matrixM)));
 	const auto & matrixMV	= matrixV * matrixM;
 	const auto & matrixMVP	= matrixP * matrixMV;
@@ -523,7 +525,7 @@ void Render::Post(const RenderCommand & command)
     }
 }
 
-void Render::Draw(DrawTypeEnum drawType, const RenderMesh & mesh)
+void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
 {
 	assert(mesh.mVBO != 0);
 	assert(mesh.mVAO != 0);

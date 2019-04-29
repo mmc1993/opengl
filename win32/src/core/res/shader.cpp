@@ -82,7 +82,7 @@ Shader::~Shader()
 }
 
 bool Shader::AddPass(
-    const RenderPass & pass, 
+    const Pass & pass, 
     const std::string & vs, 
     const std::string & fs, 
     const std::string & gs)

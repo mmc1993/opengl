@@ -4,7 +4,7 @@
 
 SpriteScreen::SpriteScreen()
 	: _shader(nullptr)
-	, _meshQuat(RenderMesh::CreateVT({
+	, _meshQuat(Mesh::CreateVT({
 			{ { -1.0f, -1.0f, 0.0f }, 0, 0 },
 			{ {  1.0f, -1.0f, 0.0f }, 1, 0 },
 			{ {  1.0f,  1.0f, 0.0f }, 1, 1 },
@@ -15,7 +15,7 @@ SpriteScreen::SpriteScreen()
 
 SpriteScreen::~SpriteScreen()
 {
-	RenderMesh::Delete(_meshQuat);
+	Mesh::Delete(_meshQuat);
 }
 
 void SpriteScreen::OnAdd()

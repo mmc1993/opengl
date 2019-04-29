@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.h"
+#include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"
 
@@ -12,7 +13,7 @@ public:
 	virtual void OnDel() override;
 	virtual void OnUpdate(float dt) override;
 
-	void AddMesh(const RenderMesh & mesh, const Material & material)
+	void AddMesh(const Mesh & mesh, const Material & material)
 	{
 		_meshs.push_back(mesh);
 		_mates.push_back(material);
@@ -23,6 +24,6 @@ public:
 
 protected:
 	Shader * _shader;
-	std::vector<Material> _mates;
-	std::vector<RenderMesh> _meshs;
+    std::vector<Mesh> _meshs;
+    std::vector<Material> _mates;
 };

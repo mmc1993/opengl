@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../include.h"
-#include "render_type.h"
+#include "render_util.h"
+#include "render_enum.h"
 #include "render_target.h"
 
 class Render {
@@ -47,7 +48,7 @@ public:
         uint mCountForwardLightSpot;
 
         //  当前绑定的pass
-        const RenderPass * mPass;
+        const Pass * mPass;
         //  当前绑定的camera
         const CameraInfo * mCamera;
 		RenderInfo()
@@ -58,12 +59,11 @@ public:
             , mTexBase(0) { }
 	};
 
-
 public:
     Render();
     ~Render();
 
-	RenderMatrix & GetMatrix();
+	MatrixStack & GetMatrix();
 
     //  相机
     void AddCamera(Camera * camera, size_t flag, size_t order = ~0);
@@ -84,7 +84,7 @@ public:
 
 private:
     //  Bind Function
-    bool Bind(const RenderPass * pass);
+    bool Bind(const Pass * pass);
     void Bind(const CameraInfo * camera);
 
     //  Post Function
@@ -93,7 +93,7 @@ private:
     void Post(const RenderCommand & command);
 
     //	执行绘制命令
-    void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
+    void Draw(DrawTypeEnum drawType, const Mesh & mesh);
 
     void ClearCommands();
 
@@ -113,7 +113,7 @@ private:
     void BindUBOLightForward();
 
 private:
-    RenderMatrix    _matrix;
+    MatrixStack     _matrixStack;
     RenderTarget    _shadowRT;
 	RenderInfo      _renderInfo;
 

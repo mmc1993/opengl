@@ -4,7 +4,7 @@
 
 Skybox::Skybox()
 	: _shader(nullptr)
-	, _meshCube(RenderMesh::Create({
+	, _meshCube(Mesh::Create({
 		{ { -1.0f,  1.0f, -1.0f } }, { { -1.0f,  1.0f,  1.0f } }, { { 1.0f,  1.0f,  1.0f } }, { { 1.0f,  1.0f, -1.0f } },
 		{ { -1.0f, -1.0f, -1.0f } }, { { -1.0f, -1.0f,  1.0f } }, { { 1.0f, -1.0f,  1.0f } }, { { 1.0f, -1.0f, -1.0f } }
 		},{ 1, 6, 5, 1, 2, 6, 0, 4, 7, 0, 7, 3, 0, 1, 5, 0, 5, 4, 3, 7, 6, 3, 6, 2, 0, 3, 2, 0, 2, 1, 4, 5, 6, 4, 6, 7 }))
@@ -12,7 +12,7 @@ Skybox::Skybox()
 
 Skybox::~Skybox()
 {
-	RenderMesh::Delete(_meshCube);
+	Mesh::Delete(_meshCube);
 }
 
 void Skybox::OnAdd()

@@ -1,11 +1,16 @@
 #pragma once
 
 #include "../include.h"
+#include "pass.h"
+#include "mesh.h"
+#include "model.h"
+#include "shader.h"
 #include "material.h"
+#include "bitmap.h"
+#include "bitmap_cube.h"
 #include "../third/assimp/postprocess.h"
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
-#include "../render/render_type.h"
 
 class Model;
 class Shader;
@@ -21,5 +26,5 @@ public:
 private:
 	static Model * LoadModel(aiNode * node, const aiScene * scene, const std::string & directory);
 	static Material LoadMate(aiMesh * mesh, const aiScene * scene, const std::string & directory);
-	static RenderMesh LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory);
+	static Mesh LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory);
 };

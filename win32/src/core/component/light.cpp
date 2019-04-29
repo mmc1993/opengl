@@ -211,18 +211,18 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glViewport(0, 0, Light::s_VIEW_W, Light::s_VIEW_H);
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
                            RenderTarget::TextureType::k2D_ARRAY,
                            0, Light::s_lightPool.GetTex2D(), mSMP);
     }
     else
     {
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kVIEW);
     }
     return count == 0;
 }
@@ -257,8 +257,8 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (count != 0)
     {
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kVIEW);
     }
     else
     {
@@ -295,10 +295,10 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
                     std::get<0>(s_faceInfo[count]) + mPosition,
                     std::get<1>(s_faceInfo[count]));
 
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW,  view);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kVIEW,  view);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k3D_ARRAY, 
                            count, Light::s_lightPool.GetTex3D(), mSMP);
@@ -361,18 +361,18 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
-        Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
                            RenderTarget::TextureType::k2D_ARRAY,
                            0, Light::s_lightPool.GetTex2D(), mSMP);
     }
     else
     {
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kVIEW);
     }
     return count == 0;
 }

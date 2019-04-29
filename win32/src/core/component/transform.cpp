@@ -1,5 +1,4 @@
 #include "transform.h"
-#include "../object/object.h"
 
 Transform::Transform()
 	: _isChange(true)

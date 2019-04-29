@@ -1,11 +1,7 @@
 #include "file.h"
-#include "model.h"
-#include "shader.h"
 #include "res_cache.h"
-#include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
-#include "../render/render_type.h"
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third/stb_image.h"
@@ -45,7 +41,7 @@ Shader * File::LoadShader(const std::string & url)
     {
         if (string_tool::IsEqualSkipSpace(line, "Pass"))
         {
-            RenderPass pass;
+            Pass pass;
             std::string fs, vs, gs;
             while (std::getline(ifile, line) && !string_tool::IsEqualSkipSpace(line, "End Pass"))
             {
@@ -318,13 +314,13 @@ Material File::LoadMate(aiMesh * mesh, const aiScene * scene, const std::string 
 	return std::move(material);
 }
 
-RenderMesh File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory)
+Mesh File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & directory)
 {
 	std::vector<std::uint32_t>		indices;
-	std::vector<RenderMesh::Vertex> vertexs;
+	std::vector<Mesh::Vertex> vertexs;
 	for (auto i = 0; i != mesh->mNumVertices; ++i)
 	{
-		RenderMesh::Vertex vertex;
+		Mesh::Vertex vertex;
 		//	vertex
 		vertex.v.x = mesh->mVertices[i].x;
 		vertex.v.y = mesh->mVertices[i].y;
@@ -356,5 +352,5 @@ RenderMesh File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::strin
 			indices.push_back(mesh->mFaces[i].mIndices[j]);
 		}
 	}
-	return RenderMesh::Create(vertexs, indices);
+	return Mesh::Create(vertexs, indices);
 }
