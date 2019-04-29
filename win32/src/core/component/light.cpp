@@ -334,8 +334,8 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
         Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
         Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
-                           RenderTarget::TextureType::k2D_ARRAY, 
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
+                           RenderTarget::TextureType::k2D_ARRAY,
                            0, Light::s_shadowMapPool.GetTex2D(), mSMP);
     }
     else
