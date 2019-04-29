@@ -1080,9 +1080,6 @@
     <ClInclude Include="src\core\res\mesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\res\pass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">

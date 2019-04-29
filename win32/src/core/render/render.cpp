@@ -1,5 +1,4 @@
 #include "render.h"
-#include "../res/pass.h"
 #include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"

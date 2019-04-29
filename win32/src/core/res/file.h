@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../include.h"
-#include "pass.h"
 #include "mesh.h"
 #include "model.h"
 #include "shader.h"
