@@ -5,12 +5,12 @@
 #include "../tools/string_tool.h"
 #include <filesystem>
 
-class ConfigCache {
+class CfgCache {
 public:
-    ConfigCache(): _root(mmc::JsonValue::FromValue(mmc::JsonValue::Hash()))
+    CfgCache(): _root(mmc::JsonValue::FromValue(mmc::JsonValue::Hash()))
     { }
 
-    ~ConfigCache()
+    ~CfgCache()
     { }
 
     mmc::JsonValue::Value At(const std::string & key)

@@ -5,7 +5,7 @@ class Timer;
 class Object;
 class Render;
 class ResCache;
-class ConfigCache;
+class CfgCache;
 
 class Global {
 public:
@@ -29,14 +29,14 @@ public:
         return *_render;
     }
 
-    inline ResCache & RefAssetCache()
+    inline ResCache & RefResCache()
     {
-        return *_assetCache;
+        return *_resCache;
     }
 
-    inline ConfigCache & RefConfigCache()
+    inline CfgCache & RefCfgCache()
     {
-        return *_configCache;
+        return *_cfgCache;
     }
 
     Global();
@@ -56,6 +56,6 @@ private:
     Timer * _timer;
     Object * _object;
     Render * _render;
-    ResCache * _assetCache;
-    ConfigCache * _configCache;
+    ResCache * _resCache;
+    CfgCache * _cfgCache;
 };

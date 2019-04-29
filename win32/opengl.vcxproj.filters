@@ -1035,9 +1035,6 @@
     <ClInclude Include="src\core\third\json\mmcjson.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\config\config_cache.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\third\mmcjson.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1072,6 +1069,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\res\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\cfg\cfg_cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,7 @@
 #include "object/object.h"
 #include "render/render.h"
 #include "res/res_cache.h"
-#include "config/config_cache.h"
+#include "cfg/cfg_cache.h"
 
 //  配置根目录
 constexpr auto DIR_CONFIG_ROOT = "res/config";
@@ -21,8 +21,8 @@ Global::Global()
     , _timer(nullptr)
     , _object(nullptr)
     , _render(nullptr)
-    , _assetCache(nullptr)
-    , _configCache(nullptr)
+    , _resCache(nullptr)
+    , _cfgCache(nullptr)
 { }
 
 Global::~Global()
@@ -36,8 +36,8 @@ void Global::Start()
         && _timer == nullptr 
         && _object == nullptr 
         && _render == nullptr 
-        && _assetCache == nullptr
-        && _configCache == nullptr);
+        && _resCache == nullptr
+        && _cfgCache == nullptr);
     //  初始化 event
     _event = new Event();
 
@@ -51,11 +51,11 @@ void Global::Start()
     _render = new Render();
 
     //  初始化assetCache
-    _assetCache = new ResCache();
+    _resCache = new ResCache();
 
     //  初始化configCache
-    _configCache = new ConfigCache();
-    _configCache->Init(DIR_CONFIG_ROOT);
+    _cfgCache = new CfgCache();
+    _cfgCache->Init(DIR_CONFIG_ROOT);
 }
 
 void Global::Clean()
@@ -64,6 +64,6 @@ void Global::Clean()
     SafeDelete(_timer);
     SafeDelete(_object);
     SafeDelete(_render);
-    SafeDelete(_assetCache);
-    SafeDelete(_configCache);
+    SafeDelete(_resCache);
+    SafeDelete(_cfgCache);
 }

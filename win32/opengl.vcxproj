@@ -35,7 +35,7 @@
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\sprite_screen.h" />
     <ClInclude Include="src\core\component\transform.h" />
-    <ClInclude Include="src\core\config\config_cache.h" />
+    <ClInclude Include="src\core\cfg\cfg_cache.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
     <ClInclude Include="src\core\global.h" />
