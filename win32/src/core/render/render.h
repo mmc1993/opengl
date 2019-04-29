@@ -6,6 +6,18 @@
 
 class Render {
 public:
+    //  正向渲染光源数限制
+    static constexpr uint LIMIT_FORWARD_LIGHT_DIRECT = 2;
+    static constexpr uint LIMIT_FORWARD_LIGHT_POINT = 4;
+    static constexpr uint LIMIT_FORWARD_LIGHT_SPOT = 4;
+
+    //  对应 _uboLightForward[3]
+    enum UBOLightForwardTypeEnum {
+        kDIRECT,
+        kPOINT,
+        kSPOT,
+    };
+
     struct CameraInfo {
 		enum Flag {
 			kFLAG0 = 0x1,	kFLAG1 = 0x2,	kFLAG2 = 0x4,	kFLAG3 = 0x8,
@@ -20,30 +32,26 @@ public:
 			: mCamera(camera), mFlag(flag), mOrder(order) { }
     };
 
+    //  渲染信息
 	struct RenderInfo {
 		uint mVertexCount;
 		uint mRenderCount;
         uint mTexBase;
+
+        //  当前正向渲染使用的光源
+
+        //  当前绑定的pass
         const RenderPass * mPass;
+        //  当前绑定的camera
+        const CameraInfo * mCamera;
 		RenderInfo()
             : mPass(nullptr)
+            , mCamera(nullptr)
             , mVertexCount(0)
 			, mRenderCount(0)
-            , mTexBase(0)
-		{ }
+            , mTexBase(0) { }
 	};
 
-    //  正向渲染光源数限制
-    static constexpr uint LIMIT_FORWARD_LIGHT_DIRECT = 2;
-    static constexpr uint LIMIT_FORWARD_LIGHT_POINT = 4;
-    static constexpr uint LIMIT_FORWARD_LIGHT_SPOT = 4;
-
-    //  对应 _uboLightForward[3]
-    enum UBOLightForwardTypeEnum {
-        kDIRECT,
-        kPOINT,
-        kSPOT,
-    };
 
 public:
     Render();
@@ -66,16 +74,14 @@ public:
 
 	void PostCommand(const Shader * shader, const RenderCommand & command);
 
-    //  辅助
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
-    void Bind(Light * light);
-    void Bind(CameraInfo * camera);
+    void Bind(const Light * light);
     bool Bind(const RenderPass * pass);
+    void Bind(const CameraInfo * camera);
     void Bind(const Material * material);
-    //	绑定每一次渲染都可能变化的参数
-    void BindEveryParam(CameraInfo * camera, const RenderCommand & command);
+    void Bind(const RenderCommand & command);
 
     //	执行绘制命令
     void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);
@@ -86,11 +92,11 @@ private:
 	void RenderShadow(Light * light);
 
     //  逐相机渲染
-    void RenderCamera(CameraInfo * camera);
-    void RenderForward(CameraInfo * camera);
-    void RenderDeferred(CameraInfo * camera);
-	void RenderForwardCommands(CameraInfo * camera, const RenderQueue & commands);
-	void RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands);
+    void RenderCamera();
+    void RenderForward();
+    void RenderDeferred();
+	void RenderForwardCommands(const RenderQueue & commands);
+	void RenderDeferredCommands(Light * light, const RenderQueue & commands);
 
     //  正向渲染光源相关
     void InitUBOLightForward();

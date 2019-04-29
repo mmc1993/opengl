@@ -45,8 +45,8 @@ public:
 	const glm::vec3 & GetUp() const;
 	const glm::vec3 & GetEye() const;
 	const glm::vec3 & GetPos() const;
-	const glm::mat4 & GetView();
-	const glm::mat4 & GetProj();
+	const glm::mat4 & GetView() const;
+	const glm::mat4 & GetProj() const;
 	const glm::vec4 & GetViewport() const;
 
 	virtual void OnAdd() override {}
@@ -54,14 +54,15 @@ public:
 	virtual void OnUpdate(float dt) override {}
 
 private:
-    void Update();
+    void Update() const;
 
 private:
 	Type _type;
 	Info _info;
-	bool _change;
-	glm::mat4 _view;
-	glm::mat4 _project;
-	glm::vec4 _viewport;
-	glm::vec3 _eye, _pos, _up;
+    glm::vec4 _viewport;
+    glm::vec3 _eye, _pos, _up;
+
+    mutable bool _change;
+    mutable glm::mat4 _view;
+    mutable glm::mat4 _project;
 };

@@ -88,7 +88,7 @@ void Render::RenderOnce()
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(&camera);
-		RenderCamera(&camera);
+		RenderCamera();
 		Bind((CameraInfo *)nullptr);
 	}
 	ClearCommands();
@@ -120,19 +120,12 @@ void Render::RenderShadow(Light * light)
     glReadBuffer(GL_NONE);
 	while (light->NextDrawShadow(count++, &_shadowRT))
 	{
-        glClear(GL_COLOR_BUFFER_BIT |
-                GL_DEPTH_BUFFER_BIT |
-                GL_STENCIL_BUFFER_BIT);
-
+        glClear(GL_DEPTH_BUFFER_BIT);
 		for (auto & command : _shadowCommands)
 		{
-            if (Bind(command.mPass))
-            { 
-                Bind(light);
-            }
-
-            BindEveryParam(nullptr, command);
-
+            Bind(command.mPass);
+            Bind(light);
+            Bind(command);
             for (auto i = 0; i != command.mMeshNum; ++i)
             {
                 Draw(command.mPass->mDrawType, command.mMeshs[i]);
@@ -142,7 +135,7 @@ void Render::RenderShadow(Light * light)
     _shadowRT.End();
 }
 
-void Render::RenderCamera(CameraInfo * camera)
+void Render::RenderCamera()
 {
     //  延迟渲染
     //      逐命令队列渲染
@@ -153,17 +146,17 @@ void Render::RenderCamera(CameraInfo * camera)
     
     //  延迟渲染
     _renderInfo.mPass = nullptr;
-    RenderDeferred(camera);
+    RenderDeferred();
 
 	//  正向渲染
     _renderInfo.mPass = nullptr;
-	RenderForward(camera);
+	RenderForward();
 
 	//	后期处理
     _renderInfo.mPass = nullptr;
 }
 
-void Render::RenderForward(CameraInfo * camera)
+void Render::RenderForward()
 {
     //  打包光源数据
     InitUBOLightForward();
@@ -171,27 +164,27 @@ void Render::RenderForward(CameraInfo * camera)
     //  渲染
     for (auto & commands : _forwardCommands)
     {
-        RenderForwardCommands(camera, commands);
+        RenderForwardCommands(commands);
     }
 }
 
-void Render::RenderDeferred(CameraInfo * camera)
+void Render::RenderDeferred()
 {
 	
 }
 
-void Render::RenderForwardCommands(CameraInfo * camera, const RenderQueue & commands)
+void Render::RenderForwardCommands(const RenderQueue & commands)
 {
 	for (const auto & command : commands)
 	{
-		if ((camera->mFlag & command.mCameraFlag) != 0)
+		if ((_renderInfo.mCamera->mFlag & command.mCameraFlag) != 0)
 		{
 			if (Bind(command.mPass)) 
             {
                 BindUBOLightForward();
             }
 			
-            BindEveryParam(camera, command);
+            Bind(command);
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
@@ -203,29 +196,12 @@ void Render::RenderForwardCommands(CameraInfo * camera, const RenderQueue & comm
 	}
 }
 
-void Render::RenderDeferredCommands(CameraInfo * camera, Light * light, const RenderQueue & commands)
+void Render::RenderDeferredCommands(Light * light, const RenderQueue & commands)
 {
 }
 
 void Render::InitUBOLightForward()
 {
-/*
-    layout (std140) uniform ExampleBlock
-    {
-                         // 基准对齐量       // 对齐偏移量
-        float value;     // 4               // 0 
-        vec3 vector;     // 16              // 16  (必须是16的倍数，所以 4->16)
-        mat4 matrix;     // 16              // 32  (列 0)
-                         // 16              // 48  (列 1)
-                         // 16              // 64  (列 2)
-                         // 16              // 80  (列 3)
-        float values[3]; // 16              // 96  (values[0])
-                         // 16              // 112 (values[1])
-                         // 16              // 128 (values[2])
-        bool boolean;    // 4               // 144
-        int integer;     // 4               // 148
-    };  
-*/
     if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
@@ -364,10 +340,11 @@ void Render::BindUBOLightForward()
     _renderInfo.mTexBase = count;
 }
 
-void Render::Bind(CameraInfo * camera)
+void Render::Bind(const CameraInfo * camera)
 {
 	if (camera != nullptr)
 	{
+        _renderInfo.mCamera = camera;
 		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
 		Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
 		Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, camera->mCamera->GetView());
@@ -377,14 +354,14 @@ void Render::Bind(CameraInfo * camera)
 	}
 	else
 	{
+        _renderInfo.mCamera = nullptr;
 		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kVIEW);
 		Global::Ref().RefRender().GetMatrix().Pop(RenderMatrix::kPROJ);
 	}
 }
 
-void Render::Bind(Light * light)
+void Render::Bind(const Light * light)
 {
-    assert(_renderInfo.mPass != nullptr);
     switch (light->GetType())
     {
     case Light::Type::kDIRECT:
@@ -478,7 +455,6 @@ bool Render::Bind(const RenderPass * pass)
 void Render::Bind(const Material * material)
 {
     auto count = _renderInfo.mTexBase;
-
 	for (auto i = 0; i != material->mDiffuses.size(); ++i)
 	{
         Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), count++);
@@ -509,7 +485,7 @@ void Render::ClearCommands()
 	for (auto & queue : _deferredCommands) { queue.clear(); }
 }
 
-void Render::BindEveryParam(CameraInfo * camera, const RenderCommand & command)
+void Render::Bind(const RenderCommand & command)
 {
 	auto & matrixM			= command.mTransform;
 	auto & matrixV			= _matrix.GetV();

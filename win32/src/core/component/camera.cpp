@@ -61,13 +61,13 @@ const glm::vec3 & Camera::GetPos() const
     return _pos;
 }
 
-const glm::mat4 & Camera::GetView()
+const glm::mat4 & Camera::GetView() const
 {
 	Update();
 	return _view;
 }
 
-const glm::mat4 & Camera::GetProj()
+const glm::mat4 & Camera::GetProj() const
 {
 	Update();
 	return _project;
@@ -78,7 +78,7 @@ const glm::vec4 & Camera::GetViewport() const
 	return _viewport;
 }
 
-void Camera::Update()
+void Camera::Update() const
 {
 	if (_change)
 	{
