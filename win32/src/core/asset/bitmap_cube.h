@@ -2,7 +2,7 @@
 
 #include "asset.h"
 
-class BitmapCube: public Asset {
+class BitmapCube: public Res {
 public:
 	BitmapCube(int w, int h, 
 			   int texfmt, int rawfmt, int pixtype, 

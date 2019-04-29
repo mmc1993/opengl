@@ -1,9 +1,8 @@
 #pragma once
 
 #include "component.h"
-#include "../asset/material.h"
-#include "../asset/texture.h"
 #include "../asset/shader.h"
+#include "../asset/material.h"
 
 class Sprite : public Component {
 public:

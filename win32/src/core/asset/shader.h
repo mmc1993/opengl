@@ -6,7 +6,7 @@
 class Bitmap;
 class BitmapCube;
 
-class Shader : public Asset {
+class Shader : public Res {
 public:
     static void SetUniform(uint GLID, const std::string & key, iint val);
     static void SetUniform(uint GLID, const std::string & key, uint val);

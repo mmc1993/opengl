@@ -225,11 +225,6 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	return bitmap;
 }
 
-Texture File::LoadTexture(const std::string & url)
-{
-	return Texture(File::LoadBitmap(url));
-}
-
 BitmapCube * File::LoadBitmapCube(const std::string & url)
 {
 	CHECK_RET(!Global::Ref().RefAssetCache().IsReg(url), Global::Ref().RefAssetCache().Get<BitmapCube>(url));

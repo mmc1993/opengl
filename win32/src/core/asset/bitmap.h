@@ -2,7 +2,7 @@
 
 #include "asset.h"
 
-class Bitmap: public Asset {
+class Bitmap: public Res {
 public:
 	Bitmap(int w, int h, int texfmt, int rawfmt, int pixtype, const std::string & url, const void * buffer): _GLID(0)
 	{

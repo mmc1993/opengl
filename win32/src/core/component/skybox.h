@@ -2,7 +2,6 @@
 
 #include "component.h"
 #include "../asset/shader.h"
-#include "../asset/texture.h"
 #include "../asset/material.h"
 #include "../asset/bitmap_cube.h"
 

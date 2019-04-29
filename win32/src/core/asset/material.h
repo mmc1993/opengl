@@ -1,7 +1,7 @@
 #pragma once
 
 #include "asset.h"
-#include "texture.h"
+#include "bitmap.h"
 #include "bitmap_cube.h"
 
 class Material {

@@ -1,11 +1,10 @@
 #pragma once
 
 #include "asset.h"
-#include "texture.h"
 #include "material.h"
 #include "../render/render_type.h"
 
-class Model: public Asset {
+class Model: public Res {
 public:
 	std::vector<Model *> mChilds;
 	std::vector<Material> mMates;

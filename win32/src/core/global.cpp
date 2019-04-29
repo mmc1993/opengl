@@ -51,7 +51,7 @@ void Global::Start()
     _render = new Render();
 
     //  初始化assetCache
-    _assetCache = new AssetCache();
+    _assetCache = new ResCache();
 
     //  初始化configCache
     _configCache = new ConfigCache();

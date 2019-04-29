@@ -1,7 +1,7 @@
 #include "shader.h"
-#include "../asset/texture.h"
-#include "../tools/debug_tool.h"
+#include "../asset/bitmap.h"
 #include "../asset/bitmap_cube.h"
+#include "../tools/debug_tool.h"
 
 void Shader::SetUniform(uint GLID, const std::string & key, iint val)
 {

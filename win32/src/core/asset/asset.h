@@ -2,17 +2,17 @@
 
 #include "../include.h"
 
-class Asset {
+class Res {
 public:
-	virtual ~Asset()
+	virtual ~Res()
 	{ }
 
 protected:
-	Asset()
+	Res()
 	{ }
 
-	Asset(Asset &&) = delete;
-	Asset(const Asset &) = delete;
-	Asset & operator=(const Asset &) = delete;
-	Asset & operator=(Asset &&) = delete;
+	Res(Res &&) = delete;
+	Res(const Res &) = delete;
+	Res & operator=(const Res &) = delete;
+	Res & operator=(Res &&) = delete;
 };

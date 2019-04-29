@@ -27,7 +27,6 @@
     <ClInclude Include="src\core\asset\material.h" />
     <ClInclude Include="src\core\asset\model.h" />
     <ClInclude Include="src\core\asset\shader.h" />
-    <ClInclude Include="src\core\asset\texture.h" />
     <ClInclude Include="src\core\base.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />

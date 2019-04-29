@@ -30,9 +30,6 @@
     <ClInclude Include="src\core\asset\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\texture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\component.h">
       <Filter>头文件</Filter>
     </ClInclude>
