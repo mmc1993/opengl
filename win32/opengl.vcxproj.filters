@@ -798,9 +798,6 @@
     <ClInclude Include="src\core\tools\time_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render_type.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\third\assimp\Compiler\poppack1.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1072,6 +1069,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\cfg\cfg_cache.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render_enum.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render_util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\pass.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
