@@ -353,7 +353,6 @@ void Render::BindUBOLightForward()
                              _uboLightForward[std::get<2>(FIND_TABLE[light->GetType()])]);
         }
     }
-
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_DIRECT_, directNum);
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, pointNum);
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, spotNum);

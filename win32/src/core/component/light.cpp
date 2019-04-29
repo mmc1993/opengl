@@ -134,7 +134,7 @@ void Light::OnDel()
 
 uint LightDirect::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0u);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mMatrix)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNormal)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mAmbient)>(base);
@@ -198,7 +198,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 
 uint LightPoint::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0u);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mFar)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNear)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
@@ -266,7 +266,7 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
 
         Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kVIEW);
         Global::Ref().RefRender().GetMatrix().Identity(RenderMatrix::kPROJ);
-        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW, view);
+        Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kVIEW,  view);
         Global::Ref().RefRender().GetMatrix().Mul(RenderMatrix::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k3D_ARRAY, 
@@ -277,7 +277,7 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
 
 uint LightSpot::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0u);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK1)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK2)>(base);
