@@ -11,10 +11,6 @@
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
 
-class Model;
-class Shader;
-class BitmapCube;
-
 class File {
 public:
 	static Model * LoadModel(const std::string & url);
