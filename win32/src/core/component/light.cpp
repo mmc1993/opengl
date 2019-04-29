@@ -87,7 +87,7 @@ void Light::ShadowMapPool::AllocPos2D()
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H, 
-                     _len2D, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+                     _len2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -110,7 +110,7 @@ void Light::ShadowMapPool::AllocPos3D()
 
         glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, _tex3D);
         glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H,
-                                    _len3D * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                     _len3D * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

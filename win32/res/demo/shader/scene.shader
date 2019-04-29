@@ -26,7 +26,7 @@ Pass
 	End Vertex
 
 	Fragment
-		#version 410 core
+		#version 440 core
 
         layout (std140) uniform LightPoint_ {
             int mSMP;
@@ -53,7 +53,8 @@ Pass
             switch (light_type_)
             {
             case LIGHT_TYPE_DIRECT_:
-                { 
+                {
+                    gl_FragDepth = gl_FragCoord.z;
                 }
                 break;
             case LIGHT_TYPE_POINT_:
@@ -64,6 +65,7 @@ Pass
                 break;
             case LIGHT_TYPE_SPOT_:
                 {
+                    gl_FragDepth = gl_FragCoord.z;
                 }
                 break;
             }
@@ -128,7 +130,7 @@ Pass
 	End Vertex
 
 	Fragment
-		#version 410 core
+		#version 440 core
 
 		struct LightDirectParam_ {
 			int mSMP;

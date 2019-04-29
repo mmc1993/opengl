@@ -13,7 +13,6 @@ Render::Render()
 
 Render::~Render()
 {
-    //  释放用于正向渲染的光源UBO
     if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
