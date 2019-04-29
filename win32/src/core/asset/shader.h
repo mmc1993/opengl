@@ -8,7 +8,8 @@ class BitmapCube;
 
 class Shader : public Asset {
 public:
-	static void SetUniform(uint GLID, const std::string & key, int val);
+    static void SetUniform(uint GLID, const std::string & key, iint val);
+    static void SetUniform(uint GLID, const std::string & key, uint val);
 	static void SetUniform(uint GLID, const std::string & key, float val);
 	static void SetUniform(uint GLID, const std::string & key, double val);
 	static void SetUniform(uint GLID, const std::string & key, const glm::vec3 & val);

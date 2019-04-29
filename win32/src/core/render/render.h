@@ -34,11 +34,17 @@ public:
 
     //  渲染信息
 	struct RenderInfo {
+        //  记录当前批次顶点数
 		uint mVertexCount;
+        //  记录当前批次渲染数
 		uint mRenderCount;
+        //  记录当前Texture基址
         uint mTexBase;
 
-        //  当前正向渲染使用的光源
+        //  正向渲染数据
+        uint mCountForwardLightDirect;
+        uint mCountForwardLightPoint;
+        uint mCountForwardLightSpot;
 
         //  当前绑定的pass
         const RenderPass * mPass;
@@ -77,11 +83,14 @@ public:
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
-    void Bind(const Light * light);
+    //  Bind Function
     bool Bind(const RenderPass * pass);
     void Bind(const CameraInfo * camera);
-    void Bind(const Material * material);
-    void Bind(const RenderCommand & command);
+
+    //  Post Function
+    void Post(const Light * light);
+    void Post(const Material * material);
+    void Post(const RenderCommand & command);
 
     //	执行绘制命令
     void Draw(DrawTypeEnum drawType, const RenderMesh & mesh);

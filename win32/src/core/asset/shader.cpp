@@ -3,9 +3,14 @@
 #include "../tools/debug_tool.h"
 #include "../asset/bitmap_cube.h"
 
-void Shader::SetUniform(uint GLID, const std::string & key, int val)
+void Shader::SetUniform(uint GLID, const std::string & key, iint val)
 {
-	glUniform1i(glGetUniformLocation(GLID, key.c_str()), val);
+    glUniform1i(glGetUniformLocation(GLID, key.c_str()), val);
+}
+
+void Shader::SetUniform(uint GLID, const std::string & key, uint val)
+{
+    glUniform1i(glGetUniformLocation(GLID, key.c_str()), val);
 }
 
 void Shader::SetUniform(uint GLID, const std::string & key, float val)
