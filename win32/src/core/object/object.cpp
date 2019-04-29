@@ -1,5 +1,5 @@
 #include "object.h"
-#include "../asset/shader.h"
+#include "../res/shader.h"
 #include "../render/render.h"
 #include "../component/component.h"
 #include "../component/transform.h"

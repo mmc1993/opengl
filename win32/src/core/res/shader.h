@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset.h"
+#include "res.h"
 #include "../render/render_type.h"
 
 class Bitmap;

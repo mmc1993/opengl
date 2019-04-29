@@ -19,14 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\asset\asset.h" />
-    <ClInclude Include="src\core\asset\asset_cache.h" />
-    <ClInclude Include="src\core\asset\bitmap.h" />
-    <ClInclude Include="src\core\asset\bitmap_cube.h" />
-    <ClInclude Include="src\core\asset\file.h" />
-    <ClInclude Include="src\core\asset\material.h" />
-    <ClInclude Include="src\core\asset\model.h" />
-    <ClInclude Include="src\core\asset\shader.h" />
+    <ClInclude Include="src\core\res\res.h" />
+    <ClInclude Include="src\core\res\res_cache.h" />
+    <ClInclude Include="src\core\res\bitmap.h" />
+    <ClInclude Include="src\core\res\bitmap_cube.h" />
+    <ClInclude Include="src\core\res\file.h" />
+    <ClInclude Include="src\core\res\material.h" />
+    <ClInclude Include="src\core\res\model.h" />
+    <ClInclude Include="src\core\res\shader.h" />
     <ClInclude Include="src\core\base.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />
@@ -374,8 +374,8 @@
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\asset\file.cpp" />
-    <ClCompile Include="src\core\asset\shader.cpp" />
+    <ClCompile Include="src\core\res\file.cpp" />
+    <ClCompile Include="src\core\res\shader.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\skybox.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />

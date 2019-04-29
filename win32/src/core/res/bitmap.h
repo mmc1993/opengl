@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset.h"
+#include "res.h"
 
 class Bitmap: public Res {
 public:

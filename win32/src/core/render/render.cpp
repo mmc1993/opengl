@@ -1,6 +1,6 @@
 #include "render.h"
-#include "../asset/shader.h"
-#include "../asset/material.h"
+#include "../res/shader.h"
+#include "../res/material.h"
 #include "../component/camera.h"
 #include "../tools/glsl_tool.h"
 #include "../tools/debug_tool.h"

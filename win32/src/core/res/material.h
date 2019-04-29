@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset.h"
+#include "res.h"
 #include "bitmap.h"
 #include "bitmap_cube.h"
 

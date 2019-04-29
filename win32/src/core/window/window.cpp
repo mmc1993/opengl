@@ -1,7 +1,6 @@
 #include "window.h"
 #include "../event/event.h"
 #include "../timer/timer.h"
-#include "../asset/shader.h"
 #include "../render/render.h"
 #include "../object/object.h"
 #include "../tools/time_tool.h"

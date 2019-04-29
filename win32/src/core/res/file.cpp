@@ -1,7 +1,7 @@
 #include "file.h"
 #include "model.h"
 #include "shader.h"
-#include "asset_cache.h"
+#include "res_cache.h"
 #include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"

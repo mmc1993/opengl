@@ -1,8 +1,8 @@
 #pragma once
 
 #include "component.h"
-#include "../asset/bitmap.h"
-#include "../asset/bitmap_cube.h"
+#include "../res/bitmap.h"
+#include "../res/bitmap_cube.h"
 
 class RenderTarget;
 

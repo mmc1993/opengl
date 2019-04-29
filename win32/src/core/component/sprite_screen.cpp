@@ -1,5 +1,5 @@
 #include "sprite_screen.h"
-#include "../asset/file.h"
+#include "../res/file.h"
 #include "../render/render.h"
 
 SpriteScreen::SpriteScreen()

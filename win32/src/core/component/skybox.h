@@ -1,9 +1,9 @@
 #pragma once
 
 #include "component.h"
-#include "../asset/shader.h"
-#include "../asset/material.h"
-#include "../asset/bitmap_cube.h"
+#include "../res/shader.h"
+#include "../res/material.h"
+#include "../res/bitmap_cube.h"
 
 class Skybox : public Component {
 public:

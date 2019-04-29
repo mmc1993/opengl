@@ -3,7 +3,7 @@
 #include "timer/timer.h"
 #include "object/object.h"
 #include "render/render.h"
-#include "asset/asset_cache.h"
+#include "res/res_cache.h"
 #include "config/config_cache.h"
 
 //  ÅäÖÃ¸ùÄ¿Â¼

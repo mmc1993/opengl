@@ -1,5 +1,5 @@
 #include "skybox.h"
-#include "../asset/file.h"
+#include "../res/file.h"
 #include "../render/render.h"
 
 Skybox::Skybox()

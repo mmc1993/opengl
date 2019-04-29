@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../asset/bitmap.h"
-#include "../asset/bitmap_cube.h"
+#include "../res/bitmap.h"
+#include "../res/bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
 class RenderBuffer {

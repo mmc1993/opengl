@@ -2,17 +2,17 @@
 
 #include "../include.h"
 
-class Res {
+class Res : public NoCopy {
 public:
-	virtual ~Res()
-	{ }
+	virtual ~Res() 
+    {
+    }
 
 protected:
-	Res()
-	{ }
+	Res() 
+    {
+    }
 
-	Res(Res &&) = delete;
 	Res(const Res &) = delete;
 	Res & operator=(const Res &) = delete;
-	Res & operator=(Res &&) = delete;
 };

@@ -15,21 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\core\asset\asset.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\asset\bitmap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\asset\file.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\asset\material.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\asset\shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\component.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -795,22 +780,13 @@
     <ClInclude Include="src\core\component\light.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\model.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\render_target.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\component\skybox.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\asset\bitmap_cube.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\component\sprite_screen.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\asset\asset_cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\timer\timer.h">
@@ -1074,14 +1050,32 @@
     <ClInclude Include="src\core\base.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\res\bitmap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\bitmap_cube.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\file.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\res.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\res_cache.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\asset\file.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\asset\shader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\component\sprite.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -1125,6 +1119,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\global.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\res\file.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\res\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

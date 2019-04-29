@@ -1,9 +1,6 @@
 #include "light.h"
 #include "transform.h"
-#include "../asset/file.h"
-#include "../asset/shader.h"
 #include "../render/render.h"
-#include "../asset/asset_cache.h"
 #include "../config/config_cache.h"
 #include "../tools/glsl_tool.h"
 
