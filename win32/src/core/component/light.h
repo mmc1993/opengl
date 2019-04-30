@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.h"
+#include "../res/mesh.h"
 #include "../res/bitmap.h"
 #include "../res/bitmap_cube.h"
 
@@ -87,6 +88,9 @@ public:
     static uint GetShadowMap2D() { return s_lightPool.GetTex2D(); }
     static uint GetShadowMap3D() { return s_lightPool.GetTex3D(); }
 
+protected:
+    void UpdateVolume();
+
 public:
     glm::uint mSMP;
     glm::mat4 mMatrix;
@@ -100,6 +104,8 @@ protected:
     uint _uboPos;
     //  光源投影矩阵
     glm::mat4 _proj;
+
+    Mesh _volume;
 private:
 	Type _type;
 };

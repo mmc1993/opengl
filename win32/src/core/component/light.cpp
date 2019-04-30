@@ -163,6 +163,28 @@ void Light::OnDel()
 	Global::Ref().RefRender().DelLight(this);
 }
 
+void Light::UpdateVolume()
+{
+    switch (_type)
+    {
+    case Type::kDIRECT:
+        //  创建后不做修改
+        break;
+    case Type::kPOINT:
+        {
+            //auto point = reinterpret_cast<LightPoint *>(this);
+            //x = d / (point->mK0 + point->mK1 * d + point->mK2 * d * d);
+            //d = x * (point->mK0 + point->mK1 * d + point->mK2 * d * d)
+            //d = point->mK0 * x + point->mK1 * x * d + point->mK2 * x * d * d
+            //d = point->mK0 * x + (point->mK1 * x + point->mK2 * x) * d + point->mK2 * x * d
+
+        }
+        break;
+    case Type::kSPOT:
+        break;
+    }
+}
+
 uint LightDirect::GetUBOLength()
 {
     auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
