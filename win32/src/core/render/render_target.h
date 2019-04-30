@@ -32,7 +32,7 @@ private:
 class RenderTarget {
 public:
     enum BindType {
-        kDRAW_READ = GL_FRAMEBUFFER,
+        kALL = GL_FRAMEBUFFER,
         kDRAW = GL_DRAW_FRAMEBUFFER,
         kREAD = GL_READ_FRAMEBUFFER,
         kNONE = GL_NONE,
@@ -80,7 +80,7 @@ public:
     RenderTarget();
     ~RenderTarget();
 
-    void Start(BindType bindType = BindType::kDRAW_READ);
+    void Start(BindType bindType = BindType::kALL);
     void Ended();
     uint GetGLID() const;
 
