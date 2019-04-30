@@ -30,7 +30,7 @@ void SpriteScreen::OnUpdate(float dt)
 {
 	RenderCommand command;
 	command.mCameraFlag		= GetOwner()->GetCameraFlag();
-	command.mTransform		= Global::Ref().RefRender().GetMatrix().GetM();
+	command.mTransform		= Global::Ref().RefRender().GetMatrixStack().GetM();
 	command.mMaterials		= &_material;
 	command.mMeshs			= &_meshQuat;
 	command.mMeshNum		= 1;

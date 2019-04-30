@@ -63,7 +63,7 @@ public:
     Render();
     ~Render();
 
-	MatrixStack & GetMatrix();
+	MatrixStack & GetMatrixStack();
 
     //  相机
     void AddCamera(Camera * camera, size_t flag, size_t order = ~0);
@@ -89,7 +89,7 @@ private:
 
     //  Post Function
     void Post(const Light * light);
-    void Post(const Material * material);
+    void Post(const Material & material);
     void Post(const RenderCommand & command);
 
     //	执行绘制命令

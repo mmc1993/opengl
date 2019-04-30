@@ -74,12 +74,12 @@ private:
 
 //  用于渲染的命令结构
 struct RenderCommand {
-    const Pass * mPass;             //  绑定的Shader
-    const Mesh * mMeshs;            //  绑定的网格
-    uint mMeshNum;                  //  绑定的网格数量
-    const Material * mMaterials;    //  绑定的材质(材质与网格数量必须一致)
-    glm::mat4 mTransform;           //  绑定的变换矩阵
-    uint mCameraFlag;               //  绑定的相机标识
+    const Pass      * mPass;            //  绑定的Shader
+    const Mesh      * mMeshs;           //  绑定的网格
+    const Material  * mMaterials;       //  绑定的材质(材质与网格数量必须一致)
+    uint mMeshNum;                      //  绑定的网格数量
+    uint mCameraFlag;                   //  绑定的相机标识
+    glm::mat4 mTransform;               //  绑定的变换矩阵
 };
 
 using RenderQueue = std::vector<RenderCommand>;

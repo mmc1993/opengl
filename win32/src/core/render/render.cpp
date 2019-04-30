@@ -25,7 +25,7 @@ Render::~Render()
     }
 }
 
-MatrixStack & Render::GetMatrix()
+MatrixStack & Render::GetMatrixStack()
 {
     return _matrixStack;
 }
@@ -166,7 +166,6 @@ void Render::RenderForward()
     //  打包光源数据
     InitUBOLightForward();
     PackUBOLightForward();
-    //  渲染
     for (auto & commands : _forwardCommands)
     {
         RenderForwardCommands(commands);
@@ -193,7 +192,7 @@ void Render::RenderForwardCommands(const RenderQueue & commands)
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
-                Post(&command.mMaterials[i]);
+                Post(command.mMaterials[i]);
 
 				Draw(command.mPass->mDrawType, command.mMeshs[i]);
 			}
@@ -361,18 +360,18 @@ void Render::Bind(const CameraInfo * camera)
 {
 	if (camera != nullptr)
 	{
-		Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kVIEW);
-		Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::kPROJ);
-		Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kVIEW, camera->mCamera->GetView());
-		Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::kPROJ, camera->mCamera->GetProj());
+		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
+		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
+		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, camera->mCamera->GetView());
+		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, camera->mCamera->GetProj());
 		glViewport((int)camera->mCamera->GetViewport().x, (int)camera->mCamera->GetViewport().y,
 				   (int)camera->mCamera->GetViewport().z, (int)camera->mCamera->GetViewport().w);
         _renderInfo.mCamera = camera;
 	}
 	else
 	{
-		Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kVIEW);
-		Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::kPROJ);
+		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
+		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
         _renderInfo.mCamera = nullptr;
 	}
 }
@@ -469,30 +468,30 @@ bool Render::Bind(const Pass * pass)
 	return false;
 }
 
-void Render::Post(const Material * material)
+void Render::Post(const Material & material)
 {
     auto count = _renderInfo.mTexBase;
-	for (auto i = 0; i != material->mDiffuses.size(); ++i)
+	for (auto i = 0; i != material.mDiffuses.size(); ++i)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material->mDiffuses.at(i), count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material.mDiffuses.at(i), count++);
 	}
-	if (material->mSpecular != nullptr)
+	if (material.mSpecular != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material->mSpecular, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material.mSpecular, count++);
 	}
-	if (material->mReflect != nullptr)
+	if (material.mReflect != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material->mReflect, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material.mReflect, count++);
 	}
-	if (material->mNormal != nullptr)
+	if (material.mNormal != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material->mNormal, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material.mNormal, count++);
 	}
-	if (material->mHeight != nullptr)
+	if (material.mHeight != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material->mHeight, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material.mHeight, count++);
 	}
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SHININESS, material->mShininess);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SHININESS, material.mShininess);
 }
 
 void Render::ClearCommands()

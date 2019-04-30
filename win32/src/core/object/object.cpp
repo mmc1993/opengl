@@ -146,8 +146,8 @@ bool Object::IsActive() const
 
 void Object::Update(float dt)
 {
-	Global::Ref().RefRender().GetMatrix().Push(MatrixStack::ModeType::kMODEL);
-	Global::Ref().RefRender().GetMatrix().Mul(MatrixStack::ModeType::kMODEL, GetTransform()->GetMatrix());
+	Global::Ref().RefRender().GetMatrixStack().Push(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::ModeType::kMODEL, GetTransform()->GetMatrix());
 
 	OnUpdate(dt);
 
@@ -167,16 +167,16 @@ void Object::Update(float dt)
 		}
 	}
 
-	Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
 }
 
 void Object::RootUpdate(float dt)
 {
-	Global::Ref().RefRender().GetMatrix().Identity(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::ModeType::kMODEL);
 	
 	Update(dt);
 
-	Global::Ref().RefRender().GetMatrix().Pop(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
 }
 
 void Object::SetParent(Object * parent)
