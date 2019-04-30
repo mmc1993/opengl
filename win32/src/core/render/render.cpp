@@ -8,6 +8,7 @@
 #include "../component/camera.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
+#include "../cfg/cfg_cache.h"
 
 Render::Render()
 { }
@@ -22,6 +23,17 @@ Render::~Render()
         assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0);
         assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0);
         glDeleteBuffers(3, _uboLightForward);
+    }
+
+    if (_gbuffer.mPositionTexture != 0)
+    {
+        assert(_gbuffer.mPositionTexture != 0
+            && _gbuffer.mSpeculerTexture != 0
+            && _gbuffer.mDiffuseTexture != 0
+            && _gbuffer.mNormalTexture != 0
+            && _gbuffer.mDepthBuffer != 0);
+        glDeleteTextures(4, &_gbuffer.mPositionTexture);
+        glDeleteRenderbuffers(1, &_gbuffer.mDepthBuffer);
     }
 }
 
@@ -116,10 +128,10 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
 void Render::RenderShadow(Light * light)
 {
     auto count = 0;
-    _shadowRT.Beg();
+    _renderTarget.Beg();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-	while (light->NextDrawShadow(count++, &_shadowRT))
+	while (light->NextDrawShadow(count++, &_renderTarget))
 	{
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -137,18 +149,11 @@ void Render::RenderShadow(Light * light)
             }
 		}
 	}
-    _shadowRT.End();
+    _renderTarget.End();
 }
 
 void Render::RenderCamera()
-{
-    //  延迟渲染
-    //      逐命令队列渲染
-    //          生成GBuffer
-    //      逐光源渲染
-    //          绑定光源UBO
-    //          渲染光源包围体
-    
+{    
     //  延迟渲染
     _renderInfo.mPass = nullptr;
     RenderDeferred();
@@ -174,7 +179,20 @@ void Render::RenderForward()
 
 void Render::RenderDeferred()
 {
-	
+    //  延迟渲染
+    //      逐命令队列渲染
+    //          生成GBuffer
+    //      逐光源渲染
+    //          绑定光源UBO
+    //          渲染光源包围体
+
+    //  初始化GBuffer
+
+    //  position
+    //  diff
+    //  spec
+    //  depth
+    //  normal
 }
 
 void Render::RenderForwardCommands(const RenderQueue & commands)
@@ -354,6 +372,69 @@ void Render::BindUBOLightForward()
     Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), count++);
     Shader::SetUniformTexArray3D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_3D_, Light::GetShadowMap3D(), count++);
     _renderInfo.mTexBase = count;
+}
+
+void Render::InitGBuffer()
+{
+    if (_gbuffer.mPositionTexture == 0)
+    {
+        assert(_gbuffer.mPositionTexture == 0
+            && _gbuffer.mSpeculerTexture == 0
+            && _gbuffer.mDiffuseTexture == 0
+            && _gbuffer.mNormalTexture == 0
+            && _gbuffer.mDepthBuffer == 0);
+        
+        glGenTextures(4, &_gbuffer.mPositionTexture);
+
+        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpeculerTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDiffuseTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mNormalTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        glGenRenderbuffers(1, &_gbuffer.mDepthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _gbuffer.mDepthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
+}
+
+void Render::BegGBuffer()
+{
+}
+
+void Render::EndGBuffer()
+{
 }
 
 void Render::Bind(const CameraInfo * camera)

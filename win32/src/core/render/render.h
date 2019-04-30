@@ -59,6 +59,21 @@ public:
             , mTexBase(0) { }
 	};
 
+    struct GBuffer {
+        uint mPositionTexture;
+        uint mSpeculerTexture;
+        uint mDiffuseTexture;
+        uint mNormalTexture;
+        uint mDepthBuffer;
+        GBuffer()
+            : mPositionTexture(0)
+            , mSpeculerTexture(0)
+            , mDiffuseTexture(0)
+            , mNormalTexture(0)
+            , mDepthBuffer(0)
+        { }
+    };
+
 public:
     Render();
     ~Render();
@@ -107,25 +122,36 @@ private:
 	void RenderForwardCommands(const RenderQueue & commands);
 	void RenderDeferredCommands(Light * light, const RenderQueue & commands);
 
-    //  正向渲染光源相关
+    //  正向渲染相关
     void InitUBOLightForward();
     void PackUBOLightForward();
     void BindUBOLightForward();
 
+    //  延迟渲染相关
+    void InitGBuffer();
+    void BegGBuffer();
+    void EndGBuffer();
+
 private:
+    RenderTarget    _renderTarget;
     MatrixStack     _matrixStack;
-    RenderTarget    _shadowRT;
 	RenderInfo      _renderInfo;
 
+    //  光源列表
 	std::vector<Light *>    _lights;
+    //  相机列表
     std::vector<CameraInfo> _cameraInfos;
-
-	//	渲染队列, 阴影不需要区分队列类型
+	//	阴影烘培队列
     RenderQueue _shadowCommands;
+    //  正向渲染队列
     std::array<RenderQueue, 4> _forwardCommands;
+    //  延迟渲染队列
     std::array<RenderQueue, 4> _deferredCommands;
 
-    //  光源UBO
+    //  正向渲染
     uint _uboLightForward[3];
+
+    //  延迟渲染
+    GBuffer _gbuffer;
 };
 

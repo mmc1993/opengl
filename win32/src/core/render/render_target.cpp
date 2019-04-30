@@ -114,23 +114,17 @@ RenderTarget::~RenderTarget()
 
 void RenderTarget::BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType)
 {
-    if (bindType == BindType::kNONE) { bindType = _bindType; }
-
-    glFramebufferRenderbuffer(bindType, attachment, GL_RENDERBUFFER, buffer->GetGLID());
+    BindAttachment(attachment, buffer->GetGLID(), bindType);
 }
 
 void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType)
 {
-    if (bindType == BindType::kNONE) { bindType = _bindType; }
-
-    glFramebufferTexture2D(bindType, attachment, type, texture2D->GetGLID(), 0);
+    BindAttachment(attachment, type, texture2D->GetGLID(), bindType);
 }
 
 void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType)
 {
-    if (bindType == BindType::kNONE) { bindType = _bindType; }
-
-    glFramebufferTexture2D(bindType, attachment, type, texture3D->GetGLID(), 0);
+    BindAttachment(attachment, type, texture3D->GetGLID(), bindType);
 }
 
 void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType)
@@ -152,6 +146,16 @@ void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, u
         }
         break;
     }
+}
+
+void RenderTarget::BindAttachment(AttachmentType attachment, uint buffer, BindType bindType)
+{
+    glFramebufferRenderbuffer(bindType, attachment, GL_RENDERBUFFER, buffer);
+}
+
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture, BindType bindType)
+{
+    glFramebufferTexture2D(bindType, attachment, type, texture, 0);
 }
 
 void RenderTarget::Beg(BindType bindType)

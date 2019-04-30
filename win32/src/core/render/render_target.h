@@ -70,6 +70,9 @@ public:
 	RenderTarget();
 	~RenderTarget();
 
+    void Beg(BindType bindType = BindType::kDRAW_READ);
+    void End();
+
     //  绑定 RenderBuffer
     void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
     //  绑定 Texture2D
@@ -80,9 +83,10 @@ public:
     //  如果绑定 Texture2D  Array, face == 0
     //  如果绑定 TextureCube Array, 0 <= face <= 6
     void BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType = BindType::kNONE);
-	
-    void Beg(BindType bindType = BindType::kDRAW_READ);
-	void End();
+    //  绑定 buffer
+    void BindAttachment(AttachmentType attachment, uint buffer, BindType bindType = BindType::kNONE);
+    //  绑定 texture
+    void BindAttachment(AttachmentType attachment, TextureType type, uint texture2D, BindType bindType = BindType::kNONE);
 
 private:
 	uint _fbo;
