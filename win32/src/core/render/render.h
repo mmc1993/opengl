@@ -61,16 +61,18 @@ public:
 
     struct GBuffer {
         uint mPositionTexture;
-        uint mSpeculerTexture;
+        uint mSpecularTexture;
         uint mDiffuseTexture;
         uint mNormalTexture;
-        uint mDepthBuffer;
+        uint mDepthTexture;
+        //uint mDepthBuffer;
         GBuffer()
             : mPositionTexture(0)
-            , mSpeculerTexture(0)
+            , mSpecularTexture(0)
             , mDiffuseTexture(0)
             , mNormalTexture(0)
-            , mDepthBuffer(0)
+            , mDepthTexture(0)
+            //, mDepthBuffer(0)
         { }
     };
 

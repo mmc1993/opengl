@@ -28,12 +28,12 @@ Render::~Render()
     if (_gbuffer.mPositionTexture != 0)
     {
         assert(_gbuffer.mPositionTexture != 0
-            && _gbuffer.mSpeculerTexture != 0
+            && _gbuffer.mSpecularTexture != 0
             && _gbuffer.mDiffuseTexture != 0
             && _gbuffer.mNormalTexture != 0
-            && _gbuffer.mDepthBuffer != 0);
-        glDeleteTextures(4, &_gbuffer.mPositionTexture);
-        glDeleteRenderbuffers(1, &_gbuffer.mDepthBuffer);
+            && _gbuffer.mDepthTexture != 0);
+        glDeleteTextures(5, &_gbuffer.mPositionTexture);
+        //glDeleteRenderbuffers(1, &_gbuffer.mDepthBuffer);
     }
 }
 
@@ -183,13 +183,16 @@ void Render::RenderDeferred()
 
     _renderTarget.Start(RenderTarget::BindType::kALL);
     _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpeculerTexture);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpecularTexture);
     _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _gbuffer.mDiffuseTexture);
     _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _gbuffer.mNormalTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kDEPTH, _gbuffer.mDepthBuffer);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _gbuffer.mDepthTexture);
+
     uint rtbinds[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
     glDrawBuffers(4, rtbinds);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (auto & commands : _deferredCommands)
     {
@@ -399,12 +402,12 @@ void Render::InitGBuffer()
     if (_gbuffer.mPositionTexture == 0)
     {
         assert(_gbuffer.mPositionTexture == 0
-            && _gbuffer.mSpeculerTexture == 0
+            && _gbuffer.mSpecularTexture == 0
             && _gbuffer.mDiffuseTexture == 0
             && _gbuffer.mNormalTexture == 0
-            && _gbuffer.mDepthBuffer == 0);
+            && _gbuffer.mDepthTexture == 0);
         
-        glGenTextures(4, &_gbuffer.mPositionTexture);
+        glGenTextures(5, &_gbuffer.mPositionTexture);
 
         auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
         auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
@@ -417,7 +420,7 @@ void Render::InitGBuffer()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpeculerTexture);
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpecularTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -441,11 +444,16 @@ void Render::InitGBuffer()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
-        glGenRenderbuffers(1, &_gbuffer.mDepthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _gbuffer.mDepthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDepthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 
+                                    0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 
