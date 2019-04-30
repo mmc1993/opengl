@@ -179,20 +179,21 @@ void Render::RenderForward()
 
 void Render::RenderDeferred()
 {
-    //  延迟渲染
-    //      逐命令队列渲染
-    //          生成GBuffer
-    //      逐光源渲染
-    //          绑定光源UBO
-    //          渲染光源包围体
+    InitGBuffer();
 
-    //  初始化GBuffer
+    _renderTarget.Start(RenderTarget::BindType::kALL);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpeculerTexture);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _gbuffer.mDiffuseTexture);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _gbuffer.mNormalTexture);
+    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kDEPTH, _gbuffer.mDepthBuffer);
 
-    //  position
-    //  diff
-    //  spec
-    //  depth
-    //  normal
+    for (auto & commands : _deferredCommands)
+    {
+        RenderDeferredCommands(commands);
+    }
+
+    _renderTarget.Ended();
 }
 
 void Render::RenderForwardCommands(const RenderQueue & commands)
@@ -218,8 +219,24 @@ void Render::RenderForwardCommands(const RenderQueue & commands)
 	}
 }
 
-void Render::RenderDeferredCommands(Light * light, const RenderQueue & commands)
+void Render::RenderDeferredCommands(const RenderQueue & commands)
 {
+    for (auto & command : commands)
+    {
+        if ((_renderInfo.mCamera->mFlag & command.mCameraFlag) != 0)
+        {
+            Bind(command.mPass); 
+            
+            Post(command);
+
+            for (auto i = 0; i != command.mMeshNum; ++i)
+            {
+                Post(command.mMaterials[i]);
+
+                Draw(command.mPass->mDrawType, command.mMeshs[i]);
+            }
+        }
+    }
 }
 
 void Render::InitUBOLightForward()
@@ -429,12 +446,9 @@ void Render::InitGBuffer()
     }
 }
 
-void Render::BegGBuffer()
+void Render::FillGBuffer()
 {
-}
 
-void Render::EndGBuffer()
-{
 }
 
 void Render::Bind(const CameraInfo * camera)

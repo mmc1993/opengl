@@ -120,7 +120,7 @@ private:
     void RenderForward();
     void RenderDeferred();
 	void RenderForwardCommands(const RenderQueue & commands);
-	void RenderDeferredCommands(Light * light, const RenderQueue & commands);
+	void RenderDeferredCommands(const RenderQueue & commands);
 
     //  正向渲染相关
     void InitUBOLightForward();
@@ -129,8 +129,7 @@ private:
 
     //  延迟渲染相关
     void InitGBuffer();
-    void BegGBuffer();
-    void EndGBuffer();
+    void FillGBuffer();
 
 private:
     RenderTarget    _renderTarget;
