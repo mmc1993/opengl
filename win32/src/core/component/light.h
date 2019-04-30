@@ -62,7 +62,7 @@ public:
     { 
         mSMP = _type == Type::kDIRECT? s_lightPool.NewPos2D()
              : _type == Type::kPOINT? s_lightPool.NewPos3D()
-             : s_lightPool.NewPos2D();
+             :  s_lightPool.NewPos2D();
         _uboPos = s_lightPool.NewUBO();
     }
 
