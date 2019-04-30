@@ -217,7 +217,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
                            RenderTarget::TextureType::k2D_ARRAY,
-                           0, Light::s_lightPool.GetTex2D(), mSMP);
+                           Light::s_lightPool.GetTex2D(), 0, mSMP);
     }
     else
     {
@@ -301,7 +301,7 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
                            RenderTarget::TextureType::k3D_ARRAY, 
-                           count, Light::s_lightPool.GetTex3D(), mSMP);
+                           Light::s_lightPool.GetTex3D(), count, mSMP);
     }
     return count != 6;
 }
@@ -367,7 +367,7 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
                            RenderTarget::TextureType::k2D_ARRAY,
-                           0, Light::s_lightPool.GetTex2D(), mSMP);
+                           Light::s_lightPool.GetTex2D(), 0, mSMP);
     }
     else
     {

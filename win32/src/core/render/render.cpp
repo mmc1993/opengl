@@ -128,7 +128,7 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
 void Render::RenderShadow(Light * light)
 {
     auto count = 0;
-    _renderTarget.Beg();
+    _renderTarget.Start();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 	while (light->NextDrawShadow(count++, &_renderTarget))
@@ -149,7 +149,7 @@ void Render::RenderShadow(Light * light)
             }
 		}
 	}
-    _renderTarget.End();
+    _renderTarget.Ended();
 }
 
 void Render::RenderCamera()

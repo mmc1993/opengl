@@ -104,6 +104,57 @@ RenderTexture3D * RenderTarget::CreateTexture3D(const std::uint32_t w, const std
 	return texture3D;
 }
 
+void RenderTarget::Bind(BindType bindType, const RenderTarget & rt)
+{
+    glBindFramebuffer(bindType, rt.GetGLID());
+}
+
+void RenderTarget::Bind(BindType bindType)
+{
+    ASSERT_RET(glCheckFramebufferStatus(bindType) == GL_FRAMEBUFFER_COMPLETE);
+
+    glBindFramebuffer(bindType, 0);
+}
+
+void RenderTarget::BindAttachment(BindType bindType, AttachmentType attachment, uint buffer)
+{
+    glFramebufferRenderbuffer(bindType, attachment, GL_RENDERBUFFER, buffer);
+}
+
+void RenderTarget::BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture)
+{
+    glFramebufferTexture2D(bindType, attachment, type, texture, 0);
+}
+
+void RenderTarget::BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture, uint face, uint pos)
+{
+    assert(type == RenderTarget::k2D_ARRAY || type == RenderTarget::k3D_ARRAY);
+
+    switch (type)
+    {
+    case RenderTarget::k2D_ARRAY:
+        {
+            glFramebufferTextureLayer(bindType, attachment, texture, 0, pos);
+        }
+        break;
+    case RenderTarget::k3D_ARRAY:
+        {
+            glFramebufferTextureLayer(bindType, attachment, texture, 0, pos * 6 + face);
+        }
+        break;
+    }
+}
+
+void RenderTarget::BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture2D * texture)
+{
+    BindAttachment(bindType, attachment, type, texture->GetGLID());
+}
+
+void RenderTarget::BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture3D * texture)
+{
+    BindAttachment(bindType, attachment, type, texture->GetGLID());
+}
+
 RenderTarget::RenderTarget() : _fbo(0)
 { }
 
@@ -112,64 +163,49 @@ RenderTarget::~RenderTarget()
 	glDeleteFramebuffers(1, &_fbo);
 }
 
-void RenderTarget::BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType)
+void RenderTarget::Start(BindType bindType)
 {
-    BindAttachment(attachment, buffer->GetGLID(), bindType);
-}
+    _bindType = bindType;
 
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType)
-{
-    BindAttachment(attachment, type, texture2D->GetGLID(), bindType);
-}
-
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType)
-{
-    BindAttachment(attachment, type, texture3D->GetGLID(), bindType);
-}
-
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType)
-{
-    assert(type == RenderTarget::k2D_ARRAY || type == RenderTarget::k3D_ARRAY);
-
-    if (bindType == BindType::kNONE) { bindType = _bindType; }
-
-    switch (type)
+    if (_fbo == 0)
     {
-    case RenderTarget::k2D_ARRAY:
-        {
-            glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos);
-        }
-        break;
-    case RenderTarget::k3D_ARRAY:
-        {
-            glFramebufferTextureLayer(bindType, attachment, texture, 0, texturePos * 6 + face);
-        }
-        break;
+        glGenFramebuffers(1, &_fbo);
     }
+
+    RenderTarget::Bind(_bindType, *this);
 }
 
-void RenderTarget::BindAttachment(AttachmentType attachment, uint buffer, BindType bindType)
+void RenderTarget::Ended()
 {
-    glFramebufferRenderbuffer(bindType, attachment, GL_RENDERBUFFER, buffer);
+    RenderTarget::Bind(_bindType);
 }
 
-void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture, BindType bindType)
+uint RenderTarget::GetGLID() const
 {
-    glFramebufferTexture2D(bindType, attachment, type, texture, 0);
+    return _fbo;
 }
 
-void RenderTarget::Beg(BindType bindType)
+void RenderTarget::BindAttachment(AttachmentType attachment, uint buffer)
 {
-	if (_fbo == 0)
-	{
-		glGenFramebuffers(1, &_fbo);
-	}
-	glBindFramebuffer(_bindType = bindType, _fbo);
+    RenderTarget::BindAttachment(_bindType, attachment, buffer);
 }
 
-void RenderTarget::End()
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture)
 {
- 	ASSERT_RET(glCheckFramebufferStatus(_bindType) == GL_FRAMEBUFFER_COMPLETE);
+    RenderTarget::BindAttachment(_bindType, attachment, type, texture);
+}
 
-	glBindFramebuffer(_bindType, 0);
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D)
+{
+    RenderTarget::BindAttachment(_bindType, attachment, type, texture2D);
+}
+
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D)
+{
+    RenderTarget::BindAttachment(_bindType, attachment, type, texture3D);
+}
+
+void RenderTarget::BindAttachment(AttachmentType attachment, TextureType type, uint texture, uint face, uint pos)
+{
+    RenderTarget::BindAttachment(_bindType, attachment, type, texture, face, pos);
 }

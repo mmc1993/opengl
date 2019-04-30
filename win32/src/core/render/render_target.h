@@ -67,26 +67,28 @@ public:
 	static RenderTexture2D * CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 	static RenderTexture3D * CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 
-	RenderTarget();
-	~RenderTarget();
+    static void Bind(BindType bindType, const RenderTarget & rt);
+    static void Bind(BindType bindType);
 
-    void Beg(BindType bindType = BindType::kDRAW_READ);
-    void End();
+    static void BindAttachment(BindType bindType, AttachmentType attachment, uint buffer);
+    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture);
+    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture2D * texture);
+    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture3D * texture);
+    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture, uint face, uint pos);
 
-    //  绑定 RenderBuffer
-    void BindAttachment(AttachmentType attachment, RenderBuffer * buffer, BindType bindType = BindType::kNONE);
-    //  绑定 Texture2D
-    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D, BindType bindType = BindType::kNONE);
-    //  绑定 TextureCube
-    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D, BindType bindType = BindType::kNONE);
-    //  绑定 Texture Array
-    //  如果绑定 Texture2D  Array, face == 0
-    //  如果绑定 TextureCube Array, 0 <= face <= 6
-    void BindAttachment(AttachmentType attachment, TextureType type, uint face, uint texture, uint texturePos, BindType bindType = BindType::kNONE);
-    //  绑定 buffer
-    void BindAttachment(AttachmentType attachment, uint buffer, BindType bindType = BindType::kNONE);
-    //  绑定 texture
-    void BindAttachment(AttachmentType attachment, TextureType type, uint texture2D, BindType bindType = BindType::kNONE);
+
+    RenderTarget();
+    ~RenderTarget();
+
+    void Start(BindType bindType = BindType::kDRAW_READ);
+    void Ended();
+    uint GetGLID() const;
+
+    void BindAttachment(AttachmentType attachment, uint buffer);
+    void BindAttachment(AttachmentType attachment, TextureType type, uint texture);
+    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D);
+    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D);
+    void BindAttachment(AttachmentType attachment, TextureType type, uint texture, uint face, uint pos);
 
 private:
 	uint _fbo;
