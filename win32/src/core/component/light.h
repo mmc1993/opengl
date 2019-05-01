@@ -121,7 +121,12 @@ public:
         glm::vec3 mPosition;
     };
 
+public:
     static uint GetUBOLength();
+private:
+    static std::weak_ptr<Mesh> s_volume;
+    static void DeleteVolume(Mesh * mesh);
+    static std::shared_ptr<Mesh> NewVolume();
 
 public:
 	LightDirect(): Light(Light::kDIRECT)

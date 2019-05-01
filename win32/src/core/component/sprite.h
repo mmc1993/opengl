@@ -15,8 +15,8 @@ public:
 
 	void AddMesh(const Mesh & mesh, const Material & material)
 	{
-		_meshs.push_back(mesh);
-		_mates.push_back(material);
+		_meshs.emplace_back(mesh);
+		_mates.emplace_back(material);
 	}
 
 	void BindShader(const std::string & url);

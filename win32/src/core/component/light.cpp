@@ -185,6 +185,24 @@ void Light::UpdateVolume()
     }
 }
 
+void LightDirect::DeleteVolume(Mesh * mesh)
+{
+    //Mesh::Delete(*mesh);
+    //s_volume = nullptr;
+}
+
+std::shared_ptr<Mesh> LightDirect::NewVolume()
+{
+    std::shared_ptr<Mesh> lock;
+    if (!s_volume.expired())
+    {
+        auto lock = std::make_shared<Mesh, void(*)(Mesh *)>();
+        *lock = Mesh::CreateV({}, {});
+        s_volume = lock;
+    }
+    return s_volume.lock();
+}
+
 uint LightDirect::GetUBOLength()
 {
     auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
