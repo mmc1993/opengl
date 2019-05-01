@@ -72,9 +72,7 @@ namespace string_tool {
             return (int)ch > 32;
         };
         auto len = std::strlen(str1);
-        auto it = std::find_if(str0.begin(), 
-                               str0.end(), 
-                               onFind);
+        auto it = std::find_if(str0.begin(), str0.end(), onFind);
         if (it == str0.end())
         {
             return len == 0;

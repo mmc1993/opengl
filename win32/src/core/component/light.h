@@ -104,8 +104,6 @@ protected:
     uint _uboPos;
     //  光源投影矩阵
     glm::mat4 _proj;
-
-    Mesh _volume;
 private:
 	Type _type;
 };
@@ -131,6 +129,8 @@ public:
 
     ~LightDirect()
     { }
+
+    void UpdateVolmue();
 
 	void OpenShadow(const glm::vec2 & orthoX,	//	左右
 					const glm::vec2 & orthoY,	//	上下
@@ -164,6 +164,8 @@ public:
     ~LightPoint()
     { }
 
+    void UpdateVolmue();
+
 	void OpenShadow(const float n, const float f);
 
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
@@ -196,6 +198,8 @@ public:
 
     ~LightSpot()
     { }
+
+    void UpdateVolmue();
 
 	void OpenShadow(const float n, const float f);
 
