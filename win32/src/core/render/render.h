@@ -94,10 +94,11 @@ public:
     
     //  ‰÷»æ
 	void RenderOnce();
-
 	void PostCommand(const Shader * shader, const RenderCommand & command);
-
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
+
+    //  —”≥Ÿ‰÷»æ
+    void BindDeferred(const Shader * shader);
 
 private:
     //  Bind Function
@@ -108,6 +109,7 @@ private:
     void Post(const Light * light);
     void Post(const Material & material);
     void Post(const RenderCommand & command);
+    //void PostMatrix(const glm::mat4 *)
 
     //	÷¥––ªÊ÷∆√¸¡Ó
     void Draw(DrawTypeEnum drawType, const Mesh & mesh);
@@ -151,8 +153,8 @@ private:
 
     //  ’˝œÚ‰÷»æ
     uint _uboLightForward[3];
-
     //  —”≥Ÿ‰÷»æ
+    const Shader * _deferredShader;
     GBuffer _gbuffer;
 };
 

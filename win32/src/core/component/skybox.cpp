@@ -12,7 +12,7 @@ Skybox::Skybox()
 
 Skybox::~Skybox()
 {
-	Mesh::Delete(_meshCube);
+	Mesh::DeleteRef(_meshCube);
 }
 
 void Skybox::OnAdd()

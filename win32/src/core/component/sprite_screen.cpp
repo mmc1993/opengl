@@ -15,7 +15,7 @@ SpriteScreen::SpriteScreen()
 
 SpriteScreen::~SpriteScreen()
 {
-	Mesh::Delete(_meshQuat);
+	Mesh::DeleteRef(_meshQuat);
 }
 
 void SpriteScreen::OnAdd()

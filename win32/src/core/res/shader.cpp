@@ -45,6 +45,13 @@ void Shader::SetUniform(uint GLID, const std::string & key, const glm::mat4 & va
 	glUniformMatrix4fv(glGetUniformLocation(GLID, key.c_str()), 1, GL_FALSE, &val[0][0]);
 }
 
+void Shader::SetUniform(uint GLID, const std::string & key, const uint val, iint pos)
+{
+    glActiveTexture(GL_TEXTURE0 + pos);
+    glBindTexture(GL_TEXTURE_2D, val);
+    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+}
+
 void Shader::SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos)
 {
 	glActiveTexture(GL_TEXTURE0 + pos);

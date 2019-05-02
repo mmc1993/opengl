@@ -78,3 +78,9 @@ static const char * const UNIFORM_LIGHT_COUNT_DIRECT_   = "light_count_direct_";
 static const char * const UNIFORM_LIGHT_COUNT_POINT_    = "light_count_point_";
 //  ¾Û¹âµÆÊýÁ¿
 static const char * const UNIFORM_LIGHT_COUNT_SPOT_     = "light_count_spot_";
+
+//  G-Buffer Position
+static const char * const UNIFORM_GBUFFER_POSIITON      = "gbuffer_position_";
+static const char * const UNIFORM_GBUFFER_SPECULAR      = "gbuffer_specular_";
+static const char * const UNIFORM_GBUFFER_DIFFUSE       = "gbuffer_diffuse_";
+static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";

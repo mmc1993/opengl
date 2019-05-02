@@ -188,11 +188,16 @@ public:
 		return mesh;
 	}
 
-	static void Delete(Mesh & mesh)
+	static void DeleteRef(Mesh & mesh)
 	{
 		glDeleteBuffers(1, &mesh.mEBO);
 		glDeleteBuffers(1, &mesh.mVBO);
 		glDeleteVertexArrays(1, &mesh.mVAO);
 		mesh.mVtxCount = mesh.mIdxCount = mesh.mVAO = mesh.mVBO = mesh.mEBO = 0;
 	}
+
+    static void DeletePtr(Mesh * mesh)
+    {
+        DeleteRef(*mesh);
+    }
 };

@@ -125,6 +125,12 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
     }
 }
 
+void Render::BindDeferred(const Shader * shader)
+{
+    assert(shader->GetPasss().size() == 1);
+    _deferredShader = shader;
+}
+
 void Render::RenderShadow(Light * light)
 {
     auto count = 0;
@@ -200,6 +206,22 @@ void Render::RenderDeferred()
     }
 
     _renderTarget.Ended();
+
+
+    for (auto & light : _lights)
+    {
+        for (const auto pass : _deferredShader->GetPasss())
+        {
+            Bind(&pass);
+            Post(light);
+            //PostMatrix()
+            auto count = _renderInfo.mTexBase;
+            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, count++);
+            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, count++);
+            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, count++);
+            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, count++);
+        }
+    }
 }
 
 void Render::RenderForwardCommands(const RenderQueue & commands)

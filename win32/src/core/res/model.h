@@ -12,7 +12,7 @@ public:
 	
 	~Model()
 	{
-		std::for_each(mMeshs.begin(), mMeshs.end(), Mesh::Delete);
+		std::for_each(mMeshs.begin(), mMeshs.end(), Mesh::DeleteRef);
 		for (auto child : mChilds) { delete child; }
 	}
 };

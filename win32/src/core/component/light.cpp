@@ -7,6 +7,9 @@
 uint Light::s_VIEW_W = 0;
 uint Light::s_VIEW_H = 0;
 Light::LightPool Light::s_lightPool;
+std::weak_ptr<Mesh> Light::s_spotVolmue;
+std::weak_ptr<Mesh> Light::s_pointVolmue;
+std::weak_ptr<Mesh> Light::s_directVolmue;
 
 void Light::LightPool::Clear()
 {
@@ -151,6 +154,126 @@ void Light::LightPool::AllocPos3D()
     }
 }
 
+std::shared_ptr<Mesh> Light::NewVolume()
+{
+    switch (_type)
+    {
+    case Type::kDIRECT:
+        {
+            if (!s_directVolmue.expired())
+            {
+                auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
+                auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+                auto mesh = Mesh::CreateV({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
+                                            { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } }, { 0, 1, 2, 0, 2, 3 });
+                std::shared_ptr<Mesh> sharePtr(new Mesh(), Mesh::DeletePtr);
+                s_directVolmue = sharePtr; *sharePtr = mesh;
+                return s_directVolmue.lock();
+            }
+            return s_directVolmue.lock();
+        }
+        break;
+    case Type::kPOINT:
+        {
+            if (!s_pointVolmue.expired())
+            {
+                const auto N0 = 4;
+                const auto N1 = N0 * 2-2;
+                std::vector<uint> indexs;
+                std::vector<Mesh::Vertex> vertexs;
+
+                vertexs.emplace_back(glm::vec3(0, 1, 0));
+                for (auto i = 0; i != N1; ++i)
+                {
+                    indexs.emplace_back(0);
+                    indexs.emplace_back((i    ) % N1 + 1);
+                    indexs.emplace_back((i + 1) % N1 + 1);
+                }
+
+                auto step = static_cast<float>(M_PI / N0);
+                for (auto i = 1; i != N0 - 1; ++i)
+                {
+                    auto a = step * i;
+                    auto x = std::sin(a);
+                    auto y = std::cos(a);
+                    auto base = (i - 1) * N1;
+                    for (auto j = 0; j != N1; ++j)
+                    {
+                        if (i != 1 && i != N0 - 2)
+                        {
+                            auto point0 = (j + 1);
+                            auto point1 = (j + 1) % N1 + 1;
+                            indexs.push_back(base - N1 + point0);
+                            indexs.push_back(point0);
+                            indexs.push_back(point1);
+
+                            indexs.push_back(base - N1 + point0);
+                            indexs.push_back(point1);
+                            indexs.push_back(base - N1 + point1);
+                        }
+                        vertexs.emplace_back(glm::vec3(x, y, std::cos(step * j)));
+                    }
+                }
+
+                auto base = (N0 - 1) * N1 + 1;
+                for (auto i = 0; i != N1; ++i)
+                {
+                    auto point0 =  i;
+                    auto point1 = (i + 1) % N1;
+                    indexs.emplace_back(base + point0);
+                    indexs.emplace_back(vertexs.size());
+                    indexs.emplace_back(base + point1);
+                }
+
+                vertexs.emplace_back(glm::vec3(0, -1, 0));
+
+                std::shared_ptr<Mesh> sharePtr(new Mesh(), &Mesh::DeletePtr);
+                *sharePtr = Mesh::CreateV(vertexs, indexs); 
+                s_pointVolmue = sharePtr;
+                return s_pointVolmue.lock();
+            }
+            return s_pointVolmue.lock();
+        }
+        break;
+    case Type::kSPOT:
+        {
+            if (s_spotVolmue.expired())
+            {
+                const auto N = 6;
+                std::vector<uint> indexs;
+                std::vector<Mesh::Vertex> vertexs;
+
+                vertexs.emplace_back(glm::vec3(0, 0, 0));
+
+                auto step = static_cast<float>(M_PI / N);
+                for (auto i = 0; i != N; ++i)
+                {
+                    auto a = step * i;
+                    auto x = std::sin(a);
+                    auto y = std::cos(a);
+                    vertexs.emplace_back(glm::vec3(x, y, 0.5f));
+
+                    indexs.emplace_back(0);
+                    indexs.emplace_back( i + 1);
+                    indexs.emplace_back((i + 1) % N + 1);
+
+                    indexs.emplace_back(1);
+                    indexs.emplace_back( i + 2);
+                    indexs.emplace_back((i + 2) % N + 1);
+                }
+
+                std::shared_ptr<Mesh> sharePtr(new Mesh(), &Mesh::DeletePtr);
+                *sharePtr = Mesh::CreateV(vertexs, indexs);
+                s_spotVolmue = sharePtr;
+                return s_spotVolmue.lock();
+            }
+            return s_spotVolmue.lock();
+        }
+        break;
+    }
+    return nullptr;
+}
+
 //  --------------------------------------------------------------------------------
 //  光源实现
 void Light::OnAdd()
@@ -163,44 +286,12 @@ void Light::OnDel()
 	Global::Ref().RefRender().DelLight(this);
 }
 
-void Light::UpdateVolume()
+float Light::CalLightDistance(float k0, float k1, float k2, float s)
 {
-    switch (_type)
-    {
-    case Type::kDIRECT:
-        //  创建后不做修改
-        break;
-    case Type::kPOINT:
-        {
-            //auto point = reinterpret_cast<LightPoint *>(this);
-            //x = d / (point->mK0 + point->mK1 * d + point->mK2 * d * d);
-            //d = x * (point->mK0 + point->mK1 * d + point->mK2 * d * d)
-            //d = point->mK0 * x + point->mK1 * x * d + point->mK2 * x * d * d
-            //d = point->mK0 * x + (point->mK1 * x + point->mK2 * x) * d + point->mK2 * x * d
-
-        }
-        break;
-    case Type::kSPOT:
-        break;
-    }
-}
-
-void LightDirect::DeleteVolume(Mesh * mesh)
-{
-    //Mesh::Delete(*mesh);
-    //s_volume = nullptr;
-}
-
-std::shared_ptr<Mesh> LightDirect::NewVolume()
-{
-    std::shared_ptr<Mesh> lock;
-    if (!s_volume.expired())
-    {
-        auto lock = std::make_shared<Mesh, void(*)(Mesh *)>();
-        *lock = Mesh::CreateV({}, {});
-        s_volume = lock;
-    }
-    return s_volume.lock();
+    auto a = k2 * s;
+    auto b = k1 * s - 1;
+    auto c = k0 * s;
+    return (-b + std::sqrt(b * b - 4 * a * c)) / (2 * a);
 }
 
 uint LightDirect::GetUBOLength()
