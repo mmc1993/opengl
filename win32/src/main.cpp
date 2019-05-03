@@ -57,7 +57,7 @@ private:
 	void InitAssets()
 	{
         File::LoadShader(BUILTIN_SHADER_LIGHT);
-        File::LoadShader("res/demo/shader/scene_deferred.shader");
+        File::LoadShader("res/demo/shader/scene.shader");
 	}
 
 	void InitObject()
@@ -68,7 +68,7 @@ private:
 
 		createScene = [&createScene](Model * model, Object * parent) {
 			auto sprite = new Sprite();
-			sprite->BindShader("res/demo/shader/scene_deferred.shader");
+			sprite->BindShader("res/demo/shader/scene.shader");
 			for (auto i = 0; i != model->mMeshs.size(); ++i)
 			{
 				sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
@@ -104,12 +104,12 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            { glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
+            //{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.00001f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.01f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -235,18 +235,15 @@ private:
 			camera->SetPos(pos);
 		}
 
-        for (auto light : _lightPoints)
-        {
-            light->GetOwner()->GetTransform()->Translate(-1.5f,
-                                                         8 + std::cos(_pointCos) * 3,
-                                                         3 + std::sin(_pointCos) * 3);
-        }
-        _pointCos += 0.1f;
+        //_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f,
+        //                                                8 + std::cos(_pointCos) * 3,
+        //                                                3 + std::sin(_pointCos) * 3);
+        //_pointCos += 0.1f;
 
-		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-																 8,
-																 0 + std::sin(_spotCos) * 5);
-		_spotCos += 0.1f;
+		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
+		//														 8,
+		//														 0 + std::sin(_spotCos) * 5);
+		//_spotCos += 0.1f;
 
 		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
