@@ -8,6 +8,7 @@ enum RenderQueueEnum {
 };
 
 enum RenderTypeEnum {
+    kLIGHT,         //  ‰÷»æπ‚‘¥
 	kSHADOW,        //  ∫Ê≈‡“ı”∞Ã˘Õº
 	kFORWARD,       //  ’˝œÚ‰÷»æ
 	kDEFERRED,      //  —”≥Ÿ‰÷»æ
@@ -84,3 +85,6 @@ static const char * const UNIFORM_GBUFFER_POSIITON      = "gbuffer_position_";
 static const char * const UNIFORM_GBUFFER_SPECULAR      = "gbuffer_specular_";
 static const char * const UNIFORM_GBUFFER_DIFFUSE       = "gbuffer_diffuse_";
 static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
+
+//  ‘§…ËShader
+static const char * const BUILTIN_SHADER_LIGHT = "res/built-in/shader/light.shader";

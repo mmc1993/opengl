@@ -73,17 +73,6 @@ void Render::DelCamera(size_t order)
 	{ DelCamera(it->mCamera); }
 }
 
-void Render::AddLight(Light * light)
-{
-	_lights.push_back(light);
-}
-
-void Render::DelLight(Light * light)
-{
-	auto it = std::remove(_lights.begin(), _lights.end(), light);
-	if (it != _lights.end()) { _lights.erase(it); }
-}
-
 void Render::RenderOnce()
 {
 	_renderInfo.mVertexCount = 0;
@@ -92,9 +81,9 @@ void Render::RenderOnce()
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
 	//	∫Ê≈‡…Ó∂»Ã˘Õº
-    for (auto & light : _lights)
+    for (auto & command : _lightCommands)
     {
-        RenderShadow(light);
+        RenderShadow(command.mLight);
     }
 
 	//	÷œ‡ª˙÷¥––‰÷»æ√¸¡Ó
@@ -113,9 +102,9 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
     {
     case RenderCommand::kOBJECT:
         {
+            auto cmd = reinterpret_cast<const ObjectCommand &>(command);
             for (const auto & pass : shader->GetPasss())
             {
-                auto cmd = reinterpret_cast<const ObjectCommand &>(command);
                 cmd.mPass = &pass;
                 switch (cmd.mPass->mRenderType)
                 {
@@ -131,16 +120,12 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
         break;
     case RenderCommand::kLIGHT:
         {
-
+            auto cmd = reinterpret_cast<const LightCommand &>(command);
+            cmd.mPass = &shader->GetPass(0);
+            _lightCommands.push_back(cmd);
         }
         break;
     }
-}
-
-void Render::BindDeferred(const Shader * shader)
-{
-    assert(shader->GetPasss().size() == 1);
-    _deferredShader = shader;
 }
 
 void Render::RenderShadow(Light * light)
@@ -219,20 +204,19 @@ void Render::RenderDeferred()
 
     _renderTarget.Ended();
 
-
-    for (auto & light : _lights)
-    {
-        for (const auto pass : _deferredShader->GetPasss())
-        {
-            Bind(&pass);
-            Post(light);
-            auto count = _renderInfo.mTexBase;
-            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, count++);
-            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, count++);
-            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, count++);
-            Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, count++);
-        }
-    }
+    //for (auto & light : _lights)
+    //{
+    //    for (const auto pass : _deferredShader->GetPasss())
+    //    {
+    //        Bind(&pass);
+    //        Post(light);
+    //        auto count = _renderInfo.mTexBase;
+    //        Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, count++);
+    //        Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, count++);
+    //        Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, count++);
+    //        Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, count++);
+    //    }
+    //}
 }
 
 void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
@@ -306,19 +290,19 @@ void Render::InitUBOLightForward()
 void Render::PackUBOLightForward()
 {
     auto & cameraPos = _renderInfo.mCamera->mCamera->GetPos();
-    std::sort(_lights.begin(), _lights.end(), [&cameraPos] (const Light * light0, 
-                                                            const Light * light1) 
+    std::sort(_lightCommands.begin(), _lightCommands.end(), [&cameraPos] (const LightCommand & command0,
+                                                                          const LightCommand & command1)
     {
-        if (light0->GetType() == Light::Type::kDIRECT && light1->GetType() != Light::Type::kDIRECT)
+        if (command0.mLight->GetType() == Light::Type::kDIRECT && command1.mLight->GetType() != Light::Type::kDIRECT)
         {
             return true;
         }
-        if (light0->GetType() != Light::Type::kDIRECT && light1->GetType() == Light::Type::kDIRECT)
+        if (command0.mLight->GetType() != Light::Type::kDIRECT && command1.mLight->GetType() == Light::Type::kDIRECT)
         {
             return false;
         }
-        auto diff0 = (cameraPos - light0->mPosition);
-        auto diff1 = (cameraPos - light1->mPosition);
+        auto diff0 = (cameraPos - command0.mLight->mPosition);
+        auto diff1 = (cameraPos - command1.mLight->mPosition);
         return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
     });
 
@@ -330,19 +314,19 @@ void Render::PackUBOLightForward()
     uint directBase = 0;
     uint pointBase = 0;
     uint spotBase = 0;
-    for (auto it = _lights.begin(); it != _lights.end() && 
+    for (auto it = _lightCommands.begin(); it != _lightCommands.end() &&
          (_renderInfo.mCountForwardLightDirect != LIMIT_FORWARD_LIGHT_DIRECT
          || _renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT
          || _renderInfo.mCountForwardLightSpot != LIMIT_FORWARD_LIGHT_SPOT); ++it)
     {
-        switch ((*it)->GetType())
+        switch (it->mLight->GetType())
         {
         case Light::Type::kDIRECT:
             {
                 if (_renderInfo.mCountForwardLightDirect != LIMIT_FORWARD_LIGHT_DIRECT)
                 {
                     ++_renderInfo.mCountForwardLightDirect;
-                    auto direct = reinterpret_cast<LightDirect *>(*it);
+                    auto direct = reinterpret_cast<LightDirect *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
                     directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mSMP)>(directBase, direct->mSMP);
                     directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mMatrix)>(directBase, direct->mMatrix);
@@ -361,7 +345,7 @@ void Render::PackUBOLightForward()
                 if (_renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT)
                 {
                     ++_renderInfo.mCountForwardLightPoint;
-                    auto point = reinterpret_cast<LightPoint *>(*it);
+                    auto point = reinterpret_cast<LightPoint *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
                     pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mSMP)>(pointBase, point->mSMP);
                     pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mFar)>(pointBase, point->mFar);
@@ -383,7 +367,7 @@ void Render::PackUBOLightForward()
                 if (_renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT)
                 {
                     ++_renderInfo.mCountForwardLightSpot;
-                    auto spot = reinterpret_cast<LightSpot *>(*it);
+                    auto spot = reinterpret_cast<LightSpot *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
                     spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mSMP)>(spotBase, spot->mSMP);
                     spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK0)>(spotBase, spot->mK0);
@@ -635,6 +619,7 @@ void Render::Post(const Material & material)
 
 void Render::ClearCommands()
 {
+    _lightCommands.clear();
 	_shadowCommands.clear();
 	for (auto & queue : _forwardCommands) { queue.clear(); }
 	for (auto & queue : _deferredCommands) { queue.clear(); }

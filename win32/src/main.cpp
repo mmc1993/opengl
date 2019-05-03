@@ -35,8 +35,8 @@ public:
 public:
     void InitGame()
     {
+        InitAssets();
 		InitCamera();
-		InitAssets();
 		InitEvents();
 		InitLights();
 		InitObject();
@@ -56,6 +56,7 @@ private:
 
 	void InitAssets()
 	{
+        File::LoadShader(BUILTIN_SHADER_LIGHT);
         File::LoadShader("res/demo/shader/scene_deferred.shader");
 	}
 

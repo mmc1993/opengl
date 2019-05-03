@@ -1,7 +1,9 @@
 #include "light.h"
 #include "transform.h"
+#include "../res/shader.h"
 #include "../render/render.h"
 #include "../cfg/cfg_cache.h"
+#include "../res/res_cache.h"
 #include "../tools/glsl_tool.h"
 
 uint Light::s_VIEW_W = 0;
@@ -274,16 +276,25 @@ std::shared_ptr<Mesh> Light::NewVolume()
     return nullptr;
 }
 
-//  --------------------------------------------------------------------------------
-//  光源实现
-void Light::OnAdd()
+Light::Light(Type type): _type(type)
 {
-	Global::Ref().RefRender().AddLight(this);
+    mSMP = _type == Type::kDIRECT ? s_lightPool.NewPos2D()
+        : _type == Type::kPOINT ? s_lightPool.NewPos3D()
+        : s_lightPool.NewPos2D();
+    _uboPos = s_lightPool.NewUBO();
+    _volume = NewVolume();
+    _shader = Global::Ref().RefResCache().Get<Shader>(BUILTIN_SHADER_LIGHT);
 }
 
-void Light::OnDel()
+//  --------------------------------------------------------------------------------
+//  光源实现
+void Light::OnUpdate(float dt)
 {
-	Global::Ref().RefRender().DelLight(this);
+    LightCommand command;
+    command.mLight      = this;
+    command.mMesh       = _volume.get();
+    command.mTransform  = Global::Ref().RefRender().GetMatrixStack().GetM();
+    Global::Ref().RefRender().PostCommand(_shader, command);
 }
 
 float Light::CalLightDistance(float k0, float k1, float k2, float s)

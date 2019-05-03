@@ -81,7 +81,7 @@ struct RenderCommand {
     };
     RenderCommand(Type type): mType(type) 
     { }
-    const Type mType;
+    Type mType;
 };
 
 struct ObjectCommand: public RenderCommand {

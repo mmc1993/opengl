@@ -5,6 +5,7 @@
 #include "../res/bitmap.h"
 #include "../res/bitmap_cube.h"
 
+class Shader;
 class RenderTarget;
 
 class Light : public Component {
@@ -64,15 +65,7 @@ private:
     std::shared_ptr<Mesh> NewVolume();
 
 public:
-	Light(Type type)
-        : _type(type), _uboPos(0)
-    { 
-        mSMP = _type == Type::kDIRECT? s_lightPool.NewPos2D()
-             : _type == Type::kPOINT? s_lightPool.NewPos3D()
-             :  s_lightPool.NewPos2D();
-        _uboPos = s_lightPool.NewUBO();
-        _volume = NewVolume();
-    }
+    Light(Type type);
 
     virtual ~Light()
     {
@@ -85,9 +78,9 @@ public:
         s_lightPool.FreeUBO(_uboPos);
     }
 
-	virtual void OnAdd();
-	virtual void OnDel();
-	virtual void OnUpdate(float dt) { }
+    virtual void OnAdd() {}
+    virtual void OnDel() {}
+    virtual void OnUpdate(float dt);
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) = 0;
 
     const Type & GetType() const { return _type; }
@@ -112,6 +105,8 @@ protected:
     glm::mat4 _proj;
     //  ¹âÌå»ý
     std::shared_ptr<Mesh> _volume;
+
+    Shader * _shader;
 private:
 	Type _type;
 };

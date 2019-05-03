@@ -144,7 +144,8 @@ Shader * File::LoadShader(const std::string & url)
                 else if (word == "RenderType")
                 {
 					sstream >> value;
-                    if (value == "Shadow") { pass.mRenderType = RenderTypeEnum::kSHADOW; }
+                    if (value == "Light") { pass.mRenderType = RenderTypeEnum::kLIGHT; }
+                    else if (value == "Shadow") { pass.mRenderType = RenderTypeEnum::kSHADOW; }
                     else if (value == "Forward") { pass.mRenderType = RenderTypeEnum::kFORWARD; }
                     else if (value == "Deferred") { pass.mRenderType = RenderTypeEnum::kDEFERRED; }
                 }

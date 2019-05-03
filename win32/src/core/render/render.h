@@ -65,14 +65,12 @@ public:
         uint mDiffuseTexture;
         uint mNormalTexture;
         uint mDepthTexture;
-        //uint mDepthBuffer;
         GBuffer()
             : mPositionTexture(0)
             , mSpecularTexture(0)
             , mDiffuseTexture(0)
             , mNormalTexture(0)
             , mDepthTexture(0)
-            //, mDepthBuffer(0)
         { }
     };
 
@@ -88,17 +86,10 @@ public:
 	void DelCamera(Camera * camera);
 	void DelCamera(size_t order);
 
-    //  光源
-	void AddLight(Light * light);
-	void DelLight(Light * light);
-    
     //  渲染
 	void RenderOnce();
 	void PostCommand(const Shader * shader, const RenderCommand & command);
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
-
-    //  延迟渲染
-    void BindDeferred(const Shader * shader);
 
 private:
     //  Bind Function
@@ -139,11 +130,11 @@ private:
     MatrixStack     _matrixStack;
 	RenderInfo      _renderInfo;
 
-    //  光源列表
-	std::vector<Light *>    _lights;
     //  相机列表
     std::vector<CameraInfo> _cameraInfos;
-	//	阴影烘培队列
+    //  光源队列
+    LightCommandQueue _lightCommands;
+    //	阴影烘培队列
     ObjectCommandQueue _shadowCommands;
     //  正向渲染队列
     std::array<ObjectCommandQueue, 4> _forwardCommands;
@@ -153,7 +144,6 @@ private:
     //  正向渲染
     uint _uboLightForward[3];
     //  延迟渲染
-    const Shader * _deferredShader;
     GBuffer _gbuffer;
 };
 
