@@ -109,19 +109,31 @@ void Render::RenderOnce()
 
 void Render::PostCommand(const Shader * shader, const RenderCommand & command)
 {
-    for (const auto & pass : shader->GetPasss())
+    switch (command.mType)
     {
-        auto cmd = command;
-        cmd.mPass  = &pass;
-        switch (cmd.mPass->mRenderType)
+    case RenderCommand::kOBJECT:
         {
-        case RenderTypeEnum::kSHADOW:
-            _shadowCommands.push_back(cmd); break;
-        case RenderTypeEnum::kFORWARD:
-            _forwardCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-        case RenderTypeEnum::kDEFERRED:
-            _deferredCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+            for (const auto & pass : shader->GetPasss())
+            {
+                auto cmd = reinterpret_cast<const ObjectCommand &>(command);
+                cmd.mPass = &pass;
+                switch (cmd.mPass->mRenderType)
+                {
+                case RenderTypeEnum::kSHADOW:
+                    _shadowCommands.push_back(cmd); break;
+                case RenderTypeEnum::kFORWARD:
+                    _forwardCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+                case RenderTypeEnum::kDEFERRED:
+                    _deferredCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+                }
+            }
         }
+        break;
+    case RenderCommand::kLIGHT:
+        {
+
+        }
+        break;
     }
 }
 
@@ -144,8 +156,8 @@ void Render::RenderShadow(Light * light)
 		for (auto & command : _shadowCommands)
 		{
             Bind(command.mPass);
-
-            Post(command);
+            
+            PostMatrix(command.mTransform);
 
             Post(light);
 
@@ -214,7 +226,6 @@ void Render::RenderDeferred()
         {
             Bind(&pass);
             Post(light);
-            //PostMatrix()
             auto count = _renderInfo.mTexBase;
             Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, count++);
             Shader::SetUniform(pass.GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, count++);
@@ -224,7 +235,7 @@ void Render::RenderDeferred()
     }
 }
 
-void Render::RenderForwardCommands(const RenderQueue & commands)
+void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
 {
 	for (const auto & command : commands)
 	{
@@ -235,7 +246,7 @@ void Render::RenderForwardCommands(const RenderQueue & commands)
                 BindUBOLightForward();
             }
 			
-            Post(command);
+            PostMatrix(command.mTransform);
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
@@ -247,7 +258,7 @@ void Render::RenderForwardCommands(const RenderQueue & commands)
 	}
 }
 
-void Render::RenderDeferredCommands(const RenderQueue & commands)
+void Render::RenderDeferredCommands(const ObjectCommandQueue & commands)
 {
     for (auto & command : commands)
     {
@@ -255,7 +266,7 @@ void Render::RenderDeferredCommands(const RenderQueue & commands)
         {
             Bind(command.mPass); 
             
-            Post(command);
+            PostMatrix(command.mTransform);
 
             for (auto i = 0; i != command.mMeshNum; ++i)
             {
@@ -629,9 +640,9 @@ void Render::ClearCommands()
 	for (auto & queue : _deferredCommands) { queue.clear(); }
 }
 
-void Render::Post(const RenderCommand & command)
+void Render::PostMatrix(const glm::mat4 & transform)
 {
-	auto & matrixM			= command.mTransform;
+	auto & matrixM			= transform;
 	auto & matrixV			= _matrixStack.GetV();
 	auto & matrixP			= _matrixStack.GetP();
 	const auto & matrixN	= glm::transpose(glm::inverse(glm::mat3(matrixM)));

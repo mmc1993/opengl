@@ -28,7 +28,7 @@ void SpriteScreen::OnDel()
 
 void SpriteScreen::OnUpdate(float dt)
 {
-	RenderCommand command;
+    ObjectCommand command;
 	command.mCameraFlag		= GetOwner()->GetCameraFlag();
 	command.mTransform		= Global::Ref().RefRender().GetMatrixStack().GetM();
 	command.mMaterials		= &_material;

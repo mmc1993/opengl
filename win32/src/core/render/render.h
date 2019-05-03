@@ -108,8 +108,7 @@ private:
     //  Post Function
     void Post(const Light * light);
     void Post(const Material & material);
-    void Post(const RenderCommand & command);
-    //void PostMatrix(const glm::mat4 *)
+    void PostMatrix(const glm::mat4 & transform);
 
     //	执行绘制命令
     void Draw(DrawTypeEnum drawType, const Mesh & mesh);
@@ -123,8 +122,8 @@ private:
     void RenderCamera();
     void RenderForward();
     void RenderDeferred();
-	void RenderForwardCommands(const RenderQueue & commands);
-	void RenderDeferredCommands(const RenderQueue & commands);
+	void RenderForwardCommands(const ObjectCommandQueue & commands);
+	void RenderDeferredCommands(const ObjectCommandQueue & commands);
 
     //  正向渲染相关
     void InitUBOLightForward();
@@ -145,11 +144,11 @@ private:
     //  相机列表
     std::vector<CameraInfo> _cameraInfos;
 	//	阴影烘培队列
-    RenderQueue _shadowCommands;
+    ObjectCommandQueue _shadowCommands;
     //  正向渲染队列
-    std::array<RenderQueue, 4> _forwardCommands;
+    std::array<ObjectCommandQueue, 4> _forwardCommands;
     //  延迟渲染队列
-    std::array<RenderQueue, 4> _deferredCommands;
+    std::array<ObjectCommandQueue, 4> _deferredCommands;
 
     //  正向渲染
     uint _uboLightForward[3];

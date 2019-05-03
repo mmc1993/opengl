@@ -72,14 +72,37 @@ private:
 	mutable std::array<std::stack<glm::mat4>, 3> _matrixs;
 };
 
+
 //  用于渲染的命令结构
 struct RenderCommand {
-    const Pass      * mPass;            //  绑定的Shader
-    const Mesh      * mMeshs;           //  绑定的网格
+    enum Type {
+        kOBJECT,
+        kLIGHT,
+    };
+    RenderCommand(Type type): mType(type) 
+    { }
+    const Type mType;
+};
+
+struct ObjectCommand: public RenderCommand {
+    ObjectCommand(): RenderCommand(kOBJECT)
+    { }
+    const Pass      * mPass;            //  绑定的Pass
+    const Mesh      * mMeshs;           //  绑定的Mesh
     const Material  * mMaterials;       //  绑定的材质(材质与网格数量必须一致)
     uint mMeshNum;                      //  绑定的网格数量
     uint mCameraFlag;                   //  绑定的相机标识
     glm::mat4 mTransform;               //  绑定的变换矩阵
 };
 
-using RenderQueue = std::vector<RenderCommand>;
+struct LightCommand: public RenderCommand {
+    LightCommand(): RenderCommand(kLIGHT)
+    { }
+    Light * mLight;
+    const Pass * mPass;
+    const Mesh * mMesh;
+    glm::mat4 mTransform;
+};
+
+using ObjectCommandQueue = std::vector<ObjectCommand>;
+using LightCommandQueue = std::vector<LightCommand>;
