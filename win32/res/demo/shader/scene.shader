@@ -6,7 +6,7 @@ Pass
 	DrawType Index
 
 	Vertex
-		#version 440 core
+		#version 330 core
 
 		layout(location = 0) in vec3 a_pos_;
 
@@ -26,7 +26,7 @@ Pass
 	End Vertex
 
 	Fragment
-		#version 440 core
+		#version 330 core
 
         layout (std140) uniform LightPoint_ {
             int mSMP;
@@ -82,7 +82,7 @@ Pass
 	DrawType Index
 
 	Vertex
-		#version 440 core
+		#version 330 core
 
 		layout(location = 0) in vec3 a_pos_;
 		layout(location = 1) in vec2 a_uv_;
@@ -130,7 +130,7 @@ Pass
 	End Vertex
 
 	Fragment
-		#version 440 core
+		#version 330 core
 
 		struct LightDirectParam_ {
 			int mSMP;
