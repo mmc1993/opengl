@@ -145,6 +145,8 @@ void Light::OnUpdate(float dt)
     command.mMesh       = _volume.get();
     command.mTransform  = Global::Ref().RefRender().GetMatrixStack().GetM();
     Global::Ref().RefRender().PostCommand(_shader, command);
+
+    mPosition = command.mTransform * glm::vec4(0, 0, 0, 1);
 }
 
 float Light::CalLightDistance(float k0, float k1, float k2, float s)
@@ -164,6 +166,28 @@ uint LightDirect::GetUBOLength()
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSpecular)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mPosition)>(base);
     return glsl_tool::UBOOffsetBase<glm::vec4>(base);
+}
+
+void LightDirect::OnUpdate(float dt)
+{
+    Light::OnUpdate(dt);
+
+    auto up     = std::abs(mNormal.y) > 0.999f
+                ? glm::vec3(0, 0, 1)
+                : glm::vec3(0, 1, 0);
+    auto right  = glm::cross(up, mNormal);
+    up          = glm::cross(mNormal, right);
+    _view       = glm::lookAt(mPosition, mPosition + mNormal, up);
+    mMatrix     = _proj * _view;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+    auto base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(0, mMatrix);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void LightDirect::OpenShadow(
@@ -201,31 +225,12 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (0 == count)
     {
-        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-
-        mPosition   = GetOwner()->GetTransform()->GetWorldPosition();
-        auto up     = std::abs(mNormal.y) > 0.999f
-                    ? glm::vec3(0, 0, 1) 
-                    : glm::vec3(0, 1, 0);
-        auto right  = glm::cross(up, mNormal);
-        up          = glm::cross(mNormal, right);
-        auto view   = glm::lookAt(mPosition, mPosition + mNormal, up);
-        mMatrix     = _proj * view;
-
-        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(0, mMatrix);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        glViewport(0, 0, viewW, viewH);
+        glViewport(0, 0,
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt(), 
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt());
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, view);
+        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
     }
@@ -249,6 +254,23 @@ uint LightPoint::GetUBOLength()
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSpecular)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mPosition)>(base);
     return glsl_tool::UBOOffsetBase<glm::vec4>(base);
+}
+
+void LightPoint::OnUpdate(float dt)
+{
+    Light::OnUpdate(dt);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+    auto base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(0, mFar);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mNear)>(base, mNear);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void LightPoint::OpenShadow(const float n, const float f)
@@ -297,24 +319,9 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
     }
     else
     {
-        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
-
-        glViewport(0, 0, viewW, viewH);
-
-        mPosition = GetOwner()->GetTransform()->GetWorldPosition();
-
-        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(0, mFar);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mNear)>(base, mNear);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glViewport(0, 0, 
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt(),
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt());
     }
 
     if (count < 6)
@@ -328,9 +335,9 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
             { glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0) },
         };
 
-        auto view = glm::lookAt(mPosition,
-                    std::get<0>(s_faceInfo[count]) + mPosition,
-                    std::get<1>(s_faceInfo[count]));
+        auto view = glm::lookAt(mPosition, 
+            std::get<0>(s_faceInfo[count]) + mPosition, 
+            std::get<1>(s_faceInfo[count]));
 
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
@@ -355,6 +362,33 @@ uint LightSpot::GetUBOLength()
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSpecular)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mPosition)>(base);
     return glsl_tool::UBOOffsetBase<glm::vec4>(base);
+}
+
+void LightSpot::OnUpdate(float dt)
+{
+    Light::OnUpdate(dt);
+
+    auto up     = std::abs(mNormal.y) > 0.999f
+                ? glm::vec3(0, 0, 1)
+                : glm::vec3(0, 1, 0);
+    auto right  = glm::cross(up, mNormal);
+    up          = glm::cross(mNormal, right);
+    _view       = glm::lookAt(mPosition, mPosition + mNormal, up);
+    mMatrix     = _proj * _view;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+    auto base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(0, mK0);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mInCone)>(base, mInCone);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mOutCone)>(base, mOutCone);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(base, mMatrix);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
+    base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void LightSpot::OpenShadow(const float n, const float f)
@@ -389,36 +423,12 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (count == 0)
     {
-        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
-
-        mPosition   = GetOwner()->GetTransform()->GetWorldPosition();
-        auto up     = std::abs(mNormal.y) > 0.999f
-                    ? glm::vec3(0, 0, 1)
-                    : glm::vec3(0, 1, 0);
-        auto right  = glm::cross(up, mNormal);
-        up          = glm::cross(mNormal, right);
-        auto view   = glm::lookAt(mPosition, mPosition + mNormal, up);
-        mMatrix     = _proj * view;
-
-        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(0, mK0);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mInCone)>(base, mInCone);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mOutCone)>(base, mOutCone);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(base, mMatrix);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        glViewport(0, 0, viewW, viewH);
+        glViewport(0, 0, 
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt(), 
+            Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt());
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, view);
+        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
         rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
     }

@@ -50,7 +50,6 @@ public:
     glm::vec3 mPosition;
 
 protected:
-    //  光源投影矩阵
     glm::mat4 _proj;
     //  shadow map
     uint _shadowMap;
@@ -86,6 +85,8 @@ public:
     ~LightDirect()
     { }
 
+    virtual void OnUpdate(float dt) override;
+
 	void OpenShadow(const glm::vec2 & orthoX,	//	左右
 					const glm::vec2 & orthoY,	//	上下
 					const glm::vec2 & orthoZ);	//	前后
@@ -94,6 +95,9 @@ public:
 
 public:
     glm::vec3 mNormal;
+
+private:
+    glm::mat4 _view;
 };
 
 class LightPoint : public Light {
@@ -116,6 +120,8 @@ public:
 
     ~LightPoint()
     { }
+
+    virtual void OnUpdate(float dt) override;
 
 	void OpenShadow(const float n, const float f);
 
@@ -149,6 +155,8 @@ public:
     ~LightSpot()
     { }
 
+    virtual void OnUpdate(float dt) override;
+
 	void OpenShadow(const float n, const float f);
 
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
@@ -157,4 +165,7 @@ public:
 	glm::vec3 mNormal;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
+
+private:
+    glm::mat4 _view;
 };
