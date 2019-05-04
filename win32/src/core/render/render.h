@@ -115,6 +115,7 @@ private:
     void RenderDeferred();
 	void RenderForwardCommands(const ObjectCommandQueue & commands);
 	void RenderDeferredCommands(const ObjectCommandQueue & commands);
+    void RenderLightVolume(const LightCommand & command, bool isRenderShadow);
 
     //  正向渲染相关
     void InitUBOLightForward();

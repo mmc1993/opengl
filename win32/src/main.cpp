@@ -57,7 +57,7 @@ private:
 	void InitAssets()
 	{
         File::LoadShader(BUILTIN_SHADER_LIGHT);
-        File::LoadShader("res/demo/shader/scene.shader");
+        File::LoadShader("res/demo/shader/scene_deferred.shader");
 	}
 
 	void InitObject()
@@ -68,7 +68,7 @@ private:
 
 		createScene = [&createScene](Model * model, Object * parent) {
 			auto sprite = new Sprite();
-			sprite->BindShader("res/demo/shader/scene.shader");
+			sprite->BindShader("res/demo/shader/scene_deferred.shader");
 			for (auto i = 0; i != model->mMeshs.size(); ++i)
 			{
 				sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
