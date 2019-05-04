@@ -142,6 +142,7 @@ void Light::OnUpdate(float dt)
 {
     LightCommand command;
     command.mLight      = this;
+    command.mShader     = _shader;
     command.mMesh       = _volume.get();
     command.mTransform  = Global::Ref().RefRender().GetMatrixStack().GetM();
     Global::Ref().RefRender().PostCommand(_shader, command);

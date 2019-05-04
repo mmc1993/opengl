@@ -113,7 +113,7 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
         break;
     case RenderCommand::kLIGHT:
         {
-            auto cmd = reinterpret_cast<const LightCommand &>(command);
+            auto & cmd = reinterpret_cast<const LightCommand &>(command);
             _lightQueues.at(cmd.mLight->GetType()).push_back(cmd);
         }
         break;
