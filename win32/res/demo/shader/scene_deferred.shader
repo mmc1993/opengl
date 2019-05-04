@@ -29,7 +29,6 @@ Pass
 		#version 330 core
 
         layout (std140) uniform LightPoint_ {
-            int mSMP;
 			float mFar, mNear;
             float mK0, mK1, mK2;
             vec3 mAmbient;

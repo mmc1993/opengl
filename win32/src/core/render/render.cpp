@@ -134,7 +134,7 @@ void Render::BakeLightDepthMap(Light * light)
 		{
             Bind(command.mPass);
             
-            PostMatrix(command.mTransform);
+            Post(command.mTransform);
 
             Post(light);
 
@@ -270,7 +270,7 @@ void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
                 BindUBOLightForward();
             }
 			
-            PostMatrix(command.mTransform);
+            Post(command.mTransform);
 			
             for (auto i = 0; i != command.mMeshNum; ++i)
 			{
@@ -290,7 +290,7 @@ void Render::RenderDeferredCommands(const ObjectCommandQueue & commands)
         {
             Bind(command.mPass); 
             
-            PostMatrix(command.mTransform);
+            Post(command.mTransform);
 
             for (auto i = 0; i != command.mMeshNum; ++i)
             {
@@ -327,7 +327,7 @@ void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow
 
     Post(command.mLight);
     
-    PostMatrix(command.mTransform);
+    Post(command.mTransform);
 
     Draw(pass.mDrawType, *command.mMesh);
 }
@@ -663,7 +663,7 @@ void Render::ClearCommands()
 	for (auto & queue : _deferredQueues) { queue.clear(); }
 }
 
-void Render::PostMatrix(const glm::mat4 & transform)
+void Render::Post(const glm::mat4 & transform)
 {
 	auto & matrixM			= transform;
 	auto & matrixV			= _matrixStack.GetV();

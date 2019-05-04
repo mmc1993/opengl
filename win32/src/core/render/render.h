@@ -98,7 +98,7 @@ private:
     //  Post Function
     void Post(const Light * light);
     void Post(const Material & material);
-    void PostMatrix(const glm::mat4 & transform);
+    void Post(const glm::mat4 & transform);
 
     //	Ö´ÐÐ»æÖÆÃüÁî
     void Draw(DrawTypeEnum drawType, const Mesh & mesh);
