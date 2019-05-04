@@ -33,7 +33,6 @@ Render::~Render()
             && _gbuffer.mNormalTexture != 0
             && _gbuffer.mDepthTexture != 0);
         glDeleteTextures(5, &_gbuffer.mPositionTexture);
-        //glDeleteRenderbuffers(1, &_gbuffer.mDepthBuffer);
     }
 }
 
@@ -80,12 +79,6 @@ void Render::RenderOnce()
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
-	//	烘培深度贴图
-    for (auto & command : _lightCommands)
-    {
-        RenderShadow(command.mLight);
-    }
-
 	//	逐相机执行渲染命令
 	for (auto & camera : _cameraInfos)
 	{
@@ -111,9 +104,9 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
                 case RenderTypeEnum::kSHADOW:
                     _shadowCommands.push_back(cmd); break;
                 case RenderTypeEnum::kFORWARD:
-                    _forwardCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+                    _forwardQueues.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
                 case RenderTypeEnum::kDEFERRED:
-                    _deferredCommands.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
+                    _deferredQueues.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
                 }
             }
         }
@@ -121,14 +114,13 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
     case RenderCommand::kLIGHT:
         {
             auto cmd = reinterpret_cast<const LightCommand &>(command);
-            cmd.mPass = &shader->GetPass(0);
-            _lightCommands.push_back(cmd);
+            _lightQueues.at(cmd.mLight->GetType()).push_back(cmd);
         }
         break;
     }
 }
 
-void Render::RenderShadow(Light * light)
+void Render::BakeLightDepthMap(Light * light)
 {
     auto count = 0;
     _renderTarget.Start();
@@ -155,8 +147,55 @@ void Render::RenderShadow(Light * light)
     _renderTarget.Ended();
 }
 
+void Render::SortLightCommands()
+{
+    auto & cameraPos = _renderInfo.mCamera->mCamera->GetPos();
+
+    _renderInfo.mCountUseLightDirect = std::min(LIMIT_LIGHT_DIRECT, _lightQueues.at(Light::Type::kDIRECT).size());
+
+    std::sort(_lightQueues.at(Light::Type::kPOINT).begin(), 
+              _lightQueues.at(Light::Type::kPOINT).end(),
+              [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+        {
+            auto diff0 = (cameraPos - command0.mLight->mPosition);
+            auto diff1 = (cameraPos - command1.mLight->mPosition);
+            return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
+        });
+    _renderInfo.mCountUseLightPoint = std::min(LIMIT_LIGHT_POINT, _lightQueues.at(Light::Type::kPOINT).size());
+
+    std::sort(_lightQueues.at(Light::Type::kSPOT).begin(), 
+              _lightQueues.at(Light::Type::kSPOT).end(),
+              [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+        {
+            auto diff0 = (cameraPos - command0.mLight->mPosition);
+            auto diff1 = (cameraPos - command1.mLight->mPosition);
+            return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
+        });
+    _renderInfo.mCountUseLightSpot = std::min(LIMIT_LIGHT_SPOT, _lightQueues.at(Light::Type::kSPOT).size());
+}
+
+void Render::BakeLightDepthMap()
+{
+    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
+    {
+        BakeLightDepthMap(_lightQueues.at(Light::Type::kDIRECT).at(i).mLight);
+    }
+    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    {
+        BakeLightDepthMap(_lightQueues.at(Light::Type::kPOINT).at(i).mLight);
+    }
+    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    {
+        BakeLightDepthMap(_lightQueues.at(Light::Type::kSPOT).at(i).mLight);
+    }
+}
+
 void Render::RenderCamera()
-{    
+{
+    SortLightCommands();
+
+    BakeLightDepthMap();
+
     //  延迟渲染
     _renderInfo.mPass = nullptr;
     RenderDeferred();
@@ -174,7 +213,7 @@ void Render::RenderForward()
     //  打包光源数据
     InitUBOLightForward();
     PackUBOLightForward();
-    for (auto & commands : _forwardCommands)
+    for (auto & commands : _forwardQueues)
     {
         RenderForwardCommands(commands);
     }
@@ -197,7 +236,7 @@ void Render::RenderDeferred()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto & commands : _deferredCommands)
+    for (auto & commands : _deferredQueues)
     {
         RenderDeferredCommands(commands);
     }
@@ -272,9 +311,9 @@ void Render::InitUBOLightForward()
         assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0);
         assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0);
 
-        auto directLen = LightDirect::GetUBOLength() * LIMIT_FORWARD_LIGHT_DIRECT;
-        auto pointLen = LightPoint::GetUBOLength() * LIMIT_FORWARD_LIGHT_POINT;
-        auto spotLen = LightSpot::GetUBOLength() * LIMIT_FORWARD_LIGHT_SPOT;
+        auto directLen = LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT;
+        auto pointLen = LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT;
+        auto spotLen = LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT;
 
         glGenBuffers(3, _uboLightForward);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
@@ -289,101 +328,57 @@ void Render::InitUBOLightForward()
 
 void Render::PackUBOLightForward()
 {
-    auto & cameraPos = _renderInfo.mCamera->mCamera->GetPos();
-    std::sort(_lightCommands.begin(), _lightCommands.end(), [&cameraPos] (const LightCommand & command0,
-                                                                          const LightCommand & command1)
-    {
-        if (command0.mLight->GetType() == Light::Type::kDIRECT && command1.mLight->GetType() != Light::Type::kDIRECT)
-        {
-            return true;
-        }
-        if (command0.mLight->GetType() != Light::Type::kDIRECT && command1.mLight->GetType() == Light::Type::kDIRECT)
-        {
-            return false;
-        }
-        auto diff0 = (cameraPos - command0.mLight->mPosition);
-        auto diff1 = (cameraPos - command1.mLight->mPosition);
-        return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
-    });
-
-
     //  初始化打包的光源数
-    _renderInfo.mCountForwardLightDirect = 0;
-    _renderInfo.mCountForwardLightPoint = 0;
-    _renderInfo.mCountForwardLightSpot = 0;
-    uint directBase = 0;
-    uint pointBase = 0;
-    uint spotBase = 0;
-    for (auto it = _lightCommands.begin(); it != _lightCommands.end() &&
-         (_renderInfo.mCountForwardLightDirect != LIMIT_FORWARD_LIGHT_DIRECT
-         || _renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT
-         || _renderInfo.mCountForwardLightSpot != LIMIT_FORWARD_LIGHT_SPOT); ++it)
+    uint directBase = 0, pointBase = 0, spotBase = 0;
+
+    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
     {
-        switch (it->mLight->GetType())
-        {
-        case Light::Type::kDIRECT:
-            {
-                if (_renderInfo.mCountForwardLightDirect != LIMIT_FORWARD_LIGHT_DIRECT)
-                {
-                    ++_renderInfo.mCountForwardLightDirect;
-                    auto direct = reinterpret_cast<LightDirect *>(it->mLight);
-                    glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mMatrix)>(directBase, direct->mMatrix);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mNormal)>(directBase, direct->mNormal);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mAmbient)>(directBase, direct->mAmbient);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mDiffuse)>(directBase, direct->mDiffuse);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mSpecular)>(directBase, direct->mSpecular);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mPosition)>(directBase, direct->mPosition);
-                    directBase = glsl_tool::UBOOffsetBase<glm::vec4>(directBase);
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                }
-            }
-            break;
-        case Light::Type::kPOINT:
-            {
-                if (_renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT)
-                {
-                    ++_renderInfo.mCountForwardLightPoint;
-                    auto point = reinterpret_cast<LightPoint *>(it->mLight);
-                    glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mFar)>(pointBase, point->mFar);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mNear)>(pointBase, point->mNear);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK0)>(pointBase, point->mK0);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK1)>(pointBase, point->mK1);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK2)>(pointBase, point->mK2);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mAmbient)>(pointBase, point->mAmbient);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mDiffuse)>(pointBase, point->mDiffuse);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mSpecular)>(pointBase, point->mSpecular);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mPosition)>(pointBase, point->mPosition);
-                    pointBase = glsl_tool::UBOOffsetBase<glm::vec4>(pointBase);
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                }
-            }
-            break;
-        case Light::Type::kSPOT:
-            {
-                if (_renderInfo.mCountForwardLightPoint != LIMIT_FORWARD_LIGHT_POINT)
-                {
-                    ++_renderInfo.mCountForwardLightSpot;
-                    auto spot = reinterpret_cast<LightSpot *>(it->mLight);
-                    glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK0)>(spotBase, spot->mK0);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK1)>(spotBase, spot->mK1);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK2)>(spotBase, spot->mK2);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mInCone)>(spotBase, spot->mInCone);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mOutCone)>(spotBase, spot->mOutCone);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mMatrix)>(spotBase, spot->mMatrix);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mNormal)>(spotBase, spot->mNormal);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mAmbient)>(spotBase, spot->mAmbient);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mDiffuse)>(spotBase, spot->mDiffuse);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mSpecular)>(spotBase, spot->mSpecular);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mPosition)>(spotBase, spot->mPosition);
-                    spotBase = glsl_tool::UBOOffsetBase<glm::vec4>(spotBase);
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                }
-            }
-            break;
-        }
+        auto direct = reinterpret_cast<LightDirect *>(_lightQueues.at(Light::Type::kDIRECT).at(i).mLight);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mMatrix)>(directBase, direct->mMatrix);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mNormal)>(directBase, direct->mNormal);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mAmbient)>(directBase, direct->mAmbient);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mDiffuse)>(directBase, direct->mDiffuse);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mSpecular)>(directBase, direct->mSpecular);
+        directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mPosition)>(directBase, direct->mPosition);
+        directBase = glsl_tool::UBOOffsetBase<glm::vec4>(directBase);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    {
+        auto point = reinterpret_cast<LightPoint *>(_lightQueues.at(Light::Type::kPOINT).at(i).mLight);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mFar)>(pointBase, point->mFar);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mNear)>(pointBase, point->mNear);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK0)>(pointBase, point->mK0);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK1)>(pointBase, point->mK1);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK2)>(pointBase, point->mK2);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mAmbient)>(pointBase, point->mAmbient);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mDiffuse)>(pointBase, point->mDiffuse);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mSpecular)>(pointBase, point->mSpecular);
+        pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mPosition)>(pointBase, point->mPosition);
+        pointBase = glsl_tool::UBOOffsetBase<glm::vec4>(pointBase);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    {
+        auto spot = reinterpret_cast<LightSpot *>(_lightQueues.at(Light::Type::kSPOT).at(i).mLight);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK0)>(spotBase, spot->mK0);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK1)>(spotBase, spot->mK1);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK2)>(spotBase, spot->mK2);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mInCone)>(spotBase, spot->mInCone);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mOutCone)>(spotBase, spot->mOutCone);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mMatrix)>(spotBase, spot->mMatrix);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mNormal)>(spotBase, spot->mNormal);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mAmbient)>(spotBase, spot->mAmbient);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mDiffuse)>(spotBase, spot->mDiffuse);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mSpecular)>(spotBase, spot->mSpecular);
+        spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mPosition)>(spotBase, spot->mPosition);
+        spotBase = glsl_tool::UBOOffsetBase<glm::vec4>(spotBase);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 }
 
@@ -401,23 +396,29 @@ void Render::BindUBOLightForward()
     glUniformBlockBinding(_renderInfo.mPass->GLID, ispot, UniformBlockEnum::kLIGHT_SPOT);
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
 
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_DIRECT_, _renderInfo.mCountForwardLightDirect);
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, _renderInfo.mCountForwardLightPoint);
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, _renderInfo.mCountForwardLightSpot);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_DIRECT_, _renderInfo.mCountUseLightDirect);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, _renderInfo.mCountUseLightPoint);
+    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, _renderInfo.mCountUseLightSpot);
 
     auto directCount = 0;
     auto pointCount = 0;
     auto spotCount = 0;
     auto texCount = _renderInfo.mTexBase;
-    for (auto & command : _lightCommands)
+    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
     {
-        switch (command.mLight->GetType())
-        {
-        case Light::Type::kDIRECT: { Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), command.mLight->GetSMP(), texCount++); } break;
-        case Light::Type::kPOINT: { Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), command.mLight->GetSMP(), texCount++); } break;
-        case Light::Type::kSPOT: { Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, pointCount), command.mLight->GetSMP(), texCount++); } break;
-        }
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), texCount++);
     }
+
+    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    {
+        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), texCount++);
+    }
+
+    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    {
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), texCount++);
+    }
+
     _renderInfo.mTexBase = texCount;
 }
 
@@ -626,10 +627,10 @@ void Render::Post(const Material & material)
 
 void Render::ClearCommands()
 {
-    _lightCommands.clear();
 	_shadowCommands.clear();
-	for (auto & queue : _forwardCommands) { queue.clear(); }
-	for (auto & queue : _deferredCommands) { queue.clear(); }
+    for (auto & queue : _lightQueues) { queue.clear(); }
+	for (auto & queue : _forwardQueues) { queue.clear(); }
+	for (auto & queue : _deferredQueues) { queue.clear(); }
 }
 
 void Render::PostMatrix(const glm::mat4 & transform)

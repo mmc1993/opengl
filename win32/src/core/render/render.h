@@ -7,10 +7,9 @@
 
 class Render {
 public:
-    //  正向渲染光源数限制
-    static constexpr uint LIMIT_FORWARD_LIGHT_DIRECT = 2;
-    static constexpr uint LIMIT_FORWARD_LIGHT_POINT = 4;
-    static constexpr uint LIMIT_FORWARD_LIGHT_SPOT = 4;
+    static constexpr uint LIMIT_LIGHT_DIRECT = 2;
+    static constexpr uint LIMIT_LIGHT_POINT = 4;
+    static constexpr uint LIMIT_LIGHT_SPOT = 4;
 
     //  对应 _uboLightForward[3]
     enum UBOLightForwardTypeEnum {
@@ -43,9 +42,9 @@ public:
         uint mTexBase;
 
         //  正向渲染数据
-        uint mCountForwardLightDirect;
-        uint mCountForwardLightPoint;
-        uint mCountForwardLightSpot;
+        uint mCountUseLightDirect;
+        uint mCountUseLightPoint;
+        uint mCountUseLightSpot;
 
         //  当前绑定的pass
         const Pass * mPass;
@@ -106,10 +105,11 @@ private:
 
     void ClearCommands();
 
-    //  生成ShadowMap
-	void RenderShadow(Light * light);
-
     //  逐相机渲染
+    void SortLightCommands();
+    void BakeLightDepthMap();
+    void BakeLightDepthMap(Light * light);
+
     void RenderCamera();
     void RenderForward();
     void RenderDeferred();
@@ -132,14 +132,15 @@ private:
 
     //  相机列表
     std::vector<CameraInfo> _cameraInfos;
-    //  光源队列
-    LightCommandQueue _lightCommands;
+
     //	阴影烘培队列
     ObjectCommandQueue _shadowCommands;
+    //  方向光队列
+    std::array<LightCommandQueue, 3> _lightQueues;
     //  正向渲染队列
-    std::array<ObjectCommandQueue, 4> _forwardCommands;
+    std::array<ObjectCommandQueue, 4> _forwardQueues;
     //  延迟渲染队列
-    std::array<ObjectCommandQueue, 4> _deferredCommands;
+    std::array<ObjectCommandQueue, 4> _deferredQueues;
 
     //  正向渲染
     uint _uboLightForward[3];

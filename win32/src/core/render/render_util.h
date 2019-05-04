@@ -98,9 +98,9 @@ struct ObjectCommand: public RenderCommand {
 struct LightCommand: public RenderCommand {
     LightCommand(): RenderCommand(kLIGHT)
     { }
-    Light * mLight;
-    const Pass * mPass;
-    const Mesh * mMesh;
+    Light        * mLight;
+    const Mesh   * mMesh;
+    const Shader * mShader;
     glm::mat4 mTransform;
 };
 
