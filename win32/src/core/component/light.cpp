@@ -6,155 +6,9 @@
 #include "../res/res_cache.h"
 #include "../tools/glsl_tool.h"
 
-uint Light::s_VIEW_W = 0;
-uint Light::s_VIEW_H = 0;
-Light::LightPool Light::s_lightPool;
 std::weak_ptr<Mesh> Light::s_spotVolmue;
 std::weak_ptr<Mesh> Light::s_pointVolmue;
 std::weak_ptr<Mesh> Light::s_directVolmue;
-
-void Light::LightPool::Clear()
-{
-    glDeleteTextures(1, &_tex2D);
-    glDeleteTextures(1, &_tex3D);
-    glDeleteBuffers(_lenUBO, _uboArray.data());
-
-    _lenUBO = _len2D = _len3D = 0;
-    _tex2D = _tex3D = 0;
-    _posStock2D.clear();
-    _posStock3D.clear();
-    _uboArray.clear();
-    _uboStock.clear();
-}
-
-uint Light::LightPool::NewUBO()
-{
-    AllocUBO();
-
-    auto top = _uboStock.back();
-    _uboStock.pop_back();
-    return top;
-}
-
-uint Light::LightPool::NewPos2D()
-{
-    AllocPos2D();
-
-    auto top = _posStock2D.back();
-    _posStock2D.pop_back();
-    return top;
-}
-
-uint Light::LightPool::NewPos3D()
-{
-    AllocPos3D();
-
-    auto top = _posStock3D.back();
-    _posStock3D.pop_back();
-    return top;
-}
-
-void Light::LightPool::FreeUBO(uint pos)
-{
-    _uboStock.push_back(pos);
-    
-    if (_uboStock.size() == _lenUBO)
-    {
-        glDeleteBuffers(_lenUBO, _uboArray.data());
-        _uboStock.clear();
-        _uboArray.clear();
-        _lenUBO = 0;
-    }
-}
-
-void Light::LightPool::FreePos2D(uint pos)
-{
-    _posStock2D.push_back(pos);
-
-    if (_posStock2D.size() == _len2D)
-    {
-        glDeleteTextures(1, &_tex2D);
-        _tex2D = _len2D = 0;
-        _posStock2D.clear();
-    }
-}
-
-void Light::LightPool::FreePos3D(uint pos)
-{
-    _posStock3D.push_back(pos);
-
-    if (_posStock3D.size() == _len3D)
-    {
-        glDeleteTextures(1, &_tex3D);
-        _tex2D = _len3D = 0;
-        _posStock3D.clear();
-    }
-}
-
-void Light::LightPool::AllocUBO()
-{
-    if (_uboStock.empty())
-    {
-        glDeleteBuffers(_lenUBO, _uboArray.data());
-        std::generate_n(std::back_inserter(_uboStock), 
-                        LightPool::ALLOC_LENGTH_STEP,
-                        [this](){return _lenUBO++;});
-
-        _uboArray.resize(_lenUBO);
-        glGenBuffers(_lenUBO, &_uboArray[0]);
-    }
-}
-
-void Light::LightPool::AllocPos2D()
-{
-    if (_tex2D == 0)
-    {
-        s_VIEW_W = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        s_VIEW_H = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
-        glGenTextures(1, &_tex2D);
-    }
-    if (_posStock2D.empty())
-    {
-        std::generate_n(std::back_inserter(_posStock2D), 
-                        LightPool::ALLOC_LENGTH_STEP, 
-                        [this]() {return _len2D++;});
-
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _tex2D);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H,
-                     _len2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    }
-}
-
-void Light::LightPool::AllocPos3D()
-{
-    if (_tex3D == 0)
-    {
-        s_VIEW_W = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        s_VIEW_H = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
-        glGenTextures(1, &_tex3D);
-    }
-    if (_posStock3D.empty())
-    {
-        std::generate_n(std::back_inserter(_posStock3D),
-                        LightPool::ALLOC_LENGTH_STEP, 
-                        [this]() {return _len3D++;});
-
-        glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, _tex3D);
-        glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, s_VIEW_W, s_VIEW_H,
-                     _len3D * 6, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, 0);
-    }
-}
 
 std::shared_ptr<Mesh> Light::NewVolume()
 {
@@ -276,12 +130,8 @@ std::shared_ptr<Mesh> Light::NewVolume()
     return nullptr;
 }
 
-Light::Light(Type type): _type(type)
+Light::Light(Type type): _type(type), _shadowMap(0), _uniformBlock(0)
 {
-    mSMP = _type == Type::kDIRECT ? s_lightPool.NewPos2D()
-        : _type == Type::kPOINT ? s_lightPool.NewPos3D()
-        : s_lightPool.NewPos2D();
-    _uboPos = s_lightPool.NewUBO();
     _volume = NewVolume();
     _shader = Global::Ref().RefResCache().Get<Shader>(BUILTIN_SHADER_LIGHT);
 }
@@ -307,8 +157,7 @@ float Light::CalLightDistance(float k0, float k1, float k2, float s)
 
 uint LightDirect::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
-    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mMatrix)>(base);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mMatrix)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNormal)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mAmbient)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mDiffuse)>(base);
@@ -322,9 +171,28 @@ void LightDirect::OpenShadow(
 	const glm::vec2 & orthoY,
 	const glm::vec2 & orthoZ)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    if (GetUBO() == 0)
+    {
+        glGenBuffers(1, &_uniformBlock);
+        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+        glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    if (GetSMP() == 0)
+    {
+        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
+
+        glGenTextures(1, &_shadowMap);
+        glBindTexture(GL_TEXTURE_2D, _shadowMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
     _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
 }
@@ -333,6 +201,9 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (0 == count)
     {
+        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+
         mPosition   = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = std::abs(mNormal.y) > 0.999f
                     ? glm::vec3(0, 0, 1) 
@@ -343,8 +214,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         mMatrix     = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(base, mMatrix);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mMatrix)>(0, mMatrix);
         base = glsl_tool::UBOAddData<decltype(UBOData::mNormal)>(base, mNormal);
         base = glsl_tool::UBOAddData<decltype(UBOData::mAmbient)>(base, mAmbient);
         base = glsl_tool::UBOAddData<decltype(UBOData::mDiffuse)>(base, mDiffuse);
@@ -352,14 +222,12 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        glViewport(0, 0, Light::s_VIEW_W, Light::s_VIEW_H);
+        glViewport(0, 0, viewW, viewH);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
-                           RenderTarget::TextureType::k2D_ARRAY,
-                           Light::s_lightPool.GetTex2D(), 0, mSMP);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
     }
     else
     {
@@ -371,8 +239,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
 
 uint LightPoint::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
-    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mFar)>(base);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mFar)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mNear)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK1)>(base);
@@ -386,12 +253,38 @@ uint LightPoint::GetUBOLength()
 
 void LightPoint::OpenShadow(const float n, const float f)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+    auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
 
-    auto wdivh = (float)Light::s_VIEW_W / (float)Light::s_VIEW_W;
-	_proj = glm::perspective(glm::radians(90.0f), wdivh, n, f);
+    if (GetUBO() == 0)
+    {
+        glGenBuffers(1, &_uniformBlock);
+        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+        glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    if (GetSMP() == 0)
+    {
+        glGenTextures(1, &_shadowMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, _shadowMap);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+
+	_proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
     mFar = f; mNear = n;
 }
 
@@ -404,13 +297,15 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
     }
     else
     {
-        glViewport(0, 0, Light::s_VIEW_W, Light::s_VIEW_H);
+        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
+
+        glViewport(0, 0, viewW, viewH);
 
         mPosition = GetOwner()->GetTransform()->GetWorldPosition();
 
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(base, mFar);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(0, mFar);
         base = glsl_tool::UBOAddData<decltype(UBOData::mNear)>(base, mNear);
         base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
         base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
@@ -441,17 +336,14 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW,  view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
-                           RenderTarget::TextureType::k3D_ARRAY, 
-                           Light::s_lightPool.GetTex3D(), count, mSMP);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, (RenderTarget::TextureType)(RenderTarget::TextureType::k3D + count), GetSMP());
     }
     return count != 6;
 }
 
 uint LightSpot::GetUBOLength()
 {
-    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mSMP)>(0);
-    base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(base);
+    auto base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK0)>(0);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK1)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mK2)>(base);
     base = glsl_tool::UBOOffsetFill<decltype(UBOData::mInCone)>(base);
@@ -467,18 +359,39 @@ uint LightSpot::GetUBOLength()
 
 void LightSpot::OpenShadow(const float n, const float f)
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-    glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+    auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
 
-    auto wdivh = (float)Light::s_VIEW_W / (float)Light::s_VIEW_H;
-    _proj = glm::perspective(glm::radians(90.0f), wdivh, n, f);
+    if (GetUBO() == 0)
+    {
+        glGenBuffers(1, &_uniformBlock);
+        glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
+        glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    if (GetSMP() == 0)
+    {
+        glGenTextures(1, &_shadowMap);
+        glBindTexture(GL_TEXTURE_2D, _shadowMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    _proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
 }
 
 bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
 {
     if (count == 0)
     {
+        auto viewW = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "w")->ToInt();
+        auto viewH = Global::Ref().RefCfgCache().At("init")->At("shadow_map", "h")->ToInt();
+
         mPosition   = GetOwner()->GetTransform()->GetWorldPosition();
         auto up     = std::abs(mNormal.y) > 0.999f
                     ? glm::vec3(0, 0, 1)
@@ -489,8 +402,7 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         mMatrix     = _proj * view;
 
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
-        auto base = glsl_tool::UBOAddData<decltype(UBOData::mSMP)>(0, mSMP);
-        base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(base, mK0);
+        auto base = glsl_tool::UBOAddData<decltype(UBOData::mK0)>(0, mK0);
         base = glsl_tool::UBOAddData<decltype(UBOData::mK1)>(base, mK1);
         base = glsl_tool::UBOAddData<decltype(UBOData::mK2)>(base, mK2);
         base = glsl_tool::UBOAddData<decltype(UBOData::mInCone)>(base, mInCone);
@@ -503,13 +415,12 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+        glViewport(0, 0, viewW, viewH);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH,
-                           RenderTarget::TextureType::k2D_ARRAY,
-                           Light::s_lightPool.GetTex2D(), 0, mSMP);
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
     }
     else
     {

@@ -52,14 +52,7 @@ public:
 
 	enum TextureType {
 		k2D				= GL_TEXTURE_2D,
-		k3D_RIGHT		= GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-		k3D_LEFT		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1,
-		k3D_TOP			= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 2,
-		k3D_BOTTOM		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 3,
-		k3D_FRONT		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4,
-		k3D_BACK		= GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5,
-        k2D_ARRAY       = GL_TEXTURE_2D_ARRAY,
-        k3D_ARRAY       = GL_TEXTURE_CUBE_MAP_ARRAY,
+		k3D		        = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 	};
 
 public:
@@ -74,7 +67,6 @@ public:
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture);
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture2D * texture);
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture3D * texture);
-    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture, uint face, uint pos);
 
 
     RenderTarget();
@@ -88,7 +80,6 @@ public:
     void BindAttachment(AttachmentType attachment, TextureType type, uint texture);
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D);
     void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D);
-    void BindAttachment(AttachmentType attachment, TextureType type, uint texture, uint face, uint pos);
 
 private:
 	uint _fbo;

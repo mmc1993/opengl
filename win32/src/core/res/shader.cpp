@@ -45,39 +45,28 @@ void Shader::SetUniform(uint GLID, const std::string & key, const glm::mat4 & va
 	glUniformMatrix4fv(glGetUniformLocation(GLID, key.c_str()), 1, GL_FALSE, &val[0][0]);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const uint val, iint pos)
+void Shader::SetTexture2D(uint GLID, const std::string & key, const uint val, iint pos)
 {
     glActiveTexture(GL_TEXTURE0 + pos);
     glBindTexture(GL_TEXTURE_2D, val);
     glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
 }
 
+void Shader::SetTexture3D(uint GLID, const std::string & key, const uint val, iint pos)
+{
+    glActiveTexture(GL_TEXTURE0 + pos);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, val);
+    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+}
+
 void Shader::SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos)
 {
-	glActiveTexture(GL_TEXTURE0 + pos);
-	glBindTexture(GL_TEXTURE_2D, val->GetGLID());
-	glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+    SetTexture2D(GLID, key, val->GetGLID(), pos);
 }
 
 void Shader::SetUniform(uint GLID, const std::string & key, const BitmapCube * val, iint pos)
 {
-	glActiveTexture(GL_TEXTURE0 + pos);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, val->GetGLID());
-	glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
-}
-
-void Shader::SetUniformTexArray2D(uint GLID, const std::string & key, const uint tex, iint pos)
-{
-    glActiveTexture(GL_TEXTURE0 + pos);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
-}
-
-void Shader::SetUniformTexArray3D(uint GLID, const std::string & key, const uint tex, iint pos)
-{
-    glActiveTexture(GL_TEXTURE0 + pos);
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, tex);
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+    SetTexture3D(GLID, key, val->GetGLID(), pos);
 }
 
 Shader::~Shader()

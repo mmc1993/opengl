@@ -328,7 +328,6 @@ void Render::PackUBOLightForward()
                     ++_renderInfo.mCountForwardLightDirect;
                     auto direct = reinterpret_cast<LightDirect *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
-                    directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mSMP)>(directBase, direct->mSMP);
                     directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mMatrix)>(directBase, direct->mMatrix);
                     directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mNormal)>(directBase, direct->mNormal);
                     directBase = glsl_tool::UBOAddData<decltype(LightDirect::UBOData::mAmbient)>(directBase, direct->mAmbient);
@@ -347,7 +346,6 @@ void Render::PackUBOLightForward()
                     ++_renderInfo.mCountForwardLightPoint;
                     auto point = reinterpret_cast<LightPoint *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
-                    pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mSMP)>(pointBase, point->mSMP);
                     pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mFar)>(pointBase, point->mFar);
                     pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mNear)>(pointBase, point->mNear);
                     pointBase = glsl_tool::UBOAddData<decltype(LightPoint::UBOData::mK0)>(pointBase, point->mK0);
@@ -369,7 +367,6 @@ void Render::PackUBOLightForward()
                     ++_renderInfo.mCountForwardLightSpot;
                     auto spot = reinterpret_cast<LightSpot *>(it->mLight);
                     glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
-                    spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mSMP)>(spotBase, spot->mSMP);
                     spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK0)>(spotBase, spot->mK0);
                     spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK1)>(spotBase, spot->mK1);
                     spotBase = glsl_tool::UBOAddData<decltype(LightSpot::UBOData::mK2)>(spotBase, spot->mK2);
@@ -408,10 +405,20 @@ void Render::BindUBOLightForward()
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, _renderInfo.mCountForwardLightPoint);
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, _renderInfo.mCountForwardLightSpot);
 
-    auto count = _renderInfo.mTexBase;
-    Shader::SetUniformTexArray2D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_2D_, Light::GetShadowMap2D(), count++);
-    Shader::SetUniformTexArray3D(_renderInfo.mPass->GLID, UNIFORM_SHADOW_MAP_3D_, Light::GetShadowMap3D(), count++);
-    _renderInfo.mTexBase = count;
+    auto directCount = 0;
+    auto pointCount = 0;
+    auto spotCount = 0;
+    auto texCount = _renderInfo.mTexBase;
+    for (auto & command : _lightCommands)
+    {
+        switch (command.mLight->GetType())
+        {
+        case Light::Type::kDIRECT: { Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), command.mLight->GetSMP(), texCount++); } break;
+        case Light::Type::kPOINT: { Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), command.mLight->GetSMP(), texCount++); } break;
+        case Light::Type::kSPOT: { Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, pointCount), command.mLight->GetSMP(), texCount++); } break;
+        }
+    }
+    _renderInfo.mTexBase = texCount;
 }
 
 void Render::InitGBuffer()

@@ -47,11 +47,10 @@ public:
 	static void SetUniform(uint GLID, const std::string & key, const glm::vec4 & val);
 	static void SetUniform(uint GLID, const std::string & key, const glm::mat3 & val);
 	static void SetUniform(uint GLID, const std::string & key, const glm::mat4 & val);
-    static void SetUniform(uint GLID, const std::string & key, const uint val, iint pos);
+    static void SetTexture2D(uint GLID, const std::string & key, const uint val, iint pos);
+    static void SetTexture3D(uint GLID, const std::string & key, const uint val, iint pos);
     static void SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos);
 	static void SetUniform(uint GLID, const std::string & key, const BitmapCube * val, iint pos);
-    static void SetUniformTexArray2D(uint GLID, const std::string & key, const uint tex, iint pos);
-    static void SetUniformTexArray3D(uint GLID, const std::string & key, const uint tex, iint pos);
 
 public:
     ~Shader();
