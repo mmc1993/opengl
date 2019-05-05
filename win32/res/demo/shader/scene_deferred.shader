@@ -157,8 +157,8 @@ Pass
 		{
             outPosition_        = v_out_.mMPos;
 
-            outSpecular_.xyz    = texture(material_.mSpecular, v_out_.mUV).rgb;
-            outSpecular_.w      = material_.mShininess;
+            outSpecular_.rgb    = texture(material_.mSpecular, v_out_.mUV).rgb;
+            outSpecular_.a      = material_.mShininess;
 
             outDiffuse_         = texture(material_.mDiffuse0, v_out_.mUV).rgb;
 

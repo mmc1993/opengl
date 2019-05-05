@@ -21,7 +21,7 @@ std::shared_ptr<Mesh> Light::NewVolume()
                 auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
                 auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
                 auto mesh = Mesh::CreateV({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
-                                            { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } }, { 0, 1, 2, 0, 2, 3 });
+                                            { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } }, { 0, 2, 1, 0, 3, 2 });
                 std::shared_ptr<Mesh> sharePtr(new Mesh(), Mesh::DeletePtr);
                 s_directVolmue = sharePtr; *sharePtr = mesh;
                 return s_directVolmue.lock();
@@ -33,7 +33,7 @@ std::shared_ptr<Mesh> Light::NewVolume()
         {
             if (s_pointVolmue.expired())
             {
-                const auto N0 = 5;
+                const auto N0 = 32;
                 const auto N1 = N0 * 2-2;
                 std::vector<uint> indexs;
                 std::vector<Mesh::Vertex> vertexs;
@@ -91,10 +91,9 @@ std::shared_ptr<Mesh> Light::NewVolume()
         break;
     case Type::kSPOT:
         {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             if (s_spotVolmue.expired())
             {
-                const auto N = 12;
+                const auto N = 32;
                 std::vector<uint> indexs;
                 std::vector<Mesh::Vertex> vertexs;
 
@@ -272,6 +271,8 @@ void LightPoint::OnUpdate(float dt)
     base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
     base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
 }
 
 void LightPoint::OpenShadow(const float n, const float f)
@@ -390,6 +391,8 @@ void LightSpot::OnUpdate(float dt)
     base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
     base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
 }
 
 void LightSpot::OpenShadow(const float n, const float f)
