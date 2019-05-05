@@ -1,5 +1,5 @@
 Pass
-	CullFace Front
+	CullFace Back
 	DepthTest
 	DepthWrite
 	RenderType Light
@@ -11,25 +11,43 @@ Pass
 		layout(location = 0) in vec3 a_pos_;
 
 		uniform mat4 matrix_mvp_;
-		uniform mat4 matrix_m_;
 
-		out V_OUT_ {
-			vec3 mMPos;
-		} v_out_;
+        uniform int light_type_;
+
+        #define LIGHT_TYPE_DIRECT_  0
+        #define LIGHT_TYPE_POINT_   1
+        #define LIGHT_TYPE_SPOT_    2
 
 		void main()
 		{
-			vec4 apos       = vec4(a_pos_, 1);
-			v_out_.mMPos    = vec3(matrix_m_ * apos);
-			gl_Position     = vec4(matrix_mvp_ * apos);
+            switch (light_type_)
+            {
+            case LIGHT_TYPE_DIRECT_:
+                gl_Position = vec4(a_pos_, 1);
+                break;
+            case LIGHT_TYPE_POINT_:
+                gl_Position = matrix_mvp_ * vec4(a_pos_, 1);
+                break;
+            case LIGHT_TYPE_SPOT_:
+                gl_Position = vec4(a_pos_, 1);
+                break;
+            }
 		}
 	End Vertex
 
 	Fragment
 		#version 330 core
 
+        layout (std140) uniform LightDirect_ {
+			mat4 mMatrix;
+			vec3 mNormal;
+			vec3 mAmbient;
+			vec3 mDiffuse;
+			vec3 mSpecular;
+			vec3 mPosition;
+        } light_direct_;
+
         layout (std140) uniform LightPoint_ {
-            int mSMP;
 			float mFar, mNear;
             float mK0, mK1, mK2;
             vec3 mAmbient;
@@ -38,15 +56,34 @@ Pass
             vec3 mPosition;
         } light_point_;
 
-		in V_OUT_{
-			vec3 mMPos;
-		} v_out_;
+        layout (std140) uniform LightSpot_ {
+			float mK0;
+            float mK1;
+            float mK2;
+			float mInCone;
+            float mOutCone;
+			mat4 mMatrix;
+			vec3 mNormal;
+			vec3 mAmbient;
+			vec3 mDiffuse;
+			vec3 mSpecular;
+			vec3 mPosition;
+        } light_spot_;
+
+		uniform	sampler2D gbuffer_position_;
+		uniform	sampler2D gbuffer_specular_;
+		uniform	sampler2D gbuffer_diffuse_;
+		uniform	sampler2D gbuffer_normal_;
+
+		uniform vec3 camera_pos_;
 
         uniform int light_type_;
 
+		out vec4 color_;
+
 		void main()
 		{
-            gl_FragColor = vec4(0, 0, 0, 0);
+            gl_FragColor = vec4(1, 1, 1, 1);
 		}
 	End Fragment
 End Pass

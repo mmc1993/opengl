@@ -723,6 +723,7 @@ void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
 		{
 			_renderInfo.mVertexCount += mesh.mIdxCount;
 			glDrawElements(GL_TRIANGLES, mesh.mIdxCount, GL_UNSIGNED_INT, nullptr);
+            //glDrawArrays(GL_LINES, 0, mesh.mVtxCount);
 		}
 		break;
 	}

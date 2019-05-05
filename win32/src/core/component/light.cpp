@@ -16,7 +16,7 @@ std::shared_ptr<Mesh> Light::NewVolume()
     {
     case Type::kDIRECT:
         {
-            if (!s_directVolmue.expired())
+            if (s_directVolmue.expired())
             {
                 auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
                 auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
@@ -31,9 +31,9 @@ std::shared_ptr<Mesh> Light::NewVolume()
         break;
     case Type::kPOINT:
         {
-            if (!s_pointVolmue.expired())
+            if (s_pointVolmue.expired())
             {
-                const auto N0 = 4;
+                const auto N0 = 5;
                 const auto N1 = N0 * 2-2;
                 std::vector<uint> indexs;
                 std::vector<Mesh::Vertex> vertexs;
@@ -46,39 +46,37 @@ std::shared_ptr<Mesh> Light::NewVolume()
                     indexs.emplace_back((i + 1) % N1 + 1);
                 }
 
-                auto step = static_cast<float>(M_PI / N0);
+                auto step = static_cast<float>(M_PI / (N0 - 1));
                 for (auto i = 1; i != N0 - 1; ++i)
                 {
-                    auto a = step * i;
-                    auto x = std::sin(a);
-                    auto y = std::cos(a);
-                    auto base = (i - 1) * N1;
+                    auto x = std::sin(step * i);
+                    auto y = std::cos(step * i);
+                    auto base = (i - 2) * N1 + 1;
                     for (auto j = 0; j != N1; ++j)
                     {
-                        if (i != 1 && i != N0 - 2)
+                        if (i != 1)
                         {
-                            auto point0 = (j + 1);
-                            auto point1 = (j + 1) % N1 + 1;
-                            indexs.push_back(base - N1 + point0);
-                            indexs.push_back(point0);
-                            indexs.push_back(point1);
+                            indexs.push_back(base + j);
+                            indexs.push_back(base + N1 + j);
+                            indexs.push_back(base + N1 + (j + 1) % N1);
 
-                            indexs.push_back(base - N1 + point0);
-                            indexs.push_back(point1);
-                            indexs.push_back(base - N1 + point1);
+                            indexs.push_back(base + j);
+                            indexs.push_back(base + N1 + (j + 1) % N1);
+                            indexs.push_back(base + (j + 1) % N1);
                         }
-                        vertexs.emplace_back(glm::vec3(x, y, std::cos(step * j)));
+                        auto l = x;
+                        auto x = std::sin(step * j) * l;
+                        auto z = std::cos(step * j) * l;
+                        vertexs.emplace_back(glm::vec3(x, y, z));
                     }
                 }
 
-                auto base = (N0 - 1) * N1 + 1;
+                auto base = (N0 - 3) * N1 + 1;
                 for (auto i = 0; i != N1; ++i)
                 {
-                    auto point0 =  i;
-                    auto point1 = (i + 1) % N1;
-                    indexs.emplace_back(base + point0);
-                    indexs.emplace_back(vertexs.size());
-                    indexs.emplace_back(base + point1);
+                    indexs.emplace_back(base + i);
+                    indexs.emplace_back(base + N1);
+                    indexs.emplace_back(base + (i + 1) % N1);
                 }
 
                 vertexs.emplace_back(glm::vec3(0, -1, 0));
