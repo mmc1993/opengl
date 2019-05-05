@@ -29,7 +29,7 @@ Pass
                 gl_Position = matrix_mvp_ * vec4(a_pos_, 1);
                 break;
             case LIGHT_TYPE_SPOT_:
-                gl_Position = vec4(a_pos_, 1);
+                gl_Position = matrix_mvp_ * vec4(a_pos_, 1);
                 break;
             }
 		}

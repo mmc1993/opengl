@@ -91,29 +91,31 @@ std::shared_ptr<Mesh> Light::NewVolume()
         break;
     case Type::kSPOT:
         {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             if (s_spotVolmue.expired())
             {
-                const auto N = 6;
+                const auto N = 12;
                 std::vector<uint> indexs;
                 std::vector<Mesh::Vertex> vertexs;
 
                 vertexs.emplace_back(glm::vec3(0, 0, 0));
-
-                auto step = static_cast<float>(M_PI / N);
+                auto step = static_cast<float>(M_PI*2/N);
                 for (auto i = 0; i != N; ++i)
                 {
-                    auto a = step * i;
-                    auto x = std::sin(a);
-                    auto y = std::cos(a);
-                    vertexs.emplace_back(glm::vec3(x, y, 0.5f));
+                    auto x = std::sin(step * i);
+                    auto y = std::cos(step * i);
+                    vertexs.emplace_back(glm::vec3(x, y, 1));
 
                     indexs.emplace_back(0);
                     indexs.emplace_back( i + 1);
                     indexs.emplace_back((i + 1) % N + 1);
 
-                    indexs.emplace_back(1);
-                    indexs.emplace_back( i + 2);
-                    indexs.emplace_back((i + 2) % N + 1);
+                    if (i != 0)
+                    {
+                        indexs.emplace_back((i + 1) % N + 1);
+                        indexs.emplace_back( i + 1);
+                        indexs.emplace_back(1);
+                    }
                 }
 
                 std::shared_ptr<Mesh> sharePtr(new Mesh(), &Mesh::DeletePtr);
