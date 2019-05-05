@@ -197,12 +197,18 @@ void Render::RenderCamera()
     BakeLightDepthMap();
 
     //  延迟渲染
-    _renderInfo.mPass = nullptr;
-    RenderDeferred();
+    if (!IsEmptyQueueArray(_deferredQueues))
+    {
+        _renderInfo.mPass = nullptr;
+        RenderDeferred();
+    }
 
 	//  正向渲染
-    _renderInfo.mPass = nullptr;
-	RenderForward();
+    if (!IsEmptyQueueArray(_forwardQueues))
+    {
+        _renderInfo.mPass = nullptr;
+        RenderForward();
+    }
 
 	//	后期处理
     _renderInfo.mPass = nullptr;
@@ -514,7 +520,17 @@ void Render::InitGBuffer()
 
 void Render::FillGBuffer()
 {
+}
 
+template <class T, int N>
+bool Render::IsEmptyQueueArray(const std::array<T, N> & ary)
+{
+    for (auto & queue : ary)
+    {
+        if (!queue.empty())
+            return false;
+    }
+    return true;
 }
 
 void Render::Bind(const CameraInfo * camera)

@@ -126,6 +126,9 @@ private:
     void InitGBuffer();
     void FillGBuffer();
 
+    template <class T, int N>
+    bool IsEmptyQueueArray(const std::array<T, N> & ary);
+
 private:
     RenderTarget    _renderTarget;
     MatrixStack     _matrixStack;
