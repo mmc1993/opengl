@@ -39,18 +39,18 @@ class BitmapCube;
 
 class Shader : public Res {
 public:
-    static void SetUniform(uint GLID, const std::string & key, iint val);
-    static void SetUniform(uint GLID, const std::string & key, uint val);
-	static void SetUniform(uint GLID, const std::string & key, float val);
-	static void SetUniform(uint GLID, const std::string & key, double val);
-	static void SetUniform(uint GLID, const std::string & key, const glm::vec3 & val);
-	static void SetUniform(uint GLID, const std::string & key, const glm::vec4 & val);
-	static void SetUniform(uint GLID, const std::string & key, const glm::mat3 & val);
-	static void SetUniform(uint GLID, const std::string & key, const glm::mat4 & val);
-    static void SetTexture2D(uint GLID, const std::string & key, const uint val, iint pos);
-    static void SetTexture3D(uint GLID, const std::string & key, const uint val, iint pos);
-    static void SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos);
-	static void SetUniform(uint GLID, const std::string & key, const BitmapCube * val, iint pos);
+    static void SetUniform(uint GLID, const char * key, iint val);
+    static void SetUniform(uint GLID, const char * key, uint val);
+	static void SetUniform(uint GLID, const char * key, float val);
+	static void SetUniform(uint GLID, const char * key, double val);
+	static void SetUniform(uint GLID, const char * key, const glm::vec3 & val);
+	static void SetUniform(uint GLID, const char * key, const glm::vec4 & val);
+	static void SetUniform(uint GLID, const char * key, const glm::mat3 & val);
+	static void SetUniform(uint GLID, const char * key, const glm::mat4 & val);
+    static void SetTexture2D(uint GLID, const char * key, const uint val, iint pos);
+    static void SetTexture3D(uint GLID, const char * key, const uint val, iint pos);
+    static void SetUniform(uint GLID, const char * key, const Bitmap * val, iint pos);
+	static void SetUniform(uint GLID, const char * key, const BitmapCube * val, iint pos);
 
 public:
     ~Shader();

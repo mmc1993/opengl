@@ -324,9 +324,9 @@ void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow
     {
         switch (command.mLight->GetType())
         {
-        case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
-        case Light::Type::kPOINT: Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, 0), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
-        case Light::Type::kSPOT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
+        case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
+        case Light::Type::kPOINT: Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
+        case Light::Type::kSPOT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
         }
     }
 
@@ -435,17 +435,17 @@ void Render::BindUBOLightForward()
 
     for (auto i = 0, directCount = 0; i != _renderInfo.mCountUseLightDirect; ++i, ++directCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
 
     for (auto i = 0, pointCount = 0; i != _renderInfo.mCountUseLightPoint; ++i, ++pointCount)
     {
-        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
 
     for (auto i = 0, spotCount = 0; i != _renderInfo.mCountUseLightSpot; ++i, ++spotCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
 }
 
@@ -641,7 +641,7 @@ void Render::Post(const Material & material)
     auto count = _renderInfo.mTexBase;
 	for (auto i = 0; i != material.mDiffuses.size(); ++i)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i), material.mDiffuses.at(i), count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i).c_str(), material.mDiffuses.at(i), count++);
 	}
 	if (material.mSpecular != nullptr)
 	{

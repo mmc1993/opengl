@@ -3,68 +3,68 @@
 #include "bitmap_cube.h"
 #include "../tools/debug_tool.h"
 
-void Shader::SetUniform(uint GLID, const std::string & key, iint val)
+void Shader::SetUniform(uint GLID, const char * key, iint val)
 {
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), val);
+    glUniform1i(glGetUniformLocation(GLID, key), val);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, uint val)
+void Shader::SetUniform(uint GLID, const char * key, uint val)
 {
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), val);
+    glUniform1i(glGetUniformLocation(GLID, key), val);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, float val)
+void Shader::SetUniform(uint GLID, const char * key, float val)
 {
 
-	glUniform1f(glGetUniformLocation(GLID, key.c_str()), val);
+	glUniform1f(glGetUniformLocation(GLID, key), val);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, double val)
+void Shader::SetUniform(uint GLID, const char * key, double val)
 {
-	glUniform1f(glGetUniformLocation(GLID, key.c_str()), static_cast<float>(val));
+	glUniform1f(glGetUniformLocation(GLID, key), static_cast<float>(val));
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const glm::vec3 & val)
+void Shader::SetUniform(uint GLID, const char * key, const glm::vec3 & val)
 {
-	glUniform3f(glGetUniformLocation(GLID, key.c_str()), val.x, val.y, val.z);
+	glUniform3f(glGetUniformLocation(GLID, key), val.x, val.y, val.z);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const glm::vec4 & val)
+void Shader::SetUniform(uint GLID, const char * key, const glm::vec4 & val)
 {
-	glUniform4f(glGetUniformLocation(GLID, key.c_str()), val.x, val.y, val.z, val.w);
+	glUniform4f(glGetUniformLocation(GLID, key), val.x, val.y, val.z, val.w);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const glm::mat3 & val)
+void Shader::SetUniform(uint GLID, const char * key, const glm::mat3 & val)
 {
-	glUniformMatrix3fv(glGetUniformLocation(GLID, key.c_str()), 1, GL_FALSE, &val[0][0]);
+	glUniformMatrix3fv(glGetUniformLocation(GLID, key), 1, GL_FALSE, &val[0][0]);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const glm::mat4 & val)
+void Shader::SetUniform(uint GLID, const char * key, const glm::mat4 & val)
 {
 
-	glUniformMatrix4fv(glGetUniformLocation(GLID, key.c_str()), 1, GL_FALSE, &val[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(GLID, key), 1, GL_FALSE, &val[0][0]);
 }
 
-void Shader::SetTexture2D(uint GLID, const std::string & key, const uint val, iint pos)
+void Shader::SetTexture2D(uint GLID, const char * key, const uint val, iint pos)
 {
     glActiveTexture(GL_TEXTURE0 + pos);
     glBindTexture(GL_TEXTURE_2D, val);
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+    glUniform1i(glGetUniformLocation(GLID, key), pos);
 }
 
-void Shader::SetTexture3D(uint GLID, const std::string & key, const uint val, iint pos)
+void Shader::SetTexture3D(uint GLID, const char * key, const uint val, iint pos)
 {
     glActiveTexture(GL_TEXTURE0 + pos);
     glBindTexture(GL_TEXTURE_CUBE_MAP, val);
-    glUniform1i(glGetUniformLocation(GLID, key.c_str()), pos);
+    glUniform1i(glGetUniformLocation(GLID, key), pos);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const Bitmap * val, iint pos)
+void Shader::SetUniform(uint GLID, const char * key, const Bitmap * val, iint pos)
 {
     SetTexture2D(GLID, key, val->GetGLID(), pos);
 }
 
-void Shader::SetUniform(uint GLID, const std::string & key, const BitmapCube * val, iint pos)
+void Shader::SetUniform(uint GLID, const char * key, const BitmapCube * val, iint pos)
 {
     SetTexture3D(GLID, key, val->GetGLID(), pos);
 }
