@@ -4,6 +4,7 @@
 #include "../render/render.h"
 #include "../object/object.h"
 #include "../tools/time_tool.h"
+#include "../event/event_enum.h"
 
 Window::Window()
     : _window(nullptr)
@@ -153,7 +154,7 @@ void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
     param.act = act;
     param.btn = btn;
     param.stat = stat;
-    Global::Ref().RefEvent().Post(EventType::kMOUSE_BUTTON, param);
+    Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_BUTTON, param);
 }
 
 void Window::OnCur(GLFWwindow * window, double x, double y)
@@ -161,7 +162,7 @@ void Window::OnCur(GLFWwindow * window, double x, double y)
     EventMouseParam param;
     param.x = static_cast<float>(x);
     param.y = static_cast<float>(y);
-    Global::Ref().RefEvent().Post(EventType::kMOUSE_MOVEED, param);
+    Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_MOVEED, param);
 }
 
 void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
@@ -170,7 +171,7 @@ void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
     param.key = key;
     param.act = act;
     param.stat = stat;
-    Global::Ref().RefEvent().Post(EventType::kKEYBOARD, param);
+    Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_KEYBOARD, param);
 }
 
 void Window::OnSize(GLFWwindow * window, int w, int h)

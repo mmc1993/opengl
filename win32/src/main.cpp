@@ -16,6 +16,7 @@
 #include "core/res/res_cache.h"
 #include "core/tools/string_tool.h"
 #include "core/cfg/cfg_cache.h"
+#include "core/event/event_enum.h"
 #include <filesystem>
 
 class AppWindow : public Window {
@@ -90,9 +91,9 @@ private:
 	void InitEvents()
 	{
 		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
-		Global::Ref().RefEvent().Add(Window::EventType::kKEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
-		Global::Ref().RefEvent().Add(Window::EventType::kMOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
-		Global::Ref().RefEvent().Add(Window::EventType::kMOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
+		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_KEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
+		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
+		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
 	}
 
 	void InitLights()

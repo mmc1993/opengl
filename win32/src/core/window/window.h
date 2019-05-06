@@ -11,12 +11,6 @@ public:
     };
 
 public:
-	enum EventType {
-		kMOUSE_BUTTON,
-		kMOUSE_MOVEED,
-		kKEYBOARD,
-	};
-
 	struct EventMouseParam {
 		int btn;
 		int act;
