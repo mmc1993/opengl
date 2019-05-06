@@ -79,7 +79,6 @@ void Render::RenderOnce()
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
-	//	逐相机执行渲染命令
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(&camera);
@@ -365,10 +364,7 @@ void Render::InitUBOLightForward()
 
 void Render::PackUBOLightForward()
 {
-    //  初始化打包的光源数
-    uint directBase = 0, pointBase = 0, spotBase = 0;
-
-    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
+    for (auto i = 0u, directBase = 0u; i != _renderInfo.mCountUseLightDirect; ++i)
     {
         auto direct = reinterpret_cast<LightDirect *>(_lightQueues.at(Light::Type::kDIRECT).at(i).mLight);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
@@ -382,7 +378,7 @@ void Render::PackUBOLightForward()
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    for (auto i = 0, pointBase = 0; i != _renderInfo.mCountUseLightPoint; ++i)
     {
         auto point = reinterpret_cast<LightPoint *>(_lightQueues.at(Light::Type::kPOINT).at(i).mLight);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
@@ -399,7 +395,7 @@ void Render::PackUBOLightForward()
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    for (auto i = 0, spotBase = 0; i != _renderInfo.mCountUseLightSpot; ++i)
     {
         auto spot = reinterpret_cast<LightSpot *>(_lightQueues.at(Light::Type::kSPOT).at(i).mLight);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
@@ -437,25 +433,20 @@ void Render::BindUBOLightForward()
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, _renderInfo.mCountUseLightPoint);
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, _renderInfo.mCountUseLightSpot);
 
-    auto directCount = 0;
-    auto pointCount = 0;
-    auto spotCount = 0;
-    auto texCount = _renderInfo.mTexBase;
-    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
+    for (auto i = 0, directCount = 0; i != _renderInfo.mCountUseLightDirect; ++i, ++directCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), texCount++);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
 
-    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    for (auto i = 0, pointCount = 0; i != _renderInfo.mCountUseLightPoint; ++i, ++pointCount)
     {
-        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), texCount++);
+        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
 
-    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    for (auto i = 0, spotCount = 0; i != _renderInfo.mCountUseLightSpot; ++i, ++spotCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), texCount++);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
-    _renderInfo.mTexBase = texCount;
 }
 
 void Render::InitGBuffer()
