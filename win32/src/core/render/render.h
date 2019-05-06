@@ -91,7 +91,7 @@ public:
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
-    void Init();
+    void StartRender();
 
     //  Bind Function
     bool Bind(const Pass * pass);
@@ -125,7 +125,7 @@ private:
     bool IsEmptyQueueArray(const std::array<T, N> & ary);
 
 private:
-    RenderTarget    _renderTarget;
+    RenderTarget    _renderTarget[2];
     MatrixStack     _matrixStack;
 	RenderInfo      _renderInfo;
 

@@ -75,10 +75,7 @@ void Render::DelCamera(size_t order)
 
 void Render::RenderOnce()
 {
-    Init();
-	glClear(GL_COLOR_BUFFER_BIT |
-			GL_DEPTH_BUFFER_BIT |
-			GL_STENCIL_BUFFER_BIT);
+    StartRender();
 	for (auto & camera : _cameraInfos)
 	{
 		Bind(&camera);
@@ -123,10 +120,10 @@ void Render::BakeLightDepthMap(Light * light)
 {
     auto count = 0;
     _renderInfo.mPass = nullptr;
-    _renderTarget.Start();
+    _renderTarget[0].Start();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-	while (light->NextDrawShadow(count++, &_renderTarget))
+	while (light->NextDrawShadow(count++, &_renderTarget[0]))
 	{
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -145,7 +142,7 @@ void Render::BakeLightDepthMap(Light * light)
             }
 		}
 	}
-    _renderTarget.Ended();
+    _renderTarget[0].Ended();
 }
 
 void Render::SortLightCommands()
@@ -219,20 +216,22 @@ void Render::RenderForward()
 {
     PackUBOLightForward();
 
+    _renderTarget[1].Start();
     for (auto & commands : _forwardQueues)
     {
         RenderForwardCommands(commands);
     }
+    _renderTarget[1].Ended();
 }
 
 void Render::RenderDeferred()
 {
-    _renderTarget.Start(RenderTarget::BindType::kALL);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpecularTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _gbuffer.mDiffuseTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _gbuffer.mNormalTexture);
-    _renderTarget.BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _gbuffer.mDepthTexture);
+    _renderTarget[0].Start(RenderTarget::BindType::kALL);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpecularTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _gbuffer.mDiffuseTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _gbuffer.mNormalTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _gbuffer.mDepthTexture);
 
     uint rtbinds[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
@@ -245,7 +244,17 @@ void Render::RenderDeferred()
         RenderDeferredCommands(commands);
     }
 
-    _renderTarget.Ended();
+    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
+    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
+    glBlitFramebuffer(
+        0, 0,
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt(),
+        0, 0,
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    _renderTarget[0].Ended();
 
     for (auto i = 0u; i != _lightQueues.at(Light::Type::kDIRECT).size(); ++i)
     {
@@ -261,6 +270,8 @@ void Render::RenderDeferred()
     {
         RenderLightVolume(_lightQueues.at(Light::Type::kSPOT).at(i), i < _renderInfo.mCountUseLightSpot);
     }
+
+    _renderTarget[1].Ended();
 }
 
 void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
@@ -491,7 +502,7 @@ void Render::Post(const Light * light)
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
 }
 
-void Render::Init()
+void Render::StartRender()
 {
     //  初始化正向渲染光源所需的UBO
     if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0)
@@ -568,6 +579,16 @@ void Render::Init()
     }
     _renderInfo.mVertexCount = 0;
     _renderInfo.mRenderCount = 0;
+
+    glClear(GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT |
+            GL_STENCIL_BUFFER_BIT);
+
+    _renderTarget[1].Start();
+    glClear(GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT |
+            GL_STENCIL_BUFFER_BIT);
+    _renderTarget[1].Ended();
 }
 
 bool Render::Bind(const Pass * pass)
