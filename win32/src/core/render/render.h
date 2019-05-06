@@ -91,6 +91,8 @@ public:
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
+    void Init();
+
     //  Bind Function
     bool Bind(const Pass * pass);
     void Bind(const CameraInfo * camera);
@@ -118,12 +120,8 @@ private:
     void RenderLightVolume(const LightCommand & command, bool isRenderShadow);
 
     //  正向渲染相关
-    void InitUBOLightForward();
     void PackUBOLightForward();
     void BindUBOLightForward();
-
-    //  延迟渲染相关
-    void InitGBuffer();
 
     template <class T, int N>
     bool IsEmptyQueueArray(const std::array<T, N> & ary);

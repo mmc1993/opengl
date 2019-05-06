@@ -75,8 +75,7 @@ void Render::DelCamera(size_t order)
 
 void Render::RenderOnce()
 {
-	_renderInfo.mVertexCount = 0;
-	_renderInfo.mRenderCount = 0;
+    Init();
 	glClear(GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT |
 			GL_STENCIL_BUFFER_BIT);
@@ -216,8 +215,8 @@ void Render::RenderCamera()
 
 void Render::RenderForward()
 {
-    InitUBOLightForward();
     PackUBOLightForward();
+
     for (auto & commands : _forwardQueues)
     {
         RenderForwardCommands(commands);
@@ -226,8 +225,6 @@ void Render::RenderForward()
 
 void Render::RenderDeferred()
 {
-    InitGBuffer();
-
     _renderTarget.Start(RenderTarget::BindType::kALL);
     _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
     _renderTarget.BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpecularTexture);
@@ -337,27 +334,6 @@ void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow
     Draw(pass.mDrawType, *command.mMesh);
 }
 
-void Render::InitUBOLightForward()
-{
-    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0 ||
-        _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0 ||
-        _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
-    {
-        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
-        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
-        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
-
-        glGenBuffers(3, _uboLightForward);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    }
-}
-
 void Render::PackUBOLightForward()
 {
     for (auto i = 0u, directBase = 0u; i != _renderInfo.mCountUseLightDirect; ++i)
@@ -445,72 +421,12 @@ void Render::BindUBOLightForward()
     }
 }
 
-void Render::InitGBuffer()
-{
-    if (_gbuffer.mPositionTexture == 0)
-    {
-        ASSERT_LOG(_gbuffer.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
-        ASSERT_LOG(_gbuffer.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
-        ASSERT_LOG(_gbuffer.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
-        ASSERT_LOG(_gbuffer.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
-        ASSERT_LOG(_gbuffer.mDepthTexture == 0, "_gbuffer.mDepthTexture: {0}", _gbuffer.mDepthTexture);
-        
-        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
-
-        glGenTextures(5, &_gbuffer.mPositionTexture);
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpecularTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDiffuseTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mNormalTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDepthTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 
-                                    0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-}
-
 template <class T, int N>
 bool Render::IsEmptyQueueArray(const std::array<T, N> & ary)
 {
     for (auto & queue : ary)
     {
-        if (!queue.empty())
-            return false;
+        if (!queue.empty()) { return false; }
     }
     return true;
 }
@@ -571,6 +487,85 @@ void Render::Post(const Light * light)
         break;
     }
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
+}
+
+void Render::Init()
+{
+    //  初始化正向渲染光源所需的UBO
+    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0)
+    {
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
+
+        glGenBuffers(3, _uboLightForward);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    //  初始化 GBuffer
+    if (_gbuffer.mPositionTexture == 0)
+    {
+        ASSERT_LOG(_gbuffer.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
+        ASSERT_LOG(_gbuffer.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
+        ASSERT_LOG(_gbuffer.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
+        ASSERT_LOG(_gbuffer.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
+        ASSERT_LOG(_gbuffer.mDepthTexture == 0, "_gbuffer.mDepthTexture: {0}", _gbuffer.mDepthTexture);
+
+        glGenTextures(5, &_gbuffer.mPositionTexture);
+
+        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpecularTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDiffuseTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mNormalTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDepthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    _renderInfo.mVertexCount = 0;
+    _renderInfo.mRenderCount = 0;
 }
 
 bool Render::Bind(const Pass * pass)
