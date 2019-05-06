@@ -73,6 +73,15 @@ public:
         { }
     };
 
+    struct OffSceneBuffer {
+        uint mColorTexture;
+        uint mDepthTexture;
+        OffSceneBuffer()
+            : mColorTexture(0)
+            , mDepthTexture(0)
+        { }
+    };
+
 public:
     Render();
     ~Render();
@@ -141,6 +150,8 @@ private:
     //  —”≥Ÿ‰÷»æ∂”¡–
     std::array<ObjectCommandQueue, 4> _deferredQueues;
 
+    //  ¿Î∆¡buffer
+    OffSceneBuffer _offSceneBuffer;
     //  ’˝œÚ‰÷»æ
     uint _uboLightForward[3];
     //  —”≥Ÿ‰÷»æ

@@ -35,7 +35,6 @@ public:
         kALL = GL_FRAMEBUFFER,
         kDRAW = GL_DRAW_FRAMEBUFFER,
         kREAD = GL_READ_FRAMEBUFFER,
-        kNONE = GL_NONE,
     };
 
 	enum AttachmentType {

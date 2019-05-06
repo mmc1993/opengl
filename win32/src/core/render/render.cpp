@@ -34,6 +34,13 @@ Render::~Render()
         ASSERT_LOG(_gbuffer.mDepthTexture != 0, "~Render _gbuffer.mDepthTexture: {0}", _gbuffer.mDepthTexture);
         glDeleteTextures(5, &_gbuffer.mPositionTexture);
     }
+
+    if (_offSceneBuffer.mColorTexture != 0)
+    {
+        ASSERT_LOG(_offSceneBuffer.mColorTexture != 0, "~Render _offSceneBuffer.mColorTexture : {0}", _offSceneBuffer.mColorTexture);
+        ASSERT_LOG(_offSceneBuffer.mDepthTexture != 0, "~Render _offSceneBuffer.mDepthTexture : {0}", _offSceneBuffer.mDepthTexture);
+        glDeleteTextures(2, &_offSceneBuffer.mColorTexture);
+    }
 }
 
 MatrixStack & Render::GetMatrixStack()
@@ -207,6 +214,20 @@ void Render::RenderCamera()
         _renderInfo.mPass = nullptr;
         RenderForward();
     }
+
+//	TODO
+    _renderTarget->Start(RenderTarget::BindType::kREAD);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glDrawBuffer(GL_FRONT);
+    glBlitFramebuffer(
+        10, 10,
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt(),
+        0, 0,
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    _renderTarget->Ended();
 
 	//	后期处理
     _renderInfo.mPass = nullptr;
@@ -539,7 +560,6 @@ void Render::StartRender()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -547,7 +567,6 @@ void Render::StartRender()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -555,7 +574,6 @@ void Render::StartRender()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -563,7 +581,6 @@ void Render::StartRender()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -572,22 +589,48 @@ void Render::StartRender()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    
+    if (_offSceneBuffer.mColorTexture == 0)
+    {
+        ASSERT_LOG(_offSceneBuffer.mColorTexture == 0, "_offSceneBuffer.mColorTexture : {0}", _offSceneBuffer.mColorTexture);
+        ASSERT_LOG(_offSceneBuffer.mDepthTexture == 0, "_offSceneBuffer.mDepthTexture : {0}", _offSceneBuffer.mDepthTexture);
+
+        glGenTextures(2, &_offSceneBuffer.mColorTexture);
+
+        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+
+        glBindTexture(GL_TEXTURE_2D, _offSceneBuffer.mColorTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _offSceneBuffer.mDepthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        _renderTarget[1].Start();
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _offSceneBuffer.mColorTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _offSceneBuffer.mDepthTexture);
+        _renderTarget[1].Ended();
+    }
+
     _renderInfo.mVertexCount = 0;
     _renderInfo.mRenderCount = 0;
 
-    glClear(GL_COLOR_BUFFER_BIT |
-            GL_DEPTH_BUFFER_BIT |
-            GL_STENCIL_BUFFER_BIT);
-
     _renderTarget[1].Start();
     glClear(GL_COLOR_BUFFER_BIT |
-            GL_DEPTH_BUFFER_BIT |
-            GL_STENCIL_BUFFER_BIT);
+            GL_DEPTH_BUFFER_BIT);
     _renderTarget[1].Ended();
 }
 
