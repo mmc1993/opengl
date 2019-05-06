@@ -122,6 +122,7 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
 void Render::BakeLightDepthMap(Light * light)
 {
     auto count = 0;
+    _renderInfo.mPass = nullptr;
     _renderTarget.Start();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
@@ -131,11 +132,12 @@ void Render::BakeLightDepthMap(Light * light)
 
 		for (auto & command : _shadowCommands)
 		{
-            Bind(command.mPass);
+            if (Bind(command.mPass))
+            {
+                Post(light);
+            }
             
             Post(command.mTransform);
-
-            Post(light);
 
             for (auto i = 0; i != command.mMeshNum; ++i)
             {
