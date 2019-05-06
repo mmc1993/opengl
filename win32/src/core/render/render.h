@@ -124,7 +124,6 @@ private:
 
     //  —”≥Ÿ‰÷»æœ‡πÿ
     void InitGBuffer();
-    void FillGBuffer();
 
     template <class T, int N>
     bool IsEmptyQueueArray(const std::array<T, N> & ary);

@@ -505,10 +505,6 @@ void Render::InitGBuffer()
     }
 }
 
-void Render::FillGBuffer()
-{
-}
-
 template <class T, int N>
 bool Render::IsEmptyQueueArray(const std::array<T, N> & ary)
 {
