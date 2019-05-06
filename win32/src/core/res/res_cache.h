@@ -5,6 +5,14 @@
 
 class ResCache {
 public:
+    ~ResCache()
+    {
+        for (auto & pair : _resources)
+        {
+            delete pair.second;
+        }
+    }
+
 	bool IsReg(const std::string & url) const
 	{
 		auto it = _resources.find(url);
