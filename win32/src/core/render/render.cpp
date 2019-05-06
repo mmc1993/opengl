@@ -216,7 +216,6 @@ void Render::RenderCamera()
 
 void Render::RenderForward()
 {
-    //  打包光源数据
     InitUBOLightForward();
     PackUBOLightForward();
     for (auto & commands : _forwardQueues)
