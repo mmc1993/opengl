@@ -56,7 +56,8 @@ void Window::Move(size_t x, size_t y, size_t w)
 
 void Window::Move(size_t x, size_t y, size_t w, size_t h)
 {
-    assert(nullptr != _window);
+    ASSERT_LOG(nullptr != _window, "_window Error");
+
     OnSize(_window, w, h);
     glfwSetWindowPos(_window, static_cast<int>(x), static_cast<int>(y));
     glfwSetWindowSize(_window, static_cast<int>(w), static_cast<int>(h));
@@ -72,32 +73,36 @@ void Window::SetFPS(size_t fps)
 
 size_t Window::GetX() const
 {
+    ASSERT_LOG(nullptr != _window, "_window Error");
+
     int x, y;
-    assert(nullptr != _window);
     glfwGetWindowPos(_window, &x, &y);
     return static_cast<size_t>(x);
 }
 
 size_t Window::GetY() const
 {
+    ASSERT_LOG(nullptr != _window, "_window Error");
+
     int x, y;
-    assert(nullptr != _window);
     glfwGetWindowPos(_window, &x, &y);
     return static_cast<size_t>(y);
 }
 
 size_t Window::GetW() const
 {
+    ASSERT_LOG(nullptr != _window, "_window Error");
+
     int w, h;
-    assert(nullptr != _window);
     glfwGetWindowSize(_window, &w, &h);
     return static_cast<size_t>(w);
 }
 
 size_t Window::GetH() const
 {
+    ASSERT_LOG(nullptr != _window, "_window Error");
+
     int w, h;
-    assert(nullptr != _window);
     glfwGetWindowSize(_window, &w, &h);
     return static_cast<size_t>(h);
 }

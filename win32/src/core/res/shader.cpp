@@ -15,7 +15,6 @@ void Shader::SetUniform(uint GLID, const char * key, uint val)
 
 void Shader::SetUniform(uint GLID, const char * key, float val)
 {
-
 	glUniform1f(glGetUniformLocation(GLID, key), val);
 }
 
@@ -77,7 +76,7 @@ Shader::~Shader()
     }
 }
 
-bool Shader::AddPass(
+void Shader::AddPass(
     const Pass & pass, 
     const std::string & vs, 
     const std::string & fs, 
@@ -89,7 +88,7 @@ bool Shader::AddPass(
         _passs.push_back(pass);
         _passs.back().GLID = GLID;
     }
-    return GLID != 0;
+    ASSERT_LOG(GLID != 0, "vs: {0}, fs: {1}, gs: {2}", vs, fs, gs);
 }
 
 uint Shader::AddPass(const char * vs, const char * fs, const char * gs)

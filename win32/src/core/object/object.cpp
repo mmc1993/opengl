@@ -75,7 +75,8 @@ Object * Object::GetChildTag(uint tag)
 
 Object * Object::GetChildIdx(uint idx)
 {
-    assert(idx < _childs.size());
+    ASSERT_LOG(idx < _childs.size(), "Object GetChildIdx Idx: {0}", idx);
+    
     return *std::next(_childs.begin(), idx);
 }
 
@@ -198,7 +199,8 @@ Object * Object::GetParent()
 
 void Object::DelChild(size_t idx, bool del)
 {
-    assert(idx < _childs.size());
+    ASSERT_LOG(idx < _childs.size(), "Object DelChild Idx: {0}", idx);
+
     auto it = std::next(_childs.begin(), idx);
     (*it)->_parent = nullptr;
     if (del) { delete *it; }
@@ -208,6 +210,7 @@ void Object::DelChild(size_t idx, bool del)
 void Object::DelChild(Object * child, bool del)
 {
     auto it = std::find(_childs.begin(), _childs.end(), child);
-    assert(it != _childs.end());
+    ASSERT_LOG(it != _childs.end(), "Object DelChild");
+
     DelChild(std::distance(_childs.begin(), it), del);
 }

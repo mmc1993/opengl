@@ -19,19 +19,19 @@ Render::~Render()
         _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
     {
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
         glDeleteBuffers(3, _uboLightForward);
     }
 
     if (_gbuffer.mPositionTexture != 0)
     {
-        assert(_gbuffer.mPositionTexture != 0
-            && _gbuffer.mSpecularTexture != 0
-            && _gbuffer.mDiffuseTexture != 0
-            && _gbuffer.mNormalTexture != 0
-            && _gbuffer.mDepthTexture != 0);
+        ASSERT_LOG(_gbuffer.mPositionTexture != 0, "~Render _gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
+        ASSERT_LOG(_gbuffer.mSpecularTexture != 0, "~Render _gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
+        ASSERT_LOG(_gbuffer.mDiffuseTexture != 0, "~Render _gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
+        ASSERT_LOG(_gbuffer.mNormalTexture != 0, "~Render _gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
+        ASSERT_LOG(_gbuffer.mDepthTexture != 0, "~Render _gbuffer.mDepthTexture: {0}", _gbuffer.mDepthTexture);
         glDeleteTextures(5, &_gbuffer.mPositionTexture);
     }
 }
@@ -43,8 +43,9 @@ MatrixStack & Render::GetMatrixStack()
 
 void Render::AddCamera(Camera * camera, size_t flag, size_t order)
 {
-	assert(order == (size_t)-1 || GetCamera(order) == nullptr);
-	auto fn = [order](const CameraInfo & info) { return order <= info.mOrder; };
+    ASSERT_LOG(order == ~0 || GetCamera(order) == nullptr, "AddCamera Flag Order: {0}, {1}", flag, order);
+	
+    auto fn = [order](const CameraInfo & info) { return order <= info.mOrder; };
 	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
 	_cameraInfos.insert(it, CameraInfo(camera, flag, order));
 }
@@ -343,21 +344,17 @@ void Render::InitUBOLightForward()
         _uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0 ||
         _uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0)
     {
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0);
-        assert(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0);
-
-        auto directLen = LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT;
-        auto pointLen = LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT;
-        auto spotLen = LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT;
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
+        ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
 
         glGenBuffers(3, _uboLightForward);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kDIRECT]);
-        glBufferData(GL_UNIFORM_BUFFER, directLen, nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kPOINT]);
-        glBufferData(GL_UNIFORM_BUFFER, pointLen, nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[kSPOT]);
-        glBufferData(GL_UNIFORM_BUFFER, spotLen, nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 }
@@ -453,17 +450,16 @@ void Render::InitGBuffer()
 {
     if (_gbuffer.mPositionTexture == 0)
     {
-        assert(_gbuffer.mPositionTexture == 0
-            && _gbuffer.mSpecularTexture == 0
-            && _gbuffer.mDiffuseTexture == 0
-            && _gbuffer.mNormalTexture == 0
-            && _gbuffer.mDepthTexture == 0);
+        ASSERT_LOG(_gbuffer.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
+        ASSERT_LOG(_gbuffer.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
+        ASSERT_LOG(_gbuffer.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
+        ASSERT_LOG(_gbuffer.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
+        ASSERT_LOG(_gbuffer.mDepthTexture == 0, "_gbuffer.mDepthTexture: {0}", _gbuffer.mDepthTexture);
         
-        glGenTextures(5, &_gbuffer.mPositionTexture);
-
         auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
         auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
 
+        glGenTextures(5, &_gbuffer.mPositionTexture);
         glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -694,8 +690,9 @@ void Render::Post(const glm::mat4 & transform)
 
 void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
 {
-	assert(mesh.mVBO != 0);
-	assert(mesh.mVAO != 0);
+    ASSERT_LOG(mesh.mVBO != 0, "Draw VBO Error");
+    ASSERT_LOG(mesh.mVAO != 0, "Draw VAO Error");
+
 	glBindVertexArray(mesh.mVAO);
 	switch (drawType)
 	{

@@ -70,7 +70,7 @@ public:
         return _passs;
     }
 
-    bool AddPass(
+    void AddPass(
         const Pass & pass,
         const std::string & vs,
         const std::string & fs,

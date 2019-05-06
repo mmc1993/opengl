@@ -1,6 +1,7 @@
 #pragma once
 
 #include "res.h"
+#include "../tools/debug_tool.h"
 
 class ResCache {
 public:
@@ -28,9 +29,9 @@ public:
 	template <class T>
 	T * Get(const std::string & url)
 	{
-		assert(IsReg(url));
+        ASSERT_LOG(IsReg(url), "Get URL: {0}", url);
 		auto ret = _resources.at(url);
-		assert(dynamic_cast<T *>(ret));
+        ASSERT_LOG(dynamic_cast<T *>(ret), "Get URL: {0}", url);
 		return reinterpret_cast<T *>(ret);
 	}
 

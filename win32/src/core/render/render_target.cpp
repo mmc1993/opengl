@@ -111,7 +111,7 @@ void RenderTarget::Bind(BindType bindType, const RenderTarget & rt)
 
 void RenderTarget::Bind(BindType bindType)
 {
-    ASSERT_RET(glCheckFramebufferStatus(bindType) == GL_FRAMEBUFFER_COMPLETE);
+    ASSERT_LOG(glCheckFramebufferStatus(bindType) == GL_FRAMEBUFFER_COMPLETE, "FBO Error");
 
     glBindFramebuffer(bindType, 0);
 }

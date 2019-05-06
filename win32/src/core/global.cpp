@@ -32,12 +32,13 @@ Global::~Global()
 
 void Global::Start()
 {
-    assert(_event == nullptr 
-        && _timer == nullptr 
-        && _object == nullptr 
-        && _render == nullptr 
-        && _resCache == nullptr
-        && _cfgCache == nullptr);
+    ASSERT_LOG(_event == nullptr, "_event Error");
+    ASSERT_LOG(_timer == nullptr, "_timer Error");
+    ASSERT_LOG(_object == nullptr, "_object Error");
+    ASSERT_LOG(_render == nullptr, "_render Error");
+    ASSERT_LOG(_resCache == nullptr, "_resCache Error");
+    ASSERT_LOG(_cfgCache == nullptr, "_cfgCache Error");
+
     //  ≥ı ºªØ event
     _event = new Event();
 

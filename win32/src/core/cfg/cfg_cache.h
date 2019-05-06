@@ -2,6 +2,7 @@
 
 #include "../include.h"
 #include "../third/mmcjson.h"
+#include "../tools/debug_tool.h"
 #include "../tools/string_tool.h"
 #include <filesystem>
 
@@ -15,7 +16,8 @@ public:
 
     mmc::JsonValue::Value At(const std::string & key)
     {
-        assert(_root != nullptr);
+        ASSERT_LOG(_root != nullptr, "CfgCache At Key: {0}", key);
+
         return _root->At(key);
     }
 
@@ -27,25 +29,22 @@ public:
         }
     }
 
-    bool Load(const std::string & url)
+    void Load(const std::string & url)
     {
         auto fname = string_tool::Replace(url, "\\", "/");
         auto value = mmc::JsonValue::FromFile(fname);
-        assert(value != nullptr);
-        if (value != nullptr)
-        {
-            auto key = string_tool::QueryFileName(fname);
-            _files.insert(std::make_pair(key, fname));
-            _root->Insert(value, key);
-        }
-        return value != nullptr;
+        ASSERT_LOG(value != nullptr, "CfgCache Load URL: {0}", url);
+
+        auto key = string_tool::QueryFileName(fname);
+        _files.insert(std::make_pair(key, fname));
+        _root->Insert(value, key);
     }
 
     void Save(const std::string & key)
     {
-        assert(_root->IsHashKey(key));
-        auto buffer = std::to_string(_root->At(key));
+        ASSERT_LOG(_root->IsHashKey(key), "CfgCache Save key: {0}", key);
 
+        auto buffer = std::to_string(_root->At(key));
         std::ofstream ofile(_files.at(key));
         ofile.write(buffer.c_str(), buffer.size());
         ofile.close();

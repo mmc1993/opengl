@@ -13,14 +13,12 @@ Model * File::LoadModel(const std::string & url)
 	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<Model>(url));
 
 	Assimp::Importer importer;
-	auto scene = importer.ReadFile(url,
-								   aiProcess_CalcTangentSpace |
-								   aiProcess_Triangulate |
-								   aiProcess_FlipUVs);
-	ASSERT_RET(scene != nullptr, nullptr);
-	ASSERT_RET(scene->mRootNode != nullptr, nullptr);
+	auto scene = importer.ReadFile(url, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs);
+	ASSERT_LOG(nullptr != scene,            "Error URL: {0}", url);
+	ASSERT_LOG(nullptr != scene->mRootNode, "Error URL: {0}", url);
+
 	auto model = File::LoadModel(scene->mRootNode, scene, url.substr(0, 1 + url.find_last_of('/')));
-	ASSERT_RET(model != nullptr, nullptr);
+    ASSERT_LOG(model != nullptr,            "Error URL: {0}", url);
     Global::Ref().RefResCache().Reg(url, model);
 	return model;
 }
@@ -30,7 +28,7 @@ Shader * File::LoadShader(const std::string & url)
 	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<Shader>(url));
 
     std::ifstream ifile(url);
-    ASSERT_RET(ifile, nullptr);
+    ASSERT_LOG(ifile, "Error URL: {0}", url);
 
     auto shader = new Shader();
     std::string line;
@@ -190,11 +188,11 @@ Shader * File::LoadShader(const std::string & url)
             }
             ASSERT_LOG(string_tool::IsEqualSkipSpace(line, "End Pass"), "Not Found End Pass");
 
-            auto ret = shader->AddPass(pass, vs, fs, gs);
-            ASSERT_LOG(ret, "Shader Pass Error");
+            shader->AddPass(pass, vs, fs, gs);
         }
     }
     ASSERT_LOG(!shader->IsEmpty(), "Empty Shader Pass");
+
     Global::Ref().RefResCache().Reg(url, shader);
     return shader;
 }
@@ -205,7 +203,8 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	
 	auto w = 0, h = 0, c = 0, fmt = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
-	ASSERT_RET(buffer != nullptr, nullptr);
+	ASSERT_LOG(buffer != nullptr, "URL: {0}", url);
+
 	switch (c)
 	{
 	case 1: fmt = GL_RED; break;
@@ -225,6 +224,7 @@ Bitmap * File::LoadBitmap(const std::string & url)
 BitmapCube * File::LoadBitmapCube(const std::string & url)
 {
 	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<BitmapCube>(url));
+
 	std::vector<std::string> urls{
 		url + ".right.jpg",		url + ".left.jpg",
 		url + ".top.jpg",		url + ".bottom.jpg",
@@ -235,7 +235,7 @@ BitmapCube * File::LoadBitmapCube(const std::string & url)
 	for (auto & url: urls)
 	{
 		auto buffer = stbi_load(url.c_str(), &w, &h, &fmt, 0);
-		ASSERT_RET(buffer != nullptr, nullptr);
+		ASSERT_LOG(buffer != nullptr, "URL: {0}", url);
 		buffers.push_back(buffer);
 	}
 	switch (fmt)
