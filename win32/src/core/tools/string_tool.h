@@ -45,7 +45,7 @@ namespace string_tool {
 	inline std::string Replace(const std::string & str, 
 							   const std::string & sold, 
 							   const std::string & snew, 
-							   size_t count = (size_t)-1)
+							   size_t count = ~0)
 	{
 		std::vector<std::string> vec;
 		auto pos = (size_t)0;
