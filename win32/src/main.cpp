@@ -1,3 +1,4 @@
+
 #include "core/timer/timer.h"
 #include "core/event/event.h"
 #include "core/window/window.h"
@@ -58,34 +59,46 @@ private:
 	void InitAssets()
 	{
         File::LoadShader(BUILTIN_SHADER_LIGHT);
-        File::LoadShader("res/demo/shader/scene.shader");
+        File::LoadShader("res/demo/shader/scene_deferred.shader");
 	}
 
 	void InitObject()
 	{
 		auto modelScene = File::LoadModel("res/demo/scene.obj");
 
-		std::function<Object * (Model *, Object *)> createScene;
+		std::function<Object * (Model *, Object *, const std::string &)> createScene;
 
-		createScene = [&createScene](Model * model, Object * parent) {
-			auto sprite = new Sprite();
-			sprite->BindShader("res/demo/shader/scene.shader");
-			for (auto i = 0; i != model->mMeshs.size(); ++i)
-			{
-				sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
-			}
+        createScene = [&createScene](Model * model, Object * parent, const std::string & shaderURL) {
+            auto sprite = new Sprite();
+            sprite->BindShader(shaderURL);
+            for (auto i = 0; i != model->mMeshs.size(); ++i)
+            {
+                sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
+            }
 
-			auto object = new Object();
-			object->AddComponent(sprite);
-			object->SetParent(parent);
+            auto object = new Object();
+            object->AddComponent(sprite);
+            object->SetParent(parent);
 
-			for (auto i = 0; i != model->mChilds.size(); ++i)
-			{
-				createScene(model->mChilds.at(i), object);
-			}
-			return object;
-		};
-		createScene(modelScene, &Global::Ref().RefObject());
+            for (auto i = 0; i != model->mChilds.size(); ++i)
+            {
+                createScene(model->mChilds.at(i), object, shaderURL);
+            }
+            return object;
+        };
+
+
+        auto parent0 = new Object();
+        parent0->GetTransform()->Translate(-6, 0, 0);
+        parent0->SetParent(&Global::Ref().RefObject());
+
+        auto parent1 = new Object();
+        parent1->GetTransform()->Translate(6, 0, 0);
+        parent1->SetParent(&Global::Ref().RefObject());
+
+
+		createScene(modelScene, parent0, "res/demo/shader/scene.shader");
+        createScene(modelScene, parent1, "res/demo/shader/scene_deferred.shader");
 	}
 
 	void InitEvents()

@@ -67,7 +67,6 @@ public:
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture2D * texture);
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture3D * texture);
 
-
     RenderTarget();
     ~RenderTarget();
 

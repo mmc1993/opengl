@@ -215,10 +215,7 @@ void Render::RenderCamera()
         RenderForward();
     }
 
-//	TODO
-    _renderTarget->Start(RenderTarget::BindType::kREAD);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glDrawBuffer(GL_FRONT);
+    _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
         10, 10,
         Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
@@ -227,7 +224,7 @@ void Render::RenderCamera()
         Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
         Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    _renderTarget->Ended();
+    _renderTarget[1].Ended();
 
 	//	后期处理
     _renderInfo.mPass = nullptr;
