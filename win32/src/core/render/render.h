@@ -63,13 +63,13 @@ public:
         uint mSpecularTexture;
         uint mDiffuseTexture;
         uint mNormalTexture;
-        uint mDepthTexture;
+        uint mDepthBuffer;
         GBuffer()
             : mPositionTexture(0)
             , mSpecularTexture(0)
             , mDiffuseTexture(0)
             , mNormalTexture(0)
-            , mDepthTexture(0)
+            , mDepthBuffer(0)
         { }
     };
 
