@@ -218,7 +218,7 @@ void Render::RenderCamera()
 
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
-        10, 10,
+        0, 0,
         Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
         Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt(),
         0, 0,
