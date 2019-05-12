@@ -209,7 +209,7 @@ void Render::RenderCamera()
         RenderDeferred();
     }
 
-	//  正向渲染
+    //  正向渲染
     if (!IsEmptyQueueArray(_forwardQueues))
     {
         _renderInfo.mPass = nullptr;
@@ -343,19 +343,19 @@ void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow
                       : command.mShader->GetPass(1);
     if (Bind(&pass))
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, _renderInfo.mTexBase++);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, _renderInfo.mTexBase++);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, _renderInfo.mTexBase++);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, _renderInfo.mTexBase++);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, _renderInfo.mTexBase + 0);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, _renderInfo.mTexBase + 1);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, _renderInfo.mTexBase + 2);
+        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, _renderInfo.mTexBase + 3);
     }
 
     if (isRenderShadow)
     {
         switch (command.mLight->GetType())
         {
-        case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
-        case Light::Type::kPOINT: Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
-        case Light::Type::kSPOT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase); break;
+        case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
+        case Light::Type::kPOINT: Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
+        case Light::Type::kSPOT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
         }
     }
 
@@ -685,26 +685,26 @@ bool Render::Bind(const Pass * pass)
 
 void Render::Post(const Material & material)
 {
-    auto count = _renderInfo.mTexBase;
+    auto texIndex = _renderInfo.mTexBase;
 	for (auto i = 0; i != material.mDiffuses.size(); ++i)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i).c_str(), material.mDiffuses.at(i), count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i).c_str(), material.mDiffuses.at(i), texIndex++);
 	}
 	if (material.mSpecular != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material.mSpecular, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material.mSpecular, texIndex++);
 	}
 	if (material.mReflect != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material.mReflect, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material.mReflect, texIndex++);
 	}
 	if (material.mNormal != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material.mNormal, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material.mNormal, texIndex++);
 	}
 	if (material.mHeight != nullptr)
 	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material.mHeight, count++);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material.mHeight, texIndex++);
 	}
     Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SHININESS, material.mShininess);
 }

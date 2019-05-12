@@ -171,7 +171,7 @@ Pass
 		float CalculatePointShadow(const vec3 position)
 		{
 			vec3 normal = position - light_point_.mPosition;
-			float z 	= texture(shadow_map_point_0_, normalize(normal)).r;
+			float z 	= texture(shadow_map_point_0_, normal).r;
 			return length(normal) > z * light_point_.mFar? 0: 1;
 		}
 
