@@ -52,6 +52,9 @@ public:
     static void SetUniform(uint GLID, const char * key, const Bitmap * val, iint pos);
 	static void SetUniform(uint GLID, const char * key, const BitmapCube * val, iint pos);
 
+    static void UnbindTex2D(iint pos);
+    static void UnbindTex3D(iint pos);
+
 public:
     ~Shader();
 

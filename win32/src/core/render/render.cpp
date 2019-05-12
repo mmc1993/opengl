@@ -351,6 +351,8 @@ void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow
 
     if (isRenderShadow)
     {
+        Shader::UnbindTex2D(_renderInfo.mTexBase + 4);
+        Shader::UnbindTex3D(_renderInfo.mTexBase + 4);
         switch (command.mLight->GetType())
         {
         case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;

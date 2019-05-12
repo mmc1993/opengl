@@ -46,7 +46,7 @@ void Shader::SetUniform(uint GLID, const char * key, const glm::mat4 & val)
 
 void Shader::SetTexture2D(uint GLID, const char * key, const uint val, iint pos)
 {
-    glActiveTexture(GL_TEXTURE0 + pos);
+    glActiveTexture(GL_TEXTURE0 +pos);
     glBindTexture(GL_TEXTURE_2D, val);
     glUniform1i(glGetUniformLocation(GLID, key), pos);
 }
@@ -66,6 +66,18 @@ void Shader::SetUniform(uint GLID, const char * key, const Bitmap * val, iint po
 void Shader::SetUniform(uint GLID, const char * key, const BitmapCube * val, iint pos)
 {
     SetTexture3D(GLID, key, val->GetGLID(), pos);
+}
+
+void Shader::UnbindTex2D(iint pos)
+{
+    glActiveTexture(GL_TEXTURE0 + pos);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Shader::UnbindTex3D(iint pos)
+{
+    glActiveTexture(GL_TEXTURE0 + pos);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 Shader::~Shader()
