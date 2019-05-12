@@ -10,6 +10,7 @@ public:
 			float u;
 			float v;
 		} uv; 
+        glm::vec4 c;
 		glm::vec3 n;
 		glm::vec3 tan;
 		glm::vec3 bitan;
@@ -47,7 +48,7 @@ public:
 	{ }
 
 	//	顶点数据
-	//		顶点坐标，纹理坐标，法线，切线，副切线
+	//		顶点坐标，纹理坐标，法线，切线，副切线，颜色
 	static Mesh Create(const std::vector<Vertex> & vertexs)
 	{
 		Mesh mesh;
@@ -69,13 +70,15 @@ public:
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitan));
 		glEnableVertexAttribArray(4);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, c));
+        glEnableVertexAttribArray(5);
 
 		glBindVertexArray(0);
 		return mesh;
 	}
 
 	//	索引数据
-	//		顶点坐标，纹理坐标，法线，切线，副切线
+	//		顶点坐标，纹理坐标，法线，切线，副切线，颜色
 	static Mesh Create(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
 	{
 		Mesh mesh;
@@ -102,6 +105,8 @@ public:
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitan));
 		glEnableVertexAttribArray(4);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, c));
+        glEnableVertexAttribArray(5);
 
 		glBindVertexArray(0);
 		return mesh;
@@ -187,6 +192,33 @@ public:
 		glBindVertexArray(0);
 		return mesh;
 	}
+
+    //	索引数据
+    //		顶点坐标，颜色
+    static Mesh CreateVC(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs)
+    {
+        Mesh mesh;
+        mesh.mIdxCount = static_cast<uint>(indexs.size());
+        mesh.mVtxCount = static_cast<uint>(vertexs.size());
+        glGenVertexArrays(1, &mesh.mVAO);
+        glBindVertexArray(mesh.mVAO);
+
+        glGenBuffers(1, &mesh.mVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.mVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertexs.size() * sizeof(Vertex), vertexs.data(), GL_STATIC_DRAW);
+
+        glGenBuffers(1, &mesh.mEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.mEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexs.size() * sizeof(uint), indexs.data(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, c));
+        glEnableVertexAttribArray(1);
+
+        glBindVertexArray(0);
+        return mesh;
+    }
 
 	static void DeleteRef(Mesh & mesh)
 	{
