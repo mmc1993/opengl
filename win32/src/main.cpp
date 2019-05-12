@@ -289,8 +289,6 @@ private:
 
     void CreateLight()
     {
-        iint i;
-        glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &i);
         //	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
         const glm::vec3 LIGHT_PARAM = glm::vec3(1.0f, 0.01f, 0.01f);
         const auto MAX_X = 15;
