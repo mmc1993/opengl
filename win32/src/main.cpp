@@ -47,58 +47,49 @@ private:
 	void InitCamera()
 	{
 		auto camera = new Camera();
-		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 3000);
+		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 30000);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(14.9228725f, 11.5230131f, 10.9647131f),
-			glm::vec3(-5, 0, -5),
-			glm::vec3(-0.287246555f, 0.787977219f, -0.290789485f));
+			glm::vec3(0, 10, 10),
+			glm::vec3(0, 0, 0),
+			glm::vec3(0, 1, 0));
 		Global::Ref().RefRender().AddCamera(camera, Render::CameraInfo::kFLAG0, 0);
 	}
 
 	void InitAssets()
 	{
         File::LoadShader(BUILTIN_SHADER_LIGHT);
-        File::LoadShader("res/demo/shader/scene_deferred.shader");
 	}
 
 	void InitObject()
 	{
-		auto modelScene = File::LoadModel("res/demo/scene.obj");
+        auto wallObject = new Object();
+        wallObject->GetTransform()->Scale(10000, 1, 10000);
+        wallObject->GetTransform()->Translate(0, 0, 0);
+        wallObject->SetParent(&Global::Ref().RefObject());
 
-		std::function<Object * (Model *, Object *, const std::string &)> createScene;
+        CreateObject(File::LoadModel("res/demo/wall.obj"), wallObject, "res/demo/shader/scene_deferred_vertex_color.shader", glm::vec3());
 
-        createScene = [&createScene](Model * model, Object * parent, const std::string & shaderURL) {
-            auto sprite = new Sprite();
-            sprite->BindShader(shaderURL);
-            for (auto i = 0; i != model->mMeshs.size(); ++i)
+        auto ballObject = new Object();
+        ballObject->SetParent(&Global::Ref().RefObject());
+
+        const auto MAX_X = 5;
+        const auto MAX_Y = 5;
+        const auto SPACE_X = 5;
+        const auto SPACE_Y = 5;
+        for (auto x = 0; x != MAX_X ; ++x)
+        {
+            for (auto y = 0; y != MAX_Y; ++y)
             {
-                sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
+                CreateObject(
+                    File::LoadModel("res/demo/ball.obj"), ballObject, 
+                    "res/demo/shader/scene_deferred_vertex_color.shader",
+                    glm::vec3(x * SPACE_X + MAX_X * SPACE_X * -0.5f, 2, 
+                              y * SPACE_Y + MAX_Y * SPACE_Y * -0.5f));
             }
+        }
 
-            auto object = new Object();
-            object->AddComponent(sprite);
-            object->SetParent(parent);
-
-            for (auto i = 0; i != model->mChilds.size(); ++i)
-            {
-                createScene(model->mChilds.at(i), object, shaderURL);
-            }
-            return object;
-        };
-
-
-        auto parent0 = new Object();
-        parent0->GetTransform()->Translate(-6, 0, 0);
-        parent0->SetParent(&Global::Ref().RefObject());
-
-        auto parent1 = new Object();
-        parent1->GetTransform()->Translate(6, 0, 0);
-        parent1->SetParent(&Global::Ref().RefObject());
-
-
-		createScene(modelScene, parent0, "res/demo/shader/scene.shader");
-        createScene(modelScene, parent1, "res/demo/shader/scene_deferred.shader");
+        CreateLight();
 	}
 
 	void InitEvents()
@@ -113,17 +104,17 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, -1, -1)) },
+			//{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            { glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
+            //{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -177,6 +168,8 @@ private:
 			object->SetParent(&Global::Ref().RefObject());
 			_lightSpots.push_back(light);
 		}
+
+        _isBegFlag = false;
 	}
 
 	void OnKeyEvent(const std::any & any)
@@ -199,6 +192,11 @@ private:
 
 		_direct = param.act == 1 && param.key == 'E' ? _direct | kDOWN :
 				  param.act == 0 && param.key == 'E' ? _direct ^ kDOWN : _direct;
+
+        if (param.key == 'G')
+        {
+            _isBegFlag = true;
+        }
 	}
 
 	void OnMouseButton(const std::any & any)
@@ -249,18 +247,80 @@ private:
 			camera->SetPos(pos);
 		}
 
-        _lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f,
-                                                        8 + std::cos(_pointCos) * 3,
-                                                        3 + std::sin(_pointCos) * 3);
-        _pointCos += 0.1f;
+        //_lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f,
+        //                                                8 + std::cos(_pointCos) * 3,
+        //                                                3 + std::sin(_pointCos) * 3);
+        //_pointCos += 0.1f;
 
-		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-																 8,
-																 0 + std::sin(_spotCos) * 5);
-		_spotCos += 0.1f;
+		//_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
+		//														 8,
+		//														 0 + std::sin(_spotCos) * 5);
+		//_spotCos += 0.1f;
+
+        if (_isBegFlag)
+        {
+            auto & pos = Global::Ref().RefRender().GetCamera(0)->GetPos();
+            auto & eye = Global::Ref().RefRender().GetCamera(0)->GetEye();
+            Global::Ref().RefRender().GetCamera(0)->SetPos(pos - eye * 0.4f);
+        }
 
 		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
+
+    void CreateObject(Model * model, Object * parent, const std::string & shaderURL, const glm::vec3 & pos)
+    {
+        auto sprite = new Sprite();
+        sprite->BindShader(shaderURL);
+        for (auto i = 0; i != model->mMeshs.size(); ++i)
+        {
+            sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
+        }
+
+        auto object = new Object();
+        object->SetParent(parent);
+        object->AddComponent(sprite);
+        object->GetTransform()->Translate(pos);
+
+        for (auto i = 0; i != model->mChilds.size(); ++i)
+        {
+            CreateObject(model->mChilds.at(i), object, shaderURL, pos);
+        }
+    };
+
+    void CreateLight()
+    {
+        iint i;
+        glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &i);
+        //	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
+        const glm::vec3 LIGHT_PARAM = glm::vec3(1.0f, 0.01f, 0.01f);
+        const auto MAX_X = 15;
+        const auto MAX_Y = 15;
+        const auto SPACE_X = 50;
+        const auto SPACE_Y = 50;
+
+        for (auto x = 0; x != MAX_X; ++x)
+        {
+            for (auto y = 0; y != MAX_Y; ++y)
+            {
+                auto light = new LightPoint();
+                light->mAmbient = glm::vec3(std::rand() % 255 / 255.0f * 0.1f, std::rand() % 255 / 255.0f * 0.1f, std::rand() % 255 / 255.0f * 0.1f);
+                light->mDiffuse = glm::vec3(std::rand() % 255 / 255.0f * 0.8f, std::rand() % 255 / 255.0f * 0.8f, std::rand() % 255 / 255.0f * 0.8f);
+                light->mSpecular = glm::vec3(std::rand() % 255 / 255.0f, std::rand() % 255 / 255.0f, std::rand() % 255 / 255.0f);
+                light->mK0 = LIGHT_PARAM.x;
+                light->mK1 = LIGHT_PARAM.y;
+                light->mK2 = LIGHT_PARAM.z;
+                light->OpenShadow(1, 100);
+
+                auto object = new Object();
+                object->AddComponent(light);
+                object->GetTransform()->Translate(x * SPACE_X - MAX_X * SPACE_X * 0.5f, 5, 
+                                                  y * SPACE_Y - MAX_Y * SPACE_Y * 0.5f);
+                object->SetParent(&Global::Ref().RefObject());
+                _lightPoints.push_back(light);
+            }
+        }
+        
+    }
 	
 private:
 	std::vector<LightDirect *> _lightDirects;
@@ -269,6 +329,8 @@ private:
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
+
+    bool _isBegFlag;
 
 	float _spotCos;
 	float _pointCos;

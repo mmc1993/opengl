@@ -330,18 +330,8 @@ Mesh File::LoadMesh(aiMesh * mesh, const aiScene * scene, const std::string & di
 		vertex.n.x = mesh->mNormals[i].x;
 		vertex.n.y = mesh->mNormals[i].y;
 		vertex.n.z = mesh->mNormals[i].z;
-        if (mesh->mColors[i] != nullptr)
-        {
-            //  color
-            vertex.c.r = mesh->mColors[i][0].r;
-            vertex.c.g = mesh->mColors[i][0].g;
-            vertex.c.b = mesh->mColors[i][0].b;
-            vertex.c.a = mesh->mColors[i][0].a;
-        }
-        else
-        {
-            vertex.c = glm::vec4(1, 1, 1, 1);
-        }
+        //  color
+        vertex.c = glm::vec4(1, 1, 1, 1);
 		//	tan
 		vertex.tan.x = mesh->mTangents[i].x;
 		vertex.tan.y = mesh->mTangents[i].y;
