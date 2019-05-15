@@ -66,7 +66,7 @@ private:
         auto object = new Object();
         object->SetParent(&Global::Ref().RefObject());
         CreateObject(File::LoadModel("res/demo/scene.obj"), object,
-                     "res/demo/shader/scene_deferred.shader", glm::vec3(0, 0, 0));
+                     "res/demo/shader/scene.shader", glm::vec3(0, 0, 0));
 	}
 
 	void InitEvents()
