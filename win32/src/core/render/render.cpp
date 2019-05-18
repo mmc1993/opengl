@@ -182,6 +182,10 @@ void Render::SortLightCommands()
 
 void Render::BakeLightDepthMap()
 {
+    //  烘培阴影的时候会修改Viewport, 在这之前先保存当前的信息.
+    iint viewport[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    //  烘培阴影
     for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
     {
         BakeLightDepthMap(_lightQueues.at(Light::Type::kDIRECT).at(i).mLight);
@@ -194,6 +198,8 @@ void Render::BakeLightDepthMap()
     {
         BakeLightDepthMap(_lightQueues.at(Light::Type::kSPOT).at(i).mLight);
     }
+    //  恢复之前的Viewport
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
 void Render::RenderCamera()
