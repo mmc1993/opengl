@@ -21,7 +21,7 @@ Global::Global()
     , _timer(nullptr)
     , _object(nullptr)
     , _render(nullptr)
-    , _resCache(nullptr)
+    , _resManager(nullptr)
     , _cfgCache(nullptr)
 { }
 
@@ -36,7 +36,7 @@ void Global::Start()
     ASSERT_LOG(_timer == nullptr, "_timer Error");
     ASSERT_LOG(_object == nullptr, "_object Error");
     ASSERT_LOG(_render == nullptr, "_render Error");
-    ASSERT_LOG(_resCache == nullptr, "_resCache Error");
+    ASSERT_LOG(_resManager == nullptr, "_resManager Error");
     ASSERT_LOG(_cfgCache == nullptr, "_cfgCache Error");
 
     //  初始化 event
@@ -52,7 +52,7 @@ void Global::Start()
     _render = new Render();
 
     //  初始化assetCache
-    _resCache = new ResManager();
+    _resManager = new ResManager();
 
     //  初始化configCache
     _cfgCache = new CfgCache();
@@ -65,6 +65,6 @@ void Global::Clean()
     SafeDelete(_timer);
     SafeDelete(_object);
     SafeDelete(_render);
-    SafeDelete(_resCache);
+    SafeDelete(_resManager);
     SafeDelete(_cfgCache);
 }

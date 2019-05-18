@@ -29,9 +29,9 @@ public:
         return *_render;
     }
 
-    inline ResManager & RefResCache()
+    inline ResManager & RefResManager()
     {
-        return *_resCache;
+        return *_resManager;
     }
 
     inline CfgCache & RefCfgCache()
@@ -56,6 +56,6 @@ private:
     Timer * _timer;
     Object * _object;
     Render * _render;
-    ResManager * _resCache;
+    ResManager * _resManager;
     CfgCache * _cfgCache;
 };

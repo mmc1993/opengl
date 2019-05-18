@@ -8,7 +8,7 @@
 
 Model * File::LoadModel(const std::string & url)
 {
-	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<Model>(url));
+	CHECK_RET(!Global::Ref().RefResManager().IsReg(url), Global::Ref().RefResManager().Get<Model>(url));
 
 	Assimp::Importer importer;
 	auto scene = importer.ReadFile(url, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -17,13 +17,13 @@ Model * File::LoadModel(const std::string & url)
 
 	auto model = File::LoadModel(scene->mRootNode, scene, url.substr(0, 1 + url.find_last_of('/')));
     ASSERT_LOG(model != nullptr,            "Error URL: {0}", url);
-    Global::Ref().RefResCache().Reg(url, model);
+    Global::Ref().RefResManager().Reg(url, model);
 	return model;
 }
 
 Shader * File::LoadShader(const std::string & url)
 {
-	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<Shader>(url));
+	CHECK_RET(!Global::Ref().RefResManager().IsReg(url), Global::Ref().RefResManager().Get<Shader>(url));
 
     std::ifstream ifile(url);
     ASSERT_LOG(ifile, "Error URL: {0}", url);
@@ -191,13 +191,13 @@ Shader * File::LoadShader(const std::string & url)
     }
     ASSERT_LOG(!shader->IsEmpty(), "Empty Shader Pass");
 
-    Global::Ref().RefResCache().Reg(url, shader);
+    Global::Ref().RefResManager().Reg(url, shader);
     return shader;
 }
 
 Bitmap * File::LoadBitmap(const std::string & url)
 {
-	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<Bitmap>(url));
+	CHECK_RET(!Global::Ref().RefResManager().IsReg(url), Global::Ref().RefResManager().Get<Bitmap>(url));
 	
 	auto w = 0, h = 0, c = 0, fmt = 0;
 	auto buffer = stbi_load(url.c_str(), &w, &h, &c, 0);
@@ -214,14 +214,14 @@ Bitmap * File::LoadBitmap(const std::string & url)
 	bitmap->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	bitmap->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
 	bitmap->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-	Global::Ref().RefResCache().Reg(url, bitmap);
+	Global::Ref().RefResManager().Reg(url, bitmap);
 	stbi_image_free(buffer);
 	return bitmap;
 }
 
 BitmapCube * File::LoadBitmapCube(const std::string & url)
 {
-	CHECK_RET(!Global::Ref().RefResCache().IsReg(url), Global::Ref().RefResCache().Get<BitmapCube>(url));
+	CHECK_RET(!Global::Ref().RefResManager().IsReg(url), Global::Ref().RefResManager().Get<BitmapCube>(url));
 
 	std::vector<std::string> urls{
 		url + ".right.jpg",		url + ".left.jpg",
@@ -249,7 +249,7 @@ BitmapCube * File::LoadBitmapCube(const std::string & url)
 	bitmapCube->SetParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	bitmapCube->SetParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	bitmapCube->SetParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	Global::Ref().RefResCache().Reg(url, bitmapCube);
+	Global::Ref().RefResManager().Reg(url, bitmapCube);
 	for (auto buffer : buffers)
 	{
 		stbi_image_free(const_cast<void *>(buffer));

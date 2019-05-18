@@ -131,7 +131,7 @@ std::shared_ptr<Mesh> Light::NewVolume()
 Light::Light(Type type): _type(type), _shadowMap(0), _uniformBlock(0)
 {
     _volume = NewVolume();
-    _shader = Global::Ref().RefResCache().Get<Shader>(BUILTIN_SHADER_LIGHT);
+    _shader = Global::Ref().RefResManager().Get<Shader>(BUILTIN_SHADER_LIGHT);
 }
 
 //  --------------------------------------------------------------------------------
