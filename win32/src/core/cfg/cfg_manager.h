@@ -4,12 +4,12 @@
 #include "../third/mmcjson.h"
 #include <filesystem>
 
-class CfgCache {
+class CfgManager {
 public:
-    CfgCache(): _root(mmc::JsonValue::FromValue(mmc::JsonValue::Hash()))
+    CfgManager(): _root(mmc::JsonValue::FromValue(mmc::JsonValue::Hash()))
     { }
 
-    ~CfgCache()
+    ~CfgManager()
     { }
 
     mmc::JsonValue::Value At(const std::string & key)

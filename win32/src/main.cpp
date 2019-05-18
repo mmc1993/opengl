@@ -14,7 +14,7 @@
 #include "core/res/model.h"
 #include "core/res/file.h"
 #include "core/res/res_manager.h"
-#include "core/cfg/cfg_cache.h"
+#include "core/cfg/cfg_manager.h"
 #include "core/event/event_enum.h"
 #include <filesystem>
 
@@ -264,13 +264,13 @@ int main()
 {
     Global::Ref().Start();
 
-    auto renderFPS = Global::Ref().RefCfgCache().At("init")->At("render", "fps")->ToInt();
+    auto renderFPS = Global::Ref().RefCfgManager().At("init")->At("render", "fps")->ToInt();
 
-    auto windowX = Global::Ref().RefCfgCache().At("init")->At("window", "x")->ToInt();
-    auto windowY = Global::Ref().RefCfgCache().At("init")->At("window", "y")->ToInt();
-    auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
-    auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
-    auto windowTitle = Global::Ref().RefCfgCache().At("init")->At("window", "title")->ToString();
+    auto windowX = Global::Ref().RefCfgManager().At("init")->At("window", "x")->ToInt();
+    auto windowY = Global::Ref().RefCfgManager().At("init")->At("window", "y")->ToInt();
+    auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+    auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
+    auto windowTitle = Global::Ref().RefCfgManager().At("init")->At("window", "title")->ToString();
 
     AppWindow app;
     app.Create(windowTitle);

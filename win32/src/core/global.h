@@ -5,7 +5,7 @@ class Timer;
 class Object;
 class Render;
 class ResManager;
-class CfgCache;
+class CfgManager;
 
 class Global {
 public:
@@ -34,9 +34,9 @@ public:
         return *_resManager;
     }
 
-    inline CfgCache & RefCfgCache()
+    inline CfgManager & RefCfgManager()
     {
-        return *_cfgCache;
+        return *_cfgManager;
     }
 
     Global();
@@ -57,5 +57,5 @@ private:
     Object * _object;
     Render * _render;
     ResManager * _resManager;
-    CfgCache * _cfgCache;
+    CfgManager * _cfgManager;
 };

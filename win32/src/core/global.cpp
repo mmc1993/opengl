@@ -4,7 +4,7 @@
 #include "object/object.h"
 #include "render/render.h"
 #include "res/res_manager.h"
-#include "cfg/cfg_cache.h"
+#include "cfg/cfg_manager.h"
 
 //  配置根目录
 constexpr auto DIR_CONFIG_ROOT = "res/config";
@@ -22,7 +22,7 @@ Global::Global()
     , _object(nullptr)
     , _render(nullptr)
     , _resManager(nullptr)
-    , _cfgCache(nullptr)
+    , _cfgManager(nullptr)
 { }
 
 Global::~Global()
@@ -37,26 +37,20 @@ void Global::Start()
     ASSERT_LOG(_object == nullptr, "_object Error");
     ASSERT_LOG(_render == nullptr, "_render Error");
     ASSERT_LOG(_resManager == nullptr, "_resManager Error");
-    ASSERT_LOG(_cfgCache == nullptr, "_cfgCache Error");
+    ASSERT_LOG(_cfgManager == nullptr, "_cfgManager Error");
 
-    //  初始化 event
     _event = new Event();
 
-    //  初始化timer
     _timer = new Timer();
 
-    //  初始化object
     _object = new Object();
 
-    //  初始化render
     _render = new Render();
 
-    //  初始化assetCache
     _resManager = new ResManager();
-
-    //  初始化configCache
-    _cfgCache = new CfgCache();
-    _cfgCache->Init(DIR_CONFIG_ROOT);
+    
+    _cfgManager = new CfgManager();
+    _cfgManager->Init(DIR_CONFIG_ROOT);
 }
 
 void Global::Clean()
@@ -66,5 +60,5 @@ void Global::Clean()
     SafeDelete(_object);
     SafeDelete(_render);
     SafeDelete(_resManager);
-    SafeDelete(_cfgCache);
+    SafeDelete(_cfgManager);
 }

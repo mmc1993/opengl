@@ -1062,13 +1062,7 @@
     <ClInclude Include="src\core\res\res.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\res\res_cache.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\res\shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\cfg\cfg_cache.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\render\render_enum.h">
@@ -1081,6 +1075,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\event\event_enum.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\res\res_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\cfg\cfg_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

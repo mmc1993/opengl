@@ -6,7 +6,7 @@
 #include "../component/camera.h"
 #include "../component/skybox.h"
 #include "../component/transform.h"
-#include "../cfg/cfg_cache.h"
+#include "../cfg/cfg_manager.h"
 
 Render::Render()
 { }
@@ -223,11 +223,11 @@ void Render::RenderCamera()
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
         0, 0,
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt(),
         0, 0,
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[1].Ended();
 
@@ -271,11 +271,11 @@ void Render::RenderDeferred()
     _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
     glBlitFramebuffer(
         0, 0,
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt(),
         0, 0,
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
         GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[0].Ended();
 
@@ -544,8 +544,8 @@ void Render::StartRender()
         glGenTextures(4, &_gbuffer.mPositionTexture);
         glGenRenderbuffers(1,&_gbuffer.mDepthBuffer);
 
-        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
 
         glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -588,8 +588,8 @@ void Render::StartRender()
 
         glGenTextures(2, &_offSceneBuffer.mColorTexture);
 
-        auto windowW = Global::Ref().RefCfgCache().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgCache().At("init")->At("window", "h")->ToInt();
+        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
 
         glBindTexture(GL_TEXTURE_2D, _offSceneBuffer.mColorTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);

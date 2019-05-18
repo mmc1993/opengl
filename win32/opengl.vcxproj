@@ -24,7 +24,7 @@
     <ClInclude Include="src\core\render\render_util.h" />
     <ClInclude Include="src\core\res\mesh.h" />
     <ClInclude Include="src\core\res\res.h" />
-    <ClInclude Include="src\core\res\res_cache.h" />
+    <ClInclude Include="src\core\res\res_manager.h" />
     <ClInclude Include="src\core\res\bitmap.h" />
     <ClInclude Include="src\core\res\bitmap_cube.h" />
     <ClInclude Include="src\core\res\file.h" />
@@ -39,7 +39,7 @@
     <ClInclude Include="src\core\component\sprite.h" />
     <ClInclude Include="src\core\component\sprite_screen.h" />
     <ClInclude Include="src\core\component\transform.h" />
-    <ClInclude Include="src\core\cfg\cfg_cache.h" />
+    <ClInclude Include="src\core\cfg\cfg_manager.h" />
     <ClInclude Include="src\core\event\event.h" />
     <ClInclude Include="src\core\include.h" />
     <ClInclude Include="src\core\global.h" />
