@@ -1083,6 +1083,18 @@
     <ClInclude Include="src\core\cfg\cfg_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\raw\raw_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\tools\file_tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\md5\md5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\md5\md5cpp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1134,6 +1146,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\res\shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\raw\raw_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\third\md5\md5.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

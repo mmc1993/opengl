@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\event\event_enum.h" />
+    <ClInclude Include="src\core\raw\raw_manager.h" />
     <ClInclude Include="src\core\render\render_enum.h" />
     <ClInclude Include="src\core\render\render_util.h" />
     <ClInclude Include="src\core\res\mesh.h" />
@@ -365,11 +366,14 @@
     <ClInclude Include="src\core\third\glm\vec4.hpp" />
     <ClInclude Include="src\core\third\glm\vector_relational.hpp" />
     <ClInclude Include="src\core\third\json\mmcjson.h" />
+    <ClInclude Include="src\core\third\md5\md5.h" />
+    <ClInclude Include="src\core\third\md5\md5cpp.h" />
     <ClInclude Include="src\core\third\mmcjson.h" />
     <ClInclude Include="src\core\third\sformat.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
     <ClInclude Include="src\core\timer\timer.h" />
     <ClInclude Include="src\core\tools\debug_tool.h" />
+    <ClInclude Include="src\core\tools\file_tool.h" />
     <ClInclude Include="src\core\tools\glsl_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\tools\time_tool.h" />
@@ -377,6 +381,7 @@
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\raw\raw_manager.cpp" />
     <ClCompile Include="src\core\res\file.cpp" />
     <ClCompile Include="src\core\res\shader.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
@@ -391,6 +396,7 @@
     <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\render\render_target.cpp" />
     <ClCompile Include="src\core\third\glm\detail\glm.cpp" />
+    <ClCompile Include="src\core\third\md5\md5.c" />
     <ClCompile Include="src\core\timer\timer.cpp" />
     <ClCompile Include="src\core\window\window.cpp" />
     <ClCompile Include="src\main.cpp" />
