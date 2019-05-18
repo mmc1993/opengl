@@ -377,7 +377,7 @@ namespace mmc {
         template <class Key, class ...Keys>
         Value & At(const Key & key, Keys && ... keys)
         {
-            return At(key)->At(std::forward<Keys...>(keys...));
+            return At(key)->At(std::forward<Keys>(keys)...);
         }
 
         template <class Key>
@@ -467,6 +467,16 @@ namespace std {
     }
 
     inline vector<mmc::JsonValue::Child>::iterator end(mmc::JsonValue::Value & json)
+    {   
+        return end(json->GetElements());
+    }
+
+    inline vector<mmc::JsonValue::Child>::iterator begin(const mmc::JsonValue::Value & json)
+    {
+        return begin(json->GetElements());
+    }
+
+    inline vector<mmc::JsonValue::Child>::iterator end(const mmc::JsonValue::Value & json)
     {
         return end(json->GetElements());
     }

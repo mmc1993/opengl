@@ -12,11 +12,10 @@ public:
     ~CfgManager()
     { }
 
-    mmc::JsonValue::Value At(const std::string & key)
+    template <class ...Keys>
+    mmc::JsonValue::Value At(Keys && ...keys)
     {
-        ASSERT_LOG(_root != nullptr, "CfgCache At Key: {0}", key);
-
-        return _root->At(key);
+        return _root->At(std::forward<Keys>(keys)...);
     }
 
     void Init(const std::string & root)

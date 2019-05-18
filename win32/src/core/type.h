@@ -3,6 +3,9 @@
 using iint = GLint;
 using uint = GLuint;
 
+using ichar = char;
+using uchar = unsigned char;
+
 class NoCopy {
 public:
     NoCopy() {}
