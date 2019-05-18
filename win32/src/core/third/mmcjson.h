@@ -10,7 +10,6 @@
 #include <functional>
 #include <type_traits>
 #include "sformat.h"
-#include "../tools/string_tool.h"
 
 //  条件判断, 抛出异常
 #define DEBUG_CHECK(exp, type, ...) if (!exp) { throw type(__VA_ARGS__); }

@@ -1,7 +1,5 @@
 #include "file.h"
-#include "res_cache.h"
-#include "../tools/debug_tool.h"
-#include "../tools/string_tool.h"
+#include "res_manager.h"
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third/stb_image.h"

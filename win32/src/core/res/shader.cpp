@@ -1,7 +1,6 @@
 #include "shader.h"
 #include "bitmap.h"
 #include "bitmap_cube.h"
-#include "../tools/debug_tool.h"
 
 void Shader::SetUniform(uint GLID, const char * key, iint val)
 {

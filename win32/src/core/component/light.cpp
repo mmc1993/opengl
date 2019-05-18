@@ -3,8 +3,7 @@
 #include "../res/shader.h"
 #include "../render/render.h"
 #include "../cfg/cfg_cache.h"
-#include "../res/res_cache.h"
-#include "../tools/glsl_tool.h"
+#include "../res/res_manager.h"
 
 std::weak_ptr<Mesh> Light::s_spotVolmue;
 std::weak_ptr<Mesh> Light::s_pointVolmue;

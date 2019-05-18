@@ -1,11 +1,10 @@
 #pragma once
 
 #include "res.h"
-#include "../tools/debug_tool.h"
 
-class ResCache {
+class ResManager {
 public:
-    ~ResCache()
+    ~ResManager()
     {
         for (auto & pair : _resources)
         {

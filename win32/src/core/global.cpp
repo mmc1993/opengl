@@ -3,7 +3,7 @@
 #include "timer/timer.h"
 #include "object/object.h"
 #include "render/render.h"
-#include "res/res_cache.h"
+#include "res/res_manager.h"
 #include "cfg/cfg_cache.h"
 
 //  配置根目录
@@ -52,7 +52,7 @@ void Global::Start()
     _render = new Render();
 
     //  初始化assetCache
-    _resCache = new ResCache();
+    _resCache = new ResManager();
 
     //  初始化configCache
     _cfgCache = new CfgCache();

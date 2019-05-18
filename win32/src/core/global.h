@@ -4,7 +4,7 @@ class Event;
 class Timer;
 class Object;
 class Render;
-class ResCache;
+class ResManager;
 class CfgCache;
 
 class Global {
@@ -29,7 +29,7 @@ public:
         return *_render;
     }
 
-    inline ResCache & RefResCache()
+    inline ResManager & RefResCache()
     {
         return *_resCache;
     }
@@ -56,6 +56,6 @@ private:
     Timer * _timer;
     Object * _object;
     Render * _render;
-    ResCache * _resCache;
+    ResManager * _resCache;
     CfgCache * _cfgCache;
 };

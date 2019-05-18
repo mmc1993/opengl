@@ -2,8 +2,6 @@
 #include "../res/mesh.h"
 #include "../res/shader.h"
 #include "../res/material.h"
-#include "../tools/glsl_tool.h"
-#include "../tools/debug_tool.h"
 #include "../component/light.h"
 #include "../component/camera.h"
 #include "../component/skybox.h"

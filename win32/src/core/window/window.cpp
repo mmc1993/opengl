@@ -3,7 +3,6 @@
 #include "../timer/timer.h"
 #include "../render/render.h"
 #include "../object/object.h"
-#include "../tools/time_tool.h"
 #include "../event/event_enum.h"
 
 Window::Window()

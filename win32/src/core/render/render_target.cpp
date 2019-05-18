@@ -1,7 +1,6 @@
 #include "render_target.h"
 #include "../res/bitmap.h"
 #include "../res/bitmap_cube.h"
-#include "../tools/debug_tool.h"
 
 RenderBuffer * RenderTarget::CreateBuffer(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int fmt)
 {
