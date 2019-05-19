@@ -11,4 +11,13 @@ namespace file_tool {
         istream.seekg(p, std::ios::beg);
         return (uint)r;
     }
+
+    inline uint GetFileLength(std::ofstream & ostream)
+    {
+        auto p = ostream.tellp();
+        ostream.seekp(0, std::ios::end);
+        auto r = ostream.tellp();
+        ostream.seekp(p, std::ios::beg);
+        return (uint)r;
+    }
 }

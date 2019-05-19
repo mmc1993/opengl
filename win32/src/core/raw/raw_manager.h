@@ -21,11 +21,34 @@ public:
         kRawTypeEnum,
     };
 
+    struct RawMesh {
+        uint mIndexLength;
+        uint mVertexLength;
+        uint * mIndexs;
+        float * mVertexs;
+    };
+
     struct RawImage {
         uint mW, mH;
         uint mFormat;
         uint mLength;
         uchar *mData;
+    };
+
+    struct RawProgram {
+        uint mLength;
+        uchar *mData;
+    };
+
+    struct RawMaterial {
+        struct Texture {
+            char mName[16];
+            char mImage[16];
+        };
+        uint mShininess;
+        char mMesh[16];
+        char mProgram[16];
+        Texture mTextures[8];
     };
 
     //  原始数据头部信息
@@ -43,8 +66,15 @@ public:
 
         struct Info {
             char mMD5[16];
-            uint mOffset;
-            uint mLength;
+            uint mByteOffset;
+            uint mByteLength;
+            Info(const char * md5, uint offset, uint length)
+                : mByteOffset(offset)
+                , mByteLength(length)
+            { 
+                memcpy(mMD5, md5, sizeof(mMD5));
+            }
+            Info() { }
         };
         std::vector<Info> mMeshList;
         std::vector<Info> mImageList;
@@ -57,21 +87,23 @@ public:
     static const std::array<std::vector<std::string>, kImportTypeEnum> SUFFIX_MAP;
 
 public:
-    bool Import(const std::string & url);
+    void BegImport();
+    void EndImport();
+    void Import(const std::string & url);
 
 private:
-    bool Import(const std::string & url, ImportTypeEnum type);
-    bool ImportModel(const std::string & url);
-    bool ImportImage(const std::string & url);
-    bool ImportProgram(const std::string & url);
-    bool ImportMaterial(const std::string & url);
+    void Import(const std::string & url, ImportTypeEnum type);
+    void ImportModel(const std::string & url);
+    void ImportImage(const std::string & url);
+    void ImportProgram(const std::string & url);
+    void ImportMaterial(const std::string & url);
 
-    void LoadRawHead();
-    void SaveRawData();
-
+    void InitRawHead();
 private:
     RawHead _rawHead;
-    std::map<std::string, RawImage> _rawImageMap;
     std::ifstream _istreams[kRawTypeEnum];
-
+    std::map<std::string, RawMesh> _rawMeshMap;
+    std::map<std::string, RawImage> _rawImageMap;
+    std::map<std::string, RawProgram> _rawProgramMap;
+    std::map<std::string, RawMaterial> _rawMaterialMap;
 };
