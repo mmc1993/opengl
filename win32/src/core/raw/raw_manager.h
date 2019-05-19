@@ -69,8 +69,7 @@ public:
             uint mByteOffset;
             uint mByteLength;
             Info(const char * md5, uint offset, uint length)
-                : mByteOffset(offset)
-                , mByteLength(length)
+                : mByteOffset(offset), mByteLength(length)
             { 
                 memcpy(mMD5, md5, sizeof(mMD5));
             }
@@ -87,9 +86,11 @@ public:
     static const std::array<std::vector<std::string>, kImportTypeEnum> SUFFIX_MAP;
 
 public:
+    void Init();
     void BegImport();
     void EndImport();
     void Import(const std::string & url);
+
 
 private:
     void Import(const std::string & url, ImportTypeEnum type);
@@ -98,10 +99,8 @@ private:
     void ImportProgram(const std::string & url);
     void ImportMaterial(const std::string & url);
 
-    void InitRawHead();
 private:
     RawHead _rawHead;
-    std::ifstream _istreams[kRawTypeEnum];
     std::map<std::string, RawMesh> _rawMeshMap;
     std::map<std::string, RawImage> _rawImageMap;
     std::map<std::string, RawProgram> _rawProgramMap;

@@ -29,6 +29,31 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
     }
 };
 
+void RawManager::Init()
+{
+    std::ifstream istream;
+    //  头部信息
+    istream.open(RAWDATA_REF[kRAW_HEAD], std::ios::in | std::ios::binary);
+    ASSERT_LOG(istream, "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_HEAD]);
+
+    RawHead::Head head;
+    istream.read((char *)&head, sizeof(RawHead::Head));
+
+    _rawHead.mMeshList.resize(head.mMeshLength * sizeof(RawHead::Info));
+    istream.read((char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
+
+    _rawHead.mImageList.resize(head.mImageLength * sizeof(RawHead::Info));
+    istream.read((char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
+
+    _rawHead.mProgramList.resize(head.mProgramLength * sizeof(RawHead::Info));
+    istream.read((char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
+
+    _rawHead.mMaterialList.resize(head.mMaterialLength * sizeof(RawHead::Info));
+    istream.read((char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
+
+    istream.close();
+}
+
 void RawManager::BegImport()
 {
     _rawMeshMap.clear();
@@ -40,12 +65,6 @@ void RawManager::BegImport()
     _rawHead.mImageList.clear();
     _rawHead.mProgramList.clear();
     _rawHead.mMaterialList.clear();
-
-    _istreams[kRAW_HEAD].close();
-    _istreams[kRAW_MESH].close();
-    _istreams[kRAW_IMAGE].close();
-    _istreams[kRAW_PROGRAM].close();
-    _istreams[kRAW_MATERIAL].close();
 }
 
 void RawManager::EndImport()
@@ -351,44 +370,4 @@ void RawManager::ImportMaterial(const std::string & url)
     auto md5 = MD5((char *)&rawMaterial, sizeof(RawMaterial));
     _rawMaterialMap.insert(std::make_pair(md5.str, rawMaterial));
     istream.close();
-}
-
-void RawManager::InitRawHead()
-{
-    //  头部信息
-    _istreams[kRAW_HEAD].open(RAWDATA_REF[kRAW_HEAD], std::ios::in | std::ios::binary);
-    ASSERT_LOG(_istreams[kRAW_HEAD], "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_HEAD]);
-
-    RawHead::Head head;
-    _istreams[kRAW_HEAD].read((char *)&head, sizeof(RawHead::Head));
-    
-    _rawHead.mMeshList.resize(head.mMeshLength * sizeof(RawHead::Info));
-    _istreams[kRAW_HEAD].read((char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
-
-    _rawHead.mImageList.resize(head.mImageLength * sizeof(RawHead::Info));
-    _istreams[kRAW_HEAD].read((char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
-
-    _rawHead.mProgramList.resize(head.mProgramLength * sizeof(RawHead::Info));
-    _istreams[kRAW_HEAD].read((char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
-
-    _rawHead.mMaterialList.resize(head.mMaterialLength * sizeof(RawHead::Info));
-    _istreams[kRAW_HEAD].read((char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
-
-    _istreams[kRAW_HEAD].close();
-
-    //  mesh
-    _istreams[kRAW_MESH].open(RAWDATA_REF[kRAW_MESH], std::ios::in | std::ios::binary);
-    ASSERT_LOG(_istreams[kRAW_MESH], "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_MESH]);
-
-    //  image
-    _istreams[kRAW_IMAGE].open(RAWDATA_REF[kRAW_IMAGE], std::ios::in | std::ios::binary);
-    ASSERT_LOG(_istreams[kRAW_IMAGE], "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_IMAGE]);
-
-    //  program
-    _istreams[kRAW_PROGRAM].open(RAWDATA_REF[kRAW_PROGRAM], std::ios::in | std::ios::binary);
-    ASSERT_LOG(_istreams[kRAW_PROGRAM], "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_PROGRAM]);
-
-    //  material
-    _istreams[kRAW_MATERIAL].open(RAWDATA_REF[kRAW_MATERIAL], std::ios::in | std::ios::binary);
-    ASSERT_LOG(_istreams[kRAW_MATERIAL], "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_MATERIAL]);
 }
