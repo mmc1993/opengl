@@ -55,6 +55,7 @@ void RawManager::Init()
 
     ClearRawData();
 }
+
 void RawManager::BegImport()
 {
     ClearRawData();
@@ -248,7 +249,7 @@ bool RawManager::FreeRaw(const std::string & key, RawTypeEnum type)
             auto it = _rawImageMap.find(key);
             if (it != _rawImageMap.end())
             {
-                delete[] it->second.mData;
+                stbi_image_free(it->second.mData);
                 _rawImageMap.erase(it);
                 return true;
             }
