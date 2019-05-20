@@ -75,12 +75,13 @@ public:
             { 
                 memcpy(mMD5, md5, sizeof(mMD5));
             }
-            Info() { }
 
             bool operator==(const std::string & md5) const
             {
                 return md5 == mMD5;
             }
+
+            Info() { }
         };
         std::vector<Info> mMeshList;
         std::vector<Info> mImageList;
