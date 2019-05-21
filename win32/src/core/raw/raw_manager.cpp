@@ -285,7 +285,7 @@ void RawManager::ImportModel(const std::string & url)
             aiMaterial->GetTexture(aiTextureType_DIFFUSE, i, &textureURL);
             auto fullpath = directory + std::string(textureURL.C_Str());
             auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-            ImportImage(urlpath);
+            ImportImage(string_tool::Replace(urlpath, "\\", "/"));
         }
 
         if (0 != aiMaterial->GetTextureCount(aiTextureType_REFLECTION))
@@ -293,7 +293,7 @@ void RawManager::ImportModel(const std::string & url)
             aiMaterial->GetTexture(aiTextureType_REFLECTION, 0, &textureURL);
             auto fullpath = directory + std::string(textureURL.C_Str());
             auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-            ImportImage(urlpath);
+            ImportImage(string_tool::Replace(urlpath, "\\", "/"));
         }
 
         if (0 != aiMaterial->GetTextureCount(aiTextureType_SPECULAR))
@@ -301,7 +301,7 @@ void RawManager::ImportModel(const std::string & url)
             aiMaterial->GetTexture(aiTextureType_SPECULAR, 0, &textureURL);
             auto fullpath = directory + std::string(textureURL.C_Str());
             auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-            ImportImage(urlpath);
+            ImportImage(string_tool::Replace(urlpath, "\\", "/"));
         }
 
         if (0 != aiMaterial->GetTextureCount(aiTextureType_HEIGHT))
@@ -309,7 +309,7 @@ void RawManager::ImportModel(const std::string & url)
             aiMaterial->GetTexture(aiTextureType_HEIGHT, 0, &textureURL);
             auto fullpath = directory + std::string(textureURL.C_Str());
             auto urlpath = string_tool::Replace(fullpath, "\\\\", "/");
-            ImportImage(urlpath);
+            ImportImage(string_tool::Replace(urlpath, "\\", "/"));
         }
     };
 
