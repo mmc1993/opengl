@@ -26,20 +26,44 @@ public:
     struct RawMesh {
         uint mIndexLength;
         uint mVertexLength;
-        uint * mIndexs;
+        uint *  mIndexs;
         float * mVertexs;
     };
 
     struct RawImage {
         uint mW, mH;
         uint mFormat;
-        uint mLength;
+        uint mByteLength;
         uchar *mData;
     };
 
     struct RawProgram {
-        uint mLength;
-        uchar *mData;
+        struct PassAttr {
+            //  面剔除
+            int     vCullFace;
+            //  混合
+            int     vBlendSrc;
+            int     vBlendDst;
+            //  深度测试
+            bool    bDepthTest;         //  开启深度测试
+            bool    bDepthWrite;        //  开启深度写入
+            //  模板测试
+            int     vStencilOpFail;		//	模板测试失败
+            int     vStencilOpZFail;	//	深度测试失败
+            int     vStencilOpZPass;	//	深度测试通过
+            int		vStencilFunc;		//	模板测试函数
+            int     vStencilMask;       //  模板测试值
+            int     vStencilRef;        //  模板测试值
+            //  渲染
+            uint    vDrawType;			//	draw类型
+            uint    vRenderType;        //  渲染类型
+            uint    vRenderQueue;       //  渲染通道
+        };
+        uchar * mData;
+        uint mPassLength;
+        uint mVSByteLength;
+        uint mGSByteLength;
+        uint mFSByteLength;
     };
 
     struct RawMaterial {
@@ -56,13 +80,9 @@ public:
     //  原始数据头部信息
     struct RawHead {
         struct Head {
-            uint mMeshOffset;
             uint mMeshLength;
-            uint mImageOffset;
             uint mImageLength;
-            uint mProgramOffset;
             uint mProgramLength;
-            uint mMaterialOffset;
             uint mMaterialLength;
         };
 

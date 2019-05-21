@@ -74,16 +74,11 @@ void RawManager::EndImport()
     for (const auto & pair : _rawMeshMap)
     {
         auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mIndexLength, sizeof(RawMesh::mIndexLength));
-        ostream.write((const char *)&pair.second.mVertexLength, sizeof(RawMesh::mVertexLength));
+        ostream.write((const char *)&pair.second.mIndexLength, sizeof(uint));
+        ostream.write((const char *)&pair.second.mVertexLength, sizeof(uint));
         ostream.write((const char *)pair.second.mIndexs, sizeof(uint) * pair.second.mIndexLength);
         ostream.write((const char *)pair.second.mVertexs, sizeof(float) * pair.second.mVertexLength);
-        auto byteLength = ostream.tellp() - byteOffset;
-        ASSERT_LOG(byteLength == sizeof(pair.second.mIndexLength) 
-                               + sizeof(pair.second.mVertexLength) 
-                               + sizeof(uint) * pair.second.mIndexLength
-                               + sizeof(float) * pair.second.mVertexLength, "数据长度不一致");
-        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)byteLength);
+        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
     }
     ostream.close();
 
@@ -93,18 +88,12 @@ void RawManager::EndImport()
     for (const auto & pair : _rawImageMap)
     {
         auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mW, sizeof(RawImage::mW));
-        ostream.write((const char *)&pair.second.mH, sizeof(RawImage::mH));
-        ostream.write((const char *)&pair.second.mFormat, sizeof(RawImage::mFormat));
-        ostream.write((const char *)&pair.second.mLength, sizeof(RawImage::mLength));
-        ostream.write((const char *)pair.second.mData, pair.second.mLength * sizeof(uchar));
-        auto byteLength = ostream.tellp() - byteOffset;
-        ASSERT_LOG(byteLength == sizeof(pair.second.mW)
-                               + sizeof(pair.second.mH)
-                               + sizeof(pair.second.mFormat)
-                               + sizeof(pair.second.mLength)
-                               + sizeof(uchar) * pair.second.mLength, "数据长度不一致");
-        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)byteLength);
+        ostream.write((const char *)&pair.second.mW, sizeof(uint));
+        ostream.write((const char *)&pair.second.mH, sizeof(uint));
+        ostream.write((const char *)&pair.second.mFormat, sizeof(uint));
+        ostream.write((const char *)&pair.second.mByteLength, sizeof(uint));
+        ostream.write((const char *)pair.second.mData, pair.second.mByteLength);
+        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
     }
     ostream.close();
 
@@ -114,12 +103,15 @@ void RawManager::EndImport()
     for (const auto & pair : _rawProgramMap)
     {
         auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mData, sizeof(uchar) * pair.second.mLength);
-        auto byteLength = ostream.tellp() - byteOffset;
-        ASSERT_LOG(byteLength == sizeof(pair.second.mLength)
-                               + sizeof(uchar) * pair.second.mLength, "数据长度不一致");
-        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)byteLength);
+        ostream.write((const char *)&pair.second.mPassLength, sizeof(uint));
+        ostream.write((const char *)&pair.second.mVSByteLength, sizeof(uint));
+        ostream.write((const char *)&pair.second.mGSByteLength, sizeof(uint));
+        ostream.write((const char *)&pair.second.mFSByteLength, sizeof(uint));
+        ostream.write((const char *)&pair.second.mData, pair.second.mVSByteLength 
+                                                      + pair.second.mGSByteLength 
+                                                      + pair.second.mFSByteLength
+                                                      + sizeof(RawProgram::PassAttr) * pair.second.mPassLength);
+        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
     }
     ostream.close();
 
@@ -130,29 +122,15 @@ void RawManager::EndImport()
     {
         auto byteOffset = ostream.tellp();
         ostream.write((const char *)&pair.second, sizeof(RawMaterial));
-        auto byteLength = ostream.tellp() - byteOffset;
-        ASSERT_LOG(byteLength == sizeof(RawMaterial), "数据长度不一致");
-        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)byteLength);
+        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
     }
     ostream.close();
 
     //  写入数据头文件
     RawHead::Head head;
-    //  Head Mesh
-    uint offset = 0;
-    head.mMeshOffset = offset;
     head.mMeshLength = _rawHead.mMeshList.size();
-    //  Head Image
-    offset += _rawHead.mMeshList.size();
-    head.mImageOffset = offset;
     head.mImageLength = _rawHead.mImageList.size();
-    //  Head Program
-    offset += _rawHead.mImageList.size();
-    head.mProgramOffset = offset;
     head.mProgramLength = _rawHead.mProgramList.size();
-    //  Head Material
-    offset += _rawHead.mProgramList.size();
-    head.mMaterialOffset = offset;
     head.mMaterialLength = _rawHead.mMaterialList.size();
     //  Data Write
     ostream.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
@@ -402,8 +380,8 @@ void RawManager::ImportModel(const std::string & url)
         //  计算MD5
         auto length = indexByteLength + vertexByteLength;
         auto buffer = new char[length];
-        memcpy(buffer, rawMesh.mIndexs, indexByteLength);
-        memcpy(buffer, rawMesh.mVertexs, vertexByteLength);
+        memcpy(buffer                  , rawMesh.mIndexs, indexByteLength);
+        memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
         auto md5 = MD5(buffer, length);
         delete[] buffer;
         _rawMeshMap.insert(std::make_pair(md5.str, rawMesh));
@@ -430,7 +408,7 @@ void RawManager::ImportImage(const std::string & url)
         (int *)&rawImage.mFormat, 0);
     ASSERT_LOG(rawImage.mData != nullptr, "URL: {0}", url);
 
-    rawImage.mLength = rawImage.mW * rawImage.mH * rawImage.mFormat;
+    rawImage.mByteLength = rawImage.mW * rawImage.mH * rawImage.mFormat;
 
     switch (rawImage.mFormat)
     {
@@ -439,23 +417,304 @@ void RawManager::ImportImage(const std::string & url)
     case 4: rawImage.mFormat = GL_RGBA; break;
     }
 
-    auto md5 = MD5(rawImage.mData, rawImage.mLength);
+    auto md5 = MD5(rawImage.mData, rawImage.mByteLength);
     _rawImageMap.insert(std::make_pair(md5.str, rawImage));
 }
 
 void RawManager::ImportProgram(const std::string & url)
 {
-    std::ifstream istream(url);
-    ASSERT_LOG(istream, "URL: {0}", url);
+    //  解析Include
+    const auto ParseInclude = [](const std::string & word)
+    {
+        auto pos = word.find_first_of(' ');
+        ASSERT_LOG(pos != std::string::npos, "Include Error: {0}", word);
+        auto url = word.substr(pos + 1);
 
-    RawProgram rawProgram;
-    rawProgram.mLength = file_tool::GetFileLength(istream);
-    rawProgram.mData = new uchar[rawProgram.mLength];
-    istream.read((char *)rawProgram.mData, rawProgram.mLength);
+        std::ifstream istream(url);
+        ASSERT_LOG(istream, "Include URL Error: {0}", url);
 
-    auto md5 = MD5(rawProgram.mData, rawProgram.mLength);
+        std::string data;
+        std::string line;
+        while (std::getline(istream, line))
+        {
+            data.append(line);
+            data.append("\n");
+        }
+        istream.close();
+        return data;
+    };
+
+    //  解析Shader
+    const auto ParseShader = [&](std::ifstream & is, const char * endflag, std::string & buffer)
+    {
+        std::string line;
+        while (std::getline(is, line))
+        {
+            if (string_tool::IsEqualSkipSpace(line, endflag))
+            {
+                break;
+            }
+            if (string_tool::IsEqualSkipSpace(line, "#include"))
+            {
+                buffer.append(ParseInclude(line));
+            }
+            else
+            {
+                buffer.append(line);
+                buffer.append("\n");
+            }
+        }
+        ASSERT_LOG(string_tool::IsEqualSkipSpace(line, endflag), "EndFlag Error: {0}", endflag);
+    };
+
+    //  解析Pass
+    const auto ParsePass = [&](
+        std::ifstream & is, 
+        const char * endFlag,
+        std::string & vBuffer, 
+        std::string & gBuffer, 
+        std::string & fBuffer, 
+        RawProgram::PassAttr * passAttr)
+    {
+        std::string line;
+        while (std::getline(is, line))
+        {
+            if (string_tool::IsEqualSkipSpace(line, endFlag))
+            {
+                break;
+            }
+            if (string_tool::IsEqualSkipSpace(line, "#include"))
+            {
+                auto buffer = ParseInclude(line);
+                vBuffer.append(buffer);
+                gBuffer.append(buffer);
+                fBuffer.append(buffer);
+            }
+            else if (string_tool::IsEqualSkipSpace(line, "CullFace") 
+                || string_tool::IsEqualSkipSpace(line, "BlendMode")
+                || string_tool::IsEqualSkipSpace(line, "DepthTest")
+                || string_tool::IsEqualSkipSpace(line, "DepthWrite")
+                || string_tool::IsEqualSkipSpace(line, "StencilTest")
+                || string_tool::IsEqualSkipSpace(line, "RenderQueue")
+                || string_tool::IsEqualSkipSpace(line, "RenderType")
+                || string_tool::IsEqualSkipSpace(line, "DrawType"))
+            {
+                ASSERT_LOG(passAttr != nullptr, "解析Pass属性错误: {0}, {1}", endFlag, line);
+                std::stringstream ss;
+                std::string word;
+                ss.str(line);
+                ss >> word;
+                
+                if (word == "CullFace")
+                {
+                    ss >> word;
+                    if (word == "Front")                    { passAttr->vCullFace = GL_FRONT; }
+                    else if (word == "Back")                { passAttr->vCullFace = GL_BACK; }
+                    else if (word == "FrontBack")           { passAttr->vCullFace = GL_FRONT_AND_BACK; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+                }
+                else if (word == "BlendMode")
+                {
+                    ss >> word;
+                    if (word == "Zero")                     { passAttr->vBlendSrc = GL_ZERO; }
+                    else if (word == "One")                 { passAttr->vBlendSrc = GL_ONE; }
+                    else if (word == "SrcColor")            { passAttr->vBlendSrc = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { passAttr->vBlendSrc = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { passAttr->vBlendSrc = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { passAttr->vBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { passAttr->vBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { passAttr->vBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+
+                    ss >> word;
+                    if (word == "Zero")                     { passAttr->vBlendDst = GL_ZERO; }
+                    else if (word == "One")                 { passAttr->vBlendDst = GL_ONE; }
+                    else if (word == "SrcColor")            { passAttr->vBlendDst = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { passAttr->vBlendDst = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { passAttr->vBlendDst = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { passAttr->vBlendDst = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { passAttr->vBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { passAttr->vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+                }
+                else if (word == "DepthTest")
+                {
+                    passAttr->bDepthTest = true;
+                }
+                else if (word == "DepthWrite")
+                {
+                    passAttr->bDepthWrite = true;
+                }
+                else if (word == "StencilTest")
+                {
+                    ss >> word;
+                    if (word == "Keep")             { passAttr->vStencilOpFail = GL_KEEP; }
+                    else if (word == "Zero")        { passAttr->vStencilOpFail = GL_ZERO; }
+                    else if (word == "Incr")        { passAttr->vStencilOpFail = GL_INCR; }
+                    else if (word == "Decr")        { passAttr->vStencilOpFail = GL_DECR; }
+                    else if (word == "Invert")      { passAttr->vStencilOpFail = GL_INVERT; }
+                    else if (word == "Replace")     { passAttr->vStencilOpFail = GL_REPLACE; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+
+                    ss >> word;
+                    if (word == "Keep")             { passAttr->vStencilOpZFail = GL_KEEP; }
+                    else if (word == "Zero")        { passAttr->vStencilOpZFail = GL_ZERO; }
+                    else if (word == "Incr")        { passAttr->vStencilOpZFail = GL_INCR; }
+                    else if (word == "Decr")        { passAttr->vStencilOpZFail = GL_DECR; }
+                    else if (word == "Invert")      { passAttr->vStencilOpZFail = GL_INVERT; }
+                    else if (word == "Replace")     { passAttr->vStencilOpZFail = GL_REPLACE; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+
+                    ss >> word;
+                    if (word == "Keep")             { passAttr->vStencilOpZPass = GL_KEEP; }
+                    else if (word == "Zero")        { passAttr->vStencilOpZPass = GL_ZERO; }
+                    else if (word == "Incr")        { passAttr->vStencilOpZPass = GL_INCR; }
+                    else if (word == "Decr")        { passAttr->vStencilOpZPass = GL_DECR; }
+                    else if (word == "Invert")      { passAttr->vStencilOpZPass = GL_INVERT; }
+                    else if (word == "Replace")     { passAttr->vStencilOpZPass = GL_REPLACE; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+
+                    ss >> word;
+                    if (word == "Never")            { passAttr->vStencilFunc = GL_NEVER; }
+                    else if (word == "Less")        { passAttr->vStencilFunc = GL_LESS; }
+                    else if (word == "Equal")       { passAttr->vStencilFunc = GL_EQUAL; }
+                    else if (word == "Greater")     { passAttr->vStencilFunc = GL_GREATER; }
+                    else if (word == "NotEqual")    { passAttr->vStencilFunc = GL_NOTEQUAL; }
+                    else if (word == "Gequal")      { passAttr->vStencilFunc = GL_GEQUAL; }
+                    else if (word == "Always")      { passAttr->vStencilFunc = GL_ALWAYS; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+
+                    ss >> word;
+                    passAttr->vStencilMask = std::stoi(word);
+
+                    ss >> word;
+                    passAttr->vStencilRef = std::stoi(word);
+                }
+                else if (word == "RenderQueue")
+                {
+                    ss >> word;
+                    if (word == "Background")       { passAttr->vRenderQueue = 0; }
+                    else if (word == "Geometric")   { passAttr->vRenderQueue = 1; }
+                    else if (word == "Opacity")     { passAttr->vRenderQueue = 2; }
+                    else if (word == "Top")         { passAttr->vRenderQueue = 3; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+                }
+                else if (word == "RenderType")
+                {
+                    ss >> word;
+                    if (word == "Light")            { passAttr->vRenderType = 0; }
+                    else if (word == "Shadow")      { passAttr->vRenderType = 1; }
+                    else if (word == "Forward")     { passAttr->vRenderType = 2; }
+                    else if (word == "Deferred")    { passAttr->vRenderType = 3; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+                }
+                else if (word == "DrawType")
+                {
+                    ss >> word;
+                    if (word == "Instance")         { passAttr->vDrawType = 0; }
+                    else if (word == "Vertex")      { passAttr->vDrawType = 1; }
+                    else if (word == "Index")       { passAttr->vDrawType = 2; }
+                    else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+                }
+                else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
+            }
+            else if (string_tool::IsEqualSkipSpace(line, "VShader Beg"))
+            {
+                ParseShader(is, "VShader End", vBuffer);
+            }
+            else if (string_tool::IsEqualSkipSpace(line, "GShader Beg"))
+            {
+                ParseShader(is, "GShader End", gBuffer);
+            }
+            else if (string_tool::IsEqualSkipSpace(line, "FShader Beg"))
+            {
+                ParseShader(is, "FShader End", fBuffer);
+            }
+        }
+        ASSERT_LOG(string_tool::IsEqualSkipSpace(line, endFlag), "EndFlag Error: {0}", endFlag);
+    };
+
+    std::ifstream is(url);
+    ASSERT_LOG(is, "URL Error: {0}", url);
+
+    //  解析GL Program数据
+    std::string line;
+    std::string vCommonBuffer;
+    std::string gCommonBuffer;
+    std::string fCommonBuffer;
+    std::vector<std::tuple<
+        std::string,
+        std::string,
+        std::string,
+        RawProgram::PassAttr>> passs;
+    while (std::getline(is, line))
+    {
+        if (string_tool::IsEqualSkipSpace(line, "Pass Common Beg"))
+        {
+            ParsePass(is, "Pass Common End", vCommonBuffer, gCommonBuffer, fCommonBuffer, nullptr);
+        }
+        else if (string_tool::IsEqualSkipSpace(line, "Pass Beg"))
+        {
+            decltype(passs)::value_type pass;
+            ParsePass(is, "Pass End",
+                std::get<0>(pass),  std::get<1>(pass),
+                std::get<2>(pass), &std::get<3>(pass));
+            passs.push_back(pass);
+        }
+    }
+
+    //  生成GL Program数据
+    std::string vBuffer;
+    std::string gBuffer;
+    std::string fBuffer;
+    auto attrs = new RawProgram::PassAttr[passs.size()];
+    for (auto i = 0; i != passs.size(); ++i)
+    {
+        vBuffer.append(std::get<0>(passs.at(i)));
+        gBuffer.append(std::get<1>(passs.at(i)));
+        fBuffer.append(std::get<2>(passs.at(i)));
+        memcpy(attrs + i, &passs.at(i), sizeof(RawProgram::PassAttr));
+    }
+
+    //  写入GL Program数据
+    RawProgram rawProgram   = { 0 };
+    rawProgram.mPassLength  = passs.size();
+    if (!vBuffer.empty())
+    {
+        vCommonBuffer.append(vBuffer);
+        rawProgram.mVSByteLength = vCommonBuffer.size();
+    }
+    if (!gBuffer.empty())
+    {
+        gCommonBuffer.append(gBuffer);
+        rawProgram.mGSByteLength = gCommonBuffer.size();
+    }
+    if (!fBuffer.empty())
+    {
+        fCommonBuffer.append(fBuffer);
+        rawProgram.mFSByteLength = fCommonBuffer.size();
+    }
+
+    auto byteLength = rawProgram.mPassLength * sizeof(RawProgram::PassAttr)
+                    + rawProgram.mVSByteLength
+                    + rawProgram.mGSByteLength
+                    + rawProgram.mFSByteLength;
+    rawProgram.mData = new uchar[byteLength];
+
+    auto ptr = rawProgram.mData;
+    memcpy(ptr, attrs, rawProgram.mPassLength * sizeof(RawProgram::PassAttr));
+    ptr += rawProgram.mPassLength * sizeof(RawProgram::PassAttr);
+    memcpy(ptr, vCommonBuffer.data(), vCommonBuffer.size());
+    ptr += vCommonBuffer.size();
+    memcpy(ptr, gCommonBuffer.data(), gCommonBuffer.size());
+    ptr += gCommonBuffer.size();
+    memcpy(ptr, fCommonBuffer.data(), fCommonBuffer.size());
+    ptr += fCommonBuffer.size();
+    delete[]attrs;
+
+    auto md5 = MD5(rawProgram.mData, byteLength);
     _rawProgramMap.insert(std::make_pair(md5.str, rawProgram));
-    istream.close();
+    is.close();
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -487,12 +746,12 @@ void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
 void RawManager::LoadRawImage(std::ifstream & istream, const std::string & key)
 {
     RawImage rawImage;
-    istream.read((char *)&rawImage, sizeof(RawImage::mW) 
-                                  + sizeof(RawImage::mH) 
-                                  + sizeof(RawImage::mFormat) 
-                                  + sizeof(RawImage::mLength));
-    rawImage.mData = new uchar[rawImage.mLength];
-    istream.read((char *)rawImage.mData, sizeof(uchar) * rawImage.mLength);
+    istream.read((char *)&rawImage.mW, sizeof(uint));
+    istream.read((char *)&rawImage.mH, sizeof(uint));
+    istream.read((char *)&rawImage.mFormat, sizeof(uint));
+    istream.read((char *)&rawImage.mByteLength, sizeof(uint));
+    rawImage.mData = new uchar[rawImage.mByteLength];
+    istream.read((char *)rawImage.mData, rawImage.mByteLength);
 
     _rawImageMap.insert(std::make_pair(key, rawImage));
 }
@@ -500,9 +759,18 @@ void RawManager::LoadRawImage(std::ifstream & istream, const std::string & key)
 void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key)
 {
     RawProgram rawProgram;
-    istream.read((char *)&rawProgram, sizeof(RawProgram::mLength));
-    rawProgram.mData = new uchar[rawProgram.mLength];
-    istream.read((char *)rawProgram.mData, sizeof(uchar) * rawProgram.mLength);
+    istream.read((char *)&rawProgram.mPassLength, sizeof(uint));
+    istream.read((char *)&rawProgram.mVSByteLength, sizeof(uint));
+    istream.read((char *)&rawProgram.mGSByteLength, sizeof(uint));
+    istream.read((char *)&rawProgram.mFSByteLength, sizeof(uint));
+
+    auto byteLength = rawProgram.mPassLength * sizeof(RawProgram::PassAttr)
+                    + rawProgram.mVSByteLength
+                    + rawProgram.mGSByteLength
+                    + rawProgram.mFSByteLength;
+    rawProgram.mData = new uchar[byteLength];
+    
+    istream.read((char *)rawProgram.mData, byteLength);
 
     _rawProgramMap.insert(std::make_pair(key, rawProgram));
 }
