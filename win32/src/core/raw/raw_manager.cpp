@@ -110,7 +110,7 @@ void RawManager::EndImport()
         ostream.write((const char *)&pair.second.mData, pair.second.mVSByteLength 
                                                       + pair.second.mGSByteLength 
                                                       + pair.second.mFSByteLength
-                                                      + sizeof(RawProgram::PassAttr) * pair.second.mPassLength);
+                                                      + sizeof(GLProgram::PassAttr) * pair.second.mPassLength);
         _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
     }
     ostream.close();
@@ -474,7 +474,7 @@ void RawManager::ImportProgram(const std::string & url)
         std::string & vBuffer, 
         std::string & gBuffer, 
         std::string & fBuffer, 
-        RawProgram::PassAttr * passAttr)
+        GLProgram::PassAttr * passAttr)
     {
         std::string line;
         while (std::getline(is, line))
@@ -646,7 +646,7 @@ void RawManager::ImportProgram(const std::string & url)
         std::string,
         std::string,
         std::string,
-        RawProgram::PassAttr>> passs;
+        GLProgram::PassAttr>> passs;
     while (std::getline(is, line))
     {
         if (string_tool::IsEqualSkipSpace(line, "Pass Common Beg"))
@@ -667,13 +667,13 @@ void RawManager::ImportProgram(const std::string & url)
     std::string vBuffer;
     std::string gBuffer;
     std::string fBuffer;
-    auto attrs = new RawProgram::PassAttr[passs.size()];
+    auto attrs = new GLProgram::PassAttr[passs.size()];
     for (auto i = 0; i != passs.size(); ++i)
     {
         vBuffer.append(std::get<0>(passs.at(i)));
         gBuffer.append(std::get<1>(passs.at(i)));
         fBuffer.append(std::get<2>(passs.at(i)));
-        memcpy(attrs + i, &passs.at(i), sizeof(RawProgram::PassAttr));
+        memcpy(attrs + i, &passs.at(i), sizeof(GLProgram::PassAttr));
     }
 
     //  –¥»ÎGL Program ˝æ›
@@ -695,15 +695,15 @@ void RawManager::ImportProgram(const std::string & url)
         rawProgram.mFSByteLength = fCommonBuffer.size();
     }
 
-    auto byteLength = rawProgram.mPassLength * sizeof(RawProgram::PassAttr)
+    auto byteLength = rawProgram.mPassLength * sizeof(GLProgram::PassAttr)
                     + rawProgram.mVSByteLength
                     + rawProgram.mGSByteLength
                     + rawProgram.mFSByteLength;
     rawProgram.mData = new uchar[byteLength];
 
     auto ptr = rawProgram.mData;
-    memcpy(ptr, attrs, rawProgram.mPassLength * sizeof(RawProgram::PassAttr));
-    ptr += rawProgram.mPassLength * sizeof(RawProgram::PassAttr);
+    memcpy(ptr, attrs, rawProgram.mPassLength * sizeof(GLProgram::PassAttr));
+    ptr += rawProgram.mPassLength * sizeof(GLProgram::PassAttr);
     memcpy(ptr, vCommonBuffer.data(), vCommonBuffer.size());
     ptr += vCommonBuffer.size();
     memcpy(ptr, gCommonBuffer.data(), gCommonBuffer.size());
@@ -764,7 +764,7 @@ void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key
     istream.read((char *)&rawProgram.mGSByteLength, sizeof(uint));
     istream.read((char *)&rawProgram.mFSByteLength, sizeof(uint));
 
-    auto byteLength = rawProgram.mPassLength * sizeof(RawProgram::PassAttr)
+    auto byteLength = rawProgram.mPassLength * sizeof(GLProgram::PassAttr)
                     + rawProgram.mVSByteLength
                     + rawProgram.mGSByteLength
                     + rawProgram.mFSByteLength;

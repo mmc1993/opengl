@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../include.h"
-
-class Res;
+#include "gl_mesh.h"
+#include "gl_program.h"
+#include "gl_texture2d.h"
 
 class RawManager {
 public:
@@ -38,27 +39,6 @@ public:
     };
 
     struct RawProgram {
-        struct PassAttr {
-            //  面剔除
-            int     vCullFace;
-            //  混合
-            int     vBlendSrc;
-            int     vBlendDst;
-            //  深度测试
-            bool    bDepthTest;         //  开启深度测试
-            bool    bDepthWrite;        //  开启深度写入
-            //  模板测试
-            int     vStencilOpFail;		//	模板测试失败
-            int     vStencilOpZFail;	//	深度测试失败
-            int     vStencilOpZPass;	//	深度测试通过
-            int		vStencilFunc;		//	模板测试函数
-            int     vStencilMask;       //  模板测试值
-            int     vStencilRef;        //  模板测试值
-            //  渲染
-            uint    vDrawType;			//	draw类型
-            uint    vRenderType;        //  渲染类型
-            uint    vRenderQueue;       //  渲染通道
-        };
         uchar * mData;
         uint mPassLength;
         uint mVSByteLength;
@@ -130,7 +110,7 @@ public:
     template <class T>
     T & LoadRes(const std::string & key) const;
     //  销毁对象, 保留原始数据
-    void FreeRes(const Res * res);
+    void FreeRes(const GLRes * res);
     void FreeRes(const std::string & key);
 
 private:
@@ -151,7 +131,7 @@ private:
 
 private:
     RawHead _rawHead;
-    std::map<std::string, Res *> _resObjectMap;
+    std::map<std::string, GLRes *> _resObjectMap;
     std::map<std::string, RawMesh> _rawMeshMap;
     std::map<std::string, RawImage> _rawImageMap;
     std::map<std::string, RawProgram> _rawProgramMap;

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\event\event_enum.h" />
     <ClInclude Include="src\core\raw\gl_mesh.h" />
+    <ClInclude Include="src\core\raw\gl_program.h" />
     <ClInclude Include="src\core\raw\gl_texture2d.h" />
     <ClInclude Include="src\core\raw\raw_manager.h" />
     <ClInclude Include="src\core\raw\gl_res.h" />
