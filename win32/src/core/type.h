@@ -6,9 +6,9 @@ using uint = GLuint;
 using ichar = char;
 using uchar = unsigned char;
 
-class NoCopy {
+class NonCopy {
 public:
-    NoCopy() {}
-    NoCopy(const NoCopy &) = delete;
-    NoCopy & operator=(const NoCopy &) = delete;
+    NonCopy() {}
+    NonCopy(const NonCopy &) = delete;
+    NonCopy & operator=(const NonCopy &) = delete;
 };

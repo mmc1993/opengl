@@ -2,7 +2,7 @@
 
 #include "../include.h"
 
-class Res : public NoCopy {
+class Res : public NonCopy {
 public:
 	virtual ~Res() 
     { }
