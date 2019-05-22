@@ -10,7 +10,4 @@ public:
 protected:
 	Res() 
     { }
-
-	Res(const Res &) = delete;
-	Res & operator=(const Res &) = delete;
 };
