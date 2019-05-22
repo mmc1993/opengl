@@ -1095,6 +1095,12 @@
     <ClInclude Include="src\core\third\md5\md5cpp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\tools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_res.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\event\event_enum.h" />
     <ClInclude Include="src\core\raw\raw_manager.h" />
+    <ClInclude Include="src\core\raw\gl_res.h" />
     <ClInclude Include="src\core\render\render_enum.h" />
     <ClInclude Include="src\core\render\render_util.h" />
     <ClInclude Include="src\core\res\mesh.h" />
@@ -372,6 +373,7 @@
     <ClInclude Include="src\core\third\sformat.h" />
     <ClInclude Include="src\core\third\stb_image.h" />
     <ClInclude Include="src\core\timer\timer.h" />
+    <ClInclude Include="src\core\tools.h" />
     <ClInclude Include="src\core\tools\debug_tool.h" />
     <ClInclude Include="src\core\tools\file_tool.h" />
     <ClInclude Include="src\core\tools\glsl_tool.h" />
