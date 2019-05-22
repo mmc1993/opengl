@@ -16,6 +16,7 @@ const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_REF 
         "raw/image.db",
         "raw/program.db",
         "raw/material.db",
+        "raw/md5tourl.txt",
     }
 };
 
@@ -67,64 +68,64 @@ void RawManager::BegImport()
 
 void RawManager::EndImport()
 {
-    std::ofstream ostream;
+    std::ofstream os;
     //  写入网格
-    ostream.open(RAWDATA_REF[kRAW_MESH], std::ios::binary);
-    ASSERT_LOG(ostream, "导入Mesh失败. {0}", RAWDATA_REF[kRAW_MESH]);
+    os.open(RAWDATA_REF[kRAW_MESH], std::ios::binary);
+    ASSERT_LOG(os, "导入Mesh失败. {0}", RAWDATA_REF[kRAW_MESH]);
     for (const auto & pair : _rawMeshMap)
     {
-        auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mIndexLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mVertexLength, sizeof(uint));
-        ostream.write((const char *)pair.second.mIndexs, sizeof(uint) * pair.second.mIndexLength);
-        ostream.write((const char *)pair.second.mVertexs, sizeof(float) * pair.second.mVertexLength);
-        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
+        auto byteOffset = os.tellp();
+        os.write((const char *)&pair.second.mIndexLength, sizeof(uint));
+        os.write((const char *)&pair.second.mVertexLength, sizeof(uint));
+        os.write((const char *)pair.second.mIndexs, sizeof(uint) * pair.second.mIndexLength);
+        os.write((const char *)pair.second.mVertexs, sizeof(float) * pair.second.mVertexLength);
+        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
     }
-    ostream.close();
+    os.close();
 
     //  写入图片
-    ostream.open(RAWDATA_REF[kRAW_IMAGE], std::ios::binary);
-    ASSERT_LOG(ostream, "导入Image失败. {0}", RAWDATA_REF[kRAW_IMAGE]);
+    os.open(RAWDATA_REF[kRAW_IMAGE], std::ios::binary);
+    ASSERT_LOG(os, "导入Image失败. {0}", RAWDATA_REF[kRAW_IMAGE]);
     for (const auto & pair : _rawImageMap)
     {
-        auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mW, sizeof(uint));
-        ostream.write((const char *)&pair.second.mH, sizeof(uint));
-        ostream.write((const char *)&pair.second.mFormat, sizeof(uint));
-        ostream.write((const char *)&pair.second.mByteLength, sizeof(uint));
-        ostream.write((const char *)pair.second.mData, pair.second.mByteLength);
-        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
+        auto byteOffset = os.tellp();
+        os.write((const char *)&pair.second.mW, sizeof(uint));
+        os.write((const char *)&pair.second.mH, sizeof(uint));
+        os.write((const char *)&pair.second.mFormat, sizeof(uint));
+        os.write((const char *)&pair.second.mByteLength, sizeof(uint));
+        os.write((const char *)pair.second.mData, pair.second.mByteLength);
+        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
     }
-    ostream.close();
+    os.close();
 
     //  写入程序
-    ostream.open(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary);
-    ASSERT_LOG(ostream, "导入Program失败. {0}", RAWDATA_REF[kRAW_PROGRAM]);
+    os.open(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary);
+    ASSERT_LOG(os, "导入Program失败. {0}", RAWDATA_REF[kRAW_PROGRAM]);
     for (const auto & pair : _rawProgramMap)
     {
-        auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second.mPassLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mVSByteLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mGSByteLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mFSByteLength, sizeof(uint));
-        ostream.write((const char *)&pair.second.mData, pair.second.mVSByteLength 
+        auto byteOffset = os.tellp();
+        os.write((const char *)&pair.second.mPassLength, sizeof(uint));
+        os.write((const char *)&pair.second.mVSByteLength, sizeof(uint));
+        os.write((const char *)&pair.second.mGSByteLength, sizeof(uint));
+        os.write((const char *)&pair.second.mFSByteLength, sizeof(uint));
+        os.write((const char *)&pair.second.mData, pair.second.mVSByteLength 
                                                       + pair.second.mGSByteLength 
                                                       + pair.second.mFSByteLength
                                                       + sizeof(GLProgram::PassAttr) * pair.second.mPassLength);
-        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
+        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
     }
-    ostream.close();
+    os.close();
 
     //  写入材质
-    ostream.open(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary);
-    ASSERT_LOG(ostream, "导入Material失败. {0}", RAWDATA_REF[kRAW_MATERIAL]);
+    os.open(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary);
+    ASSERT_LOG(os, "导入Material失败. {0}", RAWDATA_REF[kRAW_MATERIAL]);
     for (const auto & pair : _rawMaterialMap)
     {
-        auto byteOffset = ostream.tellp();
-        ostream.write((const char *)&pair.second, sizeof(RawMaterial));
-        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
+        auto byteOffset = os.tellp();
+        os.write((const char *)&pair.second, sizeof(RawMaterial));
+        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
     }
-    ostream.close();
+    os.close();
 
     //  写入数据头文件
     RawHead::Head head;
@@ -133,13 +134,20 @@ void RawManager::EndImport()
     head.mProgramLength = _rawHead.mProgramList.size();
     head.mMaterialLength = _rawHead.mMaterialList.size();
     //  Data Write
-    ostream.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
-    ostream.write((const char *)&head, sizeof(RawHead::Head));
-    ostream.write((const char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
-    ostream.write((const char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
-    ostream.write((const char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
-    ostream.write((const char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
-    ostream.close();
+    os.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
+    os.write((const char *)&head, sizeof(RawHead::Head));
+    os.write((const char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
+    os.write((const char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
+    os.write((const char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
+    os.write((const char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
+    os.close();
+
+    os.open(RAWDATA_REF[kRAW_MD5TOURL]);
+    for (const auto & pair : _rawMD5ToURLMap)
+    {
+        os << SFormat("[{0}]={1}", pair.first, pair.second);
+    }
+    os.close();
 }
 
 void RawManager::Import(const std::string & url)
@@ -386,6 +394,9 @@ void RawManager::ImportModel(const std::string & url)
         delete[] buffer;
         _rawMeshMap.insert(std::make_pair(md5.str, rawMesh));
 
+        //  建立MD5 To URL 映射
+        _rawMD5ToURLMap.insert(std::make_pair(md5.str, url + md5.str));
+
         for (auto i = 0; i != node->mNumChildren; ++i)
         {
             LoadNode(node->mChildren[i], scene, directory);
@@ -419,6 +430,9 @@ void RawManager::ImportImage(const std::string & url)
 
     auto md5 = MD5(rawImage.mData, rawImage.mByteLength);
     _rawImageMap.insert(std::make_pair(md5.str, rawImage));
+
+    //  建立MD5 To URL 映射
+    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -662,6 +676,7 @@ void RawManager::ImportProgram(const std::string & url)
             passs.push_back(pass);
         }
     }
+    is.close();
 
     //  生成GL Program数据
     std::string vBuffer;
@@ -714,21 +729,26 @@ void RawManager::ImportProgram(const std::string & url)
 
     auto md5 = MD5(rawProgram.mData, byteLength);
     _rawProgramMap.insert(std::make_pair(md5.str, rawProgram));
-    is.close();
+
+    //  建立MD5 To URL 映射
+    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
 }
 
 void RawManager::ImportMaterial(const std::string & url)
 {
-    std::ifstream istream(url);
-    ASSERT_LOG(istream, "URL: {0}", url);
-    ASSERT_LOG(sizeof(RawMaterial) == file_tool::GetFileLength(istream), "URL: {0}", url);
+    std::ifstream is(url, std::ios::binary);
+    ASSERT_LOG(is, "URL: {0}", url);
+    ASSERT_LOG(sizeof(RawMaterial) == file_tool::GetFileLength(is), "URL: {0}", url);
 
     RawMaterial rawMaterial;
-    istream.read((char *)&rawMaterial, sizeof(RawMaterial));
+    is.read((char *)&rawMaterial, sizeof(RawMaterial));
+    is.close();
 
     auto md5 = MD5((char *)&rawMaterial, sizeof(RawMaterial));
     _rawMaterialMap.insert(std::make_pair(md5.str, rawMaterial));
-    istream.close();
+
+    //  建立MD5 To URL 映射
+    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
 }
 
 void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)

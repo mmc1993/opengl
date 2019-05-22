@@ -21,6 +21,7 @@ public:
         kRAW_IMAGE,
         kRAW_PROGRAM,
         kRAW_MATERIAL,
+        kRAW_MD5TOURL,
         kRawTypeEnum,
     };
 
@@ -136,4 +137,5 @@ private:
     std::map<std::string, RawImage> _rawImageMap;
     std::map<std::string, RawProgram> _rawProgramMap;
     std::map<std::string, RawMaterial> _rawMaterialMap;
+    std::map<std::string, std::string> _rawMD5ToURLMap;
 };

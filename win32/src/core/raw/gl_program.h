@@ -74,10 +74,27 @@ public:
         ASSERT_LOG(ret != 0, "GLProgram Error");
     }
 
-    void AddPass(const PassAttr & passAttr)
+    void AddPassAttr(const PassAttr & passAttr)
     {
-
+        _passAttrs.push_back(passAttr);
     }
+
+    const PassAttr & GetPassAttr(uint i) const
+    {
+        return _passAttrs.at(i);
+    }
+
+    void UsePass(uint i) const
+    {
+        //  TODO
+    }
+
+    void Use() const
+    {
+        glUseProgram(_id);
+    }
+
+    //void Bind();
 
 private:
     void AssertPass(uint shaderID, const std::string & errorTxt)
@@ -93,6 +110,6 @@ private:
     }
 
 private:
+    std::vector<PassAttr> _passAttrs;
     uint _id;
-
 };
