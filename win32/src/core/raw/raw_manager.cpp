@@ -78,7 +78,7 @@ void RawManager::EndImport()
         ostream.write((const char *)&pair.second.mVertexLength, sizeof(uint));
         ostream.write((const char *)pair.second.mIndexs, sizeof(uint) * pair.second.mIndexLength);
         ostream.write((const char *)pair.second.mVertexs, sizeof(float) * pair.second.mVertexLength);
-        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
+        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
     }
     ostream.close();
 
@@ -93,7 +93,7 @@ void RawManager::EndImport()
         ostream.write((const char *)&pair.second.mFormat, sizeof(uint));
         ostream.write((const char *)&pair.second.mByteLength, sizeof(uint));
         ostream.write((const char *)pair.second.mData, pair.second.mByteLength);
-        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
+        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
     }
     ostream.close();
 
@@ -111,7 +111,7 @@ void RawManager::EndImport()
                                                       + pair.second.mGSByteLength 
                                                       + pair.second.mFSByteLength
                                                       + sizeof(RawProgram::PassAttr) * pair.second.mPassLength);
-        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
+        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
     }
     ostream.close();
 
@@ -122,7 +122,7 @@ void RawManager::EndImport()
     {
         auto byteOffset = ostream.tellp();
         ostream.write((const char *)&pair.second, sizeof(RawMaterial));
-        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)ostream.tellp() - byteOffset);
+        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(ostream.tellp() - byteOffset));
     }
     ostream.close();
 

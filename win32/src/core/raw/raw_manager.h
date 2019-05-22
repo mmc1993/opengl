@@ -146,6 +146,7 @@ private:
     void LoadRawProgram(std::ifstream & istream, const std::string & key);
     void LoadRawMaterial(std::ifstream & istream, const std::string & key);
 
+    //  清理所有原始数据
     void ClearRawData();
 
 private:
