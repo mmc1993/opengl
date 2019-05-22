@@ -21,7 +21,7 @@ public:
         int     vStencilMask;       //  模板测试值
         int     vStencilRef;        //  模板测试值
         //  渲染
-        uint    vDrawType;			//	draw类型
+        uint    vDrawType;			//	绘制类型
         uint    vRenderType;        //  渲染类型
         uint    vRenderQueue;       //  渲染通道
     };
