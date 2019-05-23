@@ -49,13 +49,13 @@ public:
 
     struct RawMaterial {
         struct Texture {
-            char mName[16];
-            char mImage[16];
+            char mName[MTL_TEX_NAME_LEN];
+            char mImage[MD5_LEN];
         };
         uint mShininess;
-        char mMesh[16];
-        char mProgram[16];
-        Texture mTextures[8];
+        char mMesh[MD5_LEN];
+        char mProgram[MD5_LEN];
+        Texture mTextures[MTL_TEX2D_LEN];
     };
 
     //  原始数据头部信息
@@ -68,7 +68,7 @@ public:
         };
 
         struct Info {
-            char mMD5[16];
+            char mMD5[MD5_LEN];
             uint mByteOffset;
             uint mByteLength;
             Info(const char * md5, uint offset, uint length)
