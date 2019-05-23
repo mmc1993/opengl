@@ -604,6 +604,11 @@ void RawManager::ImportProgram(const std::string & url)
                     ss >> word;
                     passAttr->vStencilRef = std::stoi(word);
                 }
+                else if (word == "PassName")
+                {
+                    ss >> word;
+                    memcpy(passAttr->mPassName, word.c_str(), word.size());
+                }
                 else if (word == "RenderQueue")
                 {
                     ss >> word;

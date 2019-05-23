@@ -2,6 +2,9 @@
 
 #include "gl_res.h"
 
+#define MMC_TEXTURE_2D  GL_TEXTURE_2D
+#define MMC_TEXTURE_3D  GL_TEXTURE_CUBE_MAP
+
 class GLProgram : public GLRes {
 public:
     struct PassAttr {
@@ -85,17 +88,50 @@ public:
         return _passAttrs.at(i);
     }
 
-    void UsePass(uint i) const
+    void UsePass(uint i)
     {
-        //  TODO
+        ASSERT_LOG(i < _passAttrs.size(), "Out Range. {0}, {1}", _passAttrs.size(), i);
+        const auto & attr  = _passAttrs.at(i);
+        BindUniformSubProgram(attr.mPassName);
     }
 
-    void Use() const
+    void Use()
     {
         glUseProgram(_id);
     }
 
-    //void Bind();
+    void BindUniformNumber(const char * const key, iint val) { glUniform1i(glGetUniformLocation(_id, key), val); }
+    void BindUniformNumber(const char * const key, uint val) { glUniform1i(glGetUniformLocation(_id, key), val); }
+    void BindUniformNumber(const char * const key, float val) { glUniform1f(glGetUniformLocation(_id, key), val); }
+    void BindUniformNumber(const char * const key, double val) { glUniform1f(glGetUniformLocation(_id, key), static_cast<float>(val)); }
+    void BindUniformVector(const char * const key, const glm::vec3 & val) { glUniform3f(glGetUniformLocation(_id, key), val.x, val.y, val.z); }
+    void BindUniformVector(const char * const key, const glm::vec4 & val) { glUniform4f(glGetUniformLocation(_id, key), val.x, val.y, val.z, val.w); }
+    void BindUniformMatrix(const char * const key, const glm::mat3 & val) { glUniformMatrix3fv(glGetUniformLocation(_id, key), 1, GL_FALSE, &val[0][0]); }
+    void BindUniformMatrix(const char * const key, const glm::mat4 & val) {  glUniformMatrix4fv(glGetUniformLocation(_id, key), 1, GL_FALSE, &val[0][0]); }
+
+    void BindUniformTex2D(const char * const key, const uint val, iint pos)
+    {
+        glActiveTexture(GL_TEXTURE0 + pos);
+        glBindTexture(MMC_TEXTURE_2D, val);
+        if (key != nullptr) { glUniform1i(glGetUniformLocation(_id, key), pos); }
+    }
+
+    void BindUniformTex3D(const char * const key, const uint val, iint pos)
+    {
+        glActiveTexture(GL_TEXTURE0 + pos);
+        glBindTexture(MMC_TEXTURE_3D, val);
+        if (key != nullptr) { glUniform1i(glGetUniformLocation(_id, key), pos); }
+    }
+
+    void BindUniformSubProgram(const char * const val)
+    {
+        auto vIndex = glGetSubroutineIndex(_id, GL_VERTEX_SHADER, val);
+        auto gIndex = glGetSubroutineIndex(_id, GL_GEOMETRY_SHADER, val);
+        auto fIndex = glGetSubroutineIndex(_id, GL_FRAGMENT_SHADER, val);
+        glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &vIndex);
+        glUniformSubroutinesuiv(GL_GEOMETRY_SHADER, 1, &gIndex);
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex);
+    }
 
 private:
     void AssertPass(uint shaderID, const std::string & errorTxt)
