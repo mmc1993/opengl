@@ -111,8 +111,8 @@ public:
     template <class T>
     T & LoadRes(const std::string & key) const;
     //  销毁对象, 保留原始数据
-    void FreeRes(const GLRes * res);
     void FreeRes(const std::string & key);
+    void FreeRes(const GLRes * res);
 
 private:
     void Import(const std::string & url, ImportTypeEnum type);
