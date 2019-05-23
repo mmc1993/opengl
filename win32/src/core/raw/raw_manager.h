@@ -132,10 +132,13 @@ private:
 
 private:
     RawHead _rawHead;
+    //  资源对象
     std::map<std::string, GLRes *> _resObjectMap;
+    //  原始资源对象
     std::map<std::string, RawMesh> _rawMeshMap;
     std::map<std::string, RawImage> _rawImageMap;
     std::map<std::string, RawProgram> _rawProgramMap;
     std::map<std::string, RawMaterial> _rawMaterialMap;
+    //  资源对应的url
     std::map<std::string, std::string> _rawMD5ToURLMap;
 };
