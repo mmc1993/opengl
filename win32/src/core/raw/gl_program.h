@@ -24,6 +24,7 @@ public:
         uint    vDrawType;			//	绘制类型
         uint    vRenderType;        //  渲染类型
         uint    vRenderQueue;       //  渲染通道
+        char    mPassName[12];      //  Pass名字
     };
 public:
     GLProgram()

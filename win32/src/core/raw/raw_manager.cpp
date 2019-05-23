@@ -688,7 +688,7 @@ void RawManager::ImportProgram(const std::string & url)
         vBuffer.append(std::get<0>(passs.at(i)));
         gBuffer.append(std::get<1>(passs.at(i)));
         fBuffer.append(std::get<2>(passs.at(i)));
-        memcpy(attrs + i, &passs.at(i), sizeof(GLProgram::PassAttr));
+        memcpy(attrs + i, &std::get<3>(passs.at(i)), sizeof(GLProgram::PassAttr));
     }
 
     //  –¥»ÎGL Program ˝æ›
