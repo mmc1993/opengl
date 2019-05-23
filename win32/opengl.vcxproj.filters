@@ -1110,6 +1110,9 @@
     <ClInclude Include="src\core\raw\gl_program.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\raw\gl_material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
