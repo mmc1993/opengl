@@ -23,7 +23,7 @@ public:
         _w = w; _h = h;
     }
 
-    void SetParam(uint key, iint val)
+    void SetParam(uint key, iint val) const
     {
         glBindTexture(  GL_TEXTURE_2D, _id);
         glTexParameteri(GL_TEXTURE_2D, key, val);

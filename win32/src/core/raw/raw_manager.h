@@ -50,7 +50,7 @@ public:
     struct RawMaterial {
         struct Texture {
             char mName[MTL_TEX_NAME_LEN];
-            char mImage[MD5_LEN];
+            char mTexture[MD5_LEN];
         };
         uint mShininess;
         char mMesh[MD5_LEN];
