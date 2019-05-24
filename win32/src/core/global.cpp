@@ -5,6 +5,7 @@
 #include "render/render.h"
 #include "res/res_manager.h"
 #include "cfg/cfg_manager.h"
+#include "raw/raw_manager.h"
 
 //  ÅäÖÃ¸ùÄ¿Â¼
 constexpr auto DIR_CONFIG_ROOT = "res/config";
@@ -23,6 +24,7 @@ Global::Global()
     , _render(nullptr)
     , _resManager(nullptr)
     , _cfgManager(nullptr)
+    , _rawManager(nullptr)
 { }
 
 Global::~Global()
@@ -38,6 +40,7 @@ void Global::Start()
     ASSERT_LOG(_render == nullptr, "_render Error");
     ASSERT_LOG(_resManager == nullptr, "_resManager Error");
     ASSERT_LOG(_cfgManager == nullptr, "_cfgManager Error");
+    ASSERT_LOG(_rawManager == nullptr, "_rawManager Error");
 
     _event = new Event();
 
@@ -51,6 +54,8 @@ void Global::Start()
     
     _cfgManager = new CfgManager();
     _cfgManager->Init(DIR_CONFIG_ROOT);
+
+    _rawManager = new RawManager();
 }
 
 void Global::Clean()
@@ -61,4 +66,5 @@ void Global::Clean()
     SafeDelete(_render);
     SafeDelete(_resManager);
     SafeDelete(_cfgManager);
+    SafeDelete(_rawManager);
 }

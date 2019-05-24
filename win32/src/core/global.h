@@ -6,6 +6,7 @@ class Object;
 class Render;
 class ResManager;
 class CfgManager;
+class RawManager;
 
 class Global {
 public:
@@ -39,6 +40,11 @@ public:
         return *_cfgManager;
     }
 
+    inline RawManager & RefRawManager()
+    {
+        return *_rawManager;
+    }
+
     Global();
     ~Global();
 
@@ -58,4 +64,5 @@ private:
     Render * _render;
     ResManager * _resManager;
     CfgManager * _cfgManager;
+    RawManager * _rawManager;
 };

@@ -11,7 +11,7 @@ public:
     {
         //  材质引用的每一个纹理都必须对应一个名字, 
         //  这个名字会对应到Shader中的uniform变量.
-        char mName[MTL_TEX_NAME_LEN];
+        char mName[MTLTEX_NAME_BYTELEN];
         const GLTexture2D * mTexture;
     };
 
@@ -50,7 +50,7 @@ public:
 
     const Texture2D * GetTexture2Ds(uint i) const
     {
-        if (i < MTL_TEX2D_LEN)
+        if (i < MTLTEX2D_LEN)
         {
             return &_glTexture2Ds[i];
         }
@@ -60,5 +60,5 @@ public:
 private:
     const GLMesh      * _glMesh;
     const GLProgram   * _glProgram;
-    Texture2D           _glTexture2Ds[MTL_TEX2D_LEN];
+    Texture2D           _glTexture2Ds[MTLTEX2D_LEN];
 };

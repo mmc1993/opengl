@@ -11,12 +11,12 @@
 //  原始数据引用路径
 const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_REF = {
     {
-        "raw/head.db",
-        "raw/mesh.db",
-        "raw/image.db",
-        "raw/program.db",
-        "raw/material.db",
-        "raw/md5tourl.txt",
+        "res/raw/head.db",
+        "res/raw/mesh.db",
+        "res/raw/image.db",
+        "res/raw/program.db",
+        "res/raw/material.db",
+        "res/raw/md5tourl.txt",
     }
 };
 
@@ -274,8 +274,8 @@ void RawManager::Import(const std::string & url, ImportTypeEnum type)
     case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
     case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
     case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
+    default: ASSERT_LOG(false, "导入的资源格式非法!: {0}, {1}", type, url); break;
     }
-    ASSERT_LOG(false, "导入的资源格式非法!: {0}, {1}", type, url);
 }
 
 void RawManager::ImportModel(const std::string & url)
@@ -392,10 +392,10 @@ void RawManager::ImportModel(const std::string & url)
         memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
         auto md5 = MD5(buffer, length);
         delete[] buffer;
-        _rawMeshMap.insert(std::make_pair(md5.str, rawMesh));
+        _rawMeshMap.insert(std::make_pair(md5, rawMesh));
 
         //  建立MD5 To URL 映射
-        _rawMD5ToURLMap.insert(std::make_pair(md5.str, url + md5.str));
+        _rawMD5ToURLMap.insert(std::make_pair(md5, url + md5));
 
         for (auto i = 0; i != node->mNumChildren; ++i)
         {
@@ -429,10 +429,10 @@ void RawManager::ImportImage(const std::string & url)
     }
 
     auto md5 = MD5(rawImage.mData, rawImage.mByteLength);
-    _rawImageMap.insert(std::make_pair(md5.str, rawImage));
-
+    _rawImageMap.insert(std::make_pair(md5, rawImage));
+    
     //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
+    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -733,10 +733,10 @@ void RawManager::ImportProgram(const std::string & url)
     delete[]attrs;
 
     auto md5 = MD5(rawProgram.mData, byteLength);
-    _rawProgramMap.insert(std::make_pair(md5.str, rawProgram));
+    _rawProgramMap.insert(std::make_pair(md5, rawProgram));
 
     //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
+    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -750,10 +750,10 @@ void RawManager::ImportMaterial(const std::string & url)
     is.close();
 
     auto md5 = MD5((char *)&rawMaterial, sizeof(RawMaterial));
-    _rawMaterialMap.insert(std::make_pair(md5.str, rawMaterial));
+    _rawMaterialMap.insert(std::make_pair(md5, rawMaterial));
 
     //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5.str, url));
+    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
 }
 
 void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)

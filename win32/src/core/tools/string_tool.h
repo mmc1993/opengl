@@ -96,7 +96,7 @@ namespace string_tool {
         assert(std::string::npos == fname.find_first_of('\\'));
         auto pos = fname.find_last_of('.');
         return pos != std::string::npos
-            ? fname.substr(pos + 1)
+            ? fname.substr(pos)
             : std::string();
     }
 

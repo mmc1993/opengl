@@ -14,6 +14,7 @@
 #include "core/res/model.h"
 #include "core/res/file.h"
 #include "core/res/res_manager.h"
+#include "core/raw/raw_manager.h"
 #include "core/cfg/cfg_manager.h"
 #include "core/event/event_enum.h"
 #include <filesystem>
@@ -56,6 +57,11 @@ private:
 
 	void InitAssets()
 	{
+        Global::Ref().RefRawManager().BegImport();
+        Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
+        Global::Ref().RefRawManager().EndImport();
+
+
         File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
 
