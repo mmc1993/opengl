@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\config.h" />
     <ClInclude Include="src\core\event\event_enum.h" />
     <ClInclude Include="src\core\raw\gl_material.h" />
     <ClInclude Include="src\core\raw\gl_mesh.h" />

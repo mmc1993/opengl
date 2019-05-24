@@ -1089,12 +1089,6 @@
     <ClInclude Include="src\core\tools\file_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\third\md5\md5.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\md5\md5cpp.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\tools.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1111,6 +1105,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\raw\gl_material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\md5\md5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\third\md5\md5cpp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\config.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
