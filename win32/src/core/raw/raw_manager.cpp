@@ -143,7 +143,7 @@ void RawManager::EndImport()
     os.close();
 
     os.open(RAWDATA_REF[kRAW_LISTING]);
-    for (const auto & pair : _rawListing)
+    for (const auto & pair : _rawListingMap)
     {
         os << SFormat("[{0}]={1}\n", pair.first, pair.second);
     }
@@ -396,7 +396,7 @@ void RawManager::ImportModel(const std::string & url)
         _rawMeshMap.insert(std::make_pair(name, rawMesh));
 
         //  记录路径
-        _rawListing.insert(std::make_pair(name, url));
+        _rawListingMap.insert(std::make_pair(name, url));
 
         for (auto i = 0; i != node->mNumChildren; ++i)
         {
@@ -436,7 +436,7 @@ void RawManager::ImportImage(const std::string & url)
     _rawImageMap.insert(std::make_pair(name, rawImage));
     
     //  记录路径
-    _rawListing.insert(std::make_pair(name, url));
+    _rawListingMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -782,7 +782,7 @@ void RawManager::ImportProgram(const std::string & url)
     _rawProgramMap.insert(std::make_pair(name, rawProgram));
 
     //  记录路径
-    _rawListing.insert(std::make_pair(name, url));
+    _rawListingMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -806,7 +806,7 @@ void RawManager::ImportMaterial(const std::string & url)
     _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
 
     //  记录路径
-    _rawListing.insert(std::make_pair(name, url));
+    _rawListingMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
@@ -886,6 +886,8 @@ void RawManager::ClearRawData()
     _rawProgramMap.clear();
 
     _rawMaterialMap.clear();
+    
+    _rawListingMap.clear();
 }
 
 std::string RawManager::BuildName(const uchar * data, const uint len)
