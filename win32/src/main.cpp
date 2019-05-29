@@ -59,7 +59,8 @@ private:
 	{
         Global::Ref().RefRawManager().BegImport();
         //Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
-        Global::Ref().RefRawManager().Import("res/demo/ball.obj");
+        //Global::Ref().RefRawManager().Import("res/demo/ball.obj");
+        Global::Ref().RefRawManager().Import("res/demo/gl_program/scene.program");
         Global::Ref().RefRawManager().EndImport();
 
 

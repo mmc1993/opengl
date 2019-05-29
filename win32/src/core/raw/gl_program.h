@@ -14,8 +14,8 @@ public:
         int     vBlendSrc;
         int     vBlendDst;
         //  深度测试
-        bool    bDepthTest;         //  开启深度测试
-        bool    bDepthWrite;        //  开启深度写入
+        short   bDepthTest;         //  开启深度测试
+        short   bDepthWrite;        //  开启深度写入
         //  模板测试
         int     vStencilOpFail;		//	模板测试失败
         int     vStencilOpZFail;	//	深度测试失败
@@ -24,10 +24,10 @@ public:
         int     vStencilMask;       //  模板测试值
         int     vStencilRef;        //  模板测试值
         //  渲染
-        uint    vDrawType;			//	绘制类型
-        uint    vRenderType;        //  渲染类型
-        uint    vRenderQueue;       //  渲染通道
-        char    mPassName[12];      //  Pass名字
+        short   vDrawType;			//	绘制类型
+        short   vRenderType;        //  渲染类型
+        short   vRenderQueue;       //  渲染通道
+        char    mPassName[14];      //  Pass名字
     };
 public:
     GLProgram()

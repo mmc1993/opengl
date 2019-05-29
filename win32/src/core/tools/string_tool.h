@@ -81,6 +81,15 @@ namespace string_tool {
         return str0.compare(pos, len, str1, len) == 0;
     }
 
+    //  判断是否可打印字符串
+    inline bool IsPrint(const std::string & str)
+    {
+        return !std::all_of(str.begin(), str.end(), [](const char ch)
+            {
+                return (int)ch <= 32;
+            });
+    }
+
     //  返回文件名 没后缀
     inline std::string QueryFileName(const std::string & fname)
     {

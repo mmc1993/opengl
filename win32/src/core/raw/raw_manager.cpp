@@ -472,10 +472,13 @@ void RawManager::ImportProgram(const std::string & url)
         std::string line;
         while (std::getline(is, line))
         {
+            if (!string_tool::IsPrint(line)) { continue; }
+
             if (string_tool::IsEqualSkipSpace(line, endFlag))
             {
                 break;
             }
+
             if (string_tool::IsEqualSkipSpace(line, "CullFace") 
                 || string_tool::IsEqualSkipSpace(line, "BlendMode")
                 || string_tool::IsEqualSkipSpace(line, "DepthTest")
@@ -483,7 +486,8 @@ void RawManager::ImportProgram(const std::string & url)
                 || string_tool::IsEqualSkipSpace(line, "StencilTest")
                 || string_tool::IsEqualSkipSpace(line, "RenderQueue")
                 || string_tool::IsEqualSkipSpace(line, "RenderType")
-                || string_tool::IsEqualSkipSpace(line, "DrawType"))
+                || string_tool::IsEqualSkipSpace(line, "DrawType")
+                || string_tool::IsEqualSkipSpace(line, "PassName"))
             {
                 ASSERT_LOG(passAttr != nullptr, "½âÎöPassÊôÐÔ´íÎó: {0}, {1}", endFlag, line);
                 std::stringstream ss;
@@ -621,6 +625,15 @@ void RawManager::ImportProgram(const std::string & url)
             {
                 ParseShader(is, "FShader End", fBuffer);
             }
+            else
+            {
+                vBuffer.append(line);
+                vBuffer.append("\n");
+                gBuffer.append(line);
+                gBuffer.append("\n");
+                fBuffer.append(line);
+                fBuffer.append("\n");
+            }
         }
         ASSERT_LOG(string_tool::IsEqualSkipSpace(line, endFlag), "EndFlag Error: {0}", endFlag);
     };
@@ -628,7 +641,7 @@ void RawManager::ImportProgram(const std::string & url)
     //  ½âÎöInclude
     const auto ParseInclude = [](const std::string & word)
     {
-        auto pos = word.find_first_of(' ');
+        auto pos = word.find_last_of(' ');
         ASSERT_LOG(pos != std::string::npos, "Include Error: {0}", word);
         auto url = word.substr(pos + 1);
 
@@ -686,9 +699,9 @@ void RawManager::ImportProgram(const std::string & url)
         GLProgram::PassAttr>> passs;
     while (std::getline(is, line))
     {
-        if (string_tool::IsEqualSkipSpace(line, "Pass Common Beg"))
+        if (string_tool::IsEqualSkipSpace(line, "Common Beg"))
         {
-            ParsePass(is, "Pass Common End", vCommonBuffer, gCommonBuffer, fCommonBuffer, nullptr);
+            ParsePass(is, "Common End", vCommonBuffer, gCommonBuffer, fCommonBuffer, nullptr);
         }
         else if (string_tool::IsEqualSkipSpace(line, "Pass Beg"))
         {
@@ -739,15 +752,31 @@ void RawManager::ImportProgram(const std::string & url)
     rawProgram.mData = new uchar[byteLength];
 
     auto ptr = rawProgram.mData;
+
     memcpy(ptr, attrs, rawProgram.mPassLength * sizeof(GLProgram::PassAttr));
     ptr += rawProgram.mPassLength * sizeof(GLProgram::PassAttr);
-    memcpy(ptr, vCommonBuffer.data(), vCommonBuffer.size());
-    ptr += vCommonBuffer.size();
-    memcpy(ptr, gCommonBuffer.data(), gCommonBuffer.size());
-    ptr += gCommonBuffer.size();
-    memcpy(ptr, fCommonBuffer.data(), fCommonBuffer.size());
-    ptr += fCommonBuffer.size();
+
+    if (rawProgram.mVSByteLength != 0)
+    {
+        memcpy(ptr, vCommonBuffer.data(), rawProgram.mVSByteLength);
+        ptr += rawProgram.mVSByteLength;
+    }
+
+    if (rawProgram.mGSByteLength != 0)
+    {
+        memcpy(ptr, gCommonBuffer.data(), rawProgram.mGSByteLength);
+        ptr += rawProgram.mGSByteLength;
+    }
+    
+    if (rawProgram.mFSByteLength != 0)
+    {
+        memcpy(ptr, fCommonBuffer.data(), rawProgram.mFSByteLength);
+        ptr += rawProgram.mFSByteLength;
+    }
+    
     delete[]attrs;
+
+    ASSERT_LOG(ptr - rawProgram.mData == byteLength, "");
 
     auto name = BuildName(rawProgram.mData, byteLength);
     _rawProgramMap.insert(std::make_pair(name, rawProgram));
