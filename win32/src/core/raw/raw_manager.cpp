@@ -441,29 +441,11 @@ void RawManager::ImportImage(const std::string & url)
 
 void RawManager::ImportProgram(const std::string & url)
 {
-    //  解析Include
-    const auto ParseInclude = [](const std::string & word)
-    {
-        auto pos = word.find_first_of(' ');
-        ASSERT_LOG(pos != std::string::npos, "Include Error: {0}", word);
-        auto url = word.substr(pos + 1);
-
-        std::ifstream istream(url);
-        ASSERT_LOG(istream, "Include URL Error: {0}", url);
-
-        std::string data;
-        std::string line;
-        while (std::getline(istream, line))
-        {
-            data.append(line);
-            data.append("\n");
-        }
-        istream.close();
-        return data;
-    };
-
     //  解析Shader
-    const auto ParseShader = [&](std::ifstream & is, const char * endflag, std::string & buffer)
+    const auto ParseShader = [&](
+        std::stringstream & is, 
+        const char * endflag, 
+        std::string & buffer)
     {
         std::string line;
         while (std::getline(is, line))
@@ -472,22 +454,15 @@ void RawManager::ImportProgram(const std::string & url)
             {
                 break;
             }
-            if (string_tool::IsEqualSkipSpace(line, "#include"))
-            {
-                buffer.append(ParseInclude(line));
-            }
-            else
-            {
-                buffer.append(line);
-                buffer.append("\n");
-            }
+            buffer.append(line);
+            buffer.append("\n");
         }
         ASSERT_LOG(string_tool::IsEqualSkipSpace(line, endflag), "EndFlag Error: {0}", endflag);
     };
 
     //  解析Pass
     const auto ParsePass = [&](
-        std::ifstream & is, 
+        std::stringstream & is, 
         const char * endFlag,
         std::string & vBuffer, 
         std::string & gBuffer, 
@@ -501,14 +476,7 @@ void RawManager::ImportProgram(const std::string & url)
             {
                 break;
             }
-            if (string_tool::IsEqualSkipSpace(line, "#include"))
-            {
-                auto buffer = ParseInclude(line);
-                vBuffer.append(buffer);
-                gBuffer.append(buffer);
-                fBuffer.append(buffer);
-            }
-            else if (string_tool::IsEqualSkipSpace(line, "CullFace") 
+            if (string_tool::IsEqualSkipSpace(line, "CullFace") 
                 || string_tool::IsEqualSkipSpace(line, "BlendMode")
                 || string_tool::IsEqualSkipSpace(line, "DepthTest")
                 || string_tool::IsEqualSkipSpace(line, "DepthWrite")
@@ -657,10 +625,56 @@ void RawManager::ImportProgram(const std::string & url)
         ASSERT_LOG(string_tool::IsEqualSkipSpace(line, endFlag), "EndFlag Error: {0}", endFlag);
     };
 
-    std::ifstream is(url);
-    ASSERT_LOG(is, "URL Error: {0}", url);
+    //  解析Include
+    const auto ParseInclude = [](const std::string & word)
+    {
+        auto pos = word.find_first_of(' ');
+        ASSERT_LOG(pos != std::string::npos, "Include Error: {0}", word);
+        auto url = word.substr(pos + 1);
+
+        std::ifstream istream(url);
+        ASSERT_LOG(istream, "Include URL Error: {0}", url);
+
+        std::string data;
+        std::string line;
+        while (std::getline(istream, line))
+        {
+            data.append(line);
+            data.append("\n");
+        }
+        istream.close();
+        return data;
+    };
+
+    //  替换Include
+    const auto OpenProgramFile = [&](const std::string & url)
+    {
+        std::string data;
+        std::string line;
+        std::ifstream is(url);
+        ASSERT_LOG(is, "URL Error: {0}", url);
+        while (std::getline(is, line))
+        {
+            if (string_tool::IsEqualSkipSpace(line, "#include"))
+            {
+                data.append(ParseInclude(line));
+                data.append("\n");
+            }
+            else
+            {
+                data.append(line);
+                data.append("\n");
+            }
+        }
+        is.close();
+
+        std::stringstream ss;
+        ss.str(data);
+        return std::move(ss);
+    };
 
     //  解析GL Program数据
+    auto is = OpenProgramFile(url);
     std::string line;
     std::string vCommonBuffer;
     std::string gCommonBuffer;
@@ -685,7 +699,6 @@ void RawManager::ImportProgram(const std::string & url)
             passs.push_back(pass);
         }
     }
-    is.close();
 
     //  生成GL Program数据
     std::string vBuffer;
