@@ -16,14 +16,14 @@ const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_REF 
         "res/raw/image.db",
         "res/raw/program.db",
         "res/raw/material.db",
-        "res/raw/md5tourl.txt",
+        "res/raw/rawlisting.txt",
     }
 };
 
 //  文件后缀关联类型
 const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManager::SUFFIX_MAP = {
     { 
-        { ".obg", ".fbx" }, 
+        { ".obj", ".fbx" }, 
         { ".png", ".jpg" }, 
         { ".program" },
         { ".material" },
@@ -142,10 +142,10 @@ void RawManager::EndImport()
     os.write((const char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
     os.close();
 
-    os.open(RAWDATA_REF[kRAW_MD5TOURL]);
-    for (const auto & pair : _rawMD5ToURLMap)
+    os.open(RAWDATA_REF[kRAW_LISTING]);
+    for (const auto & pair : _rawListing)
     {
-        os << SFormat("[{0}]={1}", pair.first, pair.second);
+        os << SFormat("[{0}]={1}\n", pair.first, pair.second);
     }
     os.close();
 }
@@ -385,17 +385,18 @@ void RawManager::ImportModel(const std::string & url)
         rawMesh.mVertexs = new float[rawMesh.mVertexLength];
         memcpy(rawMesh.mVertexs, vertexs.data(), vertexByteLength);
 
-        //  计算MD5
+        //  生成名字
         auto length = indexByteLength + vertexByteLength;
-        auto buffer = new char[length];
+        auto buffer = new uchar[length];
         memcpy(buffer                  , rawMesh.mIndexs, indexByteLength);
         memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
-        auto md5 = MD5(buffer, length);
+        auto name = BuildName(buffer, length);
         delete[] buffer;
-        _rawMeshMap.insert(std::make_pair(md5, rawMesh));
 
-        //  建立MD5 To URL 映射
-        _rawMD5ToURLMap.insert(std::make_pair(md5, url + md5));
+        _rawMeshMap.insert(std::make_pair(name, rawMesh));
+
+        //  记录路径
+        _rawListing.insert(std::make_pair(name, url));
 
         for (auto i = 0; i != node->mNumChildren; ++i)
         {
@@ -407,7 +408,10 @@ void RawManager::ImportModel(const std::string & url)
     auto scene = importer.ReadFile(url, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs);
     ASSERT_LOG(nullptr != scene, "Error URL: {0}", url);
     ASSERT_LOG(nullptr != scene->mRootNode, "Error URL: {0}", url);
-    LoadNode(scene->mRootNode, scene, url.substr(0, 1 + url.find_last_of('/')));
+    for (auto i = 0; i != scene->mRootNode->mNumChildren; ++i)
+    {
+        LoadNode(scene->mRootNode->mChildren[i], scene, url.substr(0, 1 + url.find_last_of('/')));
+    }
 }
 
 void RawManager::ImportImage(const std::string & url)
@@ -428,11 +432,11 @@ void RawManager::ImportImage(const std::string & url)
     case 4: rawImage.mFormat = GL_RGBA; break;
     }
 
-    auto md5 = MD5(rawImage.mData, rawImage.mByteLength);
-    _rawImageMap.insert(std::make_pair(md5, rawImage));
+    auto name = BuildName(rawImage.mData, rawImage.mByteLength);
+    _rawImageMap.insert(std::make_pair(name, rawImage));
     
-    //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
+    //  记录路径
+    _rawListing.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -732,11 +736,11 @@ void RawManager::ImportProgram(const std::string & url)
     ptr += fCommonBuffer.size();
     delete[]attrs;
 
-    auto md5 = MD5(rawProgram.mData, byteLength);
-    _rawProgramMap.insert(std::make_pair(md5, rawProgram));
+    auto name = BuildName(rawProgram.mData, byteLength);
+    _rawProgramMap.insert(std::make_pair(name, rawProgram));
 
-    //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
+    //  记录路径
+    _rawListing.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -749,11 +753,11 @@ void RawManager::ImportMaterial(const std::string & url)
     is.read((char *)&rawMaterial, sizeof(RawMaterial));
     is.close();
 
-    auto md5 = MD5((char *)&rawMaterial, sizeof(RawMaterial));
-    _rawMaterialMap.insert(std::make_pair(md5, rawMaterial));
+    auto name = BuildName((uchar *)&rawMaterial, sizeof(RawMaterial));
+    _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
 
-    //  建立MD5 To URL 映射
-    _rawMD5ToURLMap.insert(std::make_pair(md5, url));
+    //  记录路径
+    _rawListing.insert(std::make_pair(name, url));
 }
 
 void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
@@ -833,4 +837,10 @@ void RawManager::ClearRawData()
     _rawProgramMap.clear();
 
     _rawMaterialMap.clear();
+}
+
+std::string RawManager::BuildName(const uchar * data, const uint len)
+{
+    const auto md5 = Code::MD5Encode(data, len);
+    return Code::Base64Encode((const uchar *)md5.data(), md5.size());
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-using iint = GLint;
-using uint = GLuint;
+using iint = int;
+using uint = unsigned int;
 
 using ichar = char;
 using uchar = unsigned char;

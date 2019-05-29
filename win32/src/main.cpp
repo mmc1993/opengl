@@ -58,7 +58,8 @@ private:
 	void InitAssets()
 	{
         Global::Ref().RefRawManager().BegImport();
-        Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
+        //Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
+        Global::Ref().RefRawManager().Import("res/demo/ball.obj");
         Global::Ref().RefRawManager().EndImport();
 
 

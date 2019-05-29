@@ -21,7 +21,7 @@ public:
         kRAW_IMAGE,
         kRAW_PROGRAM,
         kRAW_MATERIAL,
-        kRAW_MD5TOURL,
+        kRAW_LISTING,
         kRawTypeEnum,
     };
 
@@ -49,12 +49,12 @@ public:
 
     struct RawMaterial {
         struct Texture {
-            char mName[MTLTEX_NAME_BYTELEN];
-            char mTexture[MD5_BYTELEN];
+            char mName[RAW_NAME_LEN];
+            char mTexture[RAW_NAME_LEN];
         };
         uint mShininess;
-        char mMesh[MD5_BYTELEN];
-        char mProgram[MD5_BYTELEN];
+        char mMesh[RAW_NAME_LEN];
+        char mProgram[RAW_NAME_LEN];
         Texture mTextures[MTLTEX2D_LEN];
     };
 
@@ -68,18 +68,18 @@ public:
         };
 
         struct Info {
-            char mMD5[MD5_BYTELEN];
+            char mName[RAW_NAME_LEN];
             uint mByteOffset;
             uint mByteLength;
-            Info(const char * md5, uint offset, uint length)
+            Info(const char * name, uint offset, uint length)
                 : mByteOffset(offset), mByteLength(length)
             { 
-                memcpy(mMD5, md5, sizeof(mMD5));
+                memcpy(mName, name, sizeof(mName));
             }
 
-            bool operator==(const std::string & md5) const
+            bool operator==(const std::string & name) const
             {
-                return md5 == mMD5;
+                return name == mName;
             }
 
             Info() { }
@@ -130,6 +130,9 @@ private:
     //  清理所有原始数据
     void ClearRawData();
 
+    //  为数据生成名字
+    std::string BuildName(const uchar * data, const uint len);
+
 private:
     RawHead _rawHead;
     //  资源对象
@@ -140,5 +143,5 @@ private:
     std::map<std::string, RawProgram> _rawProgramMap;
     std::map<std::string, RawMaterial> _rawMaterialMap;
     //  资源对应的url
-    std::map<std::string, std::string> _rawMD5ToURLMap;
+    std::map<std::string, std::string> _rawListing;
 };
