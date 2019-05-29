@@ -58,12 +58,11 @@ private:
 	void InitAssets()
 	{
         Global::Ref().RefRawManager().BegImport();
-        //Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
-        //Global::Ref().RefRawManager().Import("res/demo/ball.obj");
-        //Global::Ref().RefRawManager().Import("res/demo/gl_program/scene.program");
+        Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
+        Global::Ref().RefRawManager().Import("res/demo/ball.obj");
+        Global::Ref().RefRawManager().Import("res/demo/gl_program/scene.program");
         Global::Ref().RefRawManager().Import("res/demo/mtl/a.mtl");
         Global::Ref().RefRawManager().EndImport();
-
 
         File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
