@@ -1113,12 +1113,6 @@
     <ClInclude Include="src\core\third\code\code.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\third\code\md5.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\third\code\md5cpp.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\third\code\base64.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1176,9 +1170,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\raw\raw_manager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\third\code\md5.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\third\code\code.cpp">
