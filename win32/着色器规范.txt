@@ -1,0 +1,65 @@
+subroutine void PassProgram_();
+subroutine uniform PassProgram_ VSProgram_;
+subroutine uniform PassProgram_ GSProgram_;
+subroutine uniform PassProgram_ FSProgram_;
+
+Pass Common Beg
+    //  所有shader公共代码
+    //  ...
+
+    VShader Beg
+        //  ...
+    VShader End
+
+    GShader Beg
+        //  ...
+    GShader End
+
+    FShader Beg
+        //  ...
+    FShader End
+Pass Common End
+
+Pass Beg
+    //  属性定义
+    //  ...
+
+    VShader Beg
+        #include "a/b/c"
+        subroutine(PassProgram_) void SubProgram()
+        {
+
+        }
+    VShader End
+
+    GShader Beg
+        #include "a/b/c"
+        subroutine(PassProgram_) void SubProgram()
+        {
+
+        }
+    GShader End
+
+    FShader Beg
+        #include "a/b/c"
+        subroutine(PassProgram_) void SubProgram()
+        {
+
+        }
+    FShader End
+Pass End
+
+void main()
+{
+    VSProgram_();
+}
+
+void main()
+{
+    GSProgram_();
+}
+
+void main()
+{
+    FSProgram_();
+}

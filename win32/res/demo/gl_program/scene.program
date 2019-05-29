@@ -1,0 +1,150 @@
+Common Beg
+    subroutine void PassProgram_();
+    subroutine uniform PassProgram_ SubProgram_;
+
+    VShader Beg
+        layout(location = 0) in vec3 a_pos_;
+        layout(location = 1) in vec2 a_uv_;
+        layout(location = 2) in vec3 a_n_;
+        layout(location = 3) in vec3 a_t_;
+        layout(location = 4) in vec3 a_b_;
+
+        uniform vec3 camera_pos_;
+        uniform vec3 camera_eye_;
+        uniform mat4 matrix_mvp_;
+        uniform mat4 matrix_mv_;
+        uniform mat4 matrix_m_;
+        uniform mat4 matrix_p_;
+        uniform mat4 matrix_v_;
+        uniform mat3 matrix_n_;
+
+        out V_OUT_ {
+            vec3 mNormal;
+            vec4 mMVPPos;
+            vec3 mMVPos;
+            vec3 mMPos;
+            mat3 mTBNR;
+            mat3 mTBN;
+            vec2 mUV;
+        } v_out_;
+    VShader End
+
+    FShader Beg
+        struct LightDirectParam_ {
+            mat4 mMatrix;
+            vec3 mNormal;
+            vec3 mAmbient;
+            vec3 mDiffuse;
+            vec3 mSpecular;
+            vec3 mPosition;
+        };
+
+        struct LightPointParam_ {
+            float mFar, mNear;
+            float mK0, mK1, mK2;
+            vec3 mAmbient;
+            vec3 mDiffuse;
+            vec3 mSpecular;
+            vec3 mPosition;
+        };
+
+        struct LightSpotParam_ {
+            float mK0;
+            float mK1;
+            float mK2;
+            float mInCone;
+            float mOutCone;
+            mat4 mMatrix;
+            vec3 mNormal;
+            vec3 mAmbient;
+            vec3 mDiffuse;
+            vec3 mSpecular;
+            vec3 mPosition;
+        };
+
+        layout (std140) uniform LightDirect_ {
+            LightDirectParam_ mParam[2];
+        } light_direct_;
+
+        layout (std140) uniform LightPoint_ {
+            LightPointParam_ mParam[4];
+        } light_point_;
+
+        layout (std140) uniform LightSpot_ {
+            LightSpotParam_ mParam[4];
+        } light_spot_;
+
+        uniform int light_count_direct_;
+        uniform int light_count_point_;
+        uniform int light_count_spot_;
+
+        uniform vec3 camera_pos_;
+        uniform vec3 camera_eye_;
+
+        uniform struct Material_ {
+            float mShininess;
+            sampler2D mNormal;
+            sampler2D mSpecular;
+            sampler2D mDiffuse0;
+            sampler2D mDiffuse1;
+            sampler2D mDiffuse2;
+            sampler2D mDiffuse3;
+        } material_;
+
+        in V_OUT_{
+            vec3 mNormal;
+            vec4 mMVPPos;
+            vec3 mMVPos;
+            vec3 mMPos;
+            mat3 mTBNR;
+            mat3 mTBN;
+            vec2 mUV;
+        } v_out_;
+
+        out vec4 color_;
+    FShader End
+Common End
+
+Pass Beg
+    CullFace Back
+    DepthTest
+    DepthWrite
+    RenderQueue Geometric
+    RenderType Forward
+    DrawType Index
+    PassName SubProgram0
+
+    VShader Beg
+        #include res/demo/gl_program/phong_light_no_shadow.vs
+
+        subroutine(PassProgram_) void SubProgram0()
+        {
+            PhongLightNoShadowVS();
+        }
+    VShader End
+
+    FShader Beg
+        #include res/demo/gl_program/phong_light_no_shadow.fs
+
+        subroutine(PassProgram_) void SubProgram0()
+        {
+            PhongLightNoShadowFS();
+        }
+    FShader End
+Pass End
+
+Common Beg
+    VShader Beg
+        void main()
+        {
+            SubProgram_();
+        }
+    VShader End
+
+    FShader Beg
+        void main()
+        {
+            SubProgram_();
+        }
+    FShader End
+Common End
