@@ -26,7 +26,7 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
         { ".obj", ".fbx" }, 
         { ".png", ".jpg" }, 
         { ".program" },
-        { ".material" },
+        { ".mtl" },
     }
 };
 
@@ -787,12 +787,19 @@ void RawManager::ImportProgram(const std::string & url)
 
 void RawManager::ImportMaterial(const std::string & url)
 {
-    std::ifstream is(url, std::ios::binary);
+    std::ifstream is(url);
     ASSERT_LOG(is, "URL: {0}", url);
-    ASSERT_LOG(sizeof(RawMaterial) == file_tool::GetFileLength(is), "URL: {0}", url);
 
-    RawMaterial rawMaterial;
-    is.read((char *)&rawMaterial, sizeof(RawMaterial));
+    RawMaterial rawMaterial = { 0 };
+    is >> rawMaterial.mShininess;
+    is >> rawMaterial.mMesh;
+    is >> rawMaterial.mProgram;
+    for (auto & texture : rawMaterial.mTextures)
+    {
+        is >> texture.mName;
+        is >> texture.mTexture;
+        if (is.eof()) break;
+    }
     is.close();
 
     auto name = BuildName((uchar *)&rawMaterial, sizeof(RawMaterial));
@@ -804,7 +811,7 @@ void RawManager::ImportMaterial(const std::string & url)
 
 void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
 {
-    RawMesh rawMesh;
+    RawMesh rawMesh = { 0 };
     istream.read((char *)&rawMesh, sizeof(RawMesh::mIndexLength) + sizeof(RawMesh::mVertexLength));
     rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
     istream.read((char *)rawMesh.mIndexs, sizeof(uint) * rawMesh.mIndexLength);
@@ -816,7 +823,7 @@ void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
 
 void RawManager::LoadRawImage(std::ifstream & istream, const std::string & key)
 {
-    RawImage rawImage;
+    RawImage rawImage = { 0 };
     istream.read((char *)&rawImage.mW, sizeof(uint));
     istream.read((char *)&rawImage.mH, sizeof(uint));
     istream.read((char *)&rawImage.mFormat, sizeof(uint));
@@ -829,7 +836,7 @@ void RawManager::LoadRawImage(std::ifstream & istream, const std::string & key)
 
 void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key)
 {
-    RawProgram rawProgram;
+    RawProgram rawProgram = { 0 };
     istream.read((char *)&rawProgram.mPassLength, sizeof(uint));
     istream.read((char *)&rawProgram.mVSByteLength, sizeof(uint));
     istream.read((char *)&rawProgram.mGSByteLength, sizeof(uint));
@@ -848,7 +855,7 @@ void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key
 
 void RawManager::LoadRawMaterial(std::ifstream & istream, const std::string & key)
 {
-    RawMaterial rawMaterial;
+    RawMaterial rawMaterial = { 0 };
     istream.read((char *)&rawMaterial, sizeof(RawMaterial));
  
     _rawMaterialMap.insert(std::make_pair(key, rawMaterial));
