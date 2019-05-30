@@ -101,17 +101,17 @@ public:
     void Import(const std::string & url);
 
     //  将原始数据加载到内存
-    bool LoadRaw(const std::string & key);
-    bool LoadRaw(const std::string & key, RawTypeEnum type);
+    bool LoadRaw(const std::string & name);
+    bool LoadRaw(const std::string & name, RawTypeEnum type);
     //  将原始数据从内存卸载
-    void FreeRaw(const std::string & key);
-    bool FreeRaw(const std::string & key, RawTypeEnum type);
+    void FreeRaw(const std::string & name);
+    bool FreeRaw(const std::string & name, RawTypeEnum type);
 
     //  通过原始数据构造对象
     template <class T>
-    T & LoadRes(const std::string & key);
+    T & LoadRes(const std::string & name);
     //  销毁对象, 保留原始数据
-    void FreeRes(const std::string & key);
+    void FreeRes(const std::string & name);
     void FreeRes(const GLRes * res);
 
 private:
@@ -122,13 +122,13 @@ private:
     void ImportMaterial(const std::string & url);
 
     //  加载原始数据到内存
-    void LoadRawMesh(std::ifstream & is, const std::string & key);
-    void LoadRawImage(std::ifstream & is, const std::string & key);
-    void LoadRawProgram(std::ifstream & is, const std::string & key);
-    void LoadRawMaterial(std::ifstream & is, const std::string & key);
+    void LoadRawMesh(std::ifstream & is, const std::string & name);
+    void LoadRawImage(std::ifstream & is, const std::string & name);
+    void LoadRawProgram(std::ifstream & is, const std::string & name);
+    void LoadRawMaterial(std::ifstream & is, const std::string & name);
 
     //  从原始数据创建资源
-    
+    //GLRes * LoadResMesh(const std::string & )
 
     //  清理所有原始数据
     void ClearRawData();

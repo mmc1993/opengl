@@ -166,16 +166,16 @@ void RawManager::Import(const std::string & url)
     Import(url, type);
 }
 
-bool RawManager::LoadRaw(const std::string & key)
+bool RawManager::LoadRaw(const std::string & name)
 {
-    if (LoadRaw(key, RawTypeEnum::kRAW_MESH)) { return true; }
-    if (LoadRaw(key, RawTypeEnum::kRAW_IMAGE)) { return true; }
-    if (LoadRaw(key, RawTypeEnum::kRAW_PROGRAM)) { return true; }
-    if (LoadRaw(key, RawTypeEnum::kRAW_MATERIAL)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_MESH)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_IMAGE)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_PROGRAM)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_MATERIAL)) { return true; }
     return false;
 }
 
-bool RawManager::LoadRaw(const std::string & key, RawTypeEnum type)
+bool RawManager::LoadRaw(const std::string & name, RawTypeEnum type)
 {
     //  数据容器
     std::vector<RawHead::Info> * list[] = {
@@ -186,7 +186,7 @@ bool RawManager::LoadRaw(const std::string & key, RawTypeEnum type)
     };
     
     auto it = std::find(list[type]->begin(), 
-                        list[type]->end(), key);
+                        list[type]->end(), name);
     if (it == list[type]->end()) { return false; }
     
     //  加载函数
@@ -200,27 +200,27 @@ bool RawManager::LoadRaw(const std::string & key, RawTypeEnum type)
     std::ifstream is(RAWDATA_REF[type], std::ios::binary);
     ASSERT_LOG(is, "找不到文件: {0}", RAWDATA_REF[type]);
     is.seekg(it->mByteOffset, std::ios::beg);
-    (this->*func[type])(is, key);
-    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength, "文件读取长度不一致: {0}, {1}", type, key);
+    (this->*func[type])(is, name);
+    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength, "文件读取长度不一致: {0}, {1}", type, name);
     is.close();
     return true;
 }
 
-void RawManager::FreeRaw(const std::string & key)
+void RawManager::FreeRaw(const std::string & name)
 {
-    if (FreeRaw(key, kRAW_MESH)) return;
-    if (FreeRaw(key, kRAW_IMAGE)) return;
-    if (FreeRaw(key, kRAW_PROGRAM)) return;
-    if (FreeRaw(key, kRAW_MATERIAL)) return;
+    if (FreeRaw(name, kRAW_MESH)) return;
+    if (FreeRaw(name, kRAW_IMAGE)) return;
+    if (FreeRaw(name, kRAW_PROGRAM)) return;
+    if (FreeRaw(name, kRAW_MATERIAL)) return;
 }
 
-bool RawManager::FreeRaw(const std::string & key, RawTypeEnum type)
+bool RawManager::FreeRaw(const std::string & name, RawTypeEnum type)
 {
     switch (type)
     {
     case RawManager::kRAW_MESH:
         {
-            auto it = _rawMeshMap.find(key);
+            auto it = _rawMeshMap.find(name);
             if (it != _rawMeshMap.end())
             {
                 delete[] it->second.mIndexs;
@@ -232,7 +232,7 @@ bool RawManager::FreeRaw(const std::string & key, RawTypeEnum type)
         break;
     case RawManager::kRAW_IMAGE:
         {
-            auto it = _rawImageMap.find(key);
+            auto it = _rawImageMap.find(name);
             if (it != _rawImageMap.end())
             {
                 stbi_image_free(it->second.mData);
@@ -243,7 +243,7 @@ bool RawManager::FreeRaw(const std::string & key, RawTypeEnum type)
         break;
     case RawManager::kRAW_PROGRAM:
         {
-            auto it = _rawProgramMap.find(key);
+            auto it = _rawProgramMap.find(name);
             if (it != _rawProgramMap.end())
             {
                 delete[] it->second.mData;
@@ -254,7 +254,7 @@ bool RawManager::FreeRaw(const std::string & key, RawTypeEnum type)
         break;
     case RawManager::kRAW_MATERIAL:
         {
-            auto it = _rawMaterialMap.find(key);
+            auto it = _rawMaterialMap.find(name);
             if (it != _rawMaterialMap.end())
             {
                 _rawMaterialMap.erase(it);
@@ -809,7 +809,7 @@ void RawManager::ImportMaterial(const std::string & url)
     _rawListingMap.insert(std::make_pair(name, url));
 }
 
-void RawManager::LoadRawMesh(std::ifstream & is, const std::string & key)
+void RawManager::LoadRawMesh(std::ifstream & is, const std::string & name)
 {
     RawMesh rawMesh = { 0 };
     is.read((char *)&rawMesh, sizeof(RawMesh::mIndexLength) + sizeof(RawMesh::mVertexLength));
@@ -818,10 +818,10 @@ void RawManager::LoadRawMesh(std::ifstream & is, const std::string & key)
     rawMesh.mVertexs = new float[rawMesh.mVertexLength];
     is.read((char *)rawMesh.mVertexs, sizeof(float) * rawMesh.mVertexLength);
 
-    _rawMeshMap.insert(std::make_pair(key, rawMesh));
+    _rawMeshMap.insert(std::make_pair(name, rawMesh));
 }
 
-void RawManager::LoadRawImage(std::ifstream & is, const std::string & key)
+void RawManager::LoadRawImage(std::ifstream & is, const std::string & name)
 {
     RawImage rawImage = { 0 };
     is.read((char *)&rawImage.mW, sizeof(uint));
@@ -831,10 +831,10 @@ void RawManager::LoadRawImage(std::ifstream & is, const std::string & key)
     rawImage.mData = new uchar[rawImage.mByteLength];
     is.read((char *)rawImage.mData, rawImage.mByteLength);
 
-    _rawImageMap.insert(std::make_pair(key, rawImage));
+    _rawImageMap.insert(std::make_pair(name, rawImage));
 }
 
-void RawManager::LoadRawProgram(std::ifstream & is, const std::string & key)
+void RawManager::LoadRawProgram(std::ifstream & is, const std::string & name)
 {
     RawProgram rawProgram = { 0 };
     is.read((char *)&rawProgram.mPassLength, sizeof(uint));
@@ -850,15 +850,15 @@ void RawManager::LoadRawProgram(std::ifstream & is, const std::string & key)
     
     is.read((char *)rawProgram.mData, byteLength);
 
-    _rawProgramMap.insert(std::make_pair(key, rawProgram));
+    _rawProgramMap.insert(std::make_pair(name, rawProgram));
 }
 
-void RawManager::LoadRawMaterial(std::ifstream & is, const std::string & key)
+void RawManager::LoadRawMaterial(std::ifstream & is, const std::string & name)
 {
     RawMaterial rawMaterial = { 0 };
     is.read((char *)&rawMaterial, sizeof(RawMaterial));
  
-    _rawMaterialMap.insert(std::make_pair(key, rawMaterial));
+    _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
 }
 
 void RawManager::ClearRawData()
