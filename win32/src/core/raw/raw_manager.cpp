@@ -349,6 +349,7 @@ void RawManager::ImportModel(const std::string & url)
 
     LoadMesh = [&, this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
     {
+        auto indexBase = vertexs.size();
         for (auto i = 0; i != mesh->mNumVertices; ++i)
         {
             GLMesh::Vertex vertex;
@@ -384,10 +385,9 @@ void RawManager::ImportModel(const std::string & url)
         }
         for (auto i = 0; i != mesh->mNumFaces; ++i)
         {
-            std::copy_n(
-                mesh->mFaces[i].mIndices,
-                mesh->mFaces[i].mNumIndices,
-                std::back_inserter(indexs));
+            std::transform(mesh->mFaces[i].mIndices,
+                           mesh->mFaces[i].mIndices + mesh->mFaces[i].mNumIndices,
+                           std::back_inserter(indexs), [&](const auto & v) { return v + indexBase; });
         }
     };
 
