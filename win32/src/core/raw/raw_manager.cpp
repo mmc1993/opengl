@@ -423,7 +423,7 @@ void RawManager::ImportModel(const std::string & url)
 
         _rawMeshMap.insert(std::make_pair(name, rawMesh));
 
-        //  记录路径
+        //  纳入清单
         _rawManifestMap.insert(std::make_pair(name, url));
 
         for (auto i = 0; i != node->mNumChildren; ++i)
@@ -463,7 +463,7 @@ void RawManager::ImportImage(const std::string & url)
     auto name = BuildName(rawImage.mData, rawImage.mByteLength);
     _rawImageMap.insert(std::make_pair(name, rawImage));
     
-    //  记录路径
+    //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
 }
 
@@ -797,7 +797,7 @@ void RawManager::ImportProgram(const std::string & url)
     auto name = BuildName(rawProgram.mData, byteLength);
     _rawProgramMap.insert(std::make_pair(name, rawProgram));
 
-    //  记录路径
+    //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
 }
 
@@ -821,7 +821,7 @@ void RawManager::ImportMaterial(const std::string & url)
     auto name = BuildName((uchar *)&rawMaterial, sizeof(RawMaterial));
     _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
 
-    //  记录路径
+    //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
 }
 
