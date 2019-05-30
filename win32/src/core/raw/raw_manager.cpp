@@ -684,8 +684,7 @@ void RawManager::ImportProgram(const std::string & url)
     //  替换Include
     const auto OpenProgramFile = [&](const std::string & url)
     {
-        std::string data;
-        std::string line;
+        std::string line,data;
         std::ifstream is(url);
         ASSERT_LOG(is, "URL Error: {0}", url);
         while (std::getline(is, line))
@@ -736,9 +735,7 @@ void RawManager::ImportProgram(const std::string & url)
     }
 
     //  生成GL Program数据
-    std::string vBuffer;
-    std::string gBuffer;
-    std::string fBuffer;
+    std::string vBuffer, gBuffer, fBuffer;
     for (auto i = 0; i != passs.size(); ++i)
     {
         vBuffer.append(std::get<0>(passs.at(i)));
