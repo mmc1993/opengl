@@ -22,7 +22,7 @@ public:
         kRAW_IMAGE,
         kRAW_PROGRAM,
         kRAW_MATERIAL,
-        kRAW_LISTING,
+        kRAW_MANIFEST,
         kRawTypeEnum,
     };
 
@@ -181,6 +181,5 @@ private:
     std::map<std::string, RawImage> _rawImageMap;
     std::map<std::string, RawProgram> _rawProgramMap;
     std::map<std::string, RawMaterial> _rawMaterialMap;
-    //  资源对应的url
-    std::map<std::string, std::string> _rawListingMap;
+    std::map<std::string, std::string> _rawManifestMap;
 };

@@ -1,5 +1,5 @@
 Common Beg
-    #version 330 core
+    #version 400 core
     subroutine void PassProgram_();
     subroutine uniform PassProgram_ SubProgram_;
 

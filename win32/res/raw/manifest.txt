@@ -1,0 +1,4 @@
+[G2+A4naa/Os3Imo5dKl4WA==]=res/demo/wall.obj
+[HkdchhQh60fl9Tf86+uxJw==]=res/demo/mtl/a.mtl
+[ILzL8AlH93g5Aao6XNAs3g==]=res/demo/gl_program/scene.program
+[sRb+vsCmv/pS8kihhS5dfw==]=res/demo/texture/floor_diffuse.png

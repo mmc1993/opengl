@@ -16,7 +16,7 @@ const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_REF 
         "res/raw/image.db",
         "res/raw/program.db",
         "res/raw/material.db",
-        "res/raw/rawlisting.txt",
+        "res/raw/manifest.txt",
     }
 };
 
@@ -143,8 +143,8 @@ void RawManager::EndImport()
     os.write((const char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
     os.close();
 
-    os.open(RAWDATA_REF[kRAW_LISTING]);
-    for (const auto & pair : _rawListingMap)
+    os.open(RAWDATA_REF[kRAW_MANIFEST]);
+    for (const auto & pair : _rawManifestMap)
     {
         os << SFormat("[{0}]={1}\n", pair.first, pair.second);
     }
@@ -424,7 +424,7 @@ void RawManager::ImportModel(const std::string & url)
         _rawMeshMap.insert(std::make_pair(name, rawMesh));
 
         //  记录路径
-        _rawListingMap.insert(std::make_pair(name, url));
+        _rawManifestMap.insert(std::make_pair(name, url));
 
         for (auto i = 0; i != node->mNumChildren; ++i)
         {
@@ -464,7 +464,7 @@ void RawManager::ImportImage(const std::string & url)
     _rawImageMap.insert(std::make_pair(name, rawImage));
     
     //  记录路径
-    _rawListingMap.insert(std::make_pair(name, url));
+    _rawManifestMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -798,7 +798,7 @@ void RawManager::ImportProgram(const std::string & url)
     _rawProgramMap.insert(std::make_pair(name, rawProgram));
 
     //  记录路径
-    _rawListingMap.insert(std::make_pair(name, url));
+    _rawManifestMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -822,7 +822,7 @@ void RawManager::ImportMaterial(const std::string & url)
     _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
 
     //  记录路径
-    _rawListingMap.insert(std::make_pair(name, url));
+    _rawManifestMap.insert(std::make_pair(name, url));
 }
 
 void RawManager::LoadRawMesh(std::ifstream & is, const std::string & name)
@@ -966,7 +966,7 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
 
 void RawManager::ClearRawData()
 {
-    //  Delete Mesh Byte
+    //  Delete Mesh Raw
     for (auto & rawMesh : _rawMeshMap)
     {
         delete[]rawMesh.second.mIndexs;
@@ -974,23 +974,25 @@ void RawManager::ClearRawData()
     }
     _rawMeshMap.clear();
 
-    //  Delete Image Byte
+    //  Delete Image Raw
     for (auto & rawImage : _rawImageMap)
     {
         stbi_image_free(rawImage.second.mData);
     }
     _rawImageMap.clear();
 
-    //  Delete Program Byte
+    //  Delete Program Raw
     for (auto & rawProgram : _rawProgramMap)
     {
         delete[]rawProgram.second.mData;
     }
     _rawProgramMap.clear();
 
+    //  Delete Material Raw
     _rawMaterialMap.clear();
     
-    _rawListingMap.clear();
+    //  Delete Manifest
+    _rawManifestMap.clear();
 }
 
 std::string RawManager::BuildName(const uchar * data, const uint len)
