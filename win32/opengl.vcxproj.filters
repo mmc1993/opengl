@@ -1116,6 +1116,9 @@
     <ClInclude Include="src\core\third\code\base64.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\tools\std_tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">

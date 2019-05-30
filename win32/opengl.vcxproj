@@ -382,6 +382,7 @@
     <ClInclude Include="src\core\tools\debug_tool.h" />
     <ClInclude Include="src\core\tools\file_tool.h" />
     <ClInclude Include="src\core\tools\glsl_tool.h" />
+    <ClInclude Include="src\core\tools\std_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\tools\time_tool.h" />
     <ClInclude Include="src\core\type.h" />

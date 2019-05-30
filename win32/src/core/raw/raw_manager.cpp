@@ -201,7 +201,9 @@ bool RawManager::LoadRaw(const std::string & name, RawTypeEnum type)
     ASSERT_LOG(is, "找不到文件: {0}", RAWDATA_REF[type]);
     is.seekg(it->mByteOffset, std::ios::beg);
     (this->*func[type])(is, name);
-    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength, "文件读取长度不一致: {0}, {1}", type, name);
+    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength, 
+        "LengthErr. Type: {0}. Name: {1}. Length: {2}. ReadLength: {3}.", 
+        type, name, it->mByteLength, (uint)is.tellg() - it->mByteOffset);
     is.close();
     return true;
 }
