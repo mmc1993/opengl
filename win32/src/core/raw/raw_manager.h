@@ -109,7 +109,7 @@ public:
 
     //  通过原始数据构造对象
     template <class T>
-    T & LoadRes(const std::string & key) const;
+    T & LoadRes(const std::string & key);
     //  销毁对象, 保留原始数据
     void FreeRes(const std::string & key);
     void FreeRes(const GLRes * res);
@@ -122,10 +122,13 @@ private:
     void ImportMaterial(const std::string & url);
 
     //  加载原始数据到内存
-    void LoadRawMesh(std::ifstream & istream, const std::string & key);
-    void LoadRawImage(std::ifstream & istream, const std::string & key);
-    void LoadRawProgram(std::ifstream & istream, const std::string & key);
-    void LoadRawMaterial(std::ifstream & istream, const std::string & key);
+    void LoadRawMesh(std::ifstream & is, const std::string & key);
+    void LoadRawImage(std::ifstream & is, const std::string & key);
+    void LoadRawProgram(std::ifstream & is, const std::string & key);
+    void LoadRawMaterial(std::ifstream & is, const std::string & key);
+
+    //  从原始数据创建资源
+    
 
     //  清理所有原始数据
     void ClearRawData();

@@ -32,27 +32,27 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
 
 void RawManager::Init()
 {
-    std::ifstream istream;
+    std::ifstream is;
     //  头部信息
-    istream.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
-    ASSERT_LOG(istream, "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_HEAD]);
+    is.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
+    ASSERT_LOG(is, "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_HEAD]);
 
     RawHead::Head head;
-    istream.read((char *)&head, sizeof(RawHead::Head));
+    is.read((char *)&head, sizeof(RawHead::Head));
 
-    _rawHead.mMeshList.resize(head.mMeshLength * sizeof(RawHead::Info));
-    istream.read((char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
+    _rawHead.mMeshList.resize(head.mMeshLength);
+    is.read((char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
 
-    _rawHead.mImageList.resize(head.mImageLength * sizeof(RawHead::Info));
-    istream.read((char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
+    _rawHead.mImageList.resize(head.mImageLength);
+    is.read((char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
 
-    _rawHead.mProgramList.resize(head.mProgramLength * sizeof(RawHead::Info));
-    istream.read((char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
+    _rawHead.mProgramList.resize(head.mProgramLength);
+    is.read((char *)_rawHead.mProgramList.data(), head.mProgramLength * sizeof(RawHead::Info));
 
-    _rawHead.mMaterialList.resize(head.mMaterialLength * sizeof(RawHead::Info));
-    istream.read((char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
+    _rawHead.mMaterialList.resize(head.mMaterialLength);
+    is.read((char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
 
-    istream.close();
+    is.close();
 
     ClearRawData();
 }
@@ -197,12 +197,12 @@ bool RawManager::LoadRaw(const std::string & key, RawTypeEnum type)
         &RawManager::LoadRawMaterial,
     };
 
-    std::ifstream istream(RAWDATA_REF[type], std::ios::binary);
-    ASSERT_LOG(istream, "找不到文件: {0}", RAWDATA_REF[type]);
-    istream.seekg(it->mByteOffset, std::ios::beg);
-    (this->*func[type])(istream, key);
-    ASSERT_LOG((uint)istream.tellg() - it->mByteOffset == it->mByteLength, "文件读取长度不一致: {0}, {1}", type, key);
-    istream.close();
+    std::ifstream is(RAWDATA_REF[type], std::ios::binary);
+    ASSERT_LOG(is, "找不到文件: {0}", RAWDATA_REF[type]);
+    is.seekg(it->mByteOffset, std::ios::beg);
+    (this->*func[type])(is, key);
+    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength, "文件读取长度不一致: {0}, {1}", type, key);
+    is.close();
     return true;
 }
 
@@ -645,17 +645,17 @@ void RawManager::ImportProgram(const std::string & url)
         ASSERT_LOG(pos != std::string::npos, "Include Error: {0}", word);
         auto url = word.substr(pos + 1);
 
-        std::ifstream istream(url);
-        ASSERT_LOG(istream, "Include URL Error: {0}", url);
+        std::ifstream is(url);
+        ASSERT_LOG(is, "Include URL Error: {0}", url);
 
         std::string data;
         std::string line;
-        while (std::getline(istream, line))
+        while (std::getline(is, line))
         {
             data.append(line);
             data.append("\n");
         }
-        istream.close();
+        is.close();
         return data;
     };
 
@@ -809,38 +809,38 @@ void RawManager::ImportMaterial(const std::string & url)
     _rawListingMap.insert(std::make_pair(name, url));
 }
 
-void RawManager::LoadRawMesh(std::ifstream & istream, const std::string & key)
+void RawManager::LoadRawMesh(std::ifstream & is, const std::string & key)
 {
     RawMesh rawMesh = { 0 };
-    istream.read((char *)&rawMesh, sizeof(RawMesh::mIndexLength) + sizeof(RawMesh::mVertexLength));
+    is.read((char *)&rawMesh, sizeof(RawMesh::mIndexLength) + sizeof(RawMesh::mVertexLength));
     rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
-    istream.read((char *)rawMesh.mIndexs, sizeof(uint) * rawMesh.mIndexLength);
+    is.read((char *)rawMesh.mIndexs, sizeof(uint) * rawMesh.mIndexLength);
     rawMesh.mVertexs = new float[rawMesh.mVertexLength];
-    istream.read((char *)rawMesh.mVertexs, sizeof(float) * rawMesh.mVertexLength);
+    is.read((char *)rawMesh.mVertexs, sizeof(float) * rawMesh.mVertexLength);
 
     _rawMeshMap.insert(std::make_pair(key, rawMesh));
 }
 
-void RawManager::LoadRawImage(std::ifstream & istream, const std::string & key)
+void RawManager::LoadRawImage(std::ifstream & is, const std::string & key)
 {
     RawImage rawImage = { 0 };
-    istream.read((char *)&rawImage.mW, sizeof(uint));
-    istream.read((char *)&rawImage.mH, sizeof(uint));
-    istream.read((char *)&rawImage.mFormat, sizeof(uint));
-    istream.read((char *)&rawImage.mByteLength, sizeof(uint));
+    is.read((char *)&rawImage.mW, sizeof(uint));
+    is.read((char *)&rawImage.mH, sizeof(uint));
+    is.read((char *)&rawImage.mFormat, sizeof(uint));
+    is.read((char *)&rawImage.mByteLength, sizeof(uint));
     rawImage.mData = new uchar[rawImage.mByteLength];
-    istream.read((char *)rawImage.mData, rawImage.mByteLength);
+    is.read((char *)rawImage.mData, rawImage.mByteLength);
 
     _rawImageMap.insert(std::make_pair(key, rawImage));
 }
 
-void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key)
+void RawManager::LoadRawProgram(std::ifstream & is, const std::string & key)
 {
     RawProgram rawProgram = { 0 };
-    istream.read((char *)&rawProgram.mPassLength, sizeof(uint));
-    istream.read((char *)&rawProgram.mVSByteLength, sizeof(uint));
-    istream.read((char *)&rawProgram.mGSByteLength, sizeof(uint));
-    istream.read((char *)&rawProgram.mFSByteLength, sizeof(uint));
+    is.read((char *)&rawProgram.mPassLength, sizeof(uint));
+    is.read((char *)&rawProgram.mVSByteLength, sizeof(uint));
+    is.read((char *)&rawProgram.mGSByteLength, sizeof(uint));
+    is.read((char *)&rawProgram.mFSByteLength, sizeof(uint));
 
     auto byteLength = rawProgram.mPassLength * sizeof(GLProgram::PassAttr)
                     + rawProgram.mVSByteLength
@@ -848,15 +848,15 @@ void RawManager::LoadRawProgram(std::ifstream & istream, const std::string & key
                     + rawProgram.mFSByteLength;
     rawProgram.mData = new uchar[byteLength];
     
-    istream.read((char *)rawProgram.mData, byteLength);
+    is.read((char *)rawProgram.mData, byteLength);
 
     _rawProgramMap.insert(std::make_pair(key, rawProgram));
 }
 
-void RawManager::LoadRawMaterial(std::ifstream & istream, const std::string & key)
+void RawManager::LoadRawMaterial(std::ifstream & is, const std::string & key)
 {
     RawMaterial rawMaterial = { 0 };
-    istream.read((char *)&rawMaterial, sizeof(RawMaterial));
+    is.read((char *)&rawMaterial, sizeof(RawMaterial));
  
     _rawMaterialMap.insert(std::make_pair(key, rawMaterial));
 }
