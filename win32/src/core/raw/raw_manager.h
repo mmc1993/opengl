@@ -3,6 +3,7 @@
 #include "../include.h"
 #include "gl_mesh.h"
 #include "gl_program.h"
+#include "gl_material.h"
 #include "gl_texture2d.h"
 
 class RawManager {
@@ -15,21 +16,29 @@ public:
         kImportTypeEnum,
     };
 
+    enum RawPathEnum {
+        kRAW_PATH_HEAD,
+        kRAW_PATH_MESH,
+        kRAW_PATH_IMAGE,
+        kRAW_PATH_PROGRAM,
+        kRAW_PATH_MATERIAL,
+        kRAW_PATH_LISTING,
+        kRawPathEnum,
+    };
+
     enum RawTypeEnum {
-        kRAW_HEAD,
-        kRAW_MESH,
-        kRAW_IMAGE,
-        kRAW_PROGRAM,
-        kRAW_MATERIAL,
-        kRAW_LISTING,
+        kRAW_TYPE_MESH,
+        kRAW_TYPE_IMAGE,
+        kRAW_TYPE_PROGRAM,
+        kRAW_TYPE_MATERIAL,
         kRawTypeEnum,
     };
 
     struct RawMesh {
         uint mIndexLength;
         uint mVertexLength;
-        uint *  mIndexs;
-        float * mVertexs;
+        uint           * mIndexs;
+        GLMesh::Vertex * mVertexs;
     };
 
     struct RawImage {
@@ -90,7 +99,7 @@ public:
         std::vector<Info> mMaterialList;
     };
 
-    static const std::array<std::string, kRawTypeEnum> RAWDATA_REF;
+    static const std::array<std::string, kRawPathEnum> RAWDATA_REF;
 
     static const std::array<std::vector<std::string>, kImportTypeEnum> SUFFIX_MAP;
 
@@ -109,7 +118,39 @@ public:
 
     //  通过原始数据构造对象
     template <class T>
-    T & LoadRes(const std::string & name);
+    T * LoadRes(const std::string & name)
+    {
+        auto it = _resObjectMap.find(name);
+        if (it != _resObjectMap.end())
+        {
+            ASSERT_LOG(dynamic_cast<T *>(it->second) != nullptr, 
+                "Res Type Not Match! {0}, {1}", name, typeid(T).name());
+            return reinterpret_cast<T *>(it->second);
+        }
+        //  没有在缓存中, 从原始数据加载资源
+        GLRes * res = nullptr;
+        if (std::any_ofv(_rawHead.mMeshList.begin(), _rawHead.mMeshList.end(), name)) 
+        {
+            res = LoadResMesh(name);
+        }
+        else if (std::any_ofv(_rawHead.mImageList.begin(), _rawHead.mImageList.end(), name))
+        {
+            res = LoadResImage(name);
+        }
+        else if (std::any_ofv(_rawHead.mProgramList.begin(), _rawHead.mProgramList.end(), name))
+        {
+            res = LoadResProgram(name);
+        }
+        else if (std::any_ofv(_rawHead.mMaterialList.begin(), _rawHead.mMaterialList.end(), name)) 
+        {
+            res = LoadResMaterial(name);
+        }
+        ASSERT_LOG(res != nullptr, "res not found! {0}", name);
+
+        ASSERT_LOG(dynamic_cast<T *>(res) != nullptr, "Res Type Not Match! {0}, {1}, {2}", name, typeid(T).name(), typeid(*res).name());
+        return reinterpret_cast<T *>(res);
+    }
+
     //  销毁对象, 保留原始数据
     void FreeRes(const std::string & name);
     void FreeRes(const GLRes * res);
@@ -128,7 +169,10 @@ private:
     void LoadRawMaterial(std::ifstream & is, const std::string & name);
 
     //  从原始数据创建资源
-    //GLRes * LoadResMesh(const std::string & )
+    GLRes * LoadResMesh(const std::string & name);
+    GLRes * LoadResImage(const std::string & name);
+    GLRes * LoadResProgram(const std::string & name);
+    GLRes * LoadResMaterial(const std::string & name);
 
     //  清理所有原始数据
     void ClearRawData();

@@ -19,6 +19,7 @@ public:
             kUV = 0x8,
             kTAN = 0x10,
             kBITAN = 0x20,
+            kV_N_C_UV_TAN_BITAN = kV | kN | kC | kUV | kTAN | kBITAN,
         };
 
         static uint SizeOf(uint enabled)
@@ -47,22 +48,30 @@ public:
     //  完全填充
     void Init(const std::vector<Vertex> & vertexs, const std::vector<uint> & indexs, uint enabled, uint vUsage = GL_STATIC_DRAW, uint eUsage = GL_STATIC_DRAW)
     {
+        Init(vertexs.data(), (uint)vertexs.size(), indexs.data(), (uint)indexs.size(), enabled, vUsage, eUsage);
+    }
+
+    void Init(
+        const Vertex * vertexs, const uint vertexLength, 
+        const uint   * indexs,  const uint indexLength, 
+        uint enabled, uint vUsage = GL_STATIC_DRAW, uint eUsage = GL_STATIC_DRAW)
+    {
         //  根据启用的顶点属性, 计算出单个顶点的数据大小.
         const auto vertexSize = Vertex::SizeOf(enabled);
 
-        _vCount = static_cast<uint>(indexs.size());
-        _eCount = static_cast<uint>(vertexs.size());
+        _vCount = vertexLength;
+        _eCount = indexLength;
 
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
 
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexSize * vertexs.size(), vertexs.data(), vUsage);
+        glBufferData(GL_ARRAY_BUFFER, vertexSize * _vCount, vertexs, vUsage);
 
         glGenBuffers(1, &_ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indexs.size(), indexs.data(), eUsage);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * _eCount, indexs, eUsage);
 
         auto idx = 0;
         if (Vertex::kV & enabled)

@@ -9,7 +9,7 @@
 #include "../third/assimp/scene.h"
 
 //  原始数据引用路径
-const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_REF = {
+const std::array<std::string, RawManager::kRawPathEnum> RawManager::RAWDATA_REF = {
     {
         "res/raw/head.db",
         "res/raw/mesh.db",
@@ -34,8 +34,8 @@ void RawManager::Init()
 {
     std::ifstream is;
     //  头部信息
-    is.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
-    ASSERT_LOG(is, "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_HEAD]);
+    is.open(RAWDATA_REF[kRAW_PATH_HEAD], std::ios::binary);
+    ASSERT_LOG(is, "读取原始数据失败!: {0}", RAWDATA_REF[kRAW_PATH_HEAD]);
 
     RawHead::Head head;
     is.read((char *)&head, sizeof(RawHead::Head));
@@ -70,8 +70,8 @@ void RawManager::EndImport()
 {
     std::ofstream os;
     //  写入网格
-    os.open(RAWDATA_REF[kRAW_MESH], std::ios::binary);
-    ASSERT_LOG(os, "导入Mesh失败. {0}", RAWDATA_REF[kRAW_MESH]);
+    os.open(RAWDATA_REF[kRAW_TYPE_MESH], std::ios::binary);
+    ASSERT_LOG(os, "导入Mesh失败. {0}", RAWDATA_REF[kRAW_TYPE_MESH]);
     for (const auto & pair : _rawMeshMap)
     {
         auto byteOffset = os.tellp();
@@ -84,8 +84,8 @@ void RawManager::EndImport()
     os.close();
 
     //  写入图片
-    os.open(RAWDATA_REF[kRAW_IMAGE], std::ios::binary);
-    ASSERT_LOG(os, "导入Image失败. {0}", RAWDATA_REF[kRAW_IMAGE]);
+    os.open(RAWDATA_REF[kRAW_TYPE_IMAGE], std::ios::binary);
+    ASSERT_LOG(os, "导入Image失败. {0}", RAWDATA_REF[kRAW_TYPE_IMAGE]);
     for (const auto & pair : _rawImageMap)
     {
         auto byteOffset = os.tellp();
@@ -99,8 +99,8 @@ void RawManager::EndImport()
     os.close();
 
     //  写入程序
-    os.open(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary);
-    ASSERT_LOG(os, "导入Program失败. {0}", RAWDATA_REF[kRAW_PROGRAM]);
+    os.open(RAWDATA_REF[kRAW_TYPE_PROGRAM], std::ios::binary);
+    ASSERT_LOG(os, "导入Program失败. {0}", RAWDATA_REF[kRAW_TYPE_PROGRAM]);
     for (const auto & pair : _rawProgramMap)
     {
         auto byteOffset = os.tellp();
@@ -117,8 +117,8 @@ void RawManager::EndImport()
     os.close();
 
     //  写入材质
-    os.open(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary);
-    ASSERT_LOG(os, "导入Material失败. {0}", RAWDATA_REF[kRAW_MATERIAL]);
+    os.open(RAWDATA_REF[kRAW_TYPE_MATERIAL], std::ios::binary);
+    ASSERT_LOG(os, "导入Material失败. {0}", RAWDATA_REF[kRAW_TYPE_MATERIAL]);
     for (const auto & pair : _rawMaterialMap)
     {
         auto byteOffset = os.tellp();
@@ -134,7 +134,7 @@ void RawManager::EndImport()
     head.mProgramLength = _rawHead.mProgramList.size();
     head.mMaterialLength = _rawHead.mMaterialList.size();
     //  Data Write
-    os.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
+    os.open(RAWDATA_REF[kRAW_PATH_HEAD], std::ios::binary);
     os.write((const char *)&head, sizeof(RawHead::Head));
     os.write((const char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
     os.write((const char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
@@ -142,7 +142,7 @@ void RawManager::EndImport()
     os.write((const char *)_rawHead.mMaterialList.data(), head.mMaterialLength * sizeof(RawHead::Info));
     os.close();
 
-    os.open(RAWDATA_REF[kRAW_LISTING]);
+    os.open(RAWDATA_REF[kRAW_PATH_LISTING]);
     for (const auto & pair : _rawListingMap)
     {
         os << SFormat("[{0}]={1}\n", pair.first, pair.second);
@@ -168,10 +168,10 @@ void RawManager::Import(const std::string & url)
 
 bool RawManager::LoadRaw(const std::string & name)
 {
-    if (LoadRaw(name, RawTypeEnum::kRAW_MESH)) { return true; }
-    if (LoadRaw(name, RawTypeEnum::kRAW_IMAGE)) { return true; }
-    if (LoadRaw(name, RawTypeEnum::kRAW_PROGRAM)) { return true; }
-    if (LoadRaw(name, RawTypeEnum::kRAW_MATERIAL)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_TYPE_MESH)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_TYPE_IMAGE)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_TYPE_PROGRAM)) { return true; }
+    if (LoadRaw(name, RawTypeEnum::kRAW_TYPE_MATERIAL)) { return true; }
     return false;
 }
 
@@ -208,17 +208,17 @@ bool RawManager::LoadRaw(const std::string & name, RawTypeEnum type)
 
 void RawManager::FreeRaw(const std::string & name)
 {
-    if (FreeRaw(name, kRAW_MESH)) return;
-    if (FreeRaw(name, kRAW_IMAGE)) return;
-    if (FreeRaw(name, kRAW_PROGRAM)) return;
-    if (FreeRaw(name, kRAW_MATERIAL)) return;
+    if (FreeRaw(name, kRAW_TYPE_MESH)) return;
+    if (FreeRaw(name, kRAW_TYPE_IMAGE)) return;
+    if (FreeRaw(name, kRAW_TYPE_PROGRAM)) return;
+    if (FreeRaw(name, kRAW_TYPE_MATERIAL)) return;
 }
 
 bool RawManager::FreeRaw(const std::string & name, RawTypeEnum type)
 {
     switch (type)
     {
-    case RawManager::kRAW_MESH:
+    case RawManager::kRAW_TYPE_MESH:
         {
             auto it = _rawMeshMap.find(name);
             if (it != _rawMeshMap.end())
@@ -230,7 +230,7 @@ bool RawManager::FreeRaw(const std::string & name, RawTypeEnum type)
             }
         }
         break;
-    case RawManager::kRAW_IMAGE:
+    case RawManager::kRAW_TYPE_IMAGE:
         {
             auto it = _rawImageMap.find(name);
             if (it != _rawImageMap.end())
@@ -241,7 +241,7 @@ bool RawManager::FreeRaw(const std::string & name, RawTypeEnum type)
             }
         }
         break;
-    case RawManager::kRAW_PROGRAM:
+    case RawManager::kRAW_TYPE_PROGRAM:
         {
             auto it = _rawProgramMap.find(name);
             if (it != _rawProgramMap.end())
@@ -252,7 +252,7 @@ bool RawManager::FreeRaw(const std::string & name, RawTypeEnum type)
             }
         }
         break;
-    case RawManager::kRAW_MATERIAL:
+    case RawManager::kRAW_TYPE_MATERIAL:
         {
             auto it = _rawMaterialMap.find(name);
             if (it != _rawMaterialMap.end())
@@ -282,7 +282,7 @@ void RawManager::ImportModel(const std::string & url)
 {
     std::function<void(aiNode * node, const aiScene * scene, const std::string & directory)> LoadNode;
     std::function<void(aiMesh * mesh, const aiScene * scene, const std::string & directory)> LoadImage;
-    std::function<void(aiMesh * mesh, std::vector<float> & vertexs, std::vector<uint> & indexs)> LoadMesh;
+    std::function<void(aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)> LoadMesh;
 
     LoadImage = [&, this](aiMesh * mesh, const aiScene * scene, const std::string & directory)
     {
@@ -321,34 +321,36 @@ void RawManager::ImportModel(const std::string & url)
         }
     };
 
-    LoadMesh = [&, this](aiMesh * mesh, std::vector<float> & vertexs, std::vector<uint> & indexs)
+    LoadMesh = [&, this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
     {
         for (auto i = 0; i != mesh->mNumVertices; ++i)
         {
-            //	vertex
-            vertexs.push_back(mesh->mVertices[i].x);
-            vertexs.push_back(mesh->mVertices[i].y);
-            vertexs.push_back(mesh->mVertices[i].z);
+            GLMesh::Vertex vertex;
+            //	position
+            vertex.v.x = mesh->mVertices[i].x;
+            vertex.v.y = mesh->mVertices[i].y;
+            vertex.v.z = mesh->mVertices[i].z;
             //	normal
-            vertexs.push_back(mesh->mNormals[i].x);
-            vertexs.push_back(mesh->mNormals[i].y);
-            vertexs.push_back(mesh->mNormals[i].z);
+            vertex.n.x = mesh->mNormals[i].x;
+            vertex.n.y = mesh->mNormals[i].y;
+            vertex.n.z = mesh->mNormals[i].z;
             //  color
-            vertexs.push_back(1.0f);
-            vertexs.push_back(1.0f);
-            vertexs.push_back(1.0f);
-            vertexs.push_back(1.0f);
+            vertex.c.r = 1.0f;
+            vertex.c.g = 1.0f;
+            vertex.c.b = 1.0f;
+            vertex.c.a = 1.0f;
             //	tan
-            vertexs.push_back(mesh->mTangents[i].x);
-            vertexs.push_back(mesh->mTangents[i].y);
-            vertexs.push_back(mesh->mTangents[i].z);
+            vertex.tan.x = mesh->mTangents[i].x;
+            vertex.tan.y = mesh->mTangents[i].y;
+            vertex.tan.z = mesh->mTangents[i].z;
             //	bitan
-            vertexs.push_back(mesh->mBitangents[i].x);
-            vertexs.push_back(mesh->mBitangents[i].y);
-            vertexs.push_back(mesh->mBitangents[i].z);
+            vertex.bitan.x = mesh->mBitangents[i].x;
+            vertex.bitan.y = mesh->mBitangents[i].y;
+            vertex.bitan.z = mesh->mBitangents[i].z;
             //	uv
-            vertexs.push_back(mesh->mTextureCoords[0][i].x);
-            vertexs.push_back(mesh->mTextureCoords[0][i].y);
+            vertex.uv.x = mesh->mTextureCoords[0][i].x;
+            vertex.uv.y = mesh->mTextureCoords[0][i].y;
+            vertexs.push_back(vertex);
         }
         if (!indexs.empty())
         {
@@ -356,17 +358,17 @@ void RawManager::ImportModel(const std::string & url)
         }
         for (auto i = 0; i != mesh->mNumFaces; ++i)
         {
-            for (auto j = 0; j != mesh->mFaces[i].mNumIndices; ++j)
-            {
-                indexs.push_back(mesh->mFaces[i].mIndices[j]);
-            }
+            std::copy_n(
+                mesh->mFaces[i].mIndices,
+                mesh->mFaces[i].mNumIndices,
+                std::back_inserter(indexs));
         }
     };
 
     LoadNode = [&, this](aiNode * node, const aiScene * scene, const std::string & directory)
     {
-        std::vector<uint> indexs;
-        std::vector<float> vertexs;
+        std::vector<uint>           indexs;
+        std::vector<GLMesh::Vertex> vertexs;
         for (auto i = 0; i != node->mNumMeshes; ++i)
         {
             LoadMesh(scene->mMeshes[node->mMeshes[i]], vertexs, indexs);
@@ -380,9 +382,9 @@ void RawManager::ImportModel(const std::string & url)
         rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
         memcpy(rawMesh.mIndexs, indexs.data(), indexByteLength);
         //  顶点数据
-        auto vertexByteLength = vertexs.size() * sizeof(float);
+        auto vertexByteLength = vertexs.size() * sizeof(GLMesh::Vertex);
         rawMesh.mVertexLength = vertexs.size();
-        rawMesh.mVertexs = new float[rawMesh.mVertexLength];
+        rawMesh.mVertexs = new GLMesh::Vertex[rawMesh.mVertexLength];
         memcpy(rawMesh.mVertexs, vertexs.data(), vertexByteLength);
 
         //  生成名字
@@ -812,11 +814,11 @@ void RawManager::ImportMaterial(const std::string & url)
 void RawManager::LoadRawMesh(std::ifstream & is, const std::string & name)
 {
     RawMesh rawMesh = { 0 };
-    is.read((char *)&rawMesh, sizeof(RawMesh::mIndexLength) + sizeof(RawMesh::mVertexLength));
+    is.read((char *)&rawMesh, sizeof(uint) + sizeof(uint));
     rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
     is.read((char *)rawMesh.mIndexs, sizeof(uint) * rawMesh.mIndexLength);
-    rawMesh.mVertexs = new float[rawMesh.mVertexLength];
-    is.read((char *)rawMesh.mVertexs, sizeof(float) * rawMesh.mVertexLength);
+    rawMesh.mVertexs = new GLMesh::Vertex[rawMesh.mVertexLength];
+    is.read((char *)rawMesh.mVertexs, sizeof(GLMesh::Vertex) * rawMesh.mVertexLength);
 
     _rawMeshMap.insert(std::make_pair(name, rawMesh));
 }
@@ -859,6 +861,87 @@ void RawManager::LoadRawMaterial(std::ifstream & is, const std::string & name)
     is.read((char *)&rawMaterial, sizeof(RawMaterial));
  
     _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
+}
+
+GLRes * RawManager::LoadResMesh(const std::string & name)
+{
+    auto it = _rawMeshMap.find(name);
+    if (it == _rawMeshMap.end())
+    {
+        auto res = LoadRaw(name, RawTypeEnum::kRAW_TYPE_MESH);
+        ASSERT_LOG(res, "Not Found Raw Mesh. {0}", name);
+        it = _rawMeshMap.find(name);
+    }
+    auto glMesh = new GLMesh();
+    glMesh->Init(
+        it->second.mVertexs, it->second.mVertexLength, 
+        it->second.mIndexs, it->second.mIndexLength, 
+        GLMesh::Vertex::kV_N_C_UV_TAN_BITAN);
+    _resObjectMap.insert(std::make_pair(name, glMesh));
+    return glMesh;
+}
+
+GLRes * RawManager::LoadResImage(const std::string & name)
+{
+    auto it = _rawImageMap.find(name);
+    if (it == _rawImageMap.end())
+    {
+        auto res = LoadRaw(name, RawTypeEnum::kRAW_TYPE_IMAGE);
+        ASSERT_LOG(res, "Not Found Raw Image. {0}", name);
+        it = _rawImageMap.find(name);
+    }
+    auto glTexture2D = new GLTexture2D();
+    glTexture2D->Init(
+        it->second.mFormat, it->second.mFormat, 
+        GL_UNSIGNED_BYTE, 
+        it->second.mW, it->second.mH, 
+        it->second.mData);
+    _resObjectMap.insert(std::make_pair(name, glTexture2D));
+    return glTexture2D;
+}
+
+GLRes * RawManager::LoadResProgram(const std::string & name)
+{
+    auto it = _rawProgramMap.find(name);
+    if (it == _rawProgramMap.end())
+    {
+        auto res = LoadRaw(name, RawTypeEnum::kRAW_TYPE_PROGRAM);
+        ASSERT_LOG(res, "Not Found Raw Program. {0}", name);
+        it = _rawProgramMap.find(name);
+    }
+    auto glProgram = new GLProgram();
+    auto vData = it->second.mData;
+    auto gData = vData + it->second.mVSByteLength;
+    auto fData = gData + it->second.mGSByteLength;
+    glProgram->Init(
+        (const char *)vData, it->second.mVSByteLength,
+        (const char *)gData, it->second.mGSByteLength,
+        (const char *)fData, it->second.mFSByteLength);
+    _resObjectMap.insert(std::make_pair(name, glProgram));
+    return glProgram;
+}
+
+GLRes * RawManager::LoadResMaterial(const std::string & name)
+{
+    auto it = _rawMaterialMap.find(name);
+    if (it == _rawMaterialMap.end())
+    {
+        auto res = LoadRaw(name, RawTypeEnum::kRAW_TYPE_MATERIAL);
+        ASSERT_LOG(res, "Not Found Raw Material. {0}", name);
+        it = _rawMaterialMap.find(name);
+    }
+    auto glMaterial = new GLMaterial();
+    glMaterial->SetMesh(LoadRes<GLMesh>(it->second.mMesh));
+    glMaterial->SetShininess((float)it->second.mShininess);
+    glMaterial->SetProgram(LoadRes<GLProgram>(it->second.mProgram));
+    for (auto i = 0; i != MTLTEX2D_LEN; ++i)
+    {
+        glMaterial->SetTexture2D(
+            LoadRes<GLTexture2D>(it->second.mTextures[i].mTexture),
+            it->second.mTextures[i].mName, RAW_NAME_LEN, i);
+    }
+    _resObjectMap.insert(std::make_pair(name, glMaterial));
+    return glMaterial;
 }
 
 void RawManager::ClearRawData()

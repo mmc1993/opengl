@@ -59,6 +59,8 @@ private:
 	{
         Global::Ref().RefRawManager().Init();
 
+        Global::Ref().RefRawManager().LoadRes<GLMesh>("sRb+vsCmv/pS8kihhS5dfw==");
+
         //Global::Ref().RefRawManager().BegImport();
         //Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
         //Global::Ref().RefRawManager().Import("res/demo/ball.obj");

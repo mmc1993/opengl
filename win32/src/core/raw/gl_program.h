@@ -38,34 +38,37 @@ public:
         glDeleteProgram(_id);
     }
 
-    void Init(const char * vString, const char * gString, const char * fString)
+    void Init(
+        const char * vString, uint vLength,
+        const char * gString, uint gLength,
+        const char * fString, uint fLength)
     {
         _id = glCreateProgram();
 
-        if (vString != nullptr)
+        if (vLength != 0)
         {
             uint vs = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vs, 1, &vString, nullptr);
+            glShaderSource(vs, 1, &vString, (iint*)&vLength);
             glCompileShader(vs);
             AssertPass(vs, "VShader Error");
             glAttachShader(_id, vs);
             glDeleteShader(vs);
         }
 
-        if (gString != nullptr)
+        if (gLength != 0)
         {
             uint gs = glCreateShader(GL_GEOMETRY_SHADER);
-            glShaderSource(gs, 1, &gString, nullptr);
+            glShaderSource(gs, 1, &gString, (iint*)&gLength);
             glCompileShader(gs);
             AssertPass(gs, "GShader Error");
             glAttachShader(_id, gs);
             glDeleteShader(gs);
         }
 
-        if (gString != nullptr)
+        if (fLength != 0)
         {
             uint fs = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fs, 1, &gString, nullptr);
+            glShaderSource(fs, 1, &fString, (iint*)&fLength);
             glCompileShader(fs);
             AssertPass(fs, "FShader Error");
             glAttachShader(_id, fs);

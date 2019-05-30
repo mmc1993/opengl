@@ -11,31 +11,38 @@ public:
     {
         //  材质引用的每一个纹理都必须对应一个名字, 
         //  这个名字会对应到Shader中的uniform变量.
-        char mName[MTLTEX_NAME_BYTELEN];
+        char mName[RAW_NAME_LEN];
         const GLTexture2D * mTexture;
     };
 
 public:
-    GLMaterial(): _glMesh(nullptr), _glProgram(nullptr)
+    GLMaterial(): _glMesh(nullptr), _glProgram(nullptr), _shininess(32.0f)
     {
         memset(_glTexture2Ds, 0, sizeof(_glTexture2Ds));
     }
 
-    void SetMesh(GLMesh * glMesh)
+    void SetMesh(const GLMesh * glMesh)
     {
         _glMesh = glMesh;
     }
 
-    void SetProgram(GLProgram * glProgram)
+    void SetProgram(const GLProgram * glProgram)
     {
         _glProgram = glProgram;
     }
 
-    void SetTexture2D(const GLTexture2D * glTexture2D, const std::string & name, uint i)
+    void SetShininess(const float shininess)
     {
-        _glTexture2Ds[i].mTexture = glTexture2D;
+        _shininess = shininess;
+    }
 
-        memcpy(_glTexture2Ds[i].mName, name.c_str(), name.size());
+    void SetTexture2D(
+        const GLTexture2D   * glTexture2D, 
+        const char * name, const uint len,
+        uint i)
+    {
+        _glTexture2Ds[i].mTexture   = glTexture2D;
+        memcpy(_glTexture2Ds[i].mName, name, len);
     }
 
     const GLMesh * GetMesh() const
@@ -52,7 +59,11 @@ public:
     {
         if (i < MTLTEX2D_LEN)
         {
-            return &_glTexture2Ds[i];
+            auto & texture = _glTexture2Ds[i];
+            if (texture.mTexture != nullptr)
+            {
+                return &texture;
+            }
         }
         return nullptr;
     }
@@ -60,5 +71,6 @@ public:
 private:
     const GLMesh      * _glMesh;
     const GLProgram   * _glProgram;
+    float               _shininess;
     Texture2D           _glTexture2Ds[MTLTEX2D_LEN];
 };
