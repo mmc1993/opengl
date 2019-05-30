@@ -16,21 +16,13 @@ public:
         kImportTypeEnum,
     };
 
-    enum RawPathEnum {
-        kRAW_PATH_HEAD,
-        kRAW_PATH_MESH,
-        kRAW_PATH_IMAGE,
-        kRAW_PATH_PROGRAM,
-        kRAW_PATH_MATERIAL,
-        kRAW_PATH_LISTING,
-        kRawPathEnum,
-    };
-
     enum RawTypeEnum {
-        kRAW_TYPE_MESH,
-        kRAW_TYPE_IMAGE,
-        kRAW_TYPE_PROGRAM,
-        kRAW_TYPE_MATERIAL,
+        kRAW_HEAD,
+        kRAW_MESH,
+        kRAW_IMAGE,
+        kRAW_PROGRAM,
+        kRAW_MATERIAL,
+        kRAW_LISTING,
         kRawTypeEnum,
     };
 
@@ -99,7 +91,7 @@ public:
         std::vector<Info> mMaterialList;
     };
 
-    static const std::array<std::string, kRawPathEnum> RAWDATA_REF;
+    static const std::array<std::string, kRawTypeEnum> RAWDATA_REF;
 
     static const std::array<std::vector<std::string>, kImportTypeEnum> SUFFIX_MAP;
 
@@ -145,7 +137,7 @@ public:
         {
             res = LoadResMaterial(name);
         }
-        ASSERT_LOG(res != nullptr, "res not found! {0}", name);
+        ASSERT_LOG(res != nullptr, "Res Not Found. Name: {0}, Type: {1}", name, typeid(T).name());
 
         ASSERT_LOG(dynamic_cast<T *>(res) != nullptr, "Res Type Not Match! {0}, {1}, {2}", name, typeid(T).name(), typeid(*res).name());
         return reinterpret_cast<T *>(res);

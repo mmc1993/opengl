@@ -57,16 +57,20 @@ private:
 
 	void InitAssets()
 	{
+        Global::Ref().RefRawManager().BegImport();
+        Global::Ref().RefRawManager().Import("res/demo/wall.obj");
+        Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
+        Global::Ref().RefRawManager().Import("res/demo/gl_program/scene.program");
+        Global::Ref().RefRawManager().Import("res/demo/mtl/a.mtl");
+        Global::Ref().RefRawManager().EndImport();
+
         Global::Ref().RefRawManager().Init();
 
-        Global::Ref().RefRawManager().LoadRes<GLMesh>("sRb+vsCmv/pS8kihhS5dfw==");
+        Global::Ref().RefRawManager().LoadRes<GLMesh>("G2+A4naa/Os3Imo5dKl4WA==");
+        Global::Ref().RefRawManager().LoadRes<GLTexture2D>("sRb+vsCmv/pS8kihhS5dfw==");
+        Global::Ref().RefRawManager().LoadRes<GLProgram>("3CbMnvsAh1cOh4kkCSSbqQ==");
+        Global::Ref().RefRawManager().LoadRes<GLMaterial>("fx0ybmSAcVt2Jo8r3ECBMA==");
 
-        //Global::Ref().RefRawManager().BegImport();
-        //Global::Ref().RefRawManager().Import("res/demo/texture/floor_diffuse.png");
-        //Global::Ref().RefRawManager().Import("res/demo/ball.obj");
-        //Global::Ref().RefRawManager().Import("res/demo/gl_program/scene.program");
-        //Global::Ref().RefRawManager().Import("res/demo/mtl/a.mtl");
-        //Global::Ref().RefRawManager().EndImport();
 
         File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
