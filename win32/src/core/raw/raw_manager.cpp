@@ -555,14 +555,8 @@ void RawManager::ImportProgram(const std::string & url)
                     else if (word == "OneMinusDstAlpha")    { passAttr->vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
                     else { ASSERT_LOG(false, "½âÎöPassÊôÐÔ´íÎó: {0}, {1}", word, line); }
                 }
-                else if (word == "DepthTest")
-                {
-                    passAttr->bDepthTest = true;
-                }
-                else if (word == "DepthWrite")
-                {
-                    passAttr->bDepthWrite = true;
-                }
+                else if (word == "DepthTest")               { passAttr->bDepthTest = true; }
+                else if (word == "DepthWrite")              { passAttr->bDepthWrite = true; }
                 else if (word == "StencilTest")
                 {
                     ss >> word;
