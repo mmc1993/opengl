@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tools/number_tool.h"
 #include "tools/string_tool.h"
 #include "tools/debug_tool.h"
 #include "tools/time_tool.h"

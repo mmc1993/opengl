@@ -60,6 +60,14 @@ void RawManager::Init()
 
 void RawManager::BegImport()
 {
+    if (!file_tool::IsFileExists(RAWDATA_REF[kRAW_HEAD]))
+    {
+        file_tool::GenFile(RAWDATA_REF[kRAW_HEAD], true);
+
+        std::ofstream os(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
+        std::fill_n(std::ostream_iterator<char>(os), sizeof(RawHead::Head), '\0');
+        os.close();
+    }
     Init();
 }
 
@@ -363,12 +371,12 @@ void RawManager::ImportModel(const std::string & url)
         //  Write File
         std::ofstream os(RAWDATA_REF[kRAW_MESH], std::ios::binary | std::ios::app);
         ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_REF[kRAW_MESH]);
-        auto byteOffset = os.tellp();
+        auto byteOffset = file_tool::GetFileLength(os);
         os.write((const char *)&rawMesh.mIndexLength, sizeof(uint));
         os.write((const char *)&rawMesh.mVertexLength, sizeof(uint));
         os.write((const char *)rawMesh.mIndexs, sizeof(uint)            * rawMesh.mIndexLength);
         os.write((const char *)rawMesh.mVertexs, sizeof(GLMesh::Vertex) * rawMesh.mVertexLength);
-        _rawHead.mMeshList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+        _rawHead.mMeshList.emplace_back(name.c_str(), (uint)byteOffset, (uint)os.tellp() - byteOffset);
         os.close();
 
         //  纳入清单
@@ -413,13 +421,13 @@ void RawManager::ImportImage(const std::string & url)
     //  Write File
     std::ofstream os(RAWDATA_REF[kRAW_IMAGE], std::ios::binary | std::ios::app);
     ASSERT_LOG(os, "Import Image Failed. {0}", RAWDATA_REF[kRAW_IMAGE]);
-    auto byteOffset = os.tellp();
+    auto byteOffset = file_tool::GetFileLength(os);
     os.write((const char *)&rawImage.mW, sizeof(uint));
     os.write((const char *)&rawImage.mH, sizeof(uint));
     os.write((const char *)&rawImage.mFormat, sizeof(uint));
     os.write((const char *)&rawImage.mByteLength, sizeof(uint));
     os.write((const char *)rawImage.mData, rawImage.mByteLength);
-    _rawHead.mImageList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    _rawHead.mImageList.emplace_back(name.c_str(), (uint)byteOffset, (uint)os.tellp() - byteOffset);
     os.close();
 
     //  纳入清单
@@ -755,7 +763,7 @@ void RawManager::ImportProgram(const std::string & url)
     //  Write File
     std::ofstream os(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary | std::ios::app);
     ASSERT_LOG(os, "Import Program Failed. {0}", RAWDATA_REF[kRAW_PROGRAM]);
-    auto byteOffset = os.tellp();
+    auto byteOffset = file_tool::GetFileLength(os);
     os.write((const char *)&rawProgram.mPassLength, sizeof(uint));
     os.write((const char *)&rawProgram.mVSByteLength, sizeof(uint));
     os.write((const char *)&rawProgram.mGSByteLength, sizeof(uint));
@@ -763,7 +771,7 @@ void RawManager::ImportProgram(const std::string & url)
     os.write((const char *)rawProgram.mData, rawProgram.mVSByteLength
         + rawProgram.mGSByteLength + rawProgram.mFSByteLength
         + rawProgram.mPassLength * sizeof(GLProgram::PassAttr));
-    _rawHead.mProgramList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    _rawHead.mProgramList.emplace_back(name.c_str(), (uint)byteOffset, (uint)os.tellp() - byteOffset);
     os.close();
 
     //  纳入清单
@@ -792,9 +800,9 @@ void RawManager::ImportMaterial(const std::string & url)
     //  Write File
     std::ofstream os(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary | std::ios::app);
     ASSERT_LOG(os, "Import Material Failed. {0}", RAWDATA_REF[kRAW_MATERIAL]);
-    auto byteOffset = os.tellp();
+    auto byteOffset = file_tool::GetFileLength(os);
     os.write((const char *)&rawMaterial, sizeof(RawMaterial));
-    _rawHead.mMaterialList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    _rawHead.mMaterialList.emplace_back(name.c_str(), (uint)byteOffset, (uint)os.tellp() - byteOffset);
     os.close();
 
     //  纳入清单
@@ -982,6 +990,7 @@ void RawManager::ClearResData()
 
 std::string RawManager::BuildName(const uchar * data, const uint len)
 {
-    const auto md5 = Code::MD5Encode(data, len);
-    return Code::Base64Encode((const uchar *)md5.data(), md5.size());
+    uchar name[RAW_NAME_LEN] = { 0 };
+    auto md5 = Code::MD5Encode(data, len);
+    return (const char *)number_tool::Conver16((const uchar *)md5.c_str(), md5.size(), name);
 }

@@ -20,4 +20,17 @@ namespace file_tool {
         ostream.seekp(p, std::ios::beg);
         return (uint)r;
     }
+
+    inline bool IsFileExists(const std::string & path)
+    {
+        std::ifstream is(path);
+        bool ret = !!is;
+        is.close();
+        return ret;
+    }
+
+    inline void GenFile(const std::string & path, bool isClear)
+    {
+        std::ofstream os(path, isClear ? std::ios::out : std::ios::app); os.close();
+    }
 }

@@ -63,9 +63,9 @@ private:
         Global::Ref().RefRawManager().EndImport();
 
         Global::Ref().RefRawManager().Init();
-        Global::Ref().RefRawManager().LoadRes<GLMesh>("FSeABQJIrH4q5M/vbzeh8A==");
-        Global::Ref().RefRawManager().LoadRes<GLTexture2D>("Hk9jI3Lh3Hgv9VopL0BLMA==");
-        Global::Ref().RefRawManager().LoadRes<GLProgram>("ILzL8AlH93g5Aao6XNAs3g==");
+        Global::Ref().RefRawManager().LoadRes<GLMesh>("152780050248ac7e2ae4cfef6f37a1f0");
+        Global::Ref().RefRawManager().LoadRes<GLTexture2D>("1e4f632372e1dc782ff55a292f404b30");
+        Global::Ref().RefRawManager().LoadRes<GLProgram>("20bccbf00947f7783901aa3a5cd02cde");
 
         File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
