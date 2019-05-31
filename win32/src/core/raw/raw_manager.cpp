@@ -408,8 +408,8 @@ void RawManager::ImportImage(const std::string & url)
 {
     RawImage rawImage;
     rawImage.mData = stbi_load(url.c_str(),
-        (int *)&rawImage.mW, 
-        (int *)&rawImage.mH,   
+        (int *)&rawImage.mW,
+        (int *)&rawImage.mH,
         (int *)&rawImage.mFormat, 0);
     ASSERT_LOG(rawImage.mData != nullptr, "URL: {0}", url);
 
