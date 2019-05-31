@@ -1,11 +1,11 @@
 [+B3JwbFqYOjaEdV/ZIiTsg==]=res/raw_demo/texture/wall3_spacular.png
 [0eG+V+K+6+lyDmKxtLNCCQ==]=res/raw_demo/texture/floor_normal.png
-[35Yv/lQTuodI+r+7HhWQww==]=res/raw_demo/scene.obj
 [3hKs0oBdB3hquhwGZWYDjQ==]=res/raw_demo/texture/wall_normal.png
 [5RnJ/Wk+TBWN6BtJlv5yvw==]=res/raw_demo/texture/wall_diffuse.png
 [6FaPF3bSYHmxRW1+JyRJFQ==]=res/raw_demo/texture/wall2_spacular.png
 [C/oFSfqOaHPulgfkVyAlFw==]=res/raw_demo/texture/floor_spacular.png
 [Cc9uVrulqV88Uux8u1Sh+Q==]=res/raw_demo/texture/wall_specular.png
+[FSeABQJIrH4q5M/vbzeh8A==]=res/raw_demo/scene.obj
 [Hk9jI3Lh3Hgv9VopL0BLMA==]=res/raw_demo/texture/wall2_normal.png
 [ILzL8AlH93g5Aao6XNAs3g==]=res/raw_demo/gl_program/scene.program
 [L+fQoKGJFUPEo8I3BbEoQA==]=res/raw_demo/texture/wall3_normal.png

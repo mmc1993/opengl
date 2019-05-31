@@ -168,6 +168,7 @@ private:
 
     //  清理所有原始数据
     void ClearRawData();
+    void ClearResData();
 
     //  为数据生成名字
     std::string BuildName(const uchar * data, const uint len);

@@ -55,87 +55,24 @@ void RawManager::Init()
     is.close();
 
     ClearRawData();
+    ClearResData();
 }
 
 void RawManager::BegImport()
 {
-    ClearRawData();
-    _rawHead.mMeshList.clear();
-    _rawHead.mImageList.clear();
-    _rawHead.mProgramList.clear();
-    _rawHead.mMaterialList.clear();
+    Init();
 }
 
 void RawManager::EndImport()
 {
-    std::ofstream os;
-    //  写入网格
-    os.open(RAWDATA_REF[kRAW_MESH], std::ios::binary);
-    ASSERT_LOG(os, "导入Mesh失败. {0}", RAWDATA_REF[kRAW_MESH]);
-    for (const auto & pair : _rawMeshMap)
-    {
-        auto byteOffset = os.tellp();
-        os.write((const char *)&pair.second.mIndexLength, sizeof(uint));
-        os.write((const char *)&pair.second.mVertexLength, sizeof(uint));
-        os.write((const char *)pair.second.mIndexs, sizeof(uint)            * pair.second.mIndexLength);
-        os.write((const char *)pair.second.mVertexs, sizeof(GLMesh::Vertex) * pair.second.mVertexLength);
-        _rawHead.mMeshList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
-    }
-    os.close();
-
-    //  写入图片
-    os.open(RAWDATA_REF[kRAW_IMAGE], std::ios::binary);
-    ASSERT_LOG(os, "导入Image失败. {0}", RAWDATA_REF[kRAW_IMAGE]);
-    for (const auto & pair : _rawImageMap)
-    {
-        auto byteOffset = os.tellp();
-        os.write((const char *)&pair.second.mW, sizeof(uint));
-        os.write((const char *)&pair.second.mH, sizeof(uint));
-        os.write((const char *)&pair.second.mFormat, sizeof(uint));
-        os.write((const char *)&pair.second.mByteLength, sizeof(uint));
-        os.write((const char *)pair.second.mData, pair.second.mByteLength);
-        _rawHead.mImageList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
-    }
-    os.close();
-
-    //  写入程序
-    os.open(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary);
-    ASSERT_LOG(os, "导入Program失败. {0}", RAWDATA_REF[kRAW_PROGRAM]);
-    for (const auto & pair : _rawProgramMap)
-    {
-        auto byteOffset = os.tellp();
-        os.write((const char *)&pair.second.mPassLength, sizeof(uint));
-        os.write((const char *)&pair.second.mVSByteLength, sizeof(uint));
-        os.write((const char *)&pair.second.mGSByteLength, sizeof(uint));
-        os.write((const char *)&pair.second.mFSByteLength, sizeof(uint));
-        os.write((const char *)pair.second.mData, pair.second.mVSByteLength 
-                                                + pair.second.mGSByteLength 
-                                                + pair.second.mFSByteLength
-                                                + pair.second.mPassLength * sizeof(GLProgram::PassAttr));
-
-        _rawHead.mProgramList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
-    }
-    os.close();
-
-    //  写入材质
-    os.open(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary);
-    ASSERT_LOG(os, "导入Material失败. {0}", RAWDATA_REF[kRAW_MATERIAL]);
-    for (const auto & pair : _rawMaterialMap)
-    {
-        auto byteOffset = os.tellp();
-        os.write((const char *)&pair.second, sizeof(RawMaterial));
-        _rawHead.mMaterialList.emplace_back(pair.first.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
-    }
-    os.close();
-
     //  写入数据头文件
     RawHead::Head head;
     head.mMeshLength = _rawHead.mMeshList.size();
     head.mImageLength = _rawHead.mImageList.size();
     head.mProgramLength = _rawHead.mProgramList.size();
     head.mMaterialLength = _rawHead.mMaterialList.size();
-    //  Data Write
-    os.open(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
+
+    std::ofstream os(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
     os.write((const char *)&head, sizeof(RawHead::Head));
     os.write((const char *)_rawHead.mMeshList.data(), head.mMeshLength * sizeof(RawHead::Info));
     os.write((const char *)_rawHead.mImageList.data(), head.mImageLength * sizeof(RawHead::Info));
@@ -149,6 +86,8 @@ void RawManager::EndImport()
         os << SFormat("[{0}]={1}\n", pair.first, pair.second);
     }
     os.close();
+
+    _rawManifestMap.clear();
 }
 
 void RawManager::Import(const std::string & url)
@@ -421,7 +360,16 @@ void RawManager::ImportModel(const std::string & url)
         auto name = BuildName(buffer, length);
         delete[] buffer;
 
-        _rawMeshMap.insert(std::make_pair(name, rawMesh));
+        //  Write File
+        std::ofstream os(RAWDATA_REF[kRAW_MESH], std::ios::binary | std::ios::app);
+        ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_REF[kRAW_MESH]);
+        auto byteOffset = os.tellp();
+        os.write((const char *)&rawMesh.mIndexLength, sizeof(uint));
+        os.write((const char *)&rawMesh.mVertexLength, sizeof(uint));
+        os.write((const char *)rawMesh.mIndexs, sizeof(uint)            * rawMesh.mIndexLength);
+        os.write((const char *)rawMesh.mVertexs, sizeof(GLMesh::Vertex) * rawMesh.mVertexLength);
+        _rawHead.mMeshList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+        os.close();
 
         //  纳入清单
         _rawManifestMap.insert(std::make_pair(name, url));
@@ -461,8 +409,19 @@ void RawManager::ImportImage(const std::string & url)
     }
 
     auto name = BuildName(rawImage.mData, rawImage.mByteLength);
-    _rawImageMap.insert(std::make_pair(name, rawImage));
-    
+
+    //  Write File
+    std::ofstream os(RAWDATA_REF[kRAW_IMAGE], std::ios::binary | std::ios::app);
+    ASSERT_LOG(os, "Import Image Failed. {0}", RAWDATA_REF[kRAW_IMAGE]);
+    auto byteOffset = os.tellp();
+    os.write((const char *)&rawImage.mW, sizeof(uint));
+    os.write((const char *)&rawImage.mH, sizeof(uint));
+    os.write((const char *)&rawImage.mFormat, sizeof(uint));
+    os.write((const char *)&rawImage.mByteLength, sizeof(uint));
+    os.write((const char *)rawImage.mData, rawImage.mByteLength);
+    _rawHead.mImageList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    os.close();
+
     //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
 }
@@ -792,7 +751,20 @@ void RawManager::ImportProgram(const std::string & url)
     ASSERT_LOG(ptr - rawProgram.mData == byteLength, "");
 
     auto name = BuildName(rawProgram.mData, byteLength);
-    _rawProgramMap.insert(std::make_pair(name, rawProgram));
+
+    //  Write File
+    std::ofstream os(RAWDATA_REF[kRAW_PROGRAM], std::ios::binary | std::ios::app);
+    ASSERT_LOG(os, "Import Program Failed. {0}", RAWDATA_REF[kRAW_PROGRAM]);
+    auto byteOffset = os.tellp();
+    os.write((const char *)&rawProgram.mPassLength, sizeof(uint));
+    os.write((const char *)&rawProgram.mVSByteLength, sizeof(uint));
+    os.write((const char *)&rawProgram.mGSByteLength, sizeof(uint));
+    os.write((const char *)&rawProgram.mFSByteLength, sizeof(uint));
+    os.write((const char *)rawProgram.mData, rawProgram.mVSByteLength
+        + rawProgram.mGSByteLength + rawProgram.mFSByteLength
+        + rawProgram.mPassLength * sizeof(GLProgram::PassAttr));
+    _rawHead.mProgramList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    os.close();
 
     //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
@@ -816,7 +788,14 @@ void RawManager::ImportMaterial(const std::string & url)
     is.close();
 
     auto name = BuildName((uchar *)&rawMaterial, sizeof(RawMaterial));
-    _rawMaterialMap.insert(std::make_pair(name, rawMaterial));
+
+    //  Write File
+    std::ofstream os(RAWDATA_REF[kRAW_MATERIAL], std::ios::binary | std::ios::app);
+    ASSERT_LOG(os, "Import Material Failed. {0}", RAWDATA_REF[kRAW_MATERIAL]);
+    auto byteOffset = os.tellp();
+    os.write((const char *)&rawMaterial, sizeof(RawMaterial));
+    _rawHead.mMaterialList.emplace_back(name.c_str(), (uint)byteOffset, (uint)(os.tellp() - byteOffset));
+    os.close();
 
     //  纳入清单
     _rawManifestMap.insert(std::make_pair(name, url));
@@ -990,6 +969,15 @@ void RawManager::ClearRawData()
     
     //  Delete Manifest
     _rawManifestMap.clear();
+}
+
+void RawManager::ClearResData()
+{
+    for (auto & res : _resObjectMap)
+    {
+        delete res.second;
+    }
+    _resObjectMap.clear();
 }
 
 std::string RawManager::BuildName(const uchar * data, const uint len)
