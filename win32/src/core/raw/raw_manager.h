@@ -97,7 +97,7 @@ public:
 
 public:
     void Init();
-    void BegImport();
+    void BegImport(bool clear = false);
     void EndImport();
     void Import(const std::string & url);
 

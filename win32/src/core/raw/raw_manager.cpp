@@ -58,14 +58,20 @@ void RawManager::Init()
     ClearResData();
 }
 
-void RawManager::BegImport()
+void RawManager::BegImport(bool clear)
 {
+    if (clear)
+    {
+        for (auto & path : RAWDATA_REF)
+        {
+            std::remove(RAWDATA_REF[kRAW_HEAD].c_str());
+        }
+    }
     if (!file_tool::IsFileExists(RAWDATA_REF[kRAW_HEAD]))
     {
-        file_tool::GenFile(RAWDATA_REF[kRAW_HEAD], true);
-
         std::ofstream os(RAWDATA_REF[kRAW_HEAD], std::ios::binary);
-        std::fill_n(std::ostream_iterator<char>(os), sizeof(RawHead::Head), '\0');
+        std::fill_n(std::ostream_iterator<char>(os),
+                       sizeof(RawHead::Head), '\0');
         os.close();
     }
     Init();

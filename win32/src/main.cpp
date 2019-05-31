@@ -57,7 +57,7 @@ private:
 
 	void InitAssets()
 	{
-        Global::Ref().RefRawManager().BegImport();
+        Global::Ref().RefRawManager().BegImport(true);
         Global::Ref().RefRawManager().Import("res/raw_demo/scene.obj");
         Global::Ref().RefRawManager().Import("res/raw_demo/gl_program/scene.program");
         Global::Ref().RefRawManager().EndImport();
