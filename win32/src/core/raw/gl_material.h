@@ -37,12 +37,12 @@ public:
     }
 
     void SetTexture2D(
-        const GLTexture2D   * glTexture2D, 
-        const char * name, const uint len,
-        uint i)
+        const GLTexture2D * glTexture2D, 
+        const char * name, const uint i)
     {
-        _glTexture2Ds[i].mTexture   = glTexture2D;
-        memcpy(_glTexture2Ds[i].mName, name, len);
+        _glTexture2Ds[i].mTexture = glTexture2D;
+
+        std::copy(name, name + RAW_NAME_LEN, _glTexture2Ds[i].mName);
     }
 
     const GLMesh * GetMesh() const
