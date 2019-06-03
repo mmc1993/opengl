@@ -4,7 +4,6 @@
 #include "../res/material.h"
 #include "../component/light.h"
 #include "../component/camera.h"
-#include "../component/skybox.h"
 #include "../component/transform.h"
 #include "../cfg/cfg_manager.h"
 
