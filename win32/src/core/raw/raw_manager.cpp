@@ -102,9 +102,7 @@ RawManager::RawProgram::RawProgram()
     , mVSByteLength(0)
     , mGSByteLength(0)
     , mFSByteLength(0)
-{
-
-}
+{ }
 
 RawManager::RawProgram::~RawProgram()
 {
@@ -174,8 +172,19 @@ void RawManager::Init()
     is.read((char *)_manifest.mSlots.data(), length);
     is.close();
 
-    ClearRawData();
-    ClearResData();
+    //  清空原始资源
+    for (auto & pair : _rawObjectMap)
+    {
+        delete pair.second;
+    }
+    _rawObjectMap.clear();
+
+    //  清空资源
+    for (auto & res : _resObjectMap)
+    {
+        delete res.second;
+    }
+    _resObjectMap.clear();
 }
 
 void RawManager::BegImport(bool clear)
@@ -225,7 +234,14 @@ void RawManager::Import(const std::string & url)
         }
     }
     ASSERT_LOG(type != kImportTypeEnum, "Import Error. {0}", url);
-    Import(url, type);
+    switch (type)
+    {
+    case RawManager::kIMPORT_MODEL: ImportModel(url); break;
+    case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
+    case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
+    case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
+    default: ASSERT_LOG(false, "Import Error. {0}, {1}", type, url); break;
+    }
 }
 
 RawManager::Raw * RawManager::LoadRaw(const std::string & name)
@@ -278,18 +294,6 @@ void RawManager::FreeRes(const std::string & name)
     if (it != _resObjectMap.end())
     {
         delete it->second; _resObjectMap.erase(it);
-    }
-}
-
-void RawManager::Import(const std::string & url, ImportTypeEnum type)
-{
-    switch (type)
-    {
-    case RawManager::kIMPORT_MODEL: ImportModel(url); break;
-    case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
-    case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
-    case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
-    default: ASSERT_LOG(false, "Import Error. {0}, {1}", type, url); break;
     }
 }
 
@@ -908,24 +912,6 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
     }
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
-}
-
-void RawManager::ClearRawData()
-{
-    for (auto & pair : _rawObjectMap)
-    {
-        delete pair.second;
-    }
-    _rawObjectMap.clear();
-}
-
-void RawManager::ClearResData()
-{
-    for (auto & res : _resObjectMap)
-    {
-        delete res.second;
-    }
-    _resObjectMap.clear();
 }
 
 std::string RawManager::BuildName(const uchar * data, const uint len)

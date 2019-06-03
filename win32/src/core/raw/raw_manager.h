@@ -89,8 +89,8 @@ public:
     public:
         uint mW, mH;
         uint mFormat;
-        uint mByteLength;
         uchar *mData;
+        uint mByteLength;
 
         RawImage();
         ~RawImage();
@@ -152,7 +152,7 @@ public:
         auto it = _resObjectMap.find(name);
         if (it != _resObjectMap.end())
         {
-            ASSERT_LOG(dynamic_cast<T *>(it->second) != nullptr, "Res Type Not Match! {0}, {1}", name, typeid(T).name());
+            ASSERT_LOG(dynamic_cast<T *>(it->second) != nullptr, "Res Type Not Match! {0}, {1}", name, typeid(T).name(), typeid(*it->second).name());
             return reinterpret_cast<T *>(it->second);
         }
         auto res = (GLRes *)nullptr;
@@ -174,7 +174,6 @@ public:
     void FreeRes(const std::string & name);
 
 private:
-    void Import(const std::string & url, ImportTypeEnum type);
     void ImportModel(const std::string & url);
     void ImportImage(const std::string & url);
     void ImportProgram(const std::string & url);
@@ -185,10 +184,6 @@ private:
     GLRes * LoadResImage(const std::string & name);
     GLRes * LoadResProgram(const std::string & name);
     GLRes * LoadResMaterial(const std::string & name);
-
-    //  清理所有原始数据
-    void ClearRawData();
-    void ClearResData();
 
     //  为数据生成名字
     std::string BuildName(const uchar * data, const uint len);
