@@ -270,11 +270,14 @@ RawManager::Raw * RawManager::LoadRaw(const std::string & name)
 
     is.seekg(it->mByteOffset, std::ios::beg);
     raw->Deserialize(is);
+    auto byteLength = (uint)is.tellg() - it->mByteOffset;
     is.close();
 
-    ASSERT_LOG((uint)is.tellg() - it->mByteOffset == it->mByteLength,
-        "LengthErr. Name: {1}, Type: {0}, Length: {2}, ReadLength: {3}",
-        name, it->mType, it->mByteLength, (uint)is.tellg() - it->mByteOffset);
+    ASSERT_LOG(byteLength == it->mByteLength,
+        "Read Length Error. "
+        "Name: {0}, Type: {1}, "
+        "Length: {2}, Length: {3}",
+        name, it->mType, it->mByteLength, byteLength);
     _rawObjectMap.insert(std::make_pair(name, raw));
     return raw;
 }
