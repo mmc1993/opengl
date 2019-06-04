@@ -11,13 +11,6 @@ public:
     static constexpr uint LIMIT_LIGHT_POINT = 4;
     static constexpr uint LIMIT_LIGHT_SPOT = 4;
 
-    //  对应 _uboLightForward[3]
-    enum UBOLightForwardTypeEnum {
-        kDIRECT,
-        kPOINT,
-        kSPOT,
-    };
-
     struct RenderState {
         //  记录当前批次顶点数
         uint mVertexCount;
