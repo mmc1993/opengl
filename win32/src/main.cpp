@@ -246,11 +246,11 @@ private:
     void CreateObject(Model * model, Object * parent, const std::string & shaderURL, const glm::vec3 & pos)
     {
         auto sprite = new Sprite();
-        sprite->BindShader(shaderURL);
-        for (auto i = 0; i != model->mMeshs.size(); ++i)
-        {
-            sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
-        }
+        //sprite->BindShader(shaderURL);
+        //for (auto i = 0; i != model->mMeshs.size(); ++i)
+        //{
+        //    sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
+        //}
 
         auto object = new Object();
         object->SetParent(parent);

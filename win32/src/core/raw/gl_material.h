@@ -50,6 +50,11 @@ public:
         return _glMesh;
     }
 
+    float GetShininess() const
+    {
+        return _shininess;
+    }
+
     const GLProgram * GetProgram() const
     {
         return _glProgram;

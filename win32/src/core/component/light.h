@@ -1,29 +1,30 @@
 #pragma once
 
 #include "component.h"
-#include "../res/mesh.h"
-#include "../res/bitmap.h"
-#include "../res/bitmap_cube.h"
 
-class Shader;
+#include "../raw/gl_mesh.h"
+#include "../raw/gl_program.h"
+#include "../raw/gl_material.h"
+#include "../raw/gl_texture2d.h"
+
 class RenderTarget;
 
 class Light : public Component {
 public:
-	enum Type {
+	enum TypeEnum {
 		kDIRECT,
 		kPOINT,
 		kSPOT,
 	};
 
 private:
-    static std::weak_ptr<Mesh> s_directVolmue;
-    static std::weak_ptr<Mesh> s_pointVolmue;
-    static std::weak_ptr<Mesh> s_spotVolmue;
-    std::shared_ptr<Mesh> NewVolume();
+    static std::weak_ptr<GLMesh> s_directVolmue;
+    static std::weak_ptr<GLMesh> s_pointVolmue;
+    static std::weak_ptr<GLMesh> s_spotVolmue;
+    std::shared_ptr<GLMesh> NewVolume();
 
 public:
-    Light(Type type);
+    Light(TypeEnum type);
 
     virtual ~Light()
     {
@@ -36,8 +37,8 @@ public:
     virtual void OnUpdate(float dt);
     virtual bool NextDrawShadow(uint count, RenderTarget * rt) = 0;
 
-    const Type & GetType() const { return _type; }
-    const Mesh & GetMesh() const { return *_volume; }
+    const TypeEnum & GetType() const { return _type; }
+    const GLMesh & GetMesh() const { return *_volume; }
     const uint & GetSMP() const { return _shadowMap; }
     const uint & GetUBO() const { return _uniformBlock; }
     static float CalLightDistance(float k0, float k1, float k2, float s);
@@ -55,12 +56,12 @@ protected:
     uint _shadowMap;
     //  UBO
     uint _uniformBlock;
+    //  着色器
+    GLProgram * _program;
     //  光体积
-    std::shared_ptr<Mesh> _volume;
-
-    Shader * _shader;
+    GLMesh * _volume;
 private:
-	Type _type;
+	TypeEnum _type;
 };
 
 class LightDirect : public Light {

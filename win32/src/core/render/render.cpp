@@ -12,9 +12,7 @@ Render::Render()
 
 Render::~Render()
 {
-    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0 ||
-        _uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0 ||
-        _uboLightForward[UBOLightForwardTypeEnum::kSPOT] != 0)
+    if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0)
     {
         ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
         ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
@@ -64,42 +62,30 @@ void Render::RenderOnce()
 	ClearCommands();
 }
 
-void Render::PostCommand(const Shader * shader, const RenderCommand & command)
-{
-    switch (command.mType)
-    {
-    case RenderCommand::kOBJECT:
-        {
-            auto cmd = reinterpret_cast<const ObjectCommand &>(command);
-            for (const auto & pass : shader->GetPasss())
-            {
-                cmd.mPass = &pass;
-                switch (cmd.mPass->mRenderType)
-                {
-                case RenderTypeEnum::kSHADOW:
-                    _shadowCommands.push_back(cmd); break;
-                case RenderTypeEnum::kFORWARD:
-                    _forwardQueues.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-                case RenderTypeEnum::kDEFERRED:
-                    _deferredQueues.at(cmd.mPass->mRenderQueue).push_back(cmd); break;
-                }
-            }
-        }
-        break;
-    case RenderCommand::kLIGHT:
-        {
-            auto & cmd = reinterpret_cast<const LightCommand &>(command);
-            _lightQueues.at(cmd.mLight->GetType()).push_back(cmd);
-        }
-        break;
-    }
-}
-
 void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command)
 {
     switch (type)
     {
     case RenderCommand::TypeEnum::kMATERIAL:
+        {
+            auto cmd = (MaterialCommand &)command;
+            for (auto i = 0; i != cmd.mMaterial->GetProgram()->GetPassAttr().size(); ++i)
+            {
+                cmd.mSubPass = i;
+                switch (cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderType)
+                {
+                case RenderTypeEnum::kSHADOW:
+                    _shadowQueue.push_back(cmd);
+                    break;
+                case RenderTypeEnum::kFORWARD:
+                    _forwardQueues.at(cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderQueue).push_back(cmd);
+                    break;
+                case RenderTypeEnum::kDEFERRED:
+                    _deferredQueues.at(cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderQueue).push_back(cmd);
+                    break;
+                }
+            }
+        }
         break;
     case RenderCommand::TypeEnum::kCAMERA:
         {
@@ -107,34 +93,32 @@ void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand
         }
         break;
     case RenderCommand::TypeEnum::kLIGHT:
+        {
+            auto & cmd = (const LightCommand &)command;
+            _lightQueues.at(cmd.mLight->GetType()).push_back(cmd);
+        }
         break;
     }
 }
 
 void Render::BakeLightDepthMap(Light * light)
 {
-    auto count = 0;
-    _renderInfo.mPass = nullptr;
+    _renderState.mProgram = nullptr;
     _renderTarget[0].Start();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-	while (light->NextDrawShadow(count++, &_renderTarget[0]))
+    for (auto i = 0; light->NextDrawShadow(i, &_renderTarget[0]); ++i)
 	{
         glClear(GL_DEPTH_BUFFER_BIT);
-
-		for (auto & command : _shadowCommands)
+		for (auto & command : _shadowQueue)
 		{
-            if (Bind(command.mPass))
+            if (Bind(command.mMaterial->GetProgram()))
             {
                 Post(light);
             }
-            
+            Post(command.mSubPass);
             Post(command.mTransform);
-
-            for (auto i = 0; i != command.mMeshNum; ++i)
-            {
-                Draw(command.mPass->mDrawType, command.mMeshs[i]);
-            }
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
 		}
 	}
     _renderTarget[0].Ended();
@@ -142,51 +126,47 @@ void Render::BakeLightDepthMap(Light * light)
 
 void Render::SortLightCommands()
 {
-    auto & cameraPos = _renderInfo.mCamera->mPos;
+    const auto & cameraPos = _renderState.mCamera->mPos;
 
-    _renderInfo.mCountUseLightDirect = std::min(LIMIT_LIGHT_DIRECT, _lightQueues.at(Light::Type::kDIRECT).size());
-
-    std::sort(_lightQueues.at(Light::Type::kPOINT).begin(), 
-              _lightQueues.at(Light::Type::kPOINT).end(),
+    std::sort(_lightQueues.at(Light::TypeEnum::kPOINT).begin(), 
+              _lightQueues.at(Light::TypeEnum::kPOINT).end(),
               [&cameraPos](const LightCommand & command0, const LightCommand & command1)
         {
             auto diff0 = (cameraPos - command0.mLight->mPosition);
             auto diff1 = (cameraPos - command1.mLight->mPosition);
             return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
         });
-    _renderInfo.mCountUseLightPoint = std::min(LIMIT_LIGHT_POINT, _lightQueues.at(Light::Type::kPOINT).size());
 
-    std::sort(_lightQueues.at(Light::Type::kSPOT).begin(), 
-              _lightQueues.at(Light::Type::kSPOT).end(),
+    std::sort(_lightQueues.at(Light::TypeEnum::kSPOT).begin(), 
+              _lightQueues.at(Light::TypeEnum::kSPOT).end(),
               [&cameraPos](const LightCommand & command0, const LightCommand & command1)
         {
             auto diff0 = (cameraPos - command0.mLight->mPosition);
             auto diff1 = (cameraPos - command1.mLight->mPosition);
             return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
         });
-    _renderInfo.mCountUseLightSpot = std::min(LIMIT_LIGHT_SPOT, _lightQueues.at(Light::Type::kSPOT).size());
 }
 
 void Render::BakeLightDepthMap()
 {
-    //  烘培阴影的时候会修改Viewport, 在这之前先保存当前的信息.
-    iint viewport[4] = { 0 };
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    //  烘培阴影
-    for (auto i = 0; i != _renderInfo.mCountUseLightDirect; ++i)
+    for (auto i = 0; i != std::min(_lightQueues.at(Light::TypeEnum::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::Type::kDIRECT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::TypeEnum::kDIRECT).at(i).mLight);
     }
-    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    for (auto i = 0; i != std::min(_lightQueues.at(Light::TypeEnum::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::Type::kPOINT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::TypeEnum::kPOINT).at(i).mLight);
     }
-    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    for (auto i = 0; i != std::min(_lightQueues.at(Light::TypeEnum::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::Type::kSPOT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::TypeEnum::kSPOT).at(i).mLight);
     }
-    //  恢复之前的Viewport
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    ASSERT_LOG(_renderState.mCamera != nullptr, "_renderState.mCamera != nullptr");
+    glViewport(
+        (iint)_renderState.mCamera->mViewport.x,
+        (iint)_renderState.mCamera->mViewport.y,
+        (iint)_renderState.mCamera->mViewport.z,
+        (iint)_renderState.mCamera->mViewport.w);
 }
 
 void Render::RenderCamera()
@@ -196,11 +176,11 @@ void Render::RenderCamera()
     BakeLightDepthMap();
 
     //  延迟渲染
-    _renderInfo.mPass = nullptr;
+    _renderState.mProgram = nullptr;
     RenderDeferred();
 
     //  正向渲染
-    _renderInfo.mPass = nullptr;
+    _renderState.mProgram = nullptr;
     RenderForward();
 
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
@@ -215,7 +195,7 @@ void Render::RenderCamera()
     _renderTarget[1].Ended();
 
 	//	后期处理
-    _renderInfo.mPass = nullptr;
+    _renderState.mProgram = nullptr;
 }
 
 void Render::RenderForward()
@@ -262,97 +242,84 @@ void Render::RenderDeferred()
         GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[0].Ended();
 
-    for (auto i = 0u; i != _lightQueues.at(Light::Type::kDIRECT).size(); ++i)
+    for (auto i = 0u; i != _lightQueues.at(Light::TypeEnum::kDIRECT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::Type::kDIRECT).at(i), i < _renderInfo.mCountUseLightDirect);
+        RenderLightVolume(_lightQueues.at(Light::TypeEnum::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT);
     }
 
-    for (auto i = 0u; i != _lightQueues.at(Light::Type::kPOINT).size(); ++i)
+    for (auto i = 0u; i != _lightQueues.at(Light::TypeEnum::kPOINT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::Type::kPOINT).at(i), i < _renderInfo.mCountUseLightPoint);
+        RenderLightVolume(_lightQueues.at(Light::TypeEnum::kPOINT).at(i), i < LIMIT_LIGHT_POINT);
     }
 
-    for (auto i = 0u; i != _lightQueues.at(Light::Type::kSPOT).size(); ++i)
+    for (auto i = 0u; i != _lightQueues.at(Light::TypeEnum::kSPOT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::Type::kSPOT).at(i), i < _renderInfo.mCountUseLightSpot);
+        RenderLightVolume(_lightQueues.at(Light::TypeEnum::kSPOT).at(i), i < LIMIT_LIGHT_SPOT);
     }
 
     _renderTarget[1].Ended();
 }
 
-void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
+void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
 {
 	for (const auto & command : commands)
 	{
-		if ((_renderInfo.mCamera->mMask & command.mCameraFlag) != 0)
+		if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
 		{
-			if (Bind(command.mPass)) 
+			if (Bind(command.mMaterial->GetProgram())) 
             {
                 BindUBOLightForward();
             }
-			
+            Post(command.mSubPass);
+            Post(command.mMaterial);
             Post(command.mTransform);
-			
-            for (auto i = 0; i != command.mMeshNum; ++i)
-			{
-                Post(command.mMaterials[i]);
-
-				Draw(command.mPass->mDrawType, command.mMeshs[i]);
-			}
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
 		}
 	}
 }
 
-void Render::RenderDeferredCommands(const ObjectCommandQueue & commands)
+void Render::RenderDeferredCommands(const MaterialCommandQueue & commands)
 {
     for (auto & command : commands)
     {
-        if ((_renderInfo.mCamera->mMask & command.mCameraFlag) != 0)
+        if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
         {
-            Bind(command.mPass); 
-            
+            Bind(command.mMaterial->GetProgram());
+            Post(command.mSubPass);
+            Post(command.mMaterial);
             Post(command.mTransform);
-
-            for (auto i = 0; i != command.mMeshNum; ++i)
-            {
-                Post(command.mMaterials[i]);
-
-                Draw(command.mPass->mDrawType, command.mMeshs[i]);
-            }
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
         }
     }
 }
 
 void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow)
 {
-    const auto & pass = isRenderShadow
-                      ? command.mShader->GetPass(0)
-                      : command.mShader->GetPass(1);
-    if (Bind(&pass))
+    if (Bind(command.mProgram))
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, _renderInfo.mTexBase + 0);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, _renderInfo.mTexBase + 1);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, _renderInfo.mTexBase + 2);
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, _renderInfo.mTexBase + 3);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, _renderState.mTexBase + 0);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, _renderState.mTexBase + 1);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, _renderState.mTexBase + 2);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, _renderState.mTexBase + 3);
     }
-
+    ASSERT_LOG(command.mProgram->GetPassAttr().size() == 2, "command.mProgram->GetPassAttr().size() == 2. {0}", command.mProgram->GetPassAttr().size());
+    ASSERT_LOG(command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(0).vRenderType);
+    ASSERT_LOG(command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(1).vRenderType);
     if (isRenderShadow)
     {
-        Shader::UnbindTex2D(_renderInfo.mTexBase + 4);
-        Shader::UnbindTex3D(_renderInfo.mTexBase + 4);
+        _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
+        _renderState.mProgram->BindUniformTex3D(nullptr, 0, _renderState.mTexBase + 4);
         switch (command.mLight->GetType())
         {
-        case Light::Type::kDIRECT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
-        case Light::Type::kPOINT: Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
-        case Light::Type::kSPOT: Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderInfo.mTexBase + 4); break;
+        case Light::TypeEnum::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
+        case Light::TypeEnum::kPOINT: _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
+        case Light::TypeEnum::kSPOT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
         }
     }
-
+    Post(isRenderShadow ? 0u : 1u /*SubPass*/);
     Post(command.mLight);
-    
     Post(command.mTransform);
-
-    Draw(pass.mDrawType, *command.mMesh);
+    Post(DrawTypeEnum::kINDEX, command.mMesh);
 }
 
 void Render::PackUBOLightForward()
@@ -363,9 +330,9 @@ void Render::PackUBOLightForward()
 
     auto offset = 0;
     glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[kDIRECT]);
-    for (auto i = 0u; i != _renderInfo.mCountUseLightDirect; ++i)
+    for (auto i = 0u; i != std::min(_lightQueues.at(Light::TypeEnum::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
-        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetUBO());
+        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::TypeEnum::kDIRECT).at(i).mLight->GetUBO());
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, offset, DIRECT_UBO_LEN);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
         offset += DIRECT_UBO_LEN;
@@ -373,9 +340,9 @@ void Render::PackUBOLightForward()
 
     offset = 0;
     glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[kPOINT]);
-    for (auto i = 0; i != _renderInfo.mCountUseLightPoint; ++i)
+    for (auto i = 0; i != std::min(_lightQueues.at(Light::TypeEnum::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
-        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetUBO());
+        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::TypeEnum::kPOINT).at(i).mLight->GetUBO());
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, offset, POINT_UBO_LEN);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
         offset += POINT_UBO_LEN;
@@ -383,9 +350,9 @@ void Render::PackUBOLightForward()
 
     offset = 0;
     glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[kSPOT]);
-    for (auto i = 0; i != _renderInfo.mCountUseLightSpot; ++i)
+    for (auto i = 0; i != std::min(_lightQueues.at(Light::TypeEnum::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
-        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetUBO());
+        glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::TypeEnum::kSPOT).at(i).mLight->GetUBO());
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, offset, SPOT_UBO_LEN);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
         offset += SPOT_UBO_LEN;
@@ -396,35 +363,37 @@ void Render::PackUBOLightForward()
 
 void Render::BindUBOLightForward()
 {
-    auto idirect = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_DIRECT);
-    glUniformBlockBinding(_renderInfo.mPass->GLID, idirect, UniformBlockEnum::kLIGHT_DIRECT);
+    auto countDirect = std::min(_lightQueues.at(Light::TypeEnum::kDIRECT).size(), LIMIT_LIGHT_DIRECT);
+    auto countPoint = std::min(_lightQueues.at(Light::TypeEnum::kPOINT).size(), LIMIT_LIGHT_POINT);
+    auto countSpot = std::min(_lightQueues.at(Light::TypeEnum::kSPOT).size(), LIMIT_LIGHT_SPOT);
+
+    auto indexDirect = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_DIRECT);
+    auto indexPoint = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_POINT);
+    auto indexSpot = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_SPOT);
+
+    glUniformBlockBinding(_renderState.mProgram->GetID(), indexDirect, UniformBlockEnum::kLIGHT_DIRECT);
+    glUniformBlockBinding(_renderState.mProgram->GetID(), indexPoint, UniformBlockEnum::kLIGHT_POINT);
+    glUniformBlockBinding(_renderState.mProgram->GetID(), indexSpot, UniformBlockEnum::kLIGHT_SPOT);
+
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
-
-    auto ipoint = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_POINT);
-    glUniformBlockBinding(_renderInfo.mPass->GLID, ipoint, UniformBlockEnum::kLIGHT_POINT);
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _uboLightForward[UBOLightForwardTypeEnum::kPOINT]);
-
-    auto ispot = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_SPOT);
-    glUniformBlockBinding(_renderInfo.mPass->GLID, ispot, UniformBlockEnum::kLIGHT_SPOT);
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _uboLightForward[UBOLightForwardTypeEnum::kSPOT]);
 
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_DIRECT_, _renderInfo.mCountUseLightDirect);
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_POINT_, _renderInfo.mCountUseLightPoint);
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_COUNT_SPOT_, _renderInfo.mCountUseLightSpot);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_DIRECT_, countDirect);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, countPoint);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_SPOT_, countSpot);
 
-    for (auto i = 0, directCount = 0; i != _renderInfo.mCountUseLightDirect; ++i, ++directCount)
+    for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _lightQueues.at(Light::Type::kDIRECT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _lightQueues.at(Light::TypeEnum::kDIRECT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
     }
-
-    for (auto i = 0, pointCount = 0; i != _renderInfo.mCountUseLightPoint; ++i, ++pointCount)
+    for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
     {
-        Shader::SetTexture3D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _lightQueues.at(Light::Type::kPOINT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _lightQueues.at(Light::TypeEnum::kPOINT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
     }
-
-    for (auto i = 0, spotCount = 0; i != _renderInfo.mCountUseLightSpot; ++i, ++spotCount)
+    for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
     {
-        Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _lightQueues.at(Light::TypeEnum::kSPOT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
     }
 }
 
@@ -438,13 +407,13 @@ void Render::Bind(const CameraCommand * command)
 		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
 		glViewport((int)command->mViewport.x, (int)command->mViewport.y,
 				   (int)command->mViewport.z, (int)command->mViewport.w);
-        _renderInfo.mCamera = command;
+        _renderState.mCamera = command;
 	}
 	else
 	{
 		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
 		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
-        _renderInfo.mCamera = nullptr;
+        _renderState.mCamera = nullptr;
 	}
 }
 
@@ -452,43 +421,42 @@ void Render::Post(const Light * light)
 {
     switch (light->GetType())
     {
-    case Light::Type::kDIRECT:
+    case Light::TypeEnum::kDIRECT:
         {
-            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_DIRECT);
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_DIRECT);
             if (GL_INVALID_INDEX != idx)
             {
-                glUniformBlockBinding(_renderInfo.mPass->GLID, idx, UniformBlockEnum::kLIGHT_DIRECT);
+                glUniformBlockBinding(_renderState.mProgram->GetID(), idx, UniformBlockEnum::kLIGHT_DIRECT);
                 glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetUBO());
             }
         }
         break;
-    case Light::Type::kPOINT:
+    case Light::TypeEnum::kPOINT:
         {
-            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_POINT);
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_POINT);
             if (GL_INVALID_INDEX != idx)
             {
-                glUniformBlockBinding(_renderInfo.mPass->GLID, idx, UniformBlockEnum::kLIGHT_POINT);
+                glUniformBlockBinding(_renderState.mProgram->GetID(), idx, UniformBlockEnum::kLIGHT_POINT);
                 glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, light->GetUBO());
             }
         }
         break;
-    case Light::Type::kSPOT:
+    case Light::TypeEnum::kSPOT:
         {
-            auto idx = glGetUniformBlockIndex(_renderInfo.mPass->GLID, UBO_NAME_LIGHT_SPOT);
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetID(), UBO_NAME_LIGHT_SPOT);
             if (GL_INVALID_INDEX != idx)
             {
-                glUniformBlockBinding(_renderInfo.mPass->GLID, idx, UniformBlockEnum::kLIGHT_SPOT);
+                glUniformBlockBinding(_renderState.mProgram->GetID(), idx, UniformBlockEnum::kLIGHT_SPOT);
                 glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, light->GetUBO());
             }
         }
         break;
     }
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_LIGHT_TYPE, light->GetType());
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, light->GetType());
 }
 
 void Render::StartRender()
 {
-    //  初始化正向渲染光源所需的UBO
     if (_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0)
     {
         ASSERT_LOG(_uboLightForward[UBOLightForwardTypeEnum::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]);
@@ -558,7 +526,6 @@ void Render::StartRender()
     {
         ASSERT_LOG(_offSceneBuffer.mColorTexture == 0, "_offSceneBuffer.mColorTexture : {0}", _offSceneBuffer.mColorTexture);
         ASSERT_LOG(_offSceneBuffer.mDepthTexture == 0, "_offSceneBuffer.mDepthTexture : {0}", _offSceneBuffer.mDepthTexture);
-
         glGenTextures(2, &_offSceneBuffer.mColorTexture);
 
         auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
@@ -585,8 +552,8 @@ void Render::StartRender()
         _renderTarget[1].Ended();
     }
 
-    _renderInfo.mVertexCount = 0;
-    _renderInfo.mRenderCount = 0;
+    _renderState.mVertexCount = 0;
+    _renderState.mRenderCount = 0;
 
     _renderTarget[1].Start();
     glClear(GL_COLOR_BUFFER_BIT |
@@ -594,90 +561,81 @@ void Render::StartRender()
     _renderTarget[1].Ended();
 }
 
-bool Render::Bind(const Pass * pass)
+bool Render::Bind(const GLProgram * program)
 {
-	if (_renderInfo.mPass != pass)
-	{
-		_renderInfo.mPass = pass;
-        _renderInfo.mTexBase = 0;
-
-		//	开启面剔除
-		if (pass->bCullFace)
-		{
-			glEnable(GL_CULL_FACE);
-			glCullFace(pass->vCullFace);
-		}
-		else
-		{
-			glDisable(GL_CULL_FACE);
-		}
-		//	启用颜色混合
-		if (pass->bBlend)
-		{
-			glEnable(GL_BLEND);
-			glBlendFunc(pass->vBlendSrc, pass->vBlendDst);
-		}
-		else
-		{
-			glDisable(GL_BLEND);
-		}
-		//	启用深度测试
-		if (pass->bDepthTest)
-		{
-			glEnable(GL_DEPTH_TEST);
-		}
-		else
-		{
-			glDisable(GL_DEPTH_TEST);
-		}
-		//	启用模板测试
-		if (pass->bStencilTest)
-		{
-			glEnable(GL_STENCIL_TEST);
-			glStencilMask(0xFF);
-			glStencilFunc(pass->vStencilFunc, pass->vStencilRef, pass->vStencilMask);
-			glStencilOp(pass->vStencilOpFail, pass->vStencilOpZFail, pass->vStencilOpZPass);
-		}
-		else
-		{
-			glDisable(GL_STENCIL_TEST);
-		}
-		glUseProgram(pass->GLID);
-		return true;
-	}
-	return false;
+    if (_renderState.mProgram != program)
+    {
+        _renderState.mTexBase    = 0;
+        _renderState.mProgram   = program;
+        glUseProgram(_renderState.mProgram->GetID());
+        return true;
+    }
+    return false;
 }
 
-void Render::Post(const Material & material)
+void Render::Post(const uint subPass)
 {
-    auto texIndex = _renderInfo.mTexBase;
-	for (auto i = 0; i != material.mDiffuses.size(); ++i)
-	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, SFormat(UNIFORM_MATERIAL_DIFFUSE, i).c_str(), material.mDiffuses.at(i), texIndex++);
-	}
-	if (material.mSpecular != nullptr)
-	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SPECULAR, material.mSpecular, texIndex++);
-	}
-	if (material.mReflect != nullptr)
-	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_REFLECT, material.mReflect, texIndex++);
-	}
-	if (material.mNormal != nullptr)
-	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_NORMAL, material.mNormal, texIndex++);
-	}
-	if (material.mHeight != nullptr)
-	{
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_HEIGHT, material.mHeight, texIndex++);
-	}
-    Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATERIAL_SHININESS, material.mShininess);
+    auto & attr = _renderState.mProgram->GetPassAttr(subPass);
+
+    if (attr.vCullFace != 0)
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(attr.vCullFace);
+    }
+    else
+    {
+        glDisable(GL_CULL_FACE);
+    }
+
+    if (attr.vBlendSrc != 0 && attr.vBlendDst != 0)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(attr.vBlendSrc, attr.vBlendDst);
+    }
+    else
+    {
+        glDisable(GL_BLEND);
+    }
+
+    if (attr.bDepthTest)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+    if (attr.vStencilOpFail != 0 && attr.vStencilOpZFail != 0 && attr.vStencilOpZPass != 0)
+    {
+        glEnable(GL_STENCIL_TEST);
+        glStencilMask(0xFF);
+        glStencilFunc(attr.vStencilFunc, attr.vStencilRef, attr.vStencilMask);
+        glStencilOp(attr.vStencilOpFail, attr.vStencilOpZFail, attr.vStencilOpZPass);
+    }
+    else
+    {
+        glDisable(GL_STENCIL_TEST);
+    }
+    _renderState.mProgram->UsePass(subPass);
+}
+
+void Render::Post(const GLMaterial * material)
+{
+    auto texturePos = _renderState.mTexBase;
+    for (auto i = 0; material->GetTexture2Ds(i) != nullptr; ++i)
+    {
+        _renderState.mProgram->BindUniformTex2D(
+            material->GetTexture2Ds(i)->mName,
+            material->GetTexture2Ds(i)->mTexture->GetID(), texturePos++);
+    }
+    _renderState.mProgram->BindUniformNumber(UNIFORM_MATERIAL_SHININESS, material->GetShininess());
 }
 
 void Render::ClearCommands()
 {
     _cameraQueue.clear();
-	_shadowCommands.clear();
+    _shadowQueue.clear();
     for (auto & queue : _lightQueues) { queue.clear(); }
 	for (auto & queue : _forwardQueues) { queue.clear(); }
 	for (auto & queue : _deferredQueues) { queue.clear(); }
@@ -691,26 +649,25 @@ void Render::Post(const glm::mat4 & transform)
 	const auto & matrixN	= glm::transpose(glm::inverse(glm::mat3(matrixM)));
 	const auto & matrixMV	= matrixV * matrixM;
 	const auto & matrixMVP	= matrixP * matrixMV;
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_N, matrixN);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_M, matrixM);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_V, matrixV);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_P, matrixP);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_MV, matrixMV);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_MATRIX_MVP, matrixMVP);
-	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_GAME_TIME, glfwGetTime());
-    if (_renderInfo.mCamera != nullptr)
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_N, matrixN);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_M, matrixM);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V, matrixV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P, matrixP);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV, matrixMV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MVP, matrixMVP);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
+    if (_renderState.mCamera != nullptr)
     {
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_POS, _renderInfo.mCamera->mPos);
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_EYE, _renderInfo.mCamera->mEye);
+        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _renderState.mCamera->mPos);
+        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _renderState.mCamera->mEye);
     }
 }
 
-void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
+void Render::Post(DrawTypeEnum drawType, const GLMesh * mesh)
 {
-    ASSERT_LOG(mesh.mVBO != 0, "Draw VBO Error");
-    ASSERT_LOG(mesh.mVAO != 0, "Draw VAO Error");
+    ASSERT_LOG(mesh->GetVAO() != 0, "Draw VAO Error");
 
-	glBindVertexArray(mesh.mVAO);
+	glBindVertexArray(mesh->GetVAO());
 	switch (drawType)
 	{
 	case DrawTypeEnum::kINSTANCE:
@@ -720,16 +677,16 @@ void Render::Draw(DrawTypeEnum drawType, const Mesh & mesh)
 		break;
 	case DrawTypeEnum::kVERTEX:
 		{
-			_renderInfo.mVertexCount += mesh.mVtxCount;
-			glDrawArrays(GL_TRIANGLES, 0, mesh.mVtxCount);
+			_renderState.mVertexCount += mesh->GetVCount();
+			glDrawArrays(GL_TRIANGLES, 0, mesh->GetVCount());
 		}
 		break;
 	case DrawTypeEnum::kINDEX:
 		{
-			_renderInfo.mVertexCount += mesh.mIdxCount;
-			glDrawElements(GL_TRIANGLES, mesh.mIdxCount, GL_UNSIGNED_INT, nullptr);
+            _renderState.mVertexCount += mesh->GetECount();
+			glDrawElements(GL_TRIANGLES, mesh->GetECount(), GL_UNSIGNED_INT, nullptr);
 		}
 		break;
 	}
-	++_renderInfo.mRenderCount;
+	++_renderState.mRenderCount;
 }

@@ -18,31 +18,25 @@ public:
         kSPOT,
     };
 
-    //  渲染信息
-	struct RenderInfo {
+    struct RenderState {
         //  记录当前批次顶点数
-		uint mVertexCount;
+        uint mVertexCount;
         //  记录当前批次渲染数
-		uint mRenderCount;
+        uint mRenderCount;
         //  记录当前Texture基址
         uint mTexBase;
 
-        //  正向渲染数据
-        uint mCountUseLightDirect;
-        uint mCountUseLightPoint;
-        uint mCountUseLightSpot;
-
-        //  当前绑定的pass
-        const Pass * mPass;
-        //  当前绑定的camera
+        //  当前绑定的Program
+        const GLProgram     * mProgram;
+        //  当前绑定的Camera
         const CameraCommand * mCamera;
-		RenderInfo()
-            : mPass(nullptr)
+        RenderState()
+            : mProgram(nullptr)
             , mCamera(nullptr)
             , mVertexCount(0)
-			, mRenderCount(0)
+            , mRenderCount(0)
             , mTexBase(0) { }
-	};
+    };
 
     struct GBuffer {
         uint mPositionTexture;
@@ -73,25 +67,28 @@ public:
     ~Render();
 
 	MatrixStack & GetMatrixStack();
-
     //  渲染
 	void RenderOnce();
-	void PostCommand(const Shader * shader, const RenderCommand & command);
+    //  渲染命令入口
     void PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command);
-	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
+
+    const RenderState & GetRenderState() const { return _renderState; }
 
 private:
     void StartRender();
 
-    //  Bind Function
-    bool Bind(const Pass * pass);
+    //  Bind 系函数.
+    //      该系列函数完成数据提交同时影响渲染器内部状态
+    bool Bind(const GLProgram * program);
     void Bind(const CameraCommand * command);
 
-    //  Post Function
-    void Post(const Light * light);
-    void Post(const Material & material);
+    //  Post 系函数.
+    //      该系函数完成数据提交, 但不修改渲染器内部状态
+    void Post(const uint subPass);
+    void Post(const Light *light);
+    void Post(const GLMaterial * material);
     void Post(const glm::mat4 & transform);
-    void Draw(DrawTypeEnum drawType, const Mesh & mesh);
+    void Post(DrawTypeEnum drawType, const GLMesh * mesh);
 
     void ClearCommands();
 
@@ -103,8 +100,8 @@ private:
     void RenderCamera();
     void RenderForward();
     void RenderDeferred();
-	void RenderForwardCommands(const ObjectCommandQueue & commands);
-	void RenderDeferredCommands(const ObjectCommandQueue & commands);
+	void RenderForwardCommands(const MaterialCommandQueue & commands);
+	void RenderDeferredCommands(const MaterialCommandQueue & commands);
     void RenderLightVolume(const LightCommand & command, bool isRenderShadow);
 
     //  正向渲染相关
@@ -114,16 +111,6 @@ private:
 private:
     RenderTarget    _renderTarget[2];
     MatrixStack     _matrixStack;
-	RenderInfo      _renderInfo;
-
-    //	阴影烘培队列
-    ObjectCommandQueue _shadowCommands;
-    //  方向光队列
-    std::array<LightCommandQueue, 3> _lightQueues;
-    //  正向渲染队列
-    std::array<ObjectCommandQueue, 4> _forwardQueues;
-    //  延迟渲染队列
-    std::array<ObjectCommandQueue, 4> _deferredQueues;
 
     //  离屏buffer
     OffSceneBuffer _offSceneBuffer;
@@ -132,8 +119,17 @@ private:
     //  延迟渲染
     GBuffer _gbuffer;
 
-
-    //  新队列
+    //  状态
+    RenderState _renderState;
+    //  相机渲染队列
     CameraCommandQueue _cameraQueue;
+    //  阴影烘培队列
+    MaterialCommandQueue _shadowQueue;
+    //  光源类型队列
+    std::array<LightCommandQueue, 3> _lightQueues;
+    //  正向渲染队列
+    std::array<MaterialCommandQueue, 4> _forwardQueues;
+    //  延迟渲染队列
+    std::array<MaterialCommandQueue, 4> _deferredQueues;
 };
 

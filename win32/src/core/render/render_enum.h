@@ -90,3 +90,10 @@ static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
 
 //  预设Shader
 static const char * const BUILTIN_SHADER_LIGHT = "res/built-in/shader/light.shader";
+
+//  内置资源-延迟渲染-光体积
+static const char * const BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME = "res/built-in/program/deferred_light_volume";
+//  内置资源-延迟渲染-光体积
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct";
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT = "res/built-in/mesh/deferred_light_volume_point";
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT = "res/built-in/mesh/deferred_light_volume_spot";

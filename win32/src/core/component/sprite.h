@@ -1,29 +1,30 @@
 #pragma once
 
 #include "component.h"
-#include "../res/mesh.h"
-#include "../res/shader.h"
-#include "../res/material.h"
+
+#include "../raw/gl_mesh.h"
+#include "../raw/gl_program.h"
+#include "../raw/gl_material.h"
+#include "../raw/gl_texture2d.h"
 
 class Sprite : public Component {
 public:
-	Sprite();
-	virtual ~Sprite() {}
-	virtual void OnAdd() override;
-	virtual void OnDel() override;
+    Sprite();
+    virtual ~Sprite() {}
+    virtual void OnAdd() override { }
+    virtual void OnDel() override { }
 	virtual void OnUpdate(float dt) override;
 
-	void AddMesh(const Mesh & mesh, const Material & material)
-	{
-		_meshs.emplace_back(mesh);
-		_mates.emplace_back(material);
-	}
+    void BindMaterial(const GLMaterial * material)
+    {
+        _material = material;
+    }
 
-	void BindShader(const std::string & url);
-	Shader * GetShader() { return _shader; }
+    const GLMaterial * GetMaterial() const
+    {
+        return _material;
+    }
 
 protected:
-	Shader * _shader;
-    std::vector<Mesh> _meshs;
-    std::vector<Material> _mates;
+    const GLMaterial * _material;
 };

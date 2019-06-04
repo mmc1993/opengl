@@ -1,41 +1,43 @@
 #include "light.h"
 #include "transform.h"
-#include "../res/shader.h"
 #include "../render/render.h"
 #include "../cfg/cfg_manager.h"
 #include "../res/res_manager.h"
+#include "../raw/raw_manager.h"
 
-std::weak_ptr<Mesh> Light::s_spotVolmue;
-std::weak_ptr<Mesh> Light::s_pointVolmue;
-std::weak_ptr<Mesh> Light::s_directVolmue;
+std::weak_ptr<GLMesh> Light::s_spotVolmue;
+std::weak_ptr<GLMesh> Light::s_pointVolmue;
+std::weak_ptr<GLMesh> Light::s_directVolmue;
 
-std::shared_ptr<Mesh> Light::NewVolume()
+std::shared_ptr<GLMesh> Light::NewVolume()
 {
+    //  考虑把这些动态生成的网格存储在文件里.
     switch (_type)
     {
-    case Type::kDIRECT:
+    case TypeEnum::kDIRECT:
         {
             if (s_directVolmue.expired())
             {
                 auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
                 auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
-                auto mesh = Mesh::CreateV({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
-                                            { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } }, { 0, 2, 1, 0, 3, 2 });
-                std::shared_ptr<Mesh> sharePtr(new Mesh(), Mesh::DeletePtr);
-                s_directVolmue = sharePtr; *sharePtr = mesh;
+                auto mesh = std::make_shared<GLMesh>();
+                mesh->Init({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
+                             { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } },
+                             { 0, 2, 1, 0, 3, 2 }, GLMesh::Vertex::EnableEnum::kV);
+                s_directVolmue = mesh;
                 return s_directVolmue.lock();
             }
             return s_directVolmue.lock();
         }
         break;
-    case Type::kPOINT:
+    case TypeEnum::kPOINT:
         {
             if (s_pointVolmue.expired())
             {
                 const auto N0 = 32;
                 const auto N1 = N0 * 2-2;
-                std::vector<uint> indexs;
-                std::vector<Mesh::Vertex> vertexs;
+                std::vector<uint>           indexs;
+                std::vector<GLMesh::Vertex> vertexs;
 
                 vertexs.emplace_back(glm::vec3(0, 1, 0));
                 for (auto i = 0; i != N1; ++i)
@@ -80,21 +82,21 @@ std::shared_ptr<Mesh> Light::NewVolume()
 
                 vertexs.emplace_back(glm::vec3(0, -1, 0));
 
-                std::shared_ptr<Mesh> sharePtr(new Mesh(), &Mesh::DeletePtr);
-                *sharePtr = Mesh::CreateV(vertexs, indexs); 
-                s_pointVolmue = sharePtr;
+                auto mesh = std::make_shared<GLMesh>();
+                mesh->Init(vertexs, indexs, GLMesh::Vertex::kV);
+                s_pointVolmue = mesh;
                 return s_pointVolmue.lock();
             }
             return s_pointVolmue.lock();
         }
         break;
-    case Type::kSPOT:
+    case TypeEnum::kSPOT:
         {
             if (s_spotVolmue.expired())
             {
                 const auto N = 32;
-                std::vector<uint> indexs;
-                std::vector<Mesh::Vertex> vertexs;
+                std::vector<uint>           indexs;
+                std::vector<GLMesh::Vertex> vertexs;
 
                 vertexs.emplace_back(glm::vec3(0, 0, 0));
                 auto step = static_cast<float>(M_PI*2/N);
@@ -116,9 +118,9 @@ std::shared_ptr<Mesh> Light::NewVolume()
                     }
                 }
 
-                std::shared_ptr<Mesh> sharePtr(new Mesh(), &Mesh::DeletePtr);
-                *sharePtr = Mesh::CreateV(vertexs, indexs);
-                s_spotVolmue = sharePtr;
+                auto mesh = std::make_shared<GLMesh>();
+                mesh->Init(vertexs, indexs, GLMesh::Vertex::kV);
+                s_spotVolmue = mesh;
                 return s_spotVolmue.lock();
             }
             return s_spotVolmue.lock();
@@ -128,10 +130,21 @@ std::shared_ptr<Mesh> Light::NewVolume()
     return nullptr;
 }
 
-Light::Light(Type type): _type(type), _shadowMap(0), _uniformBlock(0)
+Light::Light(TypeEnum type): _type(type), _shadowMap(0), _uniformBlock(0)
 {
-    _volume = NewVolume();
-    _shader = Global::Ref().RefResManager().Get<Shader>(BUILTIN_SHADER_LIGHT);
+    switch (type)
+    {
+    case kDIRECT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+        break;
+    case kPOINT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+        break;
+    case kSPOT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+        break;
+    }
+    _program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
 }
 
 //  --------------------------------------------------------------------------------
@@ -139,11 +152,11 @@ Light::Light(Type type): _type(type), _shadowMap(0), _uniformBlock(0)
 void Light::OnUpdate(float dt)
 {
     LightCommand command;
-    command.mLight      = this;
-    command.mShader     = _shader;
-    command.mMesh       = _volume.get();
-    command.mTransform  = Global::Ref().RefRender().GetMatrixStack().GetM();
-    Global::Ref().RefRender().PostCommand(_shader, command);
+    command.mLight    = this;
+    command.mMesh     = _volume;
+    command.mProgram  = _program;
+    command.mTransform= Global::Ref().RefRender().GetMatrixStack().GetM();
+    Global::Ref().RefRender().PostCommand(RenderCommand::kLIGHT, command);
 
     mPosition = command.mTransform * glm::vec4(0, 0, 0, 1);
 }

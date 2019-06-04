@@ -2,6 +2,12 @@
 
 #include "../include.h"
 
+//  资源
+#include "../raw/gl_mesh.h"
+#include "../raw/gl_program.h"
+#include "../raw/gl_material.h"
+#include "../raw/gl_texture2d.h"
+
 class Mesh;
 class Pass;
 class Light;
@@ -81,14 +87,18 @@ struct RenderCommand {
         kOBJECT,
         kLIGHT,
     };
-    RenderCommand(TypeEnum type): mType(type) 
-    { }
-    TypeEnum mType;
+};
+
+struct MaterialCommand : public RenderCommand {
+    MaterialCommand() { }
+    const GLMaterial * mMaterial;
+    glm::mat4 mTransform;
+    uint mCameraMask;
+    uint mSubPass;
 };
 
 struct CameraCommand : public RenderCommand {
-    CameraCommand(): RenderCommand(kCAMERA)
-    { }
+    CameraCommand() { }
     glm::vec4 mViewport;
     glm::mat4 mProj;
     glm::mat4 mView;
@@ -98,26 +108,14 @@ struct CameraCommand : public RenderCommand {
     uint mMask;
 };
 
-struct ObjectCommand: public RenderCommand {
-    ObjectCommand(): RenderCommand(kOBJECT)
-    { }
-    const Pass      * mPass;            //  绑定的Pass
-    const Mesh      * mMeshs;           //  绑定的Mesh
-    const Material  * mMaterials;       //  绑定的材质(材质与网格数量必须一致)
-    uint mMeshNum;                      //  绑定的网格数量
-    uint mCameraFlag;                   //  绑定的相机标识
-    glm::mat4 mTransform;               //  绑定的变换矩阵
-};
-
 struct LightCommand: public RenderCommand {
-    LightCommand(): RenderCommand(kLIGHT)
-    { }
+    LightCommand() { }
     Light        * mLight;
-    const Mesh   * mMesh;
-    const Shader * mShader;
-    glm::mat4 mTransform;
+    GLMesh       * mMesh;
+    GLProgram    * mProgram;
+    glm::mat4      mTransform;
 };
 
+using MaterialCommandQueue = std::vector<MaterialCommand>;
 using CameraCommandQueue = std::vector<CameraCommand>;
-using ObjectCommandQueue = std::vector<ObjectCommand>;
 using LightCommandQueue = std::vector<LightCommand>;

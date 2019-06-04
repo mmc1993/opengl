@@ -91,6 +91,11 @@ public:
         return _passAttrs.at(i);
     }
 
+    const std::vector<PassAttr> & GetPassAttr() const
+    {
+        return _passAttrs;
+    }
+
     void UsePass(uint i) const
     {
         ASSERT_LOG(i < _passAttrs.size(), "Out Range. {0}, {1}", _passAttrs.size(), i);
@@ -134,6 +139,11 @@ public:
         glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &vIndex);
         glUniformSubroutinesuiv(GL_GEOMETRY_SHADER, 1, &gIndex);
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex);
+    }
+
+    uint GetID() const
+    {
+        return _id;
     }
 
 private:

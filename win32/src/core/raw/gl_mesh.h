@@ -22,6 +22,18 @@ public:
             kV_N_C_UV_TAN_BITAN = kV | kN | kC | kUV | kTAN | kBITAN,
         };
 
+        Vertex()
+        { }
+
+        Vertex(const glm::vec3 & _v): v(_v)
+        { }
+
+        Vertex(const glm::vec3 & _v, const glm::vec3 & _n) : v(_v), n(_n)
+        { }
+
+        Vertex(const glm::vec3 & _v, const glm::vec3 & _n, const glm::vec4 & _c) : v(_v), n(_n), c(_c)
+        { }
+
         static uint SizeOf(uint enabled)
         {
             uint size = 0;

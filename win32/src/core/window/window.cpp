@@ -141,8 +141,8 @@ void Window::Update()
 		std::cout <<
 			SFormat("Error: {0} FPS: {1} DiffTie: {2} RenderCount: {3} mVertexCount: {4}", 
 					glGetError(), _renderInfo.renderFPS / dt, dt,
-					Global::Ref().RefRender().GetRenderInfo().mRenderCount,
-					Global::Ref().RefRender().GetRenderInfo().mVertexCount)
+					Global::Ref().RefRender().GetRenderState().mRenderCount,
+					Global::Ref().RefRender().GetRenderState().mVertexCount)
 			<< std::endl;
     }
 }
