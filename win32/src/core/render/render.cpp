@@ -20,15 +20,15 @@ Render::~Render()
         glDeleteBuffers(3, _uboLightForward);
     }
 
-    if (_gbuffer.mPositionTexture != 0)
+    if (_bufferG.mPositionTexture != 0)
     {
-        ASSERT_LOG(_gbuffer.mPositionTexture != 0, "~Render _gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
-        ASSERT_LOG(_gbuffer.mSpecularTexture != 0, "~Render _gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
-        ASSERT_LOG(_gbuffer.mDiffuseTexture != 0, "~Render _gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
-        ASSERT_LOG(_gbuffer.mNormalTexture != 0, "~Render _gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
-        ASSERT_LOG(_gbuffer.mDepthBuffer != 0, "~Render _gbuffer.mDepthBuffer: {0}", _gbuffer.mDepthBuffer);
-        glDeleteTextures(4, &_gbuffer.mPositionTexture);
-        glDeleteRenderbuffers(1,&_gbuffer.mDepthBuffer);
+        ASSERT_LOG(_bufferG.mPositionTexture != 0, "~Render _gbuffer.mPositionTexture: {0}", _bufferG.mPositionTexture);
+        ASSERT_LOG(_bufferG.mSpecularTexture != 0, "~Render _gbuffer.mSpecularTexture: {0}", _bufferG.mSpecularTexture);
+        ASSERT_LOG(_bufferG.mDiffuseTexture != 0, "~Render _gbuffer.mDiffuseTexture: {0}", _bufferG.mDiffuseTexture);
+        ASSERT_LOG(_bufferG.mNormalTexture != 0, "~Render _gbuffer.mNormalTexture: {0}", _bufferG.mNormalTexture);
+        ASSERT_LOG(_bufferG.mDepthBuffer != 0, "~Render _gbuffer.mDepthBuffer: {0}", _bufferG.mDepthBuffer);
+        glDeleteTextures(4, &_bufferG.mPositionTexture);
+        glDeleteRenderbuffers(1,&_bufferG.mDepthBuffer);
     }
 
     if (_offSceneBuffer.mColorTexture != 0)
@@ -213,11 +213,11 @@ void Render::RenderForward()
 void Render::RenderDeferred()
 {
     _renderTarget[0].Start(RenderTarget::BindType::kALL);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _gbuffer.mPositionTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _gbuffer.mSpecularTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _gbuffer.mDiffuseTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _gbuffer.mNormalTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _gbuffer.mDepthBuffer);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferG.mPositionTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferG.mSpecularTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferG.mDiffuseTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferG.mNormalTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferG.mDepthBuffer);
 
     uint rtbinds[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
@@ -297,10 +297,10 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, bool isRend
 {
     if (Bind(command.mProgram))
     {
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _gbuffer.mPositionTexture, _renderState.mTexBase + 0);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _gbuffer.mSpecularTexture, _renderState.mTexBase + 1);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _gbuffer.mDiffuseTexture, _renderState.mTexBase + 2);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _gbuffer.mNormalTexture, _renderState.mTexBase + 3);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _bufferG.mPositionTexture, _renderState.mTexBase + 0);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _bufferG.mSpecularTexture, _renderState.mTexBase + 1);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferG.mDiffuseTexture, _renderState.mTexBase + 2);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferG.mNormalTexture, _renderState.mTexBase + 3);
     }
     ASSERT_LOG(command.mProgram->GetPassAttr().size() == 2, "command.mProgram->GetPassAttr().size() == 2. {0}", command.mProgram->GetPassAttr().size());
     ASSERT_LOG(command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(0).vRenderType);
@@ -474,42 +474,42 @@ void Render::StartRender()
     }
 
     //  ³õÊ¼»¯ GBuffer
-    if (_gbuffer.mPositionTexture == 0)
+    if (_bufferG.mPositionTexture == 0)
     {
-        ASSERT_LOG(_gbuffer.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _gbuffer.mPositionTexture);
-        ASSERT_LOG(_gbuffer.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _gbuffer.mSpecularTexture);
-        ASSERT_LOG(_gbuffer.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _gbuffer.mDiffuseTexture);
-        ASSERT_LOG(_gbuffer.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _gbuffer.mNormalTexture);
-        ASSERT_LOG(_gbuffer.mDepthBuffer == 0, "_gbuffer.mDepthBuffer: {0}", _gbuffer.mDepthBuffer);
+        ASSERT_LOG(_bufferG.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _bufferG.mPositionTexture);
+        ASSERT_LOG(_bufferG.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _bufferG.mSpecularTexture);
+        ASSERT_LOG(_bufferG.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _bufferG.mDiffuseTexture);
+        ASSERT_LOG(_bufferG.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _bufferG.mNormalTexture);
+        ASSERT_LOG(_bufferG.mDepthBuffer == 0, "_gbuffer.mDepthBuffer: {0}", _bufferG.mDepthBuffer);
 
-        glGenTextures(4, &_gbuffer.mPositionTexture);
-        glGenRenderbuffers(1,&_gbuffer.mDepthBuffer);
+        glGenTextures(4, &_bufferG.mPositionTexture);
+        glGenRenderbuffers(1,&_bufferG.mDepthBuffer);
 
         auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
         auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
 
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mPositionTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferG.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mSpecularTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferG.mSpecularTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mDiffuseTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferG.mDiffuseTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _gbuffer.mNormalTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferG.mNormalTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -517,7 +517,7 @@ void Render::StartRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        glBindRenderbuffer(GL_RENDERBUFFER, _gbuffer.mDepthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _bufferG.mDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }

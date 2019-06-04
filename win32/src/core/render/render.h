@@ -110,7 +110,7 @@ private:
     //  ÕıÏòäÖÈ¾
     uint _uboLightForward[3];
     //  ÑÓ³ÙäÖÈ¾
-    GBuffer _gbuffer;
+    GBuffer _bufferG;
 
     //  ×´Ì¬
     RenderState _renderState;
