@@ -206,18 +206,12 @@ void Render::RenderCamera()
     BakeLightDepthMap();
 
     //  ÑÓ³ÙäÖÈ¾
-    if (!IsEmptyQueueArray(_deferredQueues))
-    {
-        _renderInfo.mPass = nullptr;
-        RenderDeferred();
-    }
+    _renderInfo.mPass = nullptr;
+    RenderDeferred();
 
     //  ÕýÏòäÖÈ¾
-    if (!IsEmptyQueueArray(_forwardQueues))
-    {
-        _renderInfo.mPass = nullptr;
-        RenderForward();
-    }
+    _renderInfo.mPass = nullptr;
+    RenderForward();
 
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
@@ -442,16 +436,6 @@ void Render::BindUBOLightForward()
     {
         Shader::SetTexture2D(_renderInfo.mPass->GLID, SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _lightQueues.at(Light::Type::kSPOT).at(i).mLight->GetSMP(), _renderInfo.mTexBase++);
     }
-}
-
-template <class T, int N>
-bool Render::IsEmptyQueueArray(const std::array<T, N> & ary)
-{
-    for (auto & queue : ary)
-    {
-        if (!queue.empty()) { return false; }
-    }
-    return true;
 }
 
 void Render::Bind(const CameraInfo * camera)

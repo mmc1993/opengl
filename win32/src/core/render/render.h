@@ -130,9 +130,6 @@ private:
     void PackUBOLightForward();
     void BindUBOLightForward();
 
-    template <class T, int N>
-    bool IsEmptyQueueArray(const std::array<T, N> & ary);
-
 private:
     RenderTarget    _renderTarget[2];
     MatrixStack     _matrixStack;
