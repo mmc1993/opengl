@@ -18,20 +18,6 @@ public:
         kSPOT,
     };
 
-    struct CameraInfo {
-		enum Flag {
-			kFLAG0 = 0x1,	kFLAG1 = 0x2,	kFLAG2 = 0x4,	kFLAG3 = 0x8,
-			kFLAG4 = 0x10,	kFLAG5 = 0x20,	kFLAG6 = 0x30,	kFLAG7 = 0x40,
-		};
-
-		size_t mFlag;
-		size_t mOrder;
-		Camera * mCamera;
-        CameraInfo(): mCamera(nullptr), mOrder(0), mFlag(0) { }
-        CameraInfo(Camera * camera, size_t flag, size_t order) 
-			: mCamera(camera), mFlag(flag), mOrder(order) { }
-    };
-
     //  渲染信息
 	struct RenderInfo {
         //  记录当前批次顶点数
@@ -49,7 +35,7 @@ public:
         //  当前绑定的pass
         const Pass * mPass;
         //  当前绑定的camera
-        const CameraInfo * mCamera;
+        const CameraCommand * mCamera;
 		RenderInfo()
             : mPass(nullptr)
             , mCamera(nullptr)
@@ -88,15 +74,10 @@ public:
 
 	MatrixStack & GetMatrixStack();
 
-    //  相机
-    void AddCamera(Camera * camera, size_t flag, size_t order = ~0);
-	Camera *GetCamera(size_t order);
-	void DelCamera(Camera * camera);
-	void DelCamera(size_t order);
-
     //  渲染
 	void RenderOnce();
 	void PostCommand(const Shader * shader, const RenderCommand & command);
+    void PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command);
 	const RenderInfo & GetRenderInfo() const { return _renderInfo; }
 
 private:
@@ -104,7 +85,7 @@ private:
 
     //  Bind Function
     bool Bind(const Pass * pass);
-    void Bind(const CameraInfo * camera);
+    void Bind(const CameraCommand * command);
 
     //  Post Function
     void Post(const Light * light);
@@ -135,9 +116,6 @@ private:
     MatrixStack     _matrixStack;
 	RenderInfo      _renderInfo;
 
-    //  相机列表
-    std::vector<CameraInfo> _cameraInfos;
-
     //	阴影烘培队列
     ObjectCommandQueue _shadowCommands;
     //  方向光队列
@@ -153,5 +131,9 @@ private:
     uint _uboLightForward[3];
     //  延迟渲染
     GBuffer _gbuffer;
+
+
+    //  新队列
+    CameraCommandQueue _cameraQueue;
 };
 

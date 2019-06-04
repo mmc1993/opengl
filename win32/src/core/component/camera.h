@@ -4,29 +4,29 @@
 
 class Camera: public Component {
 public:
-	enum Type {
+	enum TypeEnum {
 		//	Õý½»
 		kORTHOGONAL,
 		//	Í¸ÊÓ
 		kPERSPECTIVE,
 	};
 
+    enum MaskEnum {
+        kMASK0 = 0x1,   kMASK1 = 0x2,   kMASK2 = 0x4,   kMASK3 = 0x8,
+        kMASK4 = 0x10,  kMASK5 = 0x20,  kMASK6 = 0x30,  kMASK7 = 0x40,
+    };
+
 	union Info
 	{
 		struct Ortho {
-			float l;
-			float r;
-			float t;
-			float b;
-			float n;
-			float f;
+			float l, r, t, b;
+			float n, f;
 		} mOrtho;
+
 		struct Persp {
 			float fov;
-			float w;
-			float h;
-			float n;
-			float f;
+			float w, h;
+			float n, f;
 		} mPersp;
 	};
 
@@ -38,10 +38,15 @@ public:
     void LookAt(const glm::vec3 & pos, 
 				const glm::vec3 & eye, 
 				const glm::vec3 & up);
+
+    void SetMask(const uint mask);
+    void SetOrder(const uint order);
 	void SetEye(const glm::vec3 & eye);
 	void SetPos(const glm::vec3 & pos);
 	void SetViewport(const glm::vec4 & viewport);
 
+    uint GetMask() const;
+    uint GetOrder() const;
 	const glm::vec3 & GetUp() const;
 	const glm::vec3 & GetEye() const;
 	const glm::vec3 & GetPos() const;
@@ -51,14 +56,16 @@ public:
 
 	virtual void OnAdd() override {}
 	virtual void OnDel() override {}
-	virtual void OnUpdate(float dt) override {}
+    virtual void OnUpdate(float dt) override;
 
 private:
     void Update() const;
 
 private:
-	Type _type;
 	Info _info;
+    uint _mask;
+    uint _order;
+    TypeEnum _type;
     glm::vec4 _viewport;
     glm::vec3 _eye, _pos, _up;
 

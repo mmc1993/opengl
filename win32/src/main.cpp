@@ -50,7 +50,15 @@ private:
 			glm::vec3(0, 10, 10),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0));
-		Global::Ref().RefRender().AddCamera(camera, Render::CameraInfo::kFLAG0, 0);
+        camera->SetMask(Camera::kMASK0);
+        camera->SetOrder(0);
+
+        auto object = new Object();
+        object->AddComponent(camera);
+
+        Global::Ref().RefObject().AddChild(object);
+
+        _mainCamera = camera;
 	}
 
 	void InitAssets()
@@ -191,14 +199,13 @@ private:
 		}
 		else
 		{
-			auto camera = Global::Ref().RefRender().GetCamera(0);
 			auto cos = std::acos(glm::dot(glm::vec2(1, 0), glm::normalize(v)));
 			cos = v.y < 0 ? cos : -cos;
 
-			auto right = glm::cross(camera->GetEye(), camera->GetUp());
-			auto step = glm::angleAxis(cos, camera->GetEye()) * right;
-			auto look = glm::normalize(camera->GetEye() + step);
-			_axis = glm::normalize(glm::cross(camera->GetEye(), look));
+			auto right = glm::cross(_mainCamera->GetEye(), _mainCamera->GetUp());
+			auto step = glm::angleAxis(cos, _mainCamera->GetEye()) * right;
+			auto look = glm::normalize(_mainCamera->GetEye() + step);
+			_axis = glm::normalize(glm::cross(_mainCamera->GetEye(), look));
 
 			auto s = glm::length(v) / glm::length(l);
 			_speed = s * AppWindow::s_MAX_SPEED;
@@ -207,21 +214,20 @@ private:
 	
 	void OnTimerUpdate()
 	{
-		auto camera = Global::Ref().RefRender().GetCamera(0);
 		if (_axis.x != 0 || _axis.y != 0 || _axis.z != 0)
 		{
-			camera->SetEye(glm::quat(glm::angleAxis(_speed, _axis)) * camera->GetEye());
+            _mainCamera->SetEye(glm::quat(glm::angleAxis(_speed, _axis)) * _mainCamera->GetEye());
 		}
 		if (_direct != 0)
 		{
-			auto pos = camera->GetPos();
+			auto pos = _mainCamera->GetPos();
 			if ((_direct & kUP) != 0) { pos.y += 1 * 0.1f; }
 			if ((_direct & kDOWN) != 0) { pos.y -= 1 * 0.1f; }
-			if ((_direct & kFRONT) != 0) { pos += camera->GetEye() * 0.1f; }
-			if ((_direct & kBACK) != 0) { pos -= camera->GetEye() * 0.1f; }
-			if ((_direct & kLEFT) != 0) { pos += glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
-			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(camera->GetUp(), camera->GetEye()) * 0.1f; }
-			camera->SetPos(pos);
+			if ((_direct & kFRONT) != 0) { pos += _mainCamera->GetEye() * 0.1f; }
+			if ((_direct & kBACK) != 0) { pos -= _mainCamera->GetEye() * 0.1f; }
+			if ((_direct & kLEFT) != 0) { pos += glm::cross(_mainCamera->GetUp(), _mainCamera->GetEye()) * 0.1f; }
+			if ((_direct & kRIGHT) != 0) { pos -= glm::cross(_mainCamera->GetUp(), _mainCamera->GetEye()) * 0.1f; }
+            _mainCamera->SetPos(pos);
 		}
 
         _lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f,
@@ -258,6 +264,8 @@ private:
     };
 	
 private:
+    Camera * _mainCamera;
+
 	std::vector<LightDirect *> _lightDirects;
 	std::vector<LightPoint *> _lightPoints;
 	std::vector<LightSpot *> _lightSpots;

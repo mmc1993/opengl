@@ -75,13 +75,27 @@ private:
 
 //  用于渲染的命令结构
 struct RenderCommand {
-    enum Type {
+    enum TypeEnum {
+        kMATERIAL,
+        kCAMERA,
         kOBJECT,
         kLIGHT,
     };
-    RenderCommand(Type type): mType(type) 
+    RenderCommand(TypeEnum type): mType(type) 
     { }
-    Type mType;
+    TypeEnum mType;
+};
+
+struct CameraCommand : public RenderCommand {
+    CameraCommand(): RenderCommand(kCAMERA)
+    { }
+    glm::vec4 mViewport;
+    glm::mat4 mProj;
+    glm::mat4 mView;
+    glm::vec3 mPos;
+    glm::vec3 mEye;
+    uint mOrder;
+    uint mMask;
 };
 
 struct ObjectCommand: public RenderCommand {
@@ -104,5 +118,6 @@ struct LightCommand: public RenderCommand {
     glm::mat4 mTransform;
 };
 
+using CameraCommandQueue = std::vector<CameraCommand>;
 using ObjectCommandQueue = std::vector<ObjectCommand>;
 using LightCommandQueue = std::vector<LightCommand>;

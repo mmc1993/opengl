@@ -46,47 +46,21 @@ MatrixStack & Render::GetMatrixStack()
     return _matrixStack;
 }
 
-void Render::AddCamera(Camera * camera, size_t flag, size_t order)
-{
-    ASSERT_LOG(order == ~0 || GetCamera(order) == nullptr, "AddCamera Flag Order: {0}, {1}", flag, order);
-	
-    auto fn = [order](const CameraInfo & info) { return order <= info.mOrder; };
-	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	_cameraInfos.insert(it, CameraInfo(camera, flag, order));
-}
-
-Camera * Render::GetCamera(size_t order)
-{
-	auto fn = [order](const CameraInfo & info) { return info.mOrder == order; };
-	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	return it != _cameraInfos.end() ? it->mCamera : nullptr;
-}
-
-void Render::DelCamera(Camera * camera)
-{
-	auto fn = [camera](const CameraInfo & info) { return info.mCamera == camera; };
-	auto it = std::find_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	if (it != _cameraInfos.end()) _cameraInfos.erase(it);
-	delete camera;
-}
-
-void Render::DelCamera(size_t order)
-{
-	auto fn = [order](const CameraInfo & info) { return info.mOrder == order; };
-	auto it = std::remove_if(_cameraInfos.begin(), _cameraInfos.end(), fn);
-	if (it != _cameraInfos.end())
-	{ DelCamera(it->mCamera); }
-}
-
 void Render::RenderOnce()
 {
     StartRender();
-	for (auto & camera : _cameraInfos)
-	{
-		Bind(&camera);
-		RenderCamera();
-		Bind((CameraInfo *)nullptr);
-	}
+
+    std::sort(_cameraQueue.begin(), _cameraQueue.end(), [](const auto & a, const auto & b)
+        {
+            return a.mOrder < b.mOrder;
+        });
+
+    for (const auto & command : _cameraQueue)
+    {
+        Bind(&command);
+        RenderCamera();
+        Bind((CameraCommand *)nullptr);
+    }
 	ClearCommands();
 }
 
@@ -117,6 +91,22 @@ void Render::PostCommand(const Shader * shader, const RenderCommand & command)
             auto & cmd = reinterpret_cast<const LightCommand &>(command);
             _lightQueues.at(cmd.mLight->GetType()).push_back(cmd);
         }
+        break;
+    }
+}
+
+void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command)
+{
+    switch (type)
+    {
+    case RenderCommand::TypeEnum::kMATERIAL:
+        break;
+    case RenderCommand::TypeEnum::kCAMERA:
+        {
+            _cameraQueue.push_back((const CameraCommand &)command);
+        }
+        break;
+    case RenderCommand::TypeEnum::kLIGHT:
         break;
     }
 }
@@ -152,7 +142,7 @@ void Render::BakeLightDepthMap(Light * light)
 
 void Render::SortLightCommands()
 {
-    auto & cameraPos = _renderInfo.mCamera->mCamera->GetPos();
+    auto & cameraPos = _renderInfo.mCamera->mPos;
 
     _renderInfo.mCountUseLightDirect = std::min(LIMIT_LIGHT_DIRECT, _lightQueues.at(Light::Type::kDIRECT).size());
 
@@ -294,7 +284,7 @@ void Render::RenderForwardCommands(const ObjectCommandQueue & commands)
 {
 	for (const auto & command : commands)
 	{
-		if ((_renderInfo.mCamera->mFlag & command.mCameraFlag) != 0)
+		if ((_renderInfo.mCamera->mMask & command.mCameraFlag) != 0)
 		{
 			if (Bind(command.mPass)) 
             {
@@ -317,7 +307,7 @@ void Render::RenderDeferredCommands(const ObjectCommandQueue & commands)
 {
     for (auto & command : commands)
     {
-        if ((_renderInfo.mCamera->mFlag & command.mCameraFlag) != 0)
+        if ((_renderInfo.mCamera->mMask & command.mCameraFlag) != 0)
         {
             Bind(command.mPass); 
             
@@ -438,17 +428,17 @@ void Render::BindUBOLightForward()
     }
 }
 
-void Render::Bind(const CameraInfo * camera)
+void Render::Bind(const CameraCommand * command)
 {
-	if (camera != nullptr)
+	if (command != nullptr)
 	{
 		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
 		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, camera->mCamera->GetView());
-		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, camera->mCamera->GetProj());
-		glViewport((int)camera->mCamera->GetViewport().x, (int)camera->mCamera->GetViewport().y,
-				   (int)camera->mCamera->GetViewport().z, (int)camera->mCamera->GetViewport().w);
-        _renderInfo.mCamera = camera;
+		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, command->mView);
+		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
+		glViewport((int)command->mViewport.x, (int)command->mViewport.y,
+				   (int)command->mViewport.z, (int)command->mViewport.w);
+        _renderInfo.mCamera = command;
 	}
 	else
 	{
@@ -686,6 +676,7 @@ void Render::Post(const Material & material)
 
 void Render::ClearCommands()
 {
+    _cameraQueue.clear();
 	_shadowCommands.clear();
     for (auto & queue : _lightQueues) { queue.clear(); }
 	for (auto & queue : _forwardQueues) { queue.clear(); }
@@ -709,8 +700,8 @@ void Render::Post(const glm::mat4 & transform)
 	Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_GAME_TIME, glfwGetTime());
     if (_renderInfo.mCamera != nullptr)
     {
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_POS, _renderInfo.mCamera->mCamera->GetPos());
-        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_EYE, _renderInfo.mCamera->mCamera->GetEye());
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_POS, _renderInfo.mCamera->mPos);
+        Shader::SetUniform(_renderInfo.mPass->GLID, UNIFORM_CAMERA_EYE, _renderInfo.mCamera->mEye);
     }
 }
 
