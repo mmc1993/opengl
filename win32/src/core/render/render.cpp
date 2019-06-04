@@ -244,17 +244,17 @@ void Render::RenderDeferred()
 
     for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
     {
-        RenderLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT);
     }
 
     _renderTarget[1].Ended();
@@ -293,7 +293,7 @@ void Render::RenderDeferredCommands(const MaterialCommandQueue & commands)
     }
 }
 
-void Render::RenderLightVolume(const LightCommand & command, bool isRenderShadow)
+void Render::RenderDeferredLightVolume(const LightCommand & command, bool isRenderShadow)
 {
     if (Bind(command.mProgram))
     {
@@ -622,12 +622,12 @@ void Render::Post(const uint subPass)
 
 void Render::Post(const GLMaterial * material)
 {
-    auto texturePos = _renderState.mTexBase;
     for (auto i = 0; material->GetTexture2Ds(i) != nullptr; ++i)
     {
         _renderState.mProgram->BindUniformTex2D(
             material->GetTexture2Ds(i)->mName,
-            material->GetTexture2Ds(i)->mTexture->GetID(), texturePos++);
+            material->GetTexture2Ds(i)->mTexture->GetID(), 
+            _renderState.mTexBase + i);
     }
     _renderState.mProgram->BindUniformNumber(UNIFORM_MATERIAL_SHININESS, material->GetShininess());
 }

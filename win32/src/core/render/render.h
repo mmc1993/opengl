@@ -95,7 +95,7 @@ private:
     void RenderDeferred();
 	void RenderForwardCommands(const MaterialCommandQueue & commands);
 	void RenderDeferredCommands(const MaterialCommandQueue & commands);
-    void RenderLightVolume(const LightCommand & command, bool isRenderShadow);
+    void RenderDeferredLightVolume(const LightCommand & command, bool isRenderShadow);
 
     //  正向渲染相关
     void PackUBOLightForward();
