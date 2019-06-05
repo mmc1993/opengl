@@ -18,6 +18,10 @@ Render::~Render()
         ASSERT_LOG(_uboLightForward[Light::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[Light::kPOINT]);
         ASSERT_LOG(_uboLightForward[Light::kSPOT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[Light::kSPOT]);
         glDeleteBuffers(3, _uboLightForward);
+
+        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapDirect);
+        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapPoint);
+        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapSpot);
     }
 
     if (_bufferG.mPositionTexture != 0)
@@ -471,9 +475,53 @@ void Render::StartRender()
         glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[Light::kSPOT]);
         glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        //  深度贴图初始化
+        auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
+        auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
+        glGenTextures(LIMIT_LIGHT_DIRECT, _shadowMapDirect);
+        glGenTextures(LIMIT_LIGHT_POINT, _shadowMapPoint);
+        glGenTextures(LIMIT_LIGHT_SPOT, _shadowMapSpot);
+        for (auto i = 0; i != LIMIT_LIGHT_DIRECT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_2D, _shadowMapDirect[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        for (auto i = 0; i != LIMIT_LIGHT_POINT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _shadowMapPoint[i]);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+        for (auto i = 0; i != LIMIT_LIGHT_SPOT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_2D, _shadowMapSpot[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    //  初始化 GBuffer
     if (_bufferG.mPositionTexture == 0)
     {
         ASSERT_LOG(_bufferG.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _bufferG.mPositionTexture);

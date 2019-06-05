@@ -124,5 +124,10 @@ private:
     std::array<MaterialCommandQueue, 4> _forwardQueues;
     //  延迟渲染队列
     std::array<MaterialCommandQueue, 4> _deferredQueues;
+
+    //  深度贴图
+    uint _shadowMapDirect[LIMIT_LIGHT_DIRECT];
+    uint _shadowMapPoint[LIMIT_LIGHT_POINT];
+    uint _shadowMapSpot[LIMIT_LIGHT_SPOT];
 };
 
