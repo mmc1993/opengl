@@ -18,9 +18,6 @@ public:
 	};
 
 private:
-    static std::weak_ptr<GLMesh> s_directVolmue;
-    static std::weak_ptr<GLMesh> s_pointVolmue;
-    static std::weak_ptr<GLMesh> s_spotVolmue;
     std::shared_ptr<GLMesh> NewVolume();
 
 public:

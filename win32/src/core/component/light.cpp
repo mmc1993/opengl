@@ -5,10 +5,6 @@
 #include "../res/res_manager.h"
 #include "../raw/raw_manager.h"
 
-std::weak_ptr<GLMesh> Light::s_spotVolmue;
-std::weak_ptr<GLMesh> Light::s_pointVolmue;
-std::weak_ptr<GLMesh> Light::s_directVolmue;
-
 std::shared_ptr<GLMesh> Light::NewVolume()
 {
     //  考虑把这些动态生成的网格存储在文件里.
@@ -16,114 +12,90 @@ std::shared_ptr<GLMesh> Light::NewVolume()
     {
     case TypeEnum::kDIRECT:
         {
-            if (s_directVolmue.expired())
-            {
-                auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-                auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
-                auto mesh = std::make_shared<GLMesh>();
-                mesh->Init({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
-                             { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } },
-                             { 0, 2, 1, 0, 3, 2 }, GLMesh::Vertex::EnableEnum::kV);
-                s_directVolmue = mesh;
-                return s_directVolmue.lock();
-            }
-            return s_directVolmue.lock();
+            auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+            auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
+            auto mesh = std::make_shared<GLMesh>();
+            mesh->Init({ { { -1.0f, -1.0f, 0.0f } }, { {  1.0f, -1.0f, 0.0f } },
+                            { {  1.0f,  1.0f, 0.0f } }, { { -1.0f,  1.0f, 0.0f } } },
+                            { 0, 2, 1, 0, 3, 2 }, GLMesh::Vertex::EnableEnum::kV);
         }
         break;
     case TypeEnum::kPOINT:
         {
-            if (s_pointVolmue.expired())
+            const auto N0 = 32;
+            const auto N1 = N0 * 2-2;
+            std::vector<uint>           indexs;
+            std::vector<GLMesh::Vertex> vertexs;
+
+            vertexs.emplace_back(glm::vec3(0, 1, 0));
+            for (auto i = 0; i != N1; ++i)
             {
-                const auto N0 = 32;
-                const auto N1 = N0 * 2-2;
-                std::vector<uint>           indexs;
-                std::vector<GLMesh::Vertex> vertexs;
-
-                vertexs.emplace_back(glm::vec3(0, 1, 0));
-                for (auto i = 0; i != N1; ++i)
-                {
-                    indexs.emplace_back(0);
-                    indexs.emplace_back((i    ) % N1 + 1);
-                    indexs.emplace_back((i + 1) % N1 + 1);
-                }
-
-                auto step = static_cast<float>(M_PI / (N0 - 1));
-                for (auto i = 1; i != N0 - 1; ++i)
-                {
-                    auto x = std::sin(step * i);
-                    auto y = std::cos(step * i);
-                    auto base = (i - 2) * N1 + 1;
-                    for (auto j = 0; j != N1; ++j)
-                    {
-                        if (i != 1)
-                        {
-                            indexs.push_back(base + j);
-                            indexs.push_back(base + N1 + j);
-                            indexs.push_back(base + N1 + (j + 1) % N1);
-
-                            indexs.push_back(base + j);
-                            indexs.push_back(base + N1 + (j + 1) % N1);
-                            indexs.push_back(base + (j + 1) % N1);
-                        }
-                        auto l = x;
-                        auto x = std::sin(step * j) * l;
-                        auto z = std::cos(step * j) * l;
-                        vertexs.emplace_back(glm::vec3(x, y, z));
-                    }
-                }
-
-                auto base = (N0 - 3) * N1 + 1;
-                for (auto i = 0; i != N1; ++i)
-                {
-                    indexs.emplace_back(base + i);
-                    indexs.emplace_back(base + N1);
-                    indexs.emplace_back(base + (i + 1) % N1);
-                }
-
-                vertexs.emplace_back(glm::vec3(0, -1, 0));
-
-                auto mesh = std::make_shared<GLMesh>();
-                mesh->Init(vertexs, indexs, GLMesh::Vertex::kV);
-                s_pointVolmue = mesh;
-                return s_pointVolmue.lock();
+                indexs.emplace_back(0);
+                indexs.emplace_back((i    ) % N1 + 1);
+                indexs.emplace_back((i + 1) % N1 + 1);
             }
-            return s_pointVolmue.lock();
+
+            auto step = static_cast<float>(M_PI / (N0 - 1));
+            for (auto i = 1; i != N0 - 1; ++i)
+            {
+                auto x = std::sin(step * i);
+                auto y = std::cos(step * i);
+                auto base = (i - 2) * N1 + 1;
+                for (auto j = 0; j != N1; ++j)
+                {
+                    if (i != 1)
+                    {
+                        indexs.push_back(base + j);
+                        indexs.push_back(base + N1 + j);
+                        indexs.push_back(base + N1 + (j + 1) % N1);
+
+                        indexs.push_back(base + j);
+                        indexs.push_back(base + N1 + (j + 1) % N1);
+                        indexs.push_back(base + (j + 1) % N1);
+                    }
+                    auto l = x;
+                    auto x = std::sin(step * j) * l;
+                    auto z = std::cos(step * j) * l;
+                    vertexs.emplace_back(glm::vec3(x, y, z));
+                }
+            }
+
+            auto base = (N0 - 3) * N1 + 1;
+            for (auto i = 0; i != N1; ++i)
+            {
+                indexs.emplace_back(base + i);
+                indexs.emplace_back(base + N1);
+                indexs.emplace_back(base + (i + 1) % N1);
+            }
+
+            vertexs.emplace_back(glm::vec3(0, -1, 0));
         }
         break;
     case TypeEnum::kSPOT:
         {
-            if (s_spotVolmue.expired())
+            const auto N = 32;
+            std::vector<uint>           indexs;
+            std::vector<GLMesh::Vertex> vertexs;
+
+            vertexs.emplace_back(glm::vec3(0, 0, 0));
+            auto step = static_cast<float>(M_PI*2/N);
+            for (auto i = 0; i != N; ++i)
             {
-                const auto N = 32;
-                std::vector<uint>           indexs;
-                std::vector<GLMesh::Vertex> vertexs;
+                auto x = std::sin(step * i);
+                auto y = std::cos(step * i);
+                vertexs.emplace_back(glm::vec3(x, y, 1));
 
-                vertexs.emplace_back(glm::vec3(0, 0, 0));
-                auto step = static_cast<float>(M_PI*2/N);
-                for (auto i = 0; i != N; ++i)
+                indexs.emplace_back(0);
+                indexs.emplace_back( i + 1);
+                indexs.emplace_back((i + 1) % N + 1);
+
+                if (i != 0)
                 {
-                    auto x = std::sin(step * i);
-                    auto y = std::cos(step * i);
-                    vertexs.emplace_back(glm::vec3(x, y, 1));
-
-                    indexs.emplace_back(0);
-                    indexs.emplace_back( i + 1);
                     indexs.emplace_back((i + 1) % N + 1);
-
-                    if (i != 0)
-                    {
-                        indexs.emplace_back((i + 1) % N + 1);
-                        indexs.emplace_back( i + 1);
-                        indexs.emplace_back(1);
-                    }
+                    indexs.emplace_back( i + 1);
+                    indexs.emplace_back(1);
                 }
-
-                auto mesh = std::make_shared<GLMesh>();
-                mesh->Init(vertexs, indexs, GLMesh::Vertex::kV);
-                s_spotVolmue = mesh;
-                return s_spotVolmue.lock();
             }
-            return s_spotVolmue.lock();
         }
         break;
     }
@@ -202,10 +174,7 @@ void LightDirect::OnUpdate(float dt)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void LightDirect::OpenShadow(
-	const glm::vec2 & orthoX,
-	const glm::vec2 & orthoY,
-	const glm::vec2 & orthoZ)
+void LightDirect::OpenShadow(const glm::vec2 & orthoX, const glm::vec2 & orthoY, const glm::vec2 & orthoZ)
 {
     if (GetUBO() == 0)
     {
