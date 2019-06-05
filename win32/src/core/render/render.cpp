@@ -12,12 +12,12 @@ Render::Render()
 
 Render::~Render()
 {
-    if (_uboLightForward[Light::kDIRECT] != 0)
+    if (_lightForwardUBO[Light::kDIRECT] != 0)
     {
-        ASSERT_LOG(_uboLightForward[Light::kDIRECT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[Light::kDIRECT]);
-        ASSERT_LOG(_uboLightForward[Light::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[Light::kPOINT]);
-        ASSERT_LOG(_uboLightForward[Light::kSPOT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[Light::kSPOT]);
-        glDeleteBuffers(3, _uboLightForward);
+        ASSERT_LOG(_lightForwardUBO[Light::kDIRECT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _lightForwardUBO[Light::kDIRECT]);
+        ASSERT_LOG(_lightForwardUBO[Light::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _lightForwardUBO[Light::kPOINT]);
+        ASSERT_LOG(_lightForwardUBO[Light::kSPOT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _lightForwardUBO[Light::kSPOT]);
+        glDeleteBuffers(3, _lightForwardUBO);
 
         glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapDirect);
         glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapPoint);
@@ -105,13 +105,13 @@ void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand
     }
 }
 
-void Render::BakeLightDepthMap(Light * light)
+void Render::BakeLightDepthMap(Light * light, uint shadow)
 {
     _renderState.mProgram = nullptr;
     _renderTarget[0].Start();
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-    for (auto i = 0; light->NextDrawShadow(i, &_renderTarget[0]); ++i)
+    for (auto i = 0; light->NextDrawShadow(i, shadow, &_renderTarget[0]); ++i)
 	{
         glClear(GL_DEPTH_BUFFER_BIT);
 		for (auto & command : _shadowQueue)
@@ -155,15 +155,15 @@ void Render::BakeLightDepthMap()
 {
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kDIRECT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::kDIRECT).at(i).mLight, _shadowMapDirect[i]);
     }
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kPOINT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::kPOINT).at(i).mLight, _shadowMapPoint[i]);
     }
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kSPOT).at(i).mLight);
+        BakeLightDepthMap(_lightQueues.at(Light::kSPOT).at(i).mLight, _shadowMapSpot[i]);
     }
     ASSERT_LOG(_renderState.mCamera != nullptr, "_renderState.mCamera != nullptr");
     glViewport(
@@ -248,17 +248,17 @@ void Render::RenderDeferred()
 
     for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _shadowMapDirect[i]: 0);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _shadowMapPoint[i] : 0);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _shadowMapSpot[i] : 0);
     }
 
     _renderTarget[1].Ended();
@@ -297,7 +297,7 @@ void Render::RenderDeferredCommands(const MaterialCommandQueue & commands)
     }
 }
 
-void Render::RenderDeferredLightVolume(const LightCommand & command, bool isRenderShadow)
+void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow)
 {
     if (Bind(command.mProgram))
     {
@@ -309,20 +309,20 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, bool isRend
     ASSERT_LOG(command.mProgram->GetPassAttr().size() == 2, "command.mProgram->GetPassAttr().size() == 2. {0}", command.mProgram->GetPassAttr().size());
     ASSERT_LOG(command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(0).vRenderType);
     ASSERT_LOG(command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(1).vRenderType);
-    if (isRenderShadow)
+    if (shadow != 0)
     {
         _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
         _renderState.mProgram->BindUniformTex3D(nullptr, 0, _renderState.mTexBase + 4);
         switch (command.mLight->GetType())
         {
-        case Light::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
-        case Light::kPOINT: _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
-        case Light::kSPOT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), command.mLight->GetSMP(), _renderState.mTexBase + 4); break;
+        case Light::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
+        case Light::kPOINT: _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
+        case Light::kSPOT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
         }
     }
     Post(command.mLight);
     Post(command.mTransform);
-    Post(isRenderShadow ? 0u : 1u/*SubPass*/);
+    Post(shadow != 0 ? 0u : 1u/*SubPass*/);
     Post(DrawTypeEnum::kINDEX, command.mMesh);
 }
 
@@ -333,7 +333,7 @@ void Render::PackUBOLightForward()
     const auto SPOT_UBO_LEN = LightSpot::GetUBOLength();
 
     auto offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[Light::kDIRECT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kDIRECT]);
     for (auto i = 0u; i != std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kDIRECT).at(i).mLight->GetUBO());
@@ -343,7 +343,7 @@ void Render::PackUBOLightForward()
     }
 
     offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[Light::kPOINT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kPOINT]);
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kPOINT).at(i).mLight->GetUBO());
@@ -353,7 +353,7 @@ void Render::PackUBOLightForward()
     }
 
     offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _uboLightForward[Light::kSPOT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kSPOT]);
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kSPOT).at(i).mLight->GetUBO());
@@ -379,9 +379,9 @@ void Render::BindUBOLightForward()
     glUniformBlockBinding(_renderState.mProgram->GetID(), indexPoint, UniformBlockEnum::kLIGHT_POINT);
     glUniformBlockBinding(_renderState.mProgram->GetID(), indexSpot, UniformBlockEnum::kLIGHT_SPOT);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _uboLightForward[Light::kDIRECT]);
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _uboLightForward[Light::kPOINT]);
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _uboLightForward[Light::kSPOT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _lightForwardUBO[Light::kDIRECT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _lightForwardUBO[Light::kPOINT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _lightForwardUBO[Light::kSPOT]);
 
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_DIRECT_, countDirect);
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, countPoint);
@@ -389,15 +389,15 @@ void Render::BindUBOLightForward()
 
     for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _lightQueues.at(Light::kDIRECT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _shadowMapDirect[i], _renderState.mTexBase++);
     }
     for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
     {
-        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _lightQueues.at(Light::kPOINT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _shadowMapPoint[i], _renderState.mTexBase++);
     }
     for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _lightQueues.at(Light::kSPOT).at(i).mLight->GetSMP(), _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _shadowMapSpot[i], _renderState.mTexBase++);
     }
 }
 
@@ -461,18 +461,18 @@ void Render::Post(const Light * light)
 
 void Render::StartRender()
 {
-    if (_uboLightForward[Light::kDIRECT] == 0)
+    if (_lightForwardUBO[Light::kDIRECT] == 0)
     {
-        ASSERT_LOG(_uboLightForward[Light::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _uboLightForward[Light::kDIRECT]);
-        ASSERT_LOG(_uboLightForward[Light::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _uboLightForward[Light::kPOINT]);
-        ASSERT_LOG(_uboLightForward[Light::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _uboLightForward[Light::kSPOT]);
+        ASSERT_LOG(_lightForwardUBO[Light::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _lightForwardUBO[Light::kDIRECT]);
+        ASSERT_LOG(_lightForwardUBO[Light::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _lightForwardUBO[Light::kPOINT]);
+        ASSERT_LOG(_lightForwardUBO[Light::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _lightForwardUBO[Light::kSPOT]);
 
-        glGenBuffers(3, _uboLightForward);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[Light::kDIRECT]);
+        glGenBuffers(3, _lightForwardUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kDIRECT]);
         glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[Light::kPOINT]);
+        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kPOINT]);
         glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _uboLightForward[Light::kSPOT]);
+        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kSPOT]);
         glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 

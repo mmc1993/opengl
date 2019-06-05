@@ -88,14 +88,14 @@ private:
     //  逐相机渲染
     void SortLightCommands();
     void BakeLightDepthMap();
-    void BakeLightDepthMap(Light * light);
+    void BakeLightDepthMap(Light * light, uint shadow);
 
     void RenderCamera();
     void RenderForward();
     void RenderDeferred();
 	void RenderForwardCommands(const MaterialCommandQueue & commands);
 	void RenderDeferredCommands(const MaterialCommandQueue & commands);
-    void RenderDeferredLightVolume(const LightCommand & command, bool isRenderShadow);
+    void RenderDeferredLightVolume(const LightCommand & command, uint shadow);
 
     //  正向渲染相关
     void PackUBOLightForward();
@@ -107,8 +107,6 @@ private:
 
     //  离屏buffer
     OffSceneBuffer _offSceneBuffer;
-    //  正向渲染
-    uint _uboLightForward[3];
     //  延迟渲染
     GBuffer _bufferG;
 
@@ -129,5 +127,7 @@ private:
     uint _shadowMapDirect[LIMIT_LIGHT_DIRECT];
     uint _shadowMapPoint[LIMIT_LIGHT_POINT];
     uint _shadowMapSpot[LIMIT_LIGHT_SPOT];
+    //  光源数据
+    uint _lightForwardUBO[3];
 };
 

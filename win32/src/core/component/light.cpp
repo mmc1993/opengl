@@ -130,7 +130,7 @@ std::shared_ptr<GLMesh> Light::NewVolume()
     return nullptr;
 }
 
-Light::Light(TypeEnum type): _type(type), _shadowMap(0), _uniformBlock(0)
+Light::Light(TypeEnum type): _type(type), _ubo(0)
 {
     switch (type)
     {
@@ -209,31 +209,16 @@ void LightDirect::OpenShadow(
 {
     if (GetUBO() == 0)
     {
-        glGenBuffers(1, &_uniformBlock);
+        glGenBuffers(1, &_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
         glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    if (GetSMP() == 0)
-    {
-        auto viewW = Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt();
-        auto viewH = Global::Ref().RefCfgManager().At("init")->At("shadow_map", "h")->ToInt();
-
-        glGenTextures(1, &_shadowMap);
-        glBindTexture(GL_TEXTURE_2D, _shadowMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
     _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
 }
 
-bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
+bool LightDirect::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
 {
     if (0 == count)
     {
@@ -244,7 +229,7 @@ bool LightDirect::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, shadow);
     }
     else
     {
@@ -294,35 +279,17 @@ void LightPoint::OpenShadow(const float n, const float f)
 
     if (GetUBO() == 0)
     {
-        glGenBuffers(1, &_uniformBlock);
+        glGenBuffers(1, &_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
         glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    }
-
-    if (GetSMP() == 0)
-    {
-        glGenTextures(1, &_shadowMap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, _shadowMap);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
 	_proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
     mFar = f; mNear = n;
 }
 
-bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
+bool LightPoint::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
 {
     if (count != 0)
     {
@@ -355,7 +322,7 @@ bool LightPoint::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW,  view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, (RenderTarget::TextureType)(RenderTarget::TextureType::k3D + count), GetSMP());
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, (RenderTarget::TextureType)(RenderTarget::TextureType::k3D + count), shadow);
     }
     return count != 6;
 }
@@ -412,28 +379,16 @@ void LightSpot::OpenShadow(const float n, const float f)
 
     if (GetUBO() == 0)
     {
-        glGenBuffers(1, &_uniformBlock);
+        glGenBuffers(1, &_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
         glBufferData(GL_UNIFORM_BUFFER, GetUBOLength(), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    if (GetSMP() == 0)
-    {
-        glGenTextures(1, &_shadowMap);
-        glBindTexture(GL_TEXTURE_2D, _shadowMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewW, viewH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
     _proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
 }
 
-bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
+bool LightSpot::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
 {
     if (count == 0)
     {
@@ -444,7 +399,7 @@ bool LightSpot::NextDrawShadow(uint count, RenderTarget * rt)
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, GetSMP());
+        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, shadow);
     }
     else
     {

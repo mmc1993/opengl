@@ -25,22 +25,15 @@ private:
 
 public:
     Light(TypeEnum type);
-
-    virtual ~Light()
-    {
-        glDeleteBuffers(1, &_uniformBlock);
-        glDeleteTextures(1, &_shadowMap);
-    }
+    virtual ~Light() {  }
 
     virtual void OnAdd() {}
     virtual void OnDel() {}
     virtual void OnUpdate(float dt);
-    virtual bool NextDrawShadow(uint count, RenderTarget * rt) = 0;
+    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) = 0;
 
     const TypeEnum & GetType() const { return _type; }
-    const GLMesh & GetMesh() const { return *_volume; }
-    const uint & GetSMP() const { return _shadowMap; }
-    const uint & GetUBO() const { return _uniformBlock; }
+    const uint     & GetUBO() const { return _ubo; }
     static float CalLightDistance(float k0, float k1, float k2, float s);
 
 public:
@@ -51,15 +44,10 @@ public:
     glm::vec3 mPosition;
 
 protected:
-    glm::mat4 _proj;
-    //  shadow map
-    uint _shadowMap;
-    //  UBO
-    uint _uniformBlock;
-    //  着色器
-    GLProgram * _program;
-    //  光体积
-    GLMesh * _volume;
+    uint        _ubo;
+    glm::mat4   _proj;
+    GLProgram   * _program;
+    GLMesh      * _volume;
 private:
 	TypeEnum _type;
 };
@@ -92,7 +80,7 @@ public:
 					const glm::vec2 & orthoY,	//	上下
 					const glm::vec2 & orthoZ);	//	前后
 
-	virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
+	virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
 
 public:
     glm::vec3 mNormal;
@@ -126,7 +114,7 @@ public:
 
 	void OpenShadow(const float n, const float f);
 
-    virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
+    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
 
 public:
     float mFar, mNear;
@@ -160,7 +148,7 @@ public:
 
 	void OpenShadow(const float n, const float f);
 
-    virtual bool NextDrawShadow(uint count, RenderTarget * rt) override;
+    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
 
 public:
 	glm::vec3 mNormal;
