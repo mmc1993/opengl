@@ -18,7 +18,7 @@ public:
 	};
 
 private:
-    std::shared_ptr<GLMesh> NewVolume();
+    void NewVolume();
 
 public:
     Light(TypeEnum type);

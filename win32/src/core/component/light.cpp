@@ -5,7 +5,7 @@
 #include "../res/res_manager.h"
 #include "../raw/raw_manager.h"
 
-std::shared_ptr<GLMesh> Light::NewVolume()
+void Light::NewVolume()
 {
     //  考虑把这些动态生成的网格存储在文件里.
     switch (_type)
@@ -99,7 +99,6 @@ std::shared_ptr<GLMesh> Light::NewVolume()
         }
         break;
     }
-    return nullptr;
 }
 
 Light::Light(TypeEnum type): _type(type), _ubo(0)
