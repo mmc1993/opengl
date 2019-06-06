@@ -84,7 +84,7 @@ private:
 	void InitObject()
 	{
         auto sprite = new Sprite();
-        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("9f8fe62366b62d4083bd4eb1c9af0604"));
+        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>(Global::Ref().RefRawManager().QueryName("res/demo2/material/scene.mtl")));
 
         auto object = new Object();
         object->AddComponent(sprite);
@@ -259,7 +259,6 @@ int main()
     Global::Ref().Start();
 
     auto renderFPS = Global::Ref().RefCfgManager().At("init")->At("render", "fps")->ToInt();
-
     auto windowX = Global::Ref().RefCfgManager().At("init")->At("window", "x")->ToInt();
     auto windowY = Global::Ref().RefCfgManager().At("init")->At("window", "y")->ToInt();
     auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();

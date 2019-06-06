@@ -255,7 +255,7 @@ Pass Beg
                 outColor += CalculateSpot(i, fragNormal, cameraNormal, v_out_.mUV);
             }
 
-            color_ = vec4(outColor, 1.0f);
+            color_ = vec4(texture(material_.mDiffuse0, v_out_.mUV).rgb, 1.0f);
         }
     FShader End
 Pass End

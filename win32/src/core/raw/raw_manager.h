@@ -145,6 +145,8 @@ public:
     void EndImport();
     void Import(const std::string & url);
 
+    std::string QueryName(const std::string & url) const;
+
     //  将原始数据加载到内存
     Raw * LoadRaw(const std::string & name);
     //  将原始数据从内存卸载

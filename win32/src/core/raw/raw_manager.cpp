@@ -244,6 +244,16 @@ void RawManager::Import(const std::string & url)
     }
 }
 
+std::string RawManager::QueryName(const std::string & url) const
+{
+    auto it = std::find_if(_manifest.mInfos.begin(), _manifest.mInfos.end(), [url](const Manifest::Info & info)
+        {
+            return info.mURL == url;
+        });
+    ASSERT_LOG(it != _manifest.mInfos.end(), "it != _manifest.mInfos.end()");
+    return it->mName;
+}
+
 RawManager::Raw * RawManager::LoadRaw(const std::string & name)
 {
     auto rawIt = _rawObjectMap.find(name);
@@ -896,6 +906,10 @@ GLRes * RawManager::LoadResImage(const std::string & name)
     auto res = new GLTexture2D();
     res->Init(raw->mFormat, raw->mFormat, 
               GL_UNSIGNED_BYTE, raw->mW, raw->mH, raw->mData);
+    res->SetParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    res->SetParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    res->SetParam(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    res->SetParam(GL_TEXTURE_WRAP_T, GL_REPEAT);
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }

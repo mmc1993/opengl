@@ -11,5 +11,5 @@
 [f81dc9c1b16a60e8da11d57f648893b2]=res/demo2/texture/wall3_spacular.png
 [2fe7d0a0a1891543c4a3c23705b12840]=res/demo2/texture/wall3_normal.png
 [152780050248ac7e2ae4cfef6f37a1f0]=res/demo2/scene.obj
-[f65d1da7fc24b5007f71657134cb8b77]=res/demo2/program/scene.program
-[9f8fe62366b62d4083bd4eb1c9af0604]=res/demo2/material/scene.mtl
+[59ae0e75b87cd357c07e1770a4bb7b8f]=res/demo2/program/scene.program
+[616fe4cb1b1a20148fb57a4fa4eea954]=res/demo2/material/scene.mtl
