@@ -117,6 +117,11 @@ public:
         struct Texture {
             char mName[RAW_NAME_LEN];
             char mTexture[RAW_NAME_LEN];
+            Texture()
+            {
+                memset(mName, 0, RAW_NAME_LEN);
+                memset(mTexture, 0, RAW_NAME_LEN);
+            }
         };
         uint mShininess;
         char mMesh[RAW_NAME_LEN];

@@ -180,8 +180,8 @@ void Render::RenderCamera()
     BakeLightDepthMap();
 
     //  ÑÓ³ÙäÖÈ¾
-    _renderState.mProgram = nullptr;
-    RenderDeferred();
+    //_renderState.mProgram = nullptr;
+    //RenderDeferred();
 
     //  ÕýÏòäÖÈ¾
     _renderState.mProgram = nullptr;
@@ -270,7 +270,7 @@ void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
 	{
 		if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
 		{
-			if (Bind(command.mMaterial->GetProgram())) 
+			if (Bind(command.mMaterial->GetProgram()))
             {
                 BindUBOLightForward();
             }
@@ -634,7 +634,6 @@ void Render::Post(const uint subPass)
     {
         glDisable(GL_CULL_FACE);
     }
-
     if (attr.vBlendSrc != 0 && attr.vBlendDst != 0)
     {
         glEnable(GL_BLEND);

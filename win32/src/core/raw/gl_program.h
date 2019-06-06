@@ -136,9 +136,9 @@ public:
         auto vIndex = glGetSubroutineIndex(_id, GL_VERTEX_SHADER, val);
         auto gIndex = glGetSubroutineIndex(_id, GL_GEOMETRY_SHADER, val);
         auto fIndex = glGetSubroutineIndex(_id, GL_FRAGMENT_SHADER, val);
-        glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &vIndex);
-        glUniformSubroutinesuiv(GL_GEOMETRY_SHADER, 1, &gIndex);
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex);
+        if (vIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &vIndex); }
+        if (gIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_GEOMETRY_SHADER, 1, &gIndex); }
+        if (fIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex); }
     }
 
     uint GetID() const

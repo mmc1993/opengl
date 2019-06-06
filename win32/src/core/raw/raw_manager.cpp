@@ -839,8 +839,27 @@ void RawManager::ImportMaterial(const std::string & url)
     }
     is.close();
 
+    auto length = sizeof(uint)
+                + RAW_NAME_LEN
+                + RAW_NAME_LEN
+                + MTLTEX2D_LEN * sizeof(GLMaterial::Texture2D);
+    auto buffer = new uchar[length];
+    auto point  = buffer;
+
+    memcpy(point, &rawMaterial.mShininess, sizeof(uint));
+    point += sizeof(uint);
+
+    memcpy(point, rawMaterial.mMesh, RAW_NAME_LEN);
+    point += RAW_NAME_LEN;
+
+    memcpy(point, rawMaterial.mProgram, RAW_NAME_LEN);
+    point += RAW_NAME_LEN;
+
+    memcpy(point, rawMaterial.mTextures, MTLTEX2D_LEN * sizeof(GLMaterial::Texture2D));
+
     //  Éú³ÉÃû×Ö
-    auto name = BuildName((uchar *)&rawMaterial, sizeof(RawMaterial));
+    auto name = BuildName(buffer, length);
+    delete[] buffer;
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_MATERIAL], std::ios::binary | std::ios::app);

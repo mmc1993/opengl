@@ -103,19 +103,19 @@ void Light::NewVolume()
 
 Light::Light(TypeEnum type): _type(type), _ubo(0)
 {
-    switch (type)
-    {
-    case kDIRECT:
-        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
-        break;
-    case kPOINT:
-        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
-        break;
-    case kSPOT:
-        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
-        break;
-    }
-    _program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
+    //switch (type)
+    //{
+    //case kDIRECT:
+    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+    //    break;
+    //case kPOINT:
+    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+    //    break;
+    //case kSPOT:
+    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+    //    break;
+    //}
+    //_program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
 }
 
 //  --------------------------------------------------------------------------------

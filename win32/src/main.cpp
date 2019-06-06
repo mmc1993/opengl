@@ -66,19 +66,17 @@ private:
         Global::Ref().RefRawManager().BegImport(true);
         Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
         Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
+        Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
         Global::Ref().RefRawManager().EndImport();
-
-        //Global::Ref().RefRawManager().Init();
-        //Global::Ref().RefRawManager().LoadRes<GLMesh>("152780050248ac7e2ae4cfef6f37a1f0");
-        //Global::Ref().RefRawManager().LoadRes<GLTexture2D>("1e4f632372e1dc782ff55a292f404b30");
-        //Global::Ref().RefRawManager().LoadRes<GLProgram>("20bccbf00947f7783901aa3a5cd02cde");
-
-        File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
 
 	void InitObject()
 	{
+        auto sprite = new Sprite();
+        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("9f8fe62366b62d4083bd4eb1c9af0604"));
+
         auto object = new Object();
+        object->AddComponent(sprite);
         object->SetParent(&Global::Ref().RefObject());
 	}
 
