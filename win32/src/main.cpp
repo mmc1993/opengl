@@ -34,6 +34,9 @@ public:
 public:
     void InitGame()
     {
+        glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+        glPrimitiveRestartIndex(0xffffffffu);
+
         InitAssets();
 		InitCamera();
 		InitEvents();
