@@ -34,8 +34,16 @@ public:
 public:
     void InitGame()
     {
-        glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-        glPrimitiveRestartIndex(0xffffffffu);
+        //  ³õÊ¼»¯ OpenGL ÅäÖÃ
+        auto opengl = Global::Ref().RefCfgManager().At("init", "open_gl");
+        for (auto pair : opengl)
+        {
+            if (pair.mKey == "enable_primitive_restar")
+            {
+                glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+                glPrimitiveRestartIndex(pair.mValue->ToInt());
+            }
+        }
 
         InitAssets();
 		InitCamera();

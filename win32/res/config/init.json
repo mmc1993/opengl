@@ -13,6 +13,9 @@
     },
 
     "render": {
-        "fps": 60
+      "fps": 60
+    },
+    "open_gl": {
+        "enable_primitive_restar": 4294967295
     }
 }
