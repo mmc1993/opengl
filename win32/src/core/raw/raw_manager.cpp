@@ -4,9 +4,9 @@
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third/stb_image.h"
-#include "../third/assimp/postprocess.h"
-#include "../third/assimp/Importer.hpp"
 #include "../third/assimp/scene.h"
+#include "../third/assimp/Importer.hpp"
+#include "../third/assimp/postprocess.h"
 
 const std::string RawManager::MANIFEST_SLOT_URL = "res/raw/manifest-slot.db";
 const std::string RawManager::MANIFEST_INFO_URL = "res/raw/manifest-info.txt";
@@ -302,11 +302,7 @@ void RawManager::FreeRes(const std::string & name)
 
 void RawManager::ImportModel(const std::string & url)
 {
-    std::function<void(aiNode * node, const aiScene * scene, const std::string & directory)> LoadNode;
-    std::function<void(aiMesh * mesh, const aiScene * scene, const std::string & directory)> LoadImage;
-    std::function<void(aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)> LoadMesh;
-
-    LoadImage = [&, this](aiMesh * mesh, const aiScene * scene, const std::string & directory)
+    auto LoadImage = [this](aiMesh * mesh, const aiScene * scene, const std::string & directory)
     {
         aiString textureURL;
         auto aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
@@ -343,7 +339,7 @@ void RawManager::ImportModel(const std::string & url)
         }
     };
 
-    LoadMesh = [&, this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
+    auto LoadMesh = [this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
     {
         auto indexBase = vertexs.size();
         for (auto i = 0; i != mesh->mNumVertices; ++i)
@@ -387,60 +383,69 @@ void RawManager::ImportModel(const std::string & url)
         }
     };
 
-    LoadNode = [&, this](aiNode * node, const aiScene * scene, const std::string & directory)
+    auto LoadNode = [&](aiNode * node, const aiScene * scene, const std::string & directory, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
     {
-        std::vector<uint>           indexs;
-        std::vector<GLMesh::Vertex> vertexs;
         for (auto i = 0; i != node->mNumMeshes; ++i)
         {
             LoadMesh(scene->mMeshes[node->mMeshes[i]], vertexs, indexs);
 
             LoadImage(scene->mMeshes[node->mMeshes[i]], scene, directory);
         }
-        RawMesh rawMesh;
-        //  索引数据
-        auto indexByteLength = indexs.size() * sizeof(uint);
-        rawMesh.mIndexLength = indexs.size();
-        rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
-        memcpy(rawMesh.mIndexs, indexs.data(), indexByteLength);
-        //  顶点数据
-        auto vertexByteLength = vertexs.size() * sizeof(GLMesh::Vertex);
-        rawMesh.mVertexLength = vertexs.size();
-        rawMesh.mVertexs = new GLMesh::Vertex[rawMesh.mVertexLength];
-        memcpy(rawMesh.mVertexs, vertexs.data(), vertexByteLength);
-        //  生成名字
-        auto length = indexByteLength + vertexByteLength;
-        auto buffer = new uchar[length];
-        memcpy(buffer                  , rawMesh.mIndexs, indexByteLength);
-        memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
-        auto name = BuildName(buffer, length);
-        delete[] buffer;
-        //  Write File
-        std::ofstream os(RAWDATA_URL[kRAW_MESH], std::ios::binary | std::ios::app);
-        ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_URL[kRAW_MESH]);
-
-        auto byteOffset = file_tool::GetFileLength(os);
-        rawMesh.Serialize(os);
-        auto byteLength = (uint)os.tellp() -byteOffset;
-        os.close();
-
-        _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_MESH);
-        _manifest.mInfos.emplace_back(name.c_str(), url);
-
-        for (auto i = 0; i != node->mNumChildren; ++i)
-        {
-            LoadNode(node->mChildren[i], scene, directory);
-        }
     };
 
     Assimp::Importer importer;
-    auto scene = importer.ReadFile(url, aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs);
+    auto scene = importer.ReadFile(url, aiProcess_JoinIdenticalVertices 
+                                      | aiProcess_CalcTangentSpace 
+                                      | aiProcess_Triangulate 
+                                      | aiProcess_FlipUVs);
     ASSERT_LOG(nullptr != scene, "Error URL: {0}", url);
     ASSERT_LOG(nullptr != scene->mRootNode, "Error URL: {0}", url);
-    for (auto i = 0; i != scene->mRootNode->mNumChildren; ++i)
+
+    std::vector<GLMesh::Vertex> vertexs;
+    std::vector<uint>           indexs;
+    std::queue<aiNode *>        nodes;
+    nodes.push(scene->mRootNode);
+    while (!nodes.empty())
     {
-        LoadNode(scene->mRootNode->mChildren[i], scene, url.substr(0, 1 + url.find_last_of('/')));
+        auto node = nodes.front();
+        nodes.pop();
+
+        for (auto i = 0; i != node->mNumChildren; ++i)
+        {
+            nodes.push(scene->mRootNode->mChildren[i]);
+        }
+        LoadNode(node, scene, url.substr(0, 1 + url.find_last_of('/')), vertexs, indexs);
     }
+
+    RawMesh rawMesh;
+    //  索引数据
+    auto indexByteLength = indexs.size() * sizeof(uint);
+    rawMesh.mIndexLength = indexs.size();
+    rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
+    memcpy(rawMesh.mIndexs, indexs.data(), indexByteLength);
+    //  顶点数据
+    auto vertexByteLength = vertexs.size() * sizeof(GLMesh::Vertex);
+    rawMesh.mVertexLength = vertexs.size();
+    rawMesh.mVertexs = new GLMesh::Vertex[rawMesh.mVertexLength];
+    memcpy(rawMesh.mVertexs, vertexs.data(), vertexByteLength);
+    //  生成名字
+    auto length = indexByteLength + vertexByteLength;
+    auto buffer = new uchar[length];
+    memcpy(buffer                  , rawMesh.mIndexs, indexByteLength);
+    memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
+    auto name = BuildName(buffer, length);
+    delete[] buffer;
+    //  Write File
+    std::ofstream os(RAWDATA_URL[kRAW_MESH], std::ios::binary | std::ios::app);
+    ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_URL[kRAW_MESH]);
+
+    auto byteOffset = file_tool::GetFileLength(os);
+    rawMesh.Serialize(os);
+    auto byteLength = (uint)os.tellp() - byteOffset;
+    os.close();
+
+    _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_MESH);
+    _manifest.mInfos.emplace_back(name.c_str(), url);
 }
 
 void RawManager::ImportImage(const std::string & url)

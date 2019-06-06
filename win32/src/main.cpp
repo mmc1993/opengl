@@ -64,14 +64,14 @@ private:
 	void InitAssets()
 	{
         Global::Ref().RefRawManager().BegImport(true);
-        Global::Ref().RefRawManager().Import("res/raw_demo/scene.obj");
-        Global::Ref().RefRawManager().Import("res/raw_demo/gl_program/scene.program");
+        Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
+        Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
         Global::Ref().RefRawManager().EndImport();
 
-        Global::Ref().RefRawManager().Init();
-        Global::Ref().RefRawManager().LoadRes<GLMesh>("152780050248ac7e2ae4cfef6f37a1f0");
-        Global::Ref().RefRawManager().LoadRes<GLTexture2D>("1e4f632372e1dc782ff55a292f404b30");
-        Global::Ref().RefRawManager().LoadRes<GLProgram>("20bccbf00947f7783901aa3a5cd02cde");
+        //Global::Ref().RefRawManager().Init();
+        //Global::Ref().RefRawManager().LoadRes<GLMesh>("152780050248ac7e2ae4cfef6f37a1f0");
+        //Global::Ref().RefRawManager().LoadRes<GLTexture2D>("1e4f632372e1dc782ff55a292f404b30");
+        //Global::Ref().RefRawManager().LoadRes<GLProgram>("20bccbf00947f7783901aa3a5cd02cde");
 
         File::LoadShader(BUILTIN_SHADER_LIGHT);
 	}
@@ -80,8 +80,6 @@ private:
 	{
         auto object = new Object();
         object->SetParent(&Global::Ref().RefObject());
-        CreateObject(File::LoadModel("res/demo/scene.obj"), object,
-                     "res/demo/shader/scene.shader", glm::vec3(0, 0, 0));
 	}
 
 	void InitEvents()
@@ -230,51 +228,21 @@ private:
             _mainCamera->SetPos(pos);
 		}
 
-        _lightPoints.at(0)->GetOwner()->GetTransform()->Translate(-1.5f,
-                                                        8 + std::cos(_pointCos) * 3,
-                                                        3 + std::sin(_pointCos) * 3);
-        _pointCos += 0.1f;
-
-		_lightSpots.at(0)->GetOwner()->GetTransform()->Translate(4 + std::cos(_spotCos) * 3,
-																 8,
-																 0 + std::sin(_spotCos) * 5);
-		_spotCos += 0.1f;
-
 		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
 	}
 
-    void CreateObject(Model * model, Object * parent, const std::string & shaderURL, const glm::vec3 & pos)
-    {
-        auto sprite = new Sprite();
-        //sprite->BindShader(shaderURL);
-        //for (auto i = 0; i != model->mMeshs.size(); ++i)
-        //{
-        //    sprite->AddMesh(model->mMeshs.at(i), model->mMates.at(i));
-        //}
-
-        auto object = new Object();
-        object->SetParent(parent);
-        object->AddComponent(sprite);
-        object->GetTransform()->Translate(pos);
-
-        for (auto i = 0; i != model->mChilds.size(); ++i)
-        {
-            CreateObject(model->mChilds.at(i), object, shaderURL, pos);
-        }
-    };
-	
 private:
     Camera * _mainCamera;
 
+    //  Lights
 	std::vector<LightDirect *> _lightDirects;
 	std::vector<LightPoint *> _lightPoints;
 	std::vector<LightSpot *> _lightSpots;
+
+    //  Key Input
 	glm::vec3 _axis;
 	float _speed;
 	int _direct;
-
-	float _spotCos;
-	float _pointCos;
 };
 
 int main()
