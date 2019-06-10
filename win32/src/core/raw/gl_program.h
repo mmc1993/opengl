@@ -28,6 +28,8 @@ public:
         short   vRenderType;        //  渲染类型
         short   vRenderQueue;       //  渲染通道
         char    mPassName[14];      //  Pass名字
+
+        PassAttr() { memset(this, 0, sizeof(PassAttr)); }
     };
 public:
     GLProgram()
