@@ -9,7 +9,6 @@
 #include "../third/assimp/postprocess.h"
 
 const std::string RawManager::MANIFEST_SLOT_URL = "res/raw/manifest-slot.db";
-const std::string RawManager::MANIFEST_INFO_URL = "res/raw/manifest-info.txt";
 
 //  原始数据引用路径
 const std::array<std::string, RawManager::kRawTypeEnum> RawManager::RAWDATA_URL = {
@@ -32,131 +31,140 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
 };
 
 //  Raw Mesh
-RawManager::RawMesh::RawMesh()
-    : mIndexLength(0)
-    , mVertexLength(0)
-    , mIndexs(nullptr)
-    , mVertexs(nullptr)
-{ }
-
-RawManager::RawMesh::~RawMesh()
-{
-    delete[] mIndexs;
-    delete[] mVertexs;
-}
-
 void RawManager::RawMesh::Serialize(std::ofstream & os)
 {
-    os.write((const char *)&mIndexLength, sizeof(uint));
-    os.write((const char *)&mVertexLength, sizeof(uint));
-    os.write((const char *)mIndexs, sizeof(uint)            * mIndexLength);
-    os.write((const char *)mVertexs, sizeof(GLMesh::Vertex) * mVertexLength);
+    uint iSize = (uint)mIndexs.size();
+    uint vSize = (uint)mVertexs.size();
+    os.write((const char *)&iSize, sizeof(uint));
+    os.write((const char *)&vSize, sizeof(uint));
+    os.write((const char *)mIndexs.data(),  iSize * sizeof(decltype(mIndexs)::value_type));
+    os.write((const char *)mVertexs.data(), vSize * sizeof(decltype(mIndexs)::value_type));
 }
 
 void RawManager::RawMesh::Deserialize(std::ifstream & is)
 {
-    is.read((char *)&mIndexLength, sizeof(uint));
-    is.read((char *)&mVertexLength, sizeof(uint));
-    mIndexs = new uint[mIndexLength];
-    is.read((char *)mIndexs, sizeof(uint) * mIndexLength);
-    mVertexs = new GLMesh::Vertex[mVertexLength];
-    is.read((char *)mVertexs, sizeof(GLMesh::Vertex) * mVertexLength);
+    uint iSize = 0;
+    uint vSize = 0;
+    is.read((char *)&iSize, sizeof(uint));
+    is.read((char *)&vSize, sizeof(uint));
+
+    mIndexs.resize(iSize);
+    mVertexs.resize(vSize);
+    is.read((char *)mIndexs.data(),  sizeof(decltype(mIndexs)::value_type) * iSize);
+    is.read((char *)mVertexs.data(), sizeof(decltype(mVertexs)::value_type) * vSize);
 }
 
 //  Raw Image
-RawManager::RawImage::RawImage()
-    : mW(0), mH(0)
-    , mFormat(0)
-    , mByteLength(0)
-    , mData(nullptr)
-{ }
-
-RawManager::RawImage::~RawImage()
-{
-    delete[] mData;
-}
-
 void RawManager::RawImage::Serialize(std::ofstream & os)
 {
+    uint size = (uint)mData.size();
     os.write((const char *)&mW, sizeof(uint));
     os.write((const char *)&mH, sizeof(uint));
     os.write((const char *)&mFormat, sizeof(uint));
-    os.write((const char *)&mByteLength, sizeof(uint));
-    os.write((const char *)mData, mByteLength);
+    os.write((const char *)&size, sizeof(uint));
+    os.write((const char *)mData.c_str(), size);
 }
 
 void RawManager::RawImage::Deserialize(std::ifstream & is)
 {
+    uint size = 0;
     is.read((char *)&mW, sizeof(uint));
     is.read((char *)&mH, sizeof(uint));
     is.read((char *)&mFormat, sizeof(uint));
-    is.read((char *)&mByteLength, sizeof(uint));
-    mData = new uchar[mByteLength];
-    is.read((char *)mData, mByteLength);
+
+    is.read((char *)&size, sizeof(uint));
+    mData.resize(size);
+    is.read((char *)mData.data(), size);
 }
 
 //  Raw Program
-RawManager::RawProgram::RawProgram()
-    : mData(nullptr)
-    , mPassLength(0)
-    , mVSByteLength(0)
-    , mGSByteLength(0)
-    , mFSByteLength(0)
-{ }
-
-RawManager::RawProgram::~RawProgram()
-{
-    delete[] mData;
-}
-
 void RawManager::RawProgram::Serialize(std::ofstream & os)
 {
-    os.write((const char *)&mPassLength, sizeof(uint));
-    os.write((const char *)&mVSByteLength, sizeof(uint));
-    os.write((const char *)&mGSByteLength, sizeof(uint));
-    os.write((const char *)&mFSByteLength, sizeof(uint));
-    os.write((const char *)mData, mVSByteLength + mGSByteLength + mFSByteLength
-                                + mPassLength * sizeof(GLProgram::PassAttr));
+    uint8 aSize = (uint8)mAttrs.size();
+    uint vSize  = (uint)mVSBuffer.size();
+    uint gSize  = (uint)mGSBuffer.size();
+    uint fSize  = (uint)mFSBuffer.size();
+
+    os.write((const char *)&aSize, sizeof(uint8));
+    os.write((const char *)&vSize, sizeof(uint));
+    os.write((const char *)&gSize, sizeof(uint));
+    os.write((const char *)&fSize, sizeof(uint));
+
+    os.write((const char *)mAttrs.data(), sizeof(GLProgram::PassAttr) * aSize);
+    if (!mVSBuffer.empty()) { os.write((const char *)mVSBuffer.c_str(), vSize); }
+    if (!mGSBuffer.empty()) { os.write((const char *)mGSBuffer.c_str(), gSize); }
+    if (!mFSBuffer.empty()) { os.write((const char *)mFSBuffer.c_str(), fSize); }
 }
 
 void RawManager::RawProgram::Deserialize(std::ifstream & is)
 {
-    is.read((char *)&mPassLength, sizeof(uint));
-    is.read((char *)&mVSByteLength, sizeof(uint));
-    is.read((char *)&mGSByteLength, sizeof(uint));
-    is.read((char *)&mFSByteLength, sizeof(uint));
-    auto byteLength = mPassLength * sizeof(GLProgram::PassAttr)
-                    + mVSByteLength + mGSByteLength + mFSByteLength;
-    mData = new uchar[byteLength];
-    is.read((char *)mData, byteLength);
+    uint8 aSize = 0;
+    uint  vSize = 0, gSize = 0, fSize = 0;
+
+    is.read((char *)&aSize, sizeof(uint8));
+    is.read((char *)&vSize, sizeof(uint));
+    is.read((char *)&gSize, sizeof(uint));
+    is.read((char *)&fSize, sizeof(uint));
+
+    mAttrs.resize(aSize); is.read((char *)mAttrs.data(), sizeof(GLProgram::PassAttr) * aSize);
+    if (vSize != 0) { mVSBuffer.resize(vSize); is.read((char *)mVSBuffer.data(), vSize); }
+    if (gSize != 0) { mGSBuffer.resize(gSize); is.read((char *)mGSBuffer.data(), gSize); }
+    if (fSize != 0) { mFSBuffer.resize(fSize); is.read((char *)mFSBuffer.data(), fSize); }
 }
 
 //  Raw Material
-RawManager::RawMaterial::RawMaterial()
-    : mShininess(32)
-{
-    memset(mMesh, 0, RAW_NAME_LEN);
-    memset(mProgram, 0, RAW_NAME_LEN);
-    memset(mTextures, 0, MTLTEX2D_LEN * sizeof(Texture));
-}
-
-RawManager::RawMaterial::~RawMaterial()
-{ }
-
 void RawManager::RawMaterial::Serialize(std::ofstream & os)
 {
     os.write((const char *)&mShininess, sizeof(uint));
-    os.write((const char *)mMesh, RAW_NAME_LEN);
-    os.write((const char *)mProgram, RAW_NAME_LEN);
-    os.write((const char *)mTextures, MTLTEX2D_LEN * sizeof(Texture));
+
+    uint8 size = (uint8)mMesh.size();
+    os.write((const char *)&size, sizeof(uint8));
+    os.write((const char *)mMesh.c_str(), size);
+
+    size = (uint8)mProgram.size();
+    os.write((const char *)&size, sizeof(uint8));
+    os.write((const char *)mProgram.c_str(), size);
+
+    size = (uint8)mTexture2Ds.size();
+    os.write((const char *)&size, sizeof(uint8));
+    for (auto & texture : mTexture2Ds)
+    {
+        size = (uint8)texture.mName.size();
+        os.write((const char *)&size, sizeof(uint8));
+        os.write((const char *)texture.mName.c_str(), size);
+
+        size = (uint8)texture.mDsec.size();
+        os.write((const char *)&size, sizeof(uint8));
+        os.write((const char *)texture.mDsec.c_str(), size);
+    }
 }
 
 void RawManager::RawMaterial::Deserialize(std::ifstream & is)
 {
     is.read((char *)&mShininess, sizeof(uint));
-    is.read((char *)mMesh, RAW_NAME_LEN);
-    is.read((char *)mProgram, RAW_NAME_LEN);
-    is.read((char *)mTextures, MTLTEX2D_LEN * sizeof(Texture));
+
+    uint8 size = 0;
+
+    is.read((char *)&size, sizeof(uint8));
+    mMesh.resize(size);
+    is.read((char *)mMesh.data(), size);
+
+    is.read((char *)&size, sizeof(uint8));
+    mProgram.resize(size);
+    is.read((char *)mProgram.data(), size);
+
+    is.read((char *)&size, sizeof(uint8));
+    mTexture2Ds.resize(size);
+    for (auto & texture : mTexture2Ds)
+    {
+        is.read((char *)&size, sizeof(uint8));
+        texture.mName.resize(size);
+        is.read((char *)texture.mName.data(), size);
+
+        is.read((char *)&size, sizeof(uint8));
+        texture.mDsec.resize(size);
+        is.read((char *)texture.mDsec.data(), size);
+    }
 }
 
 //  Raw Manager
@@ -165,11 +173,21 @@ void RawManager::Init()
     std::ifstream is(MANIFEST_SLOT_URL);
     ASSERT_LOG(is, "Open File Error. {0}", MANIFEST_SLOT_URL);
 
-    auto length = file_tool::GetFileLength(is);
-    ASSERT_LOG(length % sizeof(Manifest::Slot) == 0, "Manifest Slot Error.");
-    
-    _manifest.mSlots.resize(length / sizeof(Manifest::Slot));
-    is.read((char *)_manifest.mSlots.data(), length);
+    uint count = 0;
+    is.read((char *)&count, sizeof(uint));
+    _manifest.resize(count);
+
+    for (auto & slot : _manifest)
+    {
+        is.read((char *)&slot.mByteOffset, sizeof(uint));
+        is.read((char *)&slot.mByteLength, sizeof(uint));
+        is.read((char *)&slot.mType, sizeof(RawTypeEnum));
+
+        uint8 size = 0;
+        is.read((char *) &size, sizeof(uint8));
+        slot.mName.resize(size);
+        is.read((char *)slot.mName.data(), size);
+    }
     is.close();
 
     //  清空原始资源
@@ -195,7 +213,6 @@ void RawManager::BegImport(bool clear)
         {
             std::remove(path.c_str());
         }
-        std::remove(MANIFEST_INFO_URL.c_str());
         std::remove(MANIFEST_SLOT_URL.c_str());
     }
     if (!file_tool::IsFileExists(MANIFEST_SLOT_URL))
@@ -207,16 +224,20 @@ void RawManager::BegImport(bool clear)
 
 void RawManager::EndImport()
 {
-    std::ofstream os;
+    std::ofstream os(MANIFEST_SLOT_URL, std::ios::binary);
     
-    os.open(MANIFEST_SLOT_URL, std::ios::binary);
-    os.write((const char *)_manifest.mSlots.data(), _manifest.mSlots.size() * sizeof(Manifest::Slot));
-    os.close();
+    uint count = (uint)_manifest.size();
+    os.write((const char *)&count, sizeof(uint));
 
-    os.open(MANIFEST_INFO_URL);
-    for (const auto & info : _manifest.mInfos)
+    for (auto & slot : _manifest)
     {
-        os << SFormat("[{0}]={1}\n", info.mName, info.mURL);
+        os.write((const char *)&slot.mByteOffset, sizeof(uint));
+        os.write((const char *)&slot.mByteLength, sizeof(uint));
+        os.write((const char *)&slot.mType, sizeof(RawTypeEnum));
+
+        uint8 size = (uint8)slot.mName.size();
+        os.write((const char *)&size, sizeof(uint8));
+        os.write((const char *)slot.mName.data(), size);
     }
     os.close();
 }
@@ -240,18 +261,7 @@ void RawManager::Import(const std::string & url)
     case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
     case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
     case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
-    default: ASSERT_LOG(false, "Import Error. {0}, {1}", type, url); break;
     }
-}
-
-std::string RawManager::QueryName(const std::string & url) const
-{
-    auto it = std::find_if(_manifest.mInfos.begin(), _manifest.mInfos.end(), [url](const Manifest::Info & info)
-        {
-            return info.mURL == url;
-        });
-    ASSERT_LOG(it != _manifest.mInfos.end(), "it != _manifest.mInfos.end()");
-    return it->mName;
 }
 
 RawManager::Raw * RawManager::LoadRaw(const std::string & name)
@@ -261,9 +271,8 @@ RawManager::Raw * RawManager::LoadRaw(const std::string & name)
     {
         return rawIt->second;
     }
-
-    auto it = std::find(_manifest.mSlots.begin(), _manifest.mSlots.end(), name);
-    ASSERT_LOG(it != _manifest.mSlots.end(), "Not Found Raw. {0}", name);
+    auto it = std::find(_manifest.begin(), _manifest.end(), name);
+    ASSERT_LOG(it != _manifest.end(), "Not Found Raw. {0}", name);
 
     auto raw = (Raw *)nullptr;
     switch (it->mType)
@@ -273,21 +282,17 @@ RawManager::Raw * RawManager::LoadRaw(const std::string & name)
     case kRAW_PROGRAM: raw = new RawProgram(); break;
     case kRAW_MATERIAL: raw = new RawMaterial(); break;
     }
-    ASSERT_LOG(raw != nullptr, "Type Error. {0}", it->mType);
+    ASSERT_LOG(raw != nullptr, "{0}", it->mType);
 
     std::ifstream is(RAWDATA_URL[it->mType], std::ios::binary);
-    ASSERT_LOG(is, "Open File Error. {0}", RAWDATA_URL[it->mType]);
+    ASSERT_LOG(is, "{0}", RAWDATA_URL[it->mType]);
 
     is.seekg(it->mByteOffset, std::ios::beg);
     raw->Deserialize(is);
     auto byteLength = (uint)is.tellg() - it->mByteOffset;
     is.close();
 
-    ASSERT_LOG(byteLength == it->mByteLength,
-        "Read Length Error. "
-        "Name: {0}, Type: {1}, "
-        "Length: {2}, Length: {3}",
-        name, it->mType, it->mByteLength, byteLength);
+    ASSERT_LOG(byteLength == it->mByteLength, "Name: {0}, Type: {1}, Length: {2}, Length: {3}", name, it->mType, it->mByteLength, byteLength);
     _rawObjectMap.insert(std::make_pair(name, raw));
     return raw;
 }
@@ -426,48 +431,38 @@ void RawManager::ImportModel(const std::string & url)
         }
         LoadNode(node, scene, url.substr(0, 1 + url.find_last_of('/')), vertexs, indexs);
     }
-
-    RawMesh rawMesh;
-    //  索引数据
-    auto indexByteLength = indexs.size() * sizeof(uint);
-    rawMesh.mIndexLength = indexs.size();
-    rawMesh.mIndexs = new uint[rawMesh.mIndexLength];
-    memcpy(rawMesh.mIndexs, indexs.data(), indexByteLength);
-    //  顶点数据
-    auto vertexByteLength = vertexs.size() * sizeof(GLMesh::Vertex);
-    rawMesh.mVertexLength = vertexs.size();
-    rawMesh.mVertexs = new GLMesh::Vertex[rawMesh.mVertexLength];
-    memcpy(rawMesh.mVertexs, vertexs.data(), vertexByteLength);
-    //  生成名字
-    auto length = indexByteLength + vertexByteLength;
-    auto buffer = new uchar[length];
-    memcpy(buffer                  , rawMesh.mIndexs, indexByteLength);
-    memcpy(buffer + indexByteLength, rawMesh.mVertexs, vertexByteLength);
-    auto name = BuildName(buffer, length);
-    delete[] buffer;
+   
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_MESH], std::ios::binary | std::ios::app);
     ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_URL[kRAW_MESH]);
+
+    RawMesh rawMesh;
+    rawMesh.mIndexs = std::move(indexs);
+    rawMesh.mVertexs = std::move(vertexs);
 
     auto byteOffset = file_tool::GetFileLength(os);
     rawMesh.Serialize(os);
     auto byteLength = (uint)os.tellp() - byteOffset;
     os.close();
 
-    _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_MESH);
-    _manifest.mInfos.emplace_back(name.c_str(), url);
+    _manifest.emplace_back(byteOffset, byteLength, kRAW_MESH, url);
 }
 
 void RawManager::ImportImage(const std::string & url)
 {
     RawImage rawImage;
-    rawImage.mData = stbi_load(url.c_str(),
+    auto data = stbi_load(url.c_str(),
         (int *)&rawImage.mW,
         (int *)&rawImage.mH,
         (int *)&rawImage.mFormat, 0);
-    ASSERT_LOG(rawImage.mData != nullptr, "URL: {0}", url);
+    ASSERT_LOG(data != nullptr, "URL: {0}", url);
 
-    rawImage.mByteLength = rawImage.mW * rawImage.mH * rawImage.mFormat;
+    auto length = rawImage.mW 
+               * rawImage.mH 
+               * rawImage.mFormat;
+    rawImage.mData.resize(length);
+    memcpy(rawImage.mData.data(), data, length);
+    stbi_image_free(data);
 
     switch (rawImage.mFormat)
     {
@@ -475,9 +470,6 @@ void RawManager::ImportImage(const std::string & url)
     case 3: rawImage.mFormat = GL_RGB; break;
     case 4: rawImage.mFormat = GL_RGBA; break;
     }
-
-    //  生成名字
-    auto name = BuildName(rawImage.mData, rawImage.mByteLength);
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_IMAGE], std::ios::binary | std::ios::app);
@@ -488,8 +480,7 @@ void RawManager::ImportImage(const std::string & url)
     auto byteLength = (uint)os.tellp() - byteOffset;
     os.close();
 
-    _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_IMAGE);
-    _manifest.mInfos.emplace_back(name.c_str(), url);
+    _manifest.emplace_back(byteOffset, byteLength, kRAW_IMAGE, url);
 }
 
 void RawManager::ImportProgram(const std::string & url)
@@ -735,89 +726,39 @@ void RawManager::ImportProgram(const std::string & url)
     //  解析GL Program数据
     auto is = OpenProgramFile(url);
     std::string line;
-    std::string vCommonBuffer;
-    std::string gCommonBuffer;
-    std::string fCommonBuffer;
-    std::vector<std::tuple<
-        std::string,
-        std::string,
-        std::string,
-        GLProgram::PassAttr>> passs;
+    uint vLength = 0u;
+    uint gLength = 0u;
+    uint fLength = 0u;
+    std::string vBuffer;
+    std::string gBuffer;
+    std::string fBuffer;
+    std::vector<GLProgram::PassAttr> attrs;
     while (std::getline(is, line))
     {
         if (string_tool::IsEqualSkipSpace(line, "Common Beg"))
         {
-            ParsePass(is, "Common End", vCommonBuffer, gCommonBuffer, fCommonBuffer, nullptr);
+            ParsePass(is, "Common End", vBuffer, gBuffer, fBuffer, nullptr);
         }
         else if (string_tool::IsEqualSkipSpace(line, "Pass Beg"))
         {
-            decltype(passs)::value_type pass;
-            ParsePass(is, "Pass End",
-                std::get<0>(pass),  std::get<1>(pass),
-                std::get<2>(pass), &std::get<3>(pass));
-            passs.push_back(pass);
+            GLProgram::PassAttr attr;
+            auto vLen = vBuffer.size();
+            auto gLen = gBuffer.size();
+            auto fLen = fBuffer.size();
+            ParsePass(is, "Pass End", vBuffer, gBuffer, fBuffer, &attr);
+            if (vBuffer.size() != vLen) { vLength = vBuffer.size() - vLen; }
+            if (gBuffer.size() != gLen) { gLength = gBuffer.size() - gLen; }
+            if (fBuffer.size() != fLen) { fLength = fBuffer.size() - fLen; }
+            attrs.push_back(attr);
         }
-    }
-
-    //  生成GL Program数据
-    std::string vBuffer, gBuffer, fBuffer;
-    for (auto i = 0; i != passs.size(); ++i)
-    {
-        vBuffer.append(std::get<0>(passs.at(i)));
-        gBuffer.append(std::get<1>(passs.at(i)));
-        fBuffer.append(std::get<2>(passs.at(i)));
     }
 
     //  写入GL Program数据
     RawProgram rawProgram;
-    rawProgram.mPassLength  = passs.size();
-    if (!vBuffer.empty())
-    {
-        vCommonBuffer.append(vBuffer);
-        rawProgram.mVSByteLength = vCommonBuffer.size();
-    }
-    if (!gBuffer.empty())
-    {
-        gCommonBuffer.append(gBuffer);
-        rawProgram.mGSByteLength = gCommonBuffer.size();
-    }
-    if (!fBuffer.empty())
-    {
-        fCommonBuffer.append(fBuffer);
-        rawProgram.mFSByteLength = fCommonBuffer.size();
-    }
-
-    auto dataLength = rawProgram.mPassLength * sizeof(GLProgram::PassAttr)
-                    + rawProgram.mVSByteLength
-                    + rawProgram.mGSByteLength
-                    + rawProgram.mFSByteLength;
-    rawProgram.mData = new uchar[dataLength];
-
-    auto ptr = rawProgram.mData;
-    for (auto i = 0; i != passs.size(); ++i)
-    {
-        memcpy(ptr, &std::get<3>(passs.at(i)), sizeof(GLProgram::PassAttr));
-        ptr += sizeof(GLProgram::PassAttr);
-    }
-    if (rawProgram.mVSByteLength != 0)
-    {
-        memcpy(ptr, vCommonBuffer.data(), rawProgram.mVSByteLength);
-        ptr += rawProgram.mVSByteLength;
-    }
-    if (rawProgram.mGSByteLength != 0)
-    {
-        memcpy(ptr, gCommonBuffer.data(), rawProgram.mGSByteLength);
-        ptr += rawProgram.mGSByteLength;
-    }
-    if (rawProgram.mFSByteLength != 0)
-    {
-        memcpy(ptr, fCommonBuffer.data(), rawProgram.mFSByteLength);
-        ptr += rawProgram.mFSByteLength;
-    }
-    ASSERT_LOG(ptr - rawProgram.mData == dataLength, "");
-
-    //  生成名字
-    auto name = BuildName(rawProgram.mData, dataLength);
+    rawProgram.mAttrs = std::move(attrs);
+    if (vLength != 0) { rawProgram.mVSBuffer = std::move(vBuffer); }
+    if (gLength != 0) { rawProgram.mGSBuffer = std::move(gBuffer); }
+    if (fLength != 0) { rawProgram.mFSBuffer = std::move(fBuffer); }
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_PROGRAM], std::ios::binary | std::ios::app);
@@ -828,8 +769,7 @@ void RawManager::ImportProgram(const std::string & url)
     auto byteLength = (uint)os.tellp() - byteOffset;
     os.close();
 
-    _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_PROGRAM);
-    _manifest.mInfos.emplace_back(name.c_str(), url);
+    _manifest.emplace_back(byteOffset, byteLength, kRAW_PROGRAM, url);
 }
 
 void RawManager::ImportMaterial(const std::string & url)
@@ -841,35 +781,14 @@ void RawManager::ImportMaterial(const std::string & url)
     is >> rawMaterial.mShininess;
     is >> rawMaterial.mMesh;
     is >> rawMaterial.mProgram;
-    for (auto & texture : rawMaterial.mTextures)
+    while (!is.eof())
     {
+        RawMaterial::Texture texture;
+        is >> texture.mDsec;
         is >> texture.mName;
-        is >> texture.mTexture;
-        if (is.eof()) break;
+        rawMaterial.mTexture2Ds.push_back(texture);
     }
     is.close();
-
-    auto length = sizeof(uint)
-                + RAW_NAME_LEN
-                + RAW_NAME_LEN
-                + MTLTEX2D_LEN * sizeof(GLMaterial::Texture2D);
-    auto buffer = new uchar[length];
-    auto point  = buffer;
-
-    memcpy(point, &rawMaterial.mShininess, sizeof(uint));
-    point += sizeof(uint);
-
-    memcpy(point, rawMaterial.mMesh, RAW_NAME_LEN);
-    point += RAW_NAME_LEN;
-
-    memcpy(point, rawMaterial.mProgram, RAW_NAME_LEN);
-    point += RAW_NAME_LEN;
-
-    memcpy(point, rawMaterial.mTextures, MTLTEX2D_LEN * sizeof(GLMaterial::Texture2D));
-
-    //  生成名字
-    auto name = BuildName(buffer, length);
-    delete[] buffer;
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_MATERIAL], std::ios::binary | std::ios::app);
@@ -880,8 +799,7 @@ void RawManager::ImportMaterial(const std::string & url)
     auto byteLength = (uint)os.tellp() - byteOffset;
     os.close();
 
-    _manifest.mSlots.emplace_back(name.c_str(), byteOffset, byteLength, kRAW_MATERIAL);
-    _manifest.mInfos.emplace_back(name.c_str(), url);
+    _manifest.emplace_back(byteOffset, byteLength, kRAW_MATERIAL, url);
 }
 
 GLRes * RawManager::LoadResMesh(const std::string & name)
@@ -890,10 +808,8 @@ GLRes * RawManager::LoadResMesh(const std::string & name)
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
 
     auto res = new GLMesh();
-    res->Init(
-        raw->mVertexs, raw->mVertexLength,
-        raw->mIndexs,  raw->mIndexLength,
-        GLMesh::Vertex::kV_N_C_UV_TAN_BITAN);
+    res->Init(raw->mVertexs, raw->mIndexs,
+              GLMesh::Vertex::kV_N_C_UV_TAN_BITAN);
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }
@@ -905,7 +821,8 @@ GLRes * RawManager::LoadResImage(const std::string & name)
     
     auto res = new GLTexture2D();
     res->Init(raw->mFormat, raw->mFormat, 
-              GL_UNSIGNED_BYTE, raw->mW, raw->mH, raw->mData);
+              GL_UNSIGNED_BYTE, raw->mW, raw->mH, 
+              (const uchar *)raw->mData.data());
     res->SetParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     res->SetParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     res->SetParam(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -920,20 +837,13 @@ GLRes * RawManager::LoadResProgram(const std::string & name)
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
 
     auto res = new GLProgram();
-    auto pAttr = (GLProgram::PassAttr *)raw->mData;
-    auto vData = (const char *)(pAttr + raw->mPassLength);
-    auto gData = vData + raw->mVSByteLength;
-    auto fData = gData + raw->mGSByteLength;
-    //  PassAttr
-    for (auto i = 0; i != raw->mPassLength; ++i)
+    for (const auto & attr : raw->mAttrs)
     {
-        res->AddPassAttr(*pAttr++);
+        res->AddPassAttr(attr);
     }
-    //  Shader
-    res->Init(
-        (const char *)vData, raw->mVSByteLength,
-        (const char *)gData, raw->mGSByteLength,
-        (const char *)fData, raw->mFSByteLength);
+    res->Init(raw->mVSBuffer.c_str(), raw->mVSBuffer.size(),
+              raw->mGSBuffer.c_str(), raw->mGSBuffer.size(),
+              raw->mFSBuffer.c_str(), raw->mFSBuffer.size());
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }
@@ -947,17 +857,12 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
     res->SetShininess((float)raw->mShininess);
     res->SetMesh(LoadRes<GLMesh>(raw->mMesh));
     res->SetProgram(LoadRes<GLProgram>(raw->mProgram));
-    for (auto i = 0; i != MTLTEX2D_LEN && raw->mTextures[i].mName[0] != '\0'; ++i)
+    for (auto i = 0; i != raw->mTexture2Ds.size(); ++i)
     {
-        res->SetTexture2D(LoadRes<GLTexture2D>(raw->mTextures[i].mTexture), raw->mTextures[i].mName, i);
+        res->SetTexture2D(LoadRes<GLTexture2D>(
+            raw->mTexture2Ds.at(i).mName), 
+            raw->mTexture2Ds.at(i).mDsec, i);
     }
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
-}
-
-std::string RawManager::BuildName(const uchar * data, const uint len)
-{
-    uchar name[RAW_NAME_LEN] = { 0 };
-    auto md5 = Code::MD5Encode(data, len);
-    return (const char *)number_tool::Conver16((const uchar *)md5.c_str(), md5.size(), name);
 }

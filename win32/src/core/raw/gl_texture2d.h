@@ -12,7 +12,7 @@ public:
         glDeleteTextures(1, &_id);
     }
 
-    void Init(uint rawFormat, uint texFormat, uint type, uint w, uint h, uchar * data)
+    void Init(uint rawFormat, uint texFormat, uint type, uint w, uint h, const uchar * data)
     {
         ASSERT_LOG(_id == 0, "id != 0");
         glGenTextures(1, &_id);

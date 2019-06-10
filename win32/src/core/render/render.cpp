@@ -672,8 +672,8 @@ void Render::Post(const GLMaterial * material)
     for (auto i = 0; material->GetTexture2Ds(i) != nullptr; ++i)
     {
         _renderState.mProgram->BindUniformTex2D(
-            material->GetTexture2Ds(i)->mName,
-            material->GetTexture2Ds(i)->mTexture->GetID(), 
+            material->GetTexture2Ds(i)->mDesc.c_str(),
+            material->GetTexture2Ds(i)->mTex->GetID(), 
             _renderState.mTexBase + i);
     }
     _renderState.mProgram->BindUniformNumber(UNIFORM_MATERIAL_SHININESS, material->GetShininess());

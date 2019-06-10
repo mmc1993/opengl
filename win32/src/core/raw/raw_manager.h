@@ -24,43 +24,29 @@ public:
         kRawTypeEnum,
     };
 
-    class Manifest {
+    class ManifestSlot {
     public:
-        struct Info {
-            char mName[RAW_NAME_LEN];
-            std::string mURL;
+        uint mByteOffset;
+        uint mByteLength;
+        std::string mName;
+        RawTypeEnum mType;
 
-            Info() { }
+        ManifestSlot() = default;
 
-            Info(const char * name, const std::string & url): mURL(url)
-            {
-                std::copy(name, name + RAW_NAME_LEN, mName);
-            }
-        };
+        ManifestSlot(
+            uint byteOffset, 
+            uint byteLength, 
+            const RawTypeEnum & type,
+            const std::string & name)
+            : mByteOffset(byteOffset)
+            , mByteLength(byteLength)
+            , mType(type),mName(name)
+        { }
 
-        struct Slot {
-            char mName[RAW_NAME_LEN];
-            uint mByteOffset;
-            uint mByteLength;
-            RawTypeEnum mType;
-
-            Slot() { }
-
-            Slot(const char * name, uint byteOffset, uint byteLength, RawTypeEnum type)
-                : mByteOffset(byteOffset)
-                , mByteLength(byteLength)
-                , mType(type)
-            {
-                std::copy(name, name + RAW_NAME_LEN, mName);
-            }
-
-            bool operator==(const std::string & name) const
-            {
-                return name == mName;
-            }
-        };
-        std::vector<Info> mInfos;
-        std::vector<Slot> mSlots;
+        bool operator==(const std::string & name) const
+        {
+            return name == mName;
+        }
     };
 
     class Raw {
@@ -74,13 +60,9 @@ public:
 
     class RawMesh : public Raw {
     public:
-        uint mIndexLength;
-        uint mVertexLength;
-        uint           * mIndexs;
-        GLMesh::Vertex * mVertexs;
-
-        RawMesh();
-        ~RawMesh();
+        std::vector<uint>           mIndexs;
+        std::vector<GLMesh::Vertex> mVertexs;
+        
         virtual void Serialize(std::ofstream & os) override;
         virtual void Deserialize(std::ifstream & is) override;
     };
@@ -89,25 +71,19 @@ public:
     public:
         uint mW, mH;
         uint mFormat;
-        uchar *mData;
-        uint mByteLength;
+        std::string mData;
 
-        RawImage();
-        ~RawImage();
         virtual void Serialize(std::ofstream & os) override;
         virtual void Deserialize(std::ifstream & is) override;
     };
 
     class RawProgram : public Raw {
     public:
-        uchar * mData;
-        uint mPassLength;
-        uint mVSByteLength;
-        uint mGSByteLength;
-        uint mFSByteLength;
+        std::vector<GLProgram::PassAttr> mAttrs;
+        std::string mVSBuffer;
+        std::string mGSBuffer;
+        std::string mFSBuffer;
 
-        RawProgram();
-        ~RawProgram();
         virtual void Serialize(std::ofstream & os) override;
         virtual void Deserialize(std::ifstream & is) override;
     };
@@ -115,27 +91,19 @@ public:
     class RawMaterial : public Raw {
     public:
         struct Texture {
-            char mName[RAW_NAME_LEN];
-            char mTexture[RAW_NAME_LEN];
-            Texture()
-            {
-                memset(mName, 0, RAW_NAME_LEN);
-                memset(mTexture, 0, RAW_NAME_LEN);
-            }
+            std::string mDsec;
+            std::string mName;
         };
         uint mShininess;
-        char mMesh[RAW_NAME_LEN];
-        char mProgram[RAW_NAME_LEN];
-        Texture mTextures[MTLTEX2D_LEN];
+        std::string mMesh;
+        std::string mProgram;
+        std::vector<Texture> mTexture2Ds;
 
-        RawMaterial();
-        ~RawMaterial();
         virtual void Serialize(std::ofstream & os) override;
         virtual void Deserialize(std::ifstream & is) override;
     };
 
     static const std::string MANIFEST_SLOT_URL;
-    static const std::string MANIFEST_INFO_URL;
     static const std::array<std::string, kRawTypeEnum> RAWDATA_URL;
     static const std::array<std::vector<std::string>, kImportTypeEnum> SUFFIX_MAP;
 
@@ -144,8 +112,6 @@ public:
     void BegImport(bool clear = false);
     void EndImport();
     void Import(const std::string & url);
-
-    std::string QueryName(const std::string & url) const;
 
     //  将原始数据加载到内存
     Raw * LoadRaw(const std::string & name);
@@ -163,8 +129,7 @@ public:
             return reinterpret_cast<T *>(it->second);
         }
         auto res = (GLRes *)nullptr;
-        auto rawIt = std::find(_manifest.mSlots.begin(), 
-                               _manifest.mSlots.end(), name);
+        auto rawIt = std::find(_manifest.begin(), _manifest.end(), name);
         switch (rawIt->mType)
         {
         case kRAW_MESH: res = LoadResMesh(name); break;
@@ -172,7 +137,6 @@ public:
         case kRAW_PROGRAM: res = LoadResProgram(name); break;
         case kRAW_MATERIAL: res = LoadResMaterial(name); break;
         }
-        ASSERT_LOG(res != nullptr, "Not Found Res. {0}, {1}", name, typeid(T).name());
         ASSERT_LOG(dynamic_cast<T *>(res) != nullptr, "Res Type Not Match. {0}, {1}, {2}", name, typeid(T).name(), typeid(*res).name());
         return reinterpret_cast<T *>(res);
     }
@@ -192,12 +156,9 @@ private:
     GLRes * LoadResProgram(const std::string & name);
     GLRes * LoadResMaterial(const std::string & name);
 
-    //  为数据生成名字
-    std::string BuildName(const uchar * data, const uint len);
-
 private:
     //  资源对象
     std::map<std::string, GLRes *> _resObjectMap;
     std::map<std::string, Raw *> _rawObjectMap;
-    Manifest _manifest;
+    std::vector<ManifestSlot> _manifest;
 };

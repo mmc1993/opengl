@@ -84,7 +84,7 @@ private:
 	void InitObject()
 	{
         auto sprite = new Sprite();
-        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>(Global::Ref().RefRawManager().QueryName("res/demo2/material/scene.mtl")));
+        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
 
         auto object = new Object();
         object->AddComponent(sprite);

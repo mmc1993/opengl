@@ -9,17 +9,16 @@ class GLMaterial : public GLRes {
 public:
     struct Texture2D
     {
-        //  材质引用的每一个纹理都必须对应一个名字, 
-        //  这个名字会对应到Shader中的uniform变量.
-        char mName[RAW_NAME_LEN];
-        const GLTexture2D * mTexture;
+        std::string mDesc; /*标识符*/
+        const GLTexture2D * mTex;
     };
 
 public:
-    GLMaterial(): _glMesh(nullptr), _glProgram(nullptr), _shininess(32.0f)
-    {
-        memset(_glTexture2Ds, 0, sizeof(_glTexture2Ds));
-    }
+    GLMaterial()
+        : _glMesh(nullptr)
+        , _glProgram(nullptr)
+        , _shininess(0)
+    { }
 
     void SetMesh(const GLMesh * glMesh)
     {
@@ -38,11 +37,21 @@ public:
 
     void SetTexture2D(
         const GLTexture2D * glTexture2D, 
-        const char * name, const uint i)
+        const std::string & desc, 
+        const uint i)
     {
-        _glTexture2Ds[i].mTexture = glTexture2D;
-
-        std::copy(name, name + RAW_NAME_LEN, _glTexture2Ds[i].mName);
+        if (i < _glTexture2Ds.size())
+        {
+            _glTexture2Ds.at(i).mDesc = desc;
+            _glTexture2Ds.at(i).mTex = glTexture2D;
+        }
+        else
+        {
+            Texture2D texture;
+            texture.mDesc   = desc;
+            texture.mTex    = glTexture2D;
+            _glTexture2Ds.push_back(texture);
+        }
     }
 
     const GLMesh * GetMesh() const
@@ -62,20 +71,14 @@ public:
 
     const Texture2D * GetTexture2Ds(uint i) const
     {
-        if (i < MTLTEX2D_LEN)
-        {
-            auto & texture = _glTexture2Ds[i];
-            if (texture.mTexture != nullptr)
-            {
-                return &texture;
-            }
-        }
-        return nullptr;
+        return i < _glTexture2Ds.size()
+            ? &_glTexture2Ds.at(i)
+            : nullptr;
     }
 
 private:
-    const GLMesh      * _glMesh;
-    const GLProgram   * _glProgram;
-    float               _shininess;
-    Texture2D           _glTexture2Ds[MTLTEX2D_LEN];
+    float                   _shininess;
+    const GLMesh *          _glMesh;
+    const GLProgram *       _glProgram;
+    std::vector<Texture2D>  _glTexture2Ds;
 };
