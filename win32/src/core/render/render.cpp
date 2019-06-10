@@ -387,18 +387,18 @@ void Render::BindUBOLightForward()
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, countPoint);
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_SPOT_, countSpot);
 
-    for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
-    {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _shadowMapDirect[i], _renderState.mTexBase++);
-    }
-    for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
-    {
-        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _shadowMapPoint[i], _renderState.mTexBase++);
-    }
-    for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
-    {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _shadowMapSpot[i], _renderState.mTexBase++);
-    }
+    //for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
+    //{
+    //    _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _shadowMapDirect[i], _renderState.mTexBase++);
+    //}
+    //for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
+    //{
+    //    _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _shadowMapPoint[i], _renderState.mTexBase++);
+    //}
+    //for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
+    //{
+    //    _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _shadowMapSpot[i], _renderState.mTexBase++);
+    //}
 }
 
 void Render::Bind(const CameraCommand * command)

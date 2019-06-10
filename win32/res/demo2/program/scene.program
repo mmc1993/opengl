@@ -4,11 +4,12 @@ Common Beg
     subroutine uniform PassProgram_ SubProgram_;
 
     VShader Beg
-        layout(location = 0) in vec3 a_pos_;
-        layout(location = 1) in vec2 a_uv_;
-        layout(location = 2) in vec3 a_n_;
-        layout(location = 3) in vec3 a_t_;
-        layout(location = 4) in vec3 a_b_;
+        layout(location = 0) in vec3 a_v_;
+        layout(location = 1) in vec3 a_n_;
+        layout(location = 2) in vec3 a_c_;
+        layout(location = 3) in vec2 a_uv_;
+        layout(location = 4) in vec3 a_tan_;
+        layout(location = 5) in vec3 a_bitan_;
 
         uniform vec3 camera_pos_;
         uniform vec3 camera_eye_;
@@ -129,15 +130,15 @@ Pass Beg
     VShader Beg
         subroutine(PassProgram_) void SubProgram0()
         {
-            vec4 apos = vec4(a_pos_, 1);
+            vec4 apos = vec4(a_v_, 1);
             v_out_.mMPos = vec3(matrix_m_ * apos);
             v_out_.mMVPos = vec3(matrix_mv_ * apos);
             v_out_.mNormal = vec3(matrix_n_ * a_n_);
             v_out_.mMVPPos = vec4(matrix_mvp_ * apos);
 
-            vec3 T = normalize(vec3(matrix_m_ * vec4(a_t_, 0.0f)));
-            vec3 B = normalize(vec3(matrix_m_ * vec4(a_b_, 0.0f)));
-            vec3 N = normalize(vec3(matrix_m_ * vec4(a_n_, 0.0f)));
+            vec3 T = normalize(vec3(matrix_m_ * vec4(a_tan_,	0.0f)));
+            vec3 B = normalize(vec3(matrix_m_ * vec4(a_bitan_,	0.0f)));
+            vec3 N = normalize(vec3(matrix_m_ * vec4(a_n_,		0.0f)));
             v_out_.mTBN = mat3(T, B, N);
             v_out_.mTBNR = transpose(v_out_.mTBN);
             v_out_.mUV = a_uv_;
@@ -255,7 +256,7 @@ Pass Beg
                 outColor += CalculateSpot(i, fragNormal, cameraNormal, v_out_.mUV);
             }
 
-            color_ = vec4(texture(material_.mDiffuse0, v_out_.mUV).rgb, 1.0f);
+            color_ = vec4(outColor, 1.0f);
         }
     FShader End
 Pass End

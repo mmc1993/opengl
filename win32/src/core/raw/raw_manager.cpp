@@ -409,8 +409,7 @@ void RawManager::ImportModel(const std::string & url)
     };
 
     Assimp::Importer importer;
-    auto scene = importer.ReadFile(url, aiProcess_JoinIdenticalVertices 
-                                      | aiProcess_CalcTangentSpace 
+    auto scene = importer.ReadFile(url, aiProcess_CalcTangentSpace 
                                       | aiProcess_Triangulate 
                                       | aiProcess_FlipUVs);
     ASSERT_LOG(nullptr != scene, "Error URL: {0}", url);

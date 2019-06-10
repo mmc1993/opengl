@@ -143,10 +143,7 @@ public:
         if (fIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex); }
     }
 
-    uint GetID() const
-    {
-        return _id;
-    }
+    uint GetID() const { return _id; }
 
 private:
     void AssertPass(uint shaderID, const std::string & errorTxt) const

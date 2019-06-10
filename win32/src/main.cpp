@@ -76,15 +76,17 @@ private:
 	{
         Global::Ref().RefRawManager().BegImport(true);
         Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
+        Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
         Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
+        Global::Ref().RefRawManager().Import("res/demo2/material/wall.mtl");
         Global::Ref().RefRawManager().EndImport();
 	}
 
 	void InitObject()
 	{
         auto sprite = new Sprite();
-        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
+        sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/wall.mtl"));
 
         auto object = new Object();
         object->AddComponent(sprite);
@@ -108,12 +110,12 @@ private:
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            { glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
+            //{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
