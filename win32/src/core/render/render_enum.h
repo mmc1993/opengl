@@ -57,16 +57,8 @@ static const char * const UNIFORM_CAMERA_POS = "camera_pos_";
 //  相机朝向
 static const char * const UNIFORM_CAMERA_EYE = "camera_eye_";
 
-//  材质.漫反射
-static const char * const UNIFORM_MATERIAL_DIFFUSE      = "material_.mDiffuse{0}";
-//  材质.镜面反射
-static const char * const UNIFORM_MATERIAL_SPECULAR     = "material_.mSpecular";
-//  材质.反射贴图
-static const char * const UNIFORM_MATERIAL_REFLECT      = "material_.mReflect";
-//  材质.法线贴图
-static const char * const UNIFORM_MATERIAL_NORMAL       = "material_.mNormal";
-//  材质.高度贴图
-static const char * const UNIFORM_MATERIAL_HEIGHT       = "material_.mHeight";
+//  材质*
+static const char * const UNIFORM_MATERIAL              = "material_.{0}";
 //  材质.高光强度
 static const char * const UNIFORM_MATERIAL_SHININESS    = "material_.mShininess";
 //  方向光阴影贴图
