@@ -1,0 +1,9 @@
+32
+res/demo2/mesh/wall.obj
+res/demo2/program/scene.program
+mDiffuse0
+res/demo2/texture/wall2_diffuse.png
+mSpecular
+res/demo2/texture/wall2_spacular.png
+mNormal
+res/demo2/texture/wall2_normal.png
