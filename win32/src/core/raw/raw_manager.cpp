@@ -38,7 +38,7 @@ void RawManager::RawMesh::Serialize(std::ofstream & os)
     os.write((const char *)&iSize, sizeof(uint));
     os.write((const char *)&vSize, sizeof(uint));
     os.write((const char *)mIndexs.data(),  iSize * sizeof(decltype(mIndexs)::value_type));
-    os.write((const char *)mVertexs.data(), vSize * sizeof(decltype(mIndexs)::value_type));
+    os.write((const char *)mVertexs.data(), vSize * sizeof(decltype(mVertexs)::value_type));
 }
 
 void RawManager::RawMesh::Deserialize(std::ifstream & is)

@@ -624,7 +624,6 @@ bool Render::Bind(const GLProgram * program)
 void Render::Post(const uint subPass)
 {
     auto & attr = _renderState.mProgram->GetPassAttr(subPass);
-
     if (attr.vCullFace != 0)
     {
         glEnable(GL_CULL_FACE);
@@ -634,6 +633,7 @@ void Render::Post(const uint subPass)
     {
         glDisable(GL_CULL_FACE);
     }
+
     if (attr.vBlendSrc != 0 && attr.vBlendDst != 0)
     {
         glEnable(GL_BLEND);

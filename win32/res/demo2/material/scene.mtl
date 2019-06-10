@@ -1,9 +1,9 @@
 32
-152780050248ac7e2ae4cfef6f37a1f0
-59ae0e75b87cd357c07e1770a4bb7b8f
+res/demo2/scene.obj
+res/demo2/program/scene.program
 mDiffuse0
-e519c9fd693e4c158de81b4996fe72bf
+res/demo2/texture/wall2_diffuse.png
 mSpecular
-09cf6e56bba5a95f3c52ec7cbb54a1f9
+res/demo2/texture/wall2_spacular.png
 mNormal
-de12acd2805d07786aba1c066566038d
+res/demo2/texture/wall2_normal.png
