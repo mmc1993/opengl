@@ -129,7 +129,7 @@ public:
             {
                 auto size = (uint)mKey.size();
                 os.write((const char *)&mType, sizeof(mType));
-                os.write((const char *)&size, sizeof(uint));
+                os.write((const char *)&size,  sizeof(uint));
                 os.write((const char *)mKey.data(), size);
                 switch (mType)
                 {

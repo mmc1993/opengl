@@ -17,9 +17,9 @@ public:
         ASSERT_LOG(_id == 0, "id != 0");
         glGenTextures(1, &_id);
         ASSERT_LOG(_id != 0, "Init Error");
-        glBindTexture(  GL_TEXTURE_2D, _id);
-        glTexImage2D(   GL_TEXTURE_2D, 0, rawFormat, w, h, 0, texFormat, type, data);
-        glBindTexture(  GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, _id);
+        glTexImage2D( GL_TEXTURE_2D, 0, rawFormat, w, h, 0, texFormat, type, data);
+        glBindTexture(GL_TEXTURE_2D, 0);
         _w = w; _h = h;
     }
 
