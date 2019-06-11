@@ -1116,6 +1116,9 @@
     <ClInclude Include="src\core\tools\number_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\tools\serialize_tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1588,5 +1591,6 @@
     <None Include="src\core\third\assimp\vector3.inl">
       <Filter>头文件</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gl_res.h"
+#include "gl_texture2d.h"
 
 #define MMC_TEXTURE_2D  GL_TEXTURE_2D
 #define MMC_TEXTURE_3D  GL_TEXTURE_CUBE_MAP

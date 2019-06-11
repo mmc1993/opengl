@@ -669,13 +669,17 @@ void Render::Post(const uint subPass)
 
 void Render::Post(const GLMaterial * material)
 {
-    for (auto i = 0; material->GetTexture2Ds(i) != nullptr; ++i)
+    auto texBase = _renderState.mTexBase;
+    for (const auto & item : material->GetItems())
     {
-        _renderState.mProgram->BindUniformTex2D(
-            SFormat(UNIFORM_MATERIAL, material->GetTexture2Ds(i)->mDesc).c_str(),
-            material->GetTexture2Ds(i)->mTex->GetID(),_renderState.mTexBase + i);
+        auto key = SFormat(UNIFORM_MATERIAL, item.mKey);
+        switch (item.mType)
+        {
+        case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
+        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), texBase++); } break;
+        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), texBase++); } break;
+        }
     }
-    _renderState.mProgram->BindUniformNumber(UNIFORM_MATERIAL_SHININESS, material->GetShininess());
 }
 
 void Render::ClearCommands()

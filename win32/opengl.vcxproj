@@ -381,6 +381,7 @@
     <ClInclude Include="src\core\tools\file_tool.h" />
     <ClInclude Include="src\core\tools\glsl_tool.h" />
     <ClInclude Include="src\core\tools\number_tool.h" />
+    <ClInclude Include="src\core\tools\serialize_tool.h" />
     <ClInclude Include="src\core\tools\std_tool.h" />
     <ClInclude Include="src\core\tools\string_tool.h" />
     <ClInclude Include="src\core\tools\time_tool.h" />
@@ -407,6 +408,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="src\core\third\assimp\color4.inl" />
     <None Include="src\core\third\assimp\material.inl" />
     <None Include="src\core\third\assimp\matrix3x3.inl" />

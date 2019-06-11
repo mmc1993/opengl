@@ -59,8 +59,6 @@ static const char * const UNIFORM_CAMERA_EYE = "camera_eye_";
 
 //  材质*
 static const char * const UNIFORM_MATERIAL              = "material_.{0}";
-//  材质.高光强度
-static const char * const UNIFORM_MATERIAL_SHININESS    = "material_.mShininess";
 //  方向光阴影贴图
 static const char * const UNIFORM_SHADOW_MAP_DIRECT_    = "shadow_map_direct_{0}_";
 //  点光源阴影贴图

@@ -30,143 +30,6 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
     }
 };
 
-//  Raw Mesh
-void RawManager::RawMesh::Serialize(std::ofstream & os)
-{
-    uint iSize = (uint)mIndexs.size();
-    uint vSize = (uint)mVertexs.size();
-    os.write((const char *)&iSize, sizeof(uint));
-    os.write((const char *)&vSize, sizeof(uint));
-    os.write((const char *)mIndexs.data(),  iSize * sizeof(decltype(mIndexs)::value_type));
-    os.write((const char *)mVertexs.data(), vSize * sizeof(decltype(mVertexs)::value_type));
-}
-
-void RawManager::RawMesh::Deserialize(std::ifstream & is)
-{
-    uint iSize = 0;
-    uint vSize = 0;
-    is.read((char *)&iSize, sizeof(uint));
-    is.read((char *)&vSize, sizeof(uint));
-
-    mIndexs.resize(iSize);
-    mVertexs.resize(vSize);
-    is.read((char *)mIndexs.data(),  sizeof(decltype(mIndexs)::value_type) * iSize);
-    is.read((char *)mVertexs.data(), sizeof(decltype(mVertexs)::value_type) * vSize);
-}
-
-//  Raw Image
-void RawManager::RawImage::Serialize(std::ofstream & os)
-{
-    uint size = (uint)mData.size();
-    os.write((const char *)&mW, sizeof(uint));
-    os.write((const char *)&mH, sizeof(uint));
-    os.write((const char *)&mFormat, sizeof(uint));
-    os.write((const char *)&size, sizeof(uint));
-    os.write((const char *)mData.c_str(), size);
-}
-
-void RawManager::RawImage::Deserialize(std::ifstream & is)
-{
-    uint size = 0;
-    is.read((char *)&mW, sizeof(uint));
-    is.read((char *)&mH, sizeof(uint));
-    is.read((char *)&mFormat, sizeof(uint));
-
-    is.read((char *)&size, sizeof(uint));
-    mData.resize(size);
-    is.read((char *)mData.data(), size);
-}
-
-//  Raw Program
-void RawManager::RawProgram::Serialize(std::ofstream & os)
-{
-    uint8 aSize = (uint8)mAttrs.size();
-    uint vSize  = (uint)mVSBuffer.size();
-    uint gSize  = (uint)mGSBuffer.size();
-    uint fSize  = (uint)mFSBuffer.size();
-
-    os.write((const char *)&aSize, sizeof(uint8));
-    os.write((const char *)&vSize, sizeof(uint));
-    os.write((const char *)&gSize, sizeof(uint));
-    os.write((const char *)&fSize, sizeof(uint));
-
-    os.write((const char *)mAttrs.data(), sizeof(GLProgram::PassAttr) * aSize);
-    if (!mVSBuffer.empty()) { os.write((const char *)mVSBuffer.c_str(), vSize); }
-    if (!mGSBuffer.empty()) { os.write((const char *)mGSBuffer.c_str(), gSize); }
-    if (!mFSBuffer.empty()) { os.write((const char *)mFSBuffer.c_str(), fSize); }
-}
-
-void RawManager::RawProgram::Deserialize(std::ifstream & is)
-{
-    uint8 aSize = 0;
-    uint  vSize = 0, gSize = 0, fSize = 0;
-
-    is.read((char *)&aSize, sizeof(uint8));
-    is.read((char *)&vSize, sizeof(uint));
-    is.read((char *)&gSize, sizeof(uint));
-    is.read((char *)&fSize, sizeof(uint));
-
-    mAttrs.resize(aSize); is.read((char *)mAttrs.data(), sizeof(GLProgram::PassAttr) * aSize);
-    if (vSize != 0) { mVSBuffer.resize(vSize); is.read((char *)mVSBuffer.data(), vSize); }
-    if (gSize != 0) { mGSBuffer.resize(gSize); is.read((char *)mGSBuffer.data(), gSize); }
-    if (fSize != 0) { mFSBuffer.resize(fSize); is.read((char *)mFSBuffer.data(), fSize); }
-}
-
-//  Raw Material
-void RawManager::RawMaterial::Serialize(std::ofstream & os)
-{
-    os.write((const char *)&mShininess, sizeof(uint));
-
-    uint8 size = (uint8)mMesh.size();
-    os.write((const char *)&size, sizeof(uint8));
-    os.write((const char *)mMesh.c_str(), size);
-
-    size = (uint8)mProgram.size();
-    os.write((const char *)&size, sizeof(uint8));
-    os.write((const char *)mProgram.c_str(), size);
-
-    size = (uint8)mTexture2Ds.size();
-    os.write((const char *)&size, sizeof(uint8));
-    for (auto & texture : mTexture2Ds)
-    {
-        size = (uint8)texture.mName.size();
-        os.write((const char *)&size, sizeof(uint8));
-        os.write((const char *)texture.mName.c_str(), size);
-
-        size = (uint8)texture.mDsec.size();
-        os.write((const char *)&size, sizeof(uint8));
-        os.write((const char *)texture.mDsec.c_str(), size);
-    }
-}
-
-void RawManager::RawMaterial::Deserialize(std::ifstream & is)
-{
-    is.read((char *)&mShininess, sizeof(uint));
-
-    uint8 size = 0;
-
-    is.read((char *)&size, sizeof(uint8));
-    mMesh.resize(size);
-    is.read((char *)mMesh.data(), size);
-
-    is.read((char *)&size, sizeof(uint8));
-    mProgram.resize(size);
-    is.read((char *)mProgram.data(), size);
-
-    is.read((char *)&size, sizeof(uint8));
-    mTexture2Ds.resize(size);
-    for (auto & texture : mTexture2Ds)
-    {
-        is.read((char *)&size, sizeof(uint8));
-        texture.mName.resize(size);
-        is.read((char *)texture.mName.data(), size);
-
-        is.read((char *)&size, sizeof(uint8));
-        texture.mDsec.resize(size);
-        is.read((char *)texture.mDsec.data(), size);
-    }
-}
-
 //  Raw Manager
 void RawManager::Init()
 {
@@ -773,21 +636,32 @@ void RawManager::ImportProgram(const std::string & url)
 
 void RawManager::ImportMaterial(const std::string & url)
 {
-    std::ifstream is(url);
-    ASSERT_LOG(is, "URL: {0}", url);
-
+    auto json = mmc::JsonValue::FromFile(url);
+    ASSERT_LOG(json, "URL: {0}", url);
     RawMaterial rawMaterial;
-    is >> rawMaterial.mShininess;
-    is >> rawMaterial.mMesh;
-    is >> rawMaterial.mProgram;
-    while (!is.eof())
+    rawMaterial.mMesh       = json->At("mesh")->ToString();
+    rawMaterial.mProgram    = json->At("program")->ToString();
+    for (auto jitem : json->At("items"))
     {
-        RawMaterial::Texture texture;
-        is >> texture.mDsec;
-        is >> texture.mName;
-        rawMaterial.mTexture2Ds.push_back(texture);
+        RawMaterial::Item item;
+        item.mKey = jitem.mValue->At("key")->ToString();
+        if (jitem.mValue->At("type")->ToString() == "number")
+        {
+            item.mType = GLMaterial::Item::kNUMBER;
+            item.mValNum = (float)jitem.mValue->At("val")->ToDouble();
+        }
+        else if (jitem.mValue->At("type")->ToString() == "tex2d")
+        {
+            item.mType = GLMaterial::Item::kTEX2D;
+            item.mValStr = jitem.mValue->At("val")->ToString();
+        }
+        else if (jitem.mValue->At("type")->ToString() == "tex3d")
+        {
+            item.mType = GLMaterial::Item::kTEX3D;
+            item.mValStr = jitem.mValue->At("val")->ToString();
+        }
+        rawMaterial.mItems.push_back(item);
     }
-    is.close();
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_MATERIAL], std::ios::binary | std::ios::app);
@@ -851,16 +725,25 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
 {
     auto raw = (RawMaterial *)LoadRaw(name);
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
-    
+
     auto res = new GLMaterial();
-    res->SetShininess((float)raw->mShininess);
-    res->SetMesh(LoadRes<GLMesh>(raw->mMesh));
+    res->SetMesh(   LoadRes<GLMesh>      (raw->mMesh));
     res->SetProgram(LoadRes<GLProgram>(raw->mProgram));
-    for (auto i = 0; i != raw->mTexture2Ds.size(); ++i)
+    for (auto & item : raw->mItems)
     {
-        res->SetTexture2D(LoadRes<GLTexture2D>(
-            raw->mTexture2Ds.at(i).mName), 
-            raw->mTexture2Ds.at(i).mDsec, i);
+        switch (item.mType)
+        {
+        case GLMaterial::Item::kNUMBER:
+            {
+                res->SetItem(item.mType, item.mKey, item.mValNum);
+            }
+            break;
+        case GLMaterial::Item::kTEX2D:
+            {
+                res->SetItem(item.mType, item.mKey, LoadRes<GLTexture2D>(item.mValStr));
+            }
+            break;
+        }
     }
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
