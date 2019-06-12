@@ -10,25 +10,25 @@ class GLProgram : public GLRes {
 public:
     struct Pass {
         //  面剔除
-        int     vCullFace;
+        iint        mCullFace;
         //  混合
-        int     vBlendSrc;
-        int     vBlendDst;
+        iint        mBlendSrc;
+        iint        mBlendDst;
         //  深度测试
-        short   bDepthTest;         //  开启深度测试
-        short   bDepthWrite;        //  开启深度写入
+        short       mDepthTest;         //  开启深度测试
+        short       mDepthWrite;        //  开启深度写入
         //  模板测试
-        int     vStencilOpFail;		//	模板测试失败
-        int     vStencilOpZFail;	//	深度测试失败
-        int     vStencilOpZPass;	//	深度测试通过
-        int		vStencilFunc;		//	模板测试函数
-        int     vStencilMask;       //  模板测试值
-        int     vStencilRef;        //  模板测试值
+        iint        mStencilOpFail;	//	模板测试失败
+        iint        mStencilOpZFail;	//	深度测试失败
+        iint        mStencilOpZPass;	//	深度测试通过
+        iint		mStencilFunc;	//	模板测试函数
+        iint        mStencilMask;      //  模板测试值
+        iint        mStencilRef;       //  模板测试值
         //  渲染
-        short   vDrawType;			//	绘制类型
-        short   vRenderType;        //  渲染类型
-        short   vRenderQueue;       //  渲染通道
-        char    mPassName[14];      //  Pass名字
+        uint        mDrawType;			//	绘制类型
+        uint        mRenderType;        //  渲染类型
+        uint        mRenderQueue;       //  渲染通道
+        uint        mID;                //  ID
 
         Pass() { memset(this, 0, sizeof(Pass)); }
     };

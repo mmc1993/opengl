@@ -404,81 +404,81 @@ void RawManager::ImportProgram(const std::string & url)
                 if (word == "CullFace")
                 {
                     ss >> word;
-                    if (word == "Front")                    { pass->vCullFace = GL_FRONT; }
-                    else if (word == "Back")                { pass->vCullFace = GL_BACK; }
-                    else if (word == "FrontBack")           { pass->vCullFace = GL_FRONT_AND_BACK; }
+                    if (word == "Front")                    { pass->mCullFace = GL_FRONT; }
+                    else if (word == "Back")                { pass->mCullFace = GL_BACK; }
+                    else if (word == "FrontBack")           { pass->mCullFace = GL_FRONT_AND_BACK; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "BlendMode")
                 {
                     ss >> word;
-                    if (word == "Zero")                     { pass->vBlendSrc = GL_ZERO; }
-                    else if (word == "One")                 { pass->vBlendSrc = GL_ONE; }
-                    else if (word == "SrcColor")            { pass->vBlendSrc = GL_SRC_COLOR; }
-                    else if (word == "SrcAlpha")            { pass->vBlendSrc = GL_SRC_ALPHA; }
-                    else if (word == "DstAlpha")            { pass->vBlendSrc = GL_DST_ALPHA; }
-                    else if (word == "OneMinusSrcColor")    { pass->vBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
-                    else if (word == "OneMinusSrcAlpha")    { pass->vBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
-                    else if (word == "OneMinusDstAlpha")    { pass->vBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
+                    if (word == "Zero")                     { pass->mBlendSrc = GL_ZERO; }
+                    else if (word == "One")                 { pass->mBlendSrc = GL_ONE; }
+                    else if (word == "SrcColor")            { pass->mBlendSrc = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { pass->mBlendSrc = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { pass->mBlendSrc = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { pass->mBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { pass->mBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { pass->mBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Zero")                     { pass->vBlendDst = GL_ZERO; }
-                    else if (word == "One")                 { pass->vBlendDst = GL_ONE; }
-                    else if (word == "SrcColor")            { pass->vBlendDst = GL_SRC_COLOR; }
-                    else if (word == "SrcAlpha")            { pass->vBlendDst = GL_SRC_ALPHA; }
-                    else if (word == "DstAlpha")            { pass->vBlendDst = GL_DST_ALPHA; }
-                    else if (word == "OneMinusSrcColor")    { pass->vBlendDst = GL_ONE_MINUS_SRC_COLOR; }
-                    else if (word == "OneMinusSrcAlpha")    { pass->vBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
-                    else if (word == "OneMinusDstAlpha")    { pass->vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
+                    if (word == "Zero")                     { pass->mBlendDst = GL_ZERO; }
+                    else if (word == "One")                 { pass->mBlendDst = GL_ONE; }
+                    else if (word == "SrcColor")            { pass->mBlendDst = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { pass->mBlendDst = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { pass->mBlendDst = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { pass->mBlendDst = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { pass->mBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { pass->mBlendDst = GL_ONE_MINUS_DST_ALPHA; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
-                else if (word == "DepthTest")               { pass->bDepthTest = true; }
-                else if (word == "DepthWrite")              { pass->bDepthWrite = true; }
+                else if (word == "DepthTest")               { pass->mDepthTest = true; }
+                else if (word == "DepthWrite")              { pass->mDepthWrite = true; }
                 else if (word == "StencilTest")
                 {
                     ss >> word;
-                    if (word == "Keep")             { pass->vStencilOpFail = GL_KEEP; }
-                    else if (word == "Zero")        { pass->vStencilOpFail = GL_ZERO; }
-                    else if (word == "Incr")        { pass->vStencilOpFail = GL_INCR; }
-                    else if (word == "Decr")        { pass->vStencilOpFail = GL_DECR; }
-                    else if (word == "Invert")      { pass->vStencilOpFail = GL_INVERT; }
-                    else if (word == "Replace")     { pass->vStencilOpFail = GL_REPLACE; }
+                    if (word == "Keep")             { pass->mStencilOpFail = GL_KEEP; }
+                    else if (word == "Zero")        { pass->mStencilOpFail = GL_ZERO; }
+                    else if (word == "Incr")        { pass->mStencilOpFail = GL_INCR; }
+                    else if (word == "Decr")        { pass->mStencilOpFail = GL_DECR; }
+                    else if (word == "Invert")      { pass->mStencilOpFail = GL_INVERT; }
+                    else if (word == "Replace")     { pass->mStencilOpFail = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Keep")             { pass->vStencilOpZFail = GL_KEEP; }
-                    else if (word == "Zero")        { pass->vStencilOpZFail = GL_ZERO; }
-                    else if (word == "Incr")        { pass->vStencilOpZFail = GL_INCR; }
-                    else if (word == "Decr")        { pass->vStencilOpZFail = GL_DECR; }
-                    else if (word == "Invert")      { pass->vStencilOpZFail = GL_INVERT; }
-                    else if (word == "Replace")     { pass->vStencilOpZFail = GL_REPLACE; }
+                    if (word == "Keep")             { pass->mStencilOpZFail = GL_KEEP; }
+                    else if (word == "Zero")        { pass->mStencilOpZFail = GL_ZERO; }
+                    else if (word == "Incr")        { pass->mStencilOpZFail = GL_INCR; }
+                    else if (word == "Decr")        { pass->mStencilOpZFail = GL_DECR; }
+                    else if (word == "Invert")      { pass->mStencilOpZFail = GL_INVERT; }
+                    else if (word == "Replace")     { pass->mStencilOpZFail = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Keep")             { pass->vStencilOpZPass = GL_KEEP; }
-                    else if (word == "Zero")        { pass->vStencilOpZPass = GL_ZERO; }
-                    else if (word == "Incr")        { pass->vStencilOpZPass = GL_INCR; }
-                    else if (word == "Decr")        { pass->vStencilOpZPass = GL_DECR; }
-                    else if (word == "Invert")      { pass->vStencilOpZPass = GL_INVERT; }
-                    else if (word == "Replace")     { pass->vStencilOpZPass = GL_REPLACE; }
+                    if (word == "Keep")             { pass->mStencilOpZPass = GL_KEEP; }
+                    else if (word == "Zero")        { pass->mStencilOpZPass = GL_ZERO; }
+                    else if (word == "Incr")        { pass->mStencilOpZPass = GL_INCR; }
+                    else if (word == "Decr")        { pass->mStencilOpZPass = GL_DECR; }
+                    else if (word == "Invert")      { pass->mStencilOpZPass = GL_INVERT; }
+                    else if (word == "Replace")     { pass->mStencilOpZPass = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Never")            { pass->vStencilFunc = GL_NEVER; }
-                    else if (word == "Less")        { pass->vStencilFunc = GL_LESS; }
-                    else if (word == "Equal")       { pass->vStencilFunc = GL_EQUAL; }
-                    else if (word == "Greater")     { pass->vStencilFunc = GL_GREATER; }
-                    else if (word == "NotEqual")    { pass->vStencilFunc = GL_NOTEQUAL; }
-                    else if (word == "Gequal")      { pass->vStencilFunc = GL_GEQUAL; }
-                    else if (word == "Always")      { pass->vStencilFunc = GL_ALWAYS; }
+                    if (word == "Never")            { pass->mStencilFunc = GL_NEVER; }
+                    else if (word == "Less")        { pass->mStencilFunc = GL_LESS; }
+                    else if (word == "Equal")       { pass->mStencilFunc = GL_EQUAL; }
+                    else if (word == "Greater")     { pass->mStencilFunc = GL_GREATER; }
+                    else if (word == "NotEqual")    { pass->mStencilFunc = GL_NOTEQUAL; }
+                    else if (word == "Gequal")      { pass->mStencilFunc = GL_GEQUAL; }
+                    else if (word == "Always")      { pass->mStencilFunc = GL_ALWAYS; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    pass->vStencilMask = std::stoi(word);
+                    pass->mStencilMask = std::stoi(word);
 
                     ss >> word;
-                    pass->vStencilRef = std::stoi(word);
+                    pass->mStencilRef = std::stoi(word);
                 }
                 else if (word == "PassName")
                 {
@@ -488,27 +488,27 @@ void RawManager::ImportProgram(const std::string & url)
                 else if (word == "RenderQueue")
                 {
                     ss >> word;
-                    if (word == "Background")       { pass->vRenderQueue = 0; }
-                    else if (word == "Geometric")   { pass->vRenderQueue = 1; }
-                    else if (word == "Opacity")     { pass->vRenderQueue = 2; }
-                    else if (word == "Top")         { pass->vRenderQueue = 3; }
+                    if (word == "Background")       { pass->mRenderQueue = 0; }
+                    else if (word == "Geometric")   { pass->mRenderQueue = 1; }
+                    else if (word == "Opacity")     { pass->mRenderQueue = 2; }
+                    else if (word == "Top")         { pass->mRenderQueue = 3; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "RenderType")
                 {
                     ss >> word;
-                    if (word == "Light")            { pass->vRenderType = 0; }
-                    else if (word == "Shadow")      { pass->vRenderType = 1; }
-                    else if (word == "Forward")     { pass->vRenderType = 2; }
-                    else if (word == "Deferred")    { pass->vRenderType = 3; }
+                    if (word == "Light")            { pass->mRenderType = 0; }
+                    else if (word == "Shadow")      { pass->mRenderType = 1; }
+                    else if (word == "Forward")     { pass->mRenderType = 2; }
+                    else if (word == "Deferred")    { pass->mRenderType = 3; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "DrawType")
                 {
                     ss >> word;
-                    if (word == "Instance")         { pass->vDrawType = 0; }
-                    else if (word == "Vertex")      { pass->vDrawType = 1; }
-                    else if (word == "Index")       { pass->vDrawType = 2; }
+                    if (word == "Instance")         { pass->mDrawType = 0; }
+                    else if (word == "Vertex")      { pass->mDrawType = 1; }
+                    else if (word == "Index")       { pass->mDrawType = 2; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
