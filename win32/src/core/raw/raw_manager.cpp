@@ -373,7 +373,7 @@ void RawManager::ImportProgram(const std::string & url)
         std::string & vBuffer, 
         std::string & gBuffer, 
         std::string & fBuffer, 
-        GLProgram::PassAttr * passAttr)
+        GLProgram::Pass * pass)
     {
         std::string line;
         while (std::getline(is, line))
@@ -395,7 +395,7 @@ void RawManager::ImportProgram(const std::string & url)
                 || string_tool::IsEqualSkipSpace(line, "DrawType")
                 || string_tool::IsEqualSkipSpace(line, "PassName"))
             {
-                ASSERT_LOG(passAttr != nullptr, "解析Pass属性错误: {0}, {1}", endFlag, line);
+                ASSERT_LOG(pass != nullptr, "解析Pass属性错误: {0}, {1}", endFlag, line);
                 std::stringstream ss;
                 std::string word;
                 ss.str(line);
@@ -404,111 +404,111 @@ void RawManager::ImportProgram(const std::string & url)
                 if (word == "CullFace")
                 {
                     ss >> word;
-                    if (word == "Front")                    { passAttr->vCullFace = GL_FRONT; }
-                    else if (word == "Back")                { passAttr->vCullFace = GL_BACK; }
-                    else if (word == "FrontBack")           { passAttr->vCullFace = GL_FRONT_AND_BACK; }
+                    if (word == "Front")                    { pass->vCullFace = GL_FRONT; }
+                    else if (word == "Back")                { pass->vCullFace = GL_BACK; }
+                    else if (word == "FrontBack")           { pass->vCullFace = GL_FRONT_AND_BACK; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "BlendMode")
                 {
                     ss >> word;
-                    if (word == "Zero")                     { passAttr->vBlendSrc = GL_ZERO; }
-                    else if (word == "One")                 { passAttr->vBlendSrc = GL_ONE; }
-                    else if (word == "SrcColor")            { passAttr->vBlendSrc = GL_SRC_COLOR; }
-                    else if (word == "SrcAlpha")            { passAttr->vBlendSrc = GL_SRC_ALPHA; }
-                    else if (word == "DstAlpha")            { passAttr->vBlendSrc = GL_DST_ALPHA; }
-                    else if (word == "OneMinusSrcColor")    { passAttr->vBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
-                    else if (word == "OneMinusSrcAlpha")    { passAttr->vBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
-                    else if (word == "OneMinusDstAlpha")    { passAttr->vBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
+                    if (word == "Zero")                     { pass->vBlendSrc = GL_ZERO; }
+                    else if (word == "One")                 { pass->vBlendSrc = GL_ONE; }
+                    else if (word == "SrcColor")            { pass->vBlendSrc = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { pass->vBlendSrc = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { pass->vBlendSrc = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { pass->vBlendSrc = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { pass->vBlendSrc = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { pass->vBlendSrc = GL_ONE_MINUS_DST_ALPHA; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Zero")                     { passAttr->vBlendDst = GL_ZERO; }
-                    else if (word == "One")                 { passAttr->vBlendDst = GL_ONE; }
-                    else if (word == "SrcColor")            { passAttr->vBlendDst = GL_SRC_COLOR; }
-                    else if (word == "SrcAlpha")            { passAttr->vBlendDst = GL_SRC_ALPHA; }
-                    else if (word == "DstAlpha")            { passAttr->vBlendDst = GL_DST_ALPHA; }
-                    else if (word == "OneMinusSrcColor")    { passAttr->vBlendDst = GL_ONE_MINUS_SRC_COLOR; }
-                    else if (word == "OneMinusSrcAlpha")    { passAttr->vBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
-                    else if (word == "OneMinusDstAlpha")    { passAttr->vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
+                    if (word == "Zero")                     { pass->vBlendDst = GL_ZERO; }
+                    else if (word == "One")                 { pass->vBlendDst = GL_ONE; }
+                    else if (word == "SrcColor")            { pass->vBlendDst = GL_SRC_COLOR; }
+                    else if (word == "SrcAlpha")            { pass->vBlendDst = GL_SRC_ALPHA; }
+                    else if (word == "DstAlpha")            { pass->vBlendDst = GL_DST_ALPHA; }
+                    else if (word == "OneMinusSrcColor")    { pass->vBlendDst = GL_ONE_MINUS_SRC_COLOR; }
+                    else if (word == "OneMinusSrcAlpha")    { pass->vBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
+                    else if (word == "OneMinusDstAlpha")    { pass->vBlendDst = GL_ONE_MINUS_DST_ALPHA; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
-                else if (word == "DepthTest")               { passAttr->bDepthTest = true; }
-                else if (word == "DepthWrite")              { passAttr->bDepthWrite = true; }
+                else if (word == "DepthTest")               { pass->bDepthTest = true; }
+                else if (word == "DepthWrite")              { pass->bDepthWrite = true; }
                 else if (word == "StencilTest")
                 {
                     ss >> word;
-                    if (word == "Keep")             { passAttr->vStencilOpFail = GL_KEEP; }
-                    else if (word == "Zero")        { passAttr->vStencilOpFail = GL_ZERO; }
-                    else if (word == "Incr")        { passAttr->vStencilOpFail = GL_INCR; }
-                    else if (word == "Decr")        { passAttr->vStencilOpFail = GL_DECR; }
-                    else if (word == "Invert")      { passAttr->vStencilOpFail = GL_INVERT; }
-                    else if (word == "Replace")     { passAttr->vStencilOpFail = GL_REPLACE; }
+                    if (word == "Keep")             { pass->vStencilOpFail = GL_KEEP; }
+                    else if (word == "Zero")        { pass->vStencilOpFail = GL_ZERO; }
+                    else if (word == "Incr")        { pass->vStencilOpFail = GL_INCR; }
+                    else if (word == "Decr")        { pass->vStencilOpFail = GL_DECR; }
+                    else if (word == "Invert")      { pass->vStencilOpFail = GL_INVERT; }
+                    else if (word == "Replace")     { pass->vStencilOpFail = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Keep")             { passAttr->vStencilOpZFail = GL_KEEP; }
-                    else if (word == "Zero")        { passAttr->vStencilOpZFail = GL_ZERO; }
-                    else if (word == "Incr")        { passAttr->vStencilOpZFail = GL_INCR; }
-                    else if (word == "Decr")        { passAttr->vStencilOpZFail = GL_DECR; }
-                    else if (word == "Invert")      { passAttr->vStencilOpZFail = GL_INVERT; }
-                    else if (word == "Replace")     { passAttr->vStencilOpZFail = GL_REPLACE; }
+                    if (word == "Keep")             { pass->vStencilOpZFail = GL_KEEP; }
+                    else if (word == "Zero")        { pass->vStencilOpZFail = GL_ZERO; }
+                    else if (word == "Incr")        { pass->vStencilOpZFail = GL_INCR; }
+                    else if (word == "Decr")        { pass->vStencilOpZFail = GL_DECR; }
+                    else if (word == "Invert")      { pass->vStencilOpZFail = GL_INVERT; }
+                    else if (word == "Replace")     { pass->vStencilOpZFail = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Keep")             { passAttr->vStencilOpZPass = GL_KEEP; }
-                    else if (word == "Zero")        { passAttr->vStencilOpZPass = GL_ZERO; }
-                    else if (word == "Incr")        { passAttr->vStencilOpZPass = GL_INCR; }
-                    else if (word == "Decr")        { passAttr->vStencilOpZPass = GL_DECR; }
-                    else if (word == "Invert")      { passAttr->vStencilOpZPass = GL_INVERT; }
-                    else if (word == "Replace")     { passAttr->vStencilOpZPass = GL_REPLACE; }
+                    if (word == "Keep")             { pass->vStencilOpZPass = GL_KEEP; }
+                    else if (word == "Zero")        { pass->vStencilOpZPass = GL_ZERO; }
+                    else if (word == "Incr")        { pass->vStencilOpZPass = GL_INCR; }
+                    else if (word == "Decr")        { pass->vStencilOpZPass = GL_DECR; }
+                    else if (word == "Invert")      { pass->vStencilOpZPass = GL_INVERT; }
+                    else if (word == "Replace")     { pass->vStencilOpZPass = GL_REPLACE; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    if (word == "Never")            { passAttr->vStencilFunc = GL_NEVER; }
-                    else if (word == "Less")        { passAttr->vStencilFunc = GL_LESS; }
-                    else if (word == "Equal")       { passAttr->vStencilFunc = GL_EQUAL; }
-                    else if (word == "Greater")     { passAttr->vStencilFunc = GL_GREATER; }
-                    else if (word == "NotEqual")    { passAttr->vStencilFunc = GL_NOTEQUAL; }
-                    else if (word == "Gequal")      { passAttr->vStencilFunc = GL_GEQUAL; }
-                    else if (word == "Always")      { passAttr->vStencilFunc = GL_ALWAYS; }
+                    if (word == "Never")            { pass->vStencilFunc = GL_NEVER; }
+                    else if (word == "Less")        { pass->vStencilFunc = GL_LESS; }
+                    else if (word == "Equal")       { pass->vStencilFunc = GL_EQUAL; }
+                    else if (word == "Greater")     { pass->vStencilFunc = GL_GREATER; }
+                    else if (word == "NotEqual")    { pass->vStencilFunc = GL_NOTEQUAL; }
+                    else if (word == "Gequal")      { pass->vStencilFunc = GL_GEQUAL; }
+                    else if (word == "Always")      { pass->vStencilFunc = GL_ALWAYS; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
 
                     ss >> word;
-                    passAttr->vStencilMask = std::stoi(word);
+                    pass->vStencilMask = std::stoi(word);
 
                     ss >> word;
-                    passAttr->vStencilRef = std::stoi(word);
+                    pass->vStencilRef = std::stoi(word);
                 }
                 else if (word == "PassName")
                 {
                     ss >> word;
-                    memcpy(passAttr->mPassName, word.c_str(), word.size());
+                    memcpy(pass->mPassName, word.c_str(), word.size());
                 }
                 else if (word == "RenderQueue")
                 {
                     ss >> word;
-                    if (word == "Background")       { passAttr->vRenderQueue = 0; }
-                    else if (word == "Geometric")   { passAttr->vRenderQueue = 1; }
-                    else if (word == "Opacity")     { passAttr->vRenderQueue = 2; }
-                    else if (word == "Top")         { passAttr->vRenderQueue = 3; }
+                    if (word == "Background")       { pass->vRenderQueue = 0; }
+                    else if (word == "Geometric")   { pass->vRenderQueue = 1; }
+                    else if (word == "Opacity")     { pass->vRenderQueue = 2; }
+                    else if (word == "Top")         { pass->vRenderQueue = 3; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "RenderType")
                 {
                     ss >> word;
-                    if (word == "Light")            { passAttr->vRenderType = 0; }
-                    else if (word == "Shadow")      { passAttr->vRenderType = 1; }
-                    else if (word == "Forward")     { passAttr->vRenderType = 2; }
-                    else if (word == "Deferred")    { passAttr->vRenderType = 3; }
+                    if (word == "Light")            { pass->vRenderType = 0; }
+                    else if (word == "Shadow")      { pass->vRenderType = 1; }
+                    else if (word == "Forward")     { pass->vRenderType = 2; }
+                    else if (word == "Deferred")    { pass->vRenderType = 3; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else if (word == "DrawType")
                 {
                     ss >> word;
-                    if (word == "Instance")         { passAttr->vDrawType = 0; }
-                    else if (word == "Vertex")      { passAttr->vDrawType = 1; }
-                    else if (word == "Index")       { passAttr->vDrawType = 2; }
+                    if (word == "Instance")         { pass->vDrawType = 0; }
+                    else if (word == "Vertex")      { pass->vDrawType = 1; }
+                    else if (word == "Index")       { pass->vDrawType = 2; }
                     else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
                 }
                 else { ASSERT_LOG(false, "解析Pass属性错误: {0}, {1}", word, line); }
@@ -594,7 +594,7 @@ void RawManager::ImportProgram(const std::string & url)
     std::string vBuffer;
     std::string gBuffer;
     std::string fBuffer;
-    std::vector<GLProgram::PassAttr> attrs;
+    std::vector<GLProgram::Pass> passs;
     while (std::getline(is, line))
     {
         if (string_tool::IsEqualSkipSpace(line, "Common Beg"))
@@ -603,21 +603,21 @@ void RawManager::ImportProgram(const std::string & url)
         }
         else if (string_tool::IsEqualSkipSpace(line, "Pass Beg"))
         {
-            GLProgram::PassAttr attr;
+            GLProgram::Pass pass;
             auto vLen = vBuffer.size();
             auto gLen = gBuffer.size();
             auto fLen = fBuffer.size();
-            ParsePass(is, "Pass End", vBuffer, gBuffer, fBuffer, &attr);
+            ParsePass(is, "Pass End", vBuffer, gBuffer, fBuffer, &pass);
             if (vBuffer.size() != vLen) { vLength = vBuffer.size() - vLen; }
             if (gBuffer.size() != gLen) { gLength = gBuffer.size() - gLen; }
             if (fBuffer.size() != fLen) { fLength = fBuffer.size() - fLen; }
-            attrs.push_back(attr);
+            passs.push_back(pass);
         }
     }
 
     //  写入GL Program数据
     RawProgram rawProgram;
-    rawProgram.mAttrs = std::move(attrs);
+    rawProgram.mPasss = std::move(passs);
     if (vLength != 0) { rawProgram.mVSBuffer = std::move(vBuffer); }
     if (gLength != 0) { rawProgram.mGSBuffer = std::move(gBuffer); }
     if (fLength != 0) { rawProgram.mFSBuffer = std::move(fBuffer); }
@@ -710,9 +710,9 @@ GLRes * RawManager::LoadResProgram(const std::string & name)
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
 
     auto res = new GLProgram();
-    for (const auto & attr : raw->mAttrs)
+    for (const auto & pass : raw->mPasss)
     {
-        res->AddPassAttr(attr);
+        res->AddPass(pass);
     }
     res->Init(raw->mVSBuffer.c_str(), raw->mVSBuffer.size(),
               raw->mGSBuffer.c_str(), raw->mGSBuffer.size(),

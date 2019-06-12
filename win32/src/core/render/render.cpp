@@ -73,19 +73,19 @@ void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand
     case RenderCommand::kMATERIAL:
         {
             auto cmd = (MaterialCommand &)command;
-            for (auto i = 0; i != cmd.mMaterial->GetProgram()->GetPassAttr().size(); ++i)
+            for (auto i = 0; i != cmd.mMaterial->GetProgram()->GetPass().size(); ++i)
             {
                 cmd.mSubPass = i;
-                switch (cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderType)
+                switch (cmd.mMaterial->GetProgram()->GetPass(i).vRenderType)
                 {
                 case RenderTypeEnum::kSHADOW:
                     _shadowQueue.push_back(cmd);
                     break;
                 case RenderTypeEnum::kFORWARD:
-                    _forwardQueues.at(cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderQueue).push_back(cmd);
+                    _forwardQueues.at(cmd.mMaterial->GetProgram()->GetPass(i).vRenderQueue).push_back(cmd);
                     break;
                 case RenderTypeEnum::kDEFERRED:
-                    _deferredQueues.at(cmd.mMaterial->GetProgram()->GetPassAttr(i).vRenderQueue).push_back(cmd);
+                    _deferredQueues.at(cmd.mMaterial->GetProgram()->GetPass(i).vRenderQueue).push_back(cmd);
                     break;
                 }
             }
@@ -122,7 +122,7 @@ void Render::BakeLightDepthMap(Light * light, uint shadow)
             }
             Post(command.mSubPass);
             Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
 		}
 	}
     _renderTarget[0].Ended();
@@ -277,7 +277,7 @@ void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
             Post(command.mSubPass);
             Post(command.mMaterial);
             Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
 		}
 	}
 }
@@ -292,7 +292,7 @@ void Render::RenderDeferredCommands(const MaterialCommandQueue & commands)
             Post(command.mSubPass);
             Post(command.mMaterial);
             Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPassAttr(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).vDrawType, command.mMaterial->GetMesh());
         }
     }
 }
@@ -306,9 +306,9 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow
         _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferG.mDiffuseTexture, _renderState.mTexBase + 2);
         _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferG.mNormalTexture, _renderState.mTexBase + 3);
     }
-    ASSERT_LOG(command.mProgram->GetPassAttr().size() == 2, "command.mProgram->GetPassAttr().size() == 2. {0}", command.mProgram->GetPassAttr().size());
-    ASSERT_LOG(command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(0).vRenderType);
-    ASSERT_LOG(command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPassAttr(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPassAttr(1).vRenderType);
+    ASSERT_LOG(command.mProgram->GetPass().size() == 2, "command.mProgram->GetPass().size() == 2. {0}", command.mProgram->GetPass().size());
+    ASSERT_LOG(command.mProgram->GetPass(0).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(0).vRenderType);
+    ASSERT_LOG(command.mProgram->GetPass(1).vRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(1).vRenderType);
     if (shadow != 0)
     {
         _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
@@ -623,7 +623,7 @@ bool Render::Bind(const GLProgram * program)
 
 void Render::Post(const uint subPass)
 {
-    auto & attr = _renderState.mProgram->GetPassAttr(subPass);
+    auto & attr = _renderState.mProgram->GetPass(subPass);
     if (attr.vCullFace != 0)
     {
         glEnable(GL_CULL_FACE);

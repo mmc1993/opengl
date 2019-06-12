@@ -8,7 +8,7 @@
 
 class GLProgram : public GLRes {
 public:
-    struct PassAttr {
+    struct Pass {
         //  面剔除
         int     vCullFace;
         //  混合
@@ -30,7 +30,7 @@ public:
         short   vRenderQueue;       //  渲染通道
         char    mPassName[14];      //  Pass名字
 
-        PassAttr() { memset(this, 0, sizeof(PassAttr)); }
+        Pass() { memset(this, 0, sizeof(Pass)); }
     };
 public:
     GLProgram()
@@ -84,25 +84,25 @@ public:
         ASSERT_LOG(ret != 0, "GLProgram Error");
     }
 
-    void AddPassAttr(const PassAttr & passAttr)
+    void AddPass(const Pass & pass)
     {
-        _passAttrs.push_back(passAttr);
+        _passs.push_back(pass);
     }
 
-    const PassAttr & GetPassAttr(uint i) const
+    const Pass & GetPass(uint i) const
     {
-        return _passAttrs.at(i);
+        return _passs.at(i);
     }
 
-    const std::vector<PassAttr> & GetPassAttr() const
+    const std::vector<Pass> & GetPass() const
     {
-        return _passAttrs;
+        return _passs;
     }
 
     void UsePass(uint i) const
     {
-        ASSERT_LOG(i < _passAttrs.size(), "Out Range. {0}, {1}", _passAttrs.size(), i);
-        const auto & attr  = _passAttrs.at(i);
+        ASSERT_LOG(i < _passs.size(), "Out Range. {0}, {1}", _passs.size(), i);
+        const auto & attr  = _passs.at(i);
         BindUniformSubProgram(attr.mPassName);
     }
 
@@ -160,6 +160,6 @@ private:
     }
 
 private:
-    std::vector<PassAttr> _passAttrs;
+    std::vector<Pass> _passs;
     uint _id;
 };

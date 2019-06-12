@@ -97,20 +97,20 @@ public:
 
     class RawProgram : public Raw {
     public:
-        std::vector<GLProgram::PassAttr> mAttrs;
+        std::vector<GLProgram::Pass> mPasss;
         std::string mVSBuffer;
         std::string mGSBuffer;
         std::string mFSBuffer;
 
         SERIALIZE_BEG
-            SERIALIZE_POD_ARRAY(mAttrs);
+            SERIALIZE_POD_ARRAY(mPasss);
             SERIALIZE_POD_ARRAY(mVSBuffer);
             SERIALIZE_POD_ARRAY(mGSBuffer);
             SERIALIZE_POD_ARRAY(mFSBuffer);
         SERIALIZE_END
 
         DESERIALIZE_BEG
-            DESERIALIZE_POD_ARRAY(mAttrs);
+            DESERIALIZE_POD_ARRAY(mPasss);
             DESERIALIZE_POD_ARRAY(mVSBuffer);
             DESERIALIZE_POD_ARRAY(mGSBuffer);
             DESERIALIZE_POD_ARRAY(mFSBuffer);
