@@ -145,7 +145,7 @@ Pass Beg
             {
             case LIGHT_TYPE_DIRECT_:
                 {
-                    gl_FragDepth = 1;
+                    gl_FragDepth = gl_FragCoord.z;
                 }
                 break;
             case LIGHT_TYPE_POINT_:
@@ -281,12 +281,12 @@ Pass Beg
 
         vec3 CalculateDirect(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
         {
-            // float shadow = 0;
-			// switch (i)
-			// {
-			// case 0: shadow = CalculateDirectShadow(i, shadow_map_direct_0_); break;
-			// case 1: shadow = CalculateDirectShadow(i, shadow_map_direct_0_); break;
-			// }
+            float shadow = 0;
+			switch (i)
+			{
+			case 0: shadow = CalculateDirectShadow(i, shadow_map_direct_0_); break;
+			case 1: shadow = CalculateDirectShadow(i, shadow_map_direct_0_); break;
+			}
 
             float diff = CalculateDiffuseScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
             float spec = CalculateSpecularScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
@@ -294,19 +294,19 @@ Pass Beg
             vec3 ambient = light_direct_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_direct_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
             vec3 specular = light_direct_.mParam[i].mSpecular * texture(material_.mSpecular, uv).rgb * spec;
-            return ambient + (diffuse + specular) * 1;
+            return ambient + (diffuse + specular) * shadow * 1;
         }
 
         vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
         {
-            // float shadow = 0;
-			// switch (i)
-			// {
-			// case 0: shadow = CalculatePointShadow(i, shadow_map_point_0_); break;
-			// case 1: shadow = CalculatePointShadow(i, shadow_map_point_1_); break;
-			// case 2: shadow = CalculatePointShadow(i, shadow_map_point_2_); break;
-			// case 3: shadow = CalculatePointShadow(i, shadow_map_point_3_); break;
-			// }
+            float shadow = 0;
+			switch (i)
+			{
+			case 0: shadow = CalculatePointShadow(i, shadow_map_point_0_); break;
+			case 1: shadow = CalculatePointShadow(i, shadow_map_point_1_); break;
+			case 2: shadow = CalculatePointShadow(i, shadow_map_point_2_); break;
+			case 3: shadow = CalculatePointShadow(i, shadow_map_point_3_); break;
+			}
 
             vec3 fragToLight = normalize(light_point_.mParam[i].mPosition - v_out_.mMPos);
 
@@ -324,19 +324,19 @@ Pass Beg
                                                     light_point_.mParam[i].mK1,
                                                     light_point_.mParam[i].mK2);
 
-            return (ambient + (diffuse + specular) * 1) * distance;
+            return (ambient + (diffuse + specular) * shadow) * distance;
         }
 
         vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
         {
-            // float shadow = 0;
-			// switch (i)
-			// {
-			// case 0: shadow = CalculateSpotShadow(i, shadow_map_spot_0_); break;
-			// case 1: shadow = CalculateSpotShadow(i, shadow_map_spot_1_); break;
-			// case 2: shadow = CalculateSpotShadow(i, shadow_map_spot_2_); break;
-			// case 3: shadow = CalculateSpotShadow(i, shadow_map_spot_3_); break;
-			// }
+            float shadow = 0;
+			switch (i)
+			{
+			case 0: shadow = CalculateSpotShadow(i, shadow_map_spot_0_); break;
+			case 1: shadow = CalculateSpotShadow(i, shadow_map_spot_1_); break;
+			case 2: shadow = CalculateSpotShadow(i, shadow_map_spot_2_); break;
+			case 3: shadow = CalculateSpotShadow(i, shadow_map_spot_3_); break;
+			}
 
             vec3 fragToLight = normalize(light_spot_.mParam[i].mPosition - v_out_.mMPos);
 
@@ -359,7 +359,7 @@ Pass Beg
                                                     light_spot_.mParam[i].mK1, 
                                                     light_spot_.mParam[i].mK2);
 
-            return (ambient + (diffuse + specular) * 1) * weight * distance;
+            return (ambient + (diffuse + specular) * shadow) * weight * distance;
         }
 
         void main()
