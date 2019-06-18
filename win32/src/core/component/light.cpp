@@ -5,10 +5,10 @@
 #include "../res/res_manager.h"
 #include "../raw/raw_manager.h"
 
-void Light::NewVolume()
+void Light::BuildVolume(const TypeEnum type)
 {
     //  考虑把这些动态生成的网格存储在文件里.
-    switch (_type)
+    switch (type)
     {
     case TypeEnum::kDIRECT:
         {
@@ -22,8 +22,8 @@ void Light::NewVolume()
         break;
     case TypeEnum::kPOINT:
         {
-            const auto N0 = 32;
-            const auto N1 = N0 * 2-2;
+            const auto N0 = 8;
+            const auto N1 = N0 * 2 - 2;
             std::vector<uint>           indexs;
             std::vector<GLMesh::Vertex> vertexs;
 
@@ -69,11 +69,29 @@ void Light::NewVolume()
             }
 
             vertexs.emplace_back(glm::vec3(0, -1, 0));
+
+            std::ofstream os("res/built-in/mesh/deferred_light_volume_point.obj");
+            for (auto & point : vertexs)
+            {
+                os << "v "
+                    << point.v.x << " "
+                    << point.v.y << " "
+                    << point.v.z << std::endl;
+            }
+
+            for (auto i = 0; i != indexs.size(); i += 3)
+            {
+                os << "f "
+                    << indexs.at(i    ) + 1 << " "
+                    << indexs.at(i + 1) + 1 << " "
+                    << indexs.at(i + 2) + 1 << std::endl;
+            }
+            os.close();
         }
         break;
     case TypeEnum::kSPOT:
         {
-            const auto N = 32;
+            const auto N = 16;
             std::vector<uint>           indexs;
             std::vector<GLMesh::Vertex> vertexs;
 
@@ -96,6 +114,24 @@ void Light::NewVolume()
                     indexs.emplace_back(1);
                 }
             }
+
+            std::ofstream os("res/built-in/mesh/deferred_light_volume_spot.obj");
+            for (auto & point : vertexs)
+            {
+                os << "v "
+                    << point.v.x << " "
+                    << point.v.y << " "
+                    << point.v.z << std::endl;
+            }
+
+            for (auto i = 0; i != indexs.size(); i += 3)
+            {
+                os << "f "
+                    << indexs.at(i    ) + 1 << " "
+                    << indexs.at(i + 1) + 1 << " "
+                    << indexs.at(i + 2) + 1 << std::endl;
+            }
+            os.close();
         }
         break;
     }
@@ -103,19 +139,19 @@ void Light::NewVolume()
 
 Light::Light(TypeEnum type): _type(type), _ubo(0)
 {
-    //switch (type)
-    //{
-    //case kDIRECT:
-    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
-    //    break;
-    //case kPOINT:
-    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
-    //    break;
-    //case kSPOT:
-    //    _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
-    //    break;
-    //}
-    //_program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
+    switch (type)
+    {
+    case kDIRECT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+        break;
+    case kPOINT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+        break;
+    case kSPOT:
+        _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+        break;
+    }
+    _program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
 }
 
 //  --------------------------------------------------------------------------------

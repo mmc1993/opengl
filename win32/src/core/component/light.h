@@ -17,8 +17,7 @@ public:
 		kSPOT,
 	};
 
-private:
-    void NewVolume();
+    static void BuildVolume(TypeEnum type);
 
 public:
     Light(TypeEnum type);

@@ -75,6 +75,10 @@ private:
 	void InitAssets()
 	{
         Global::Ref().RefRawManager().BegImport(true);
+        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+
         Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
         Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
