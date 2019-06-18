@@ -1,8 +1,5 @@
 Common Beg
     #version 400 core
-    subroutine void PassProgram_();
-    subroutine uniform PassProgram_ sub_program_;
-
     //  矩阵/相机
     uniform vec3 camera_pos_;
     uniform vec3 camera_eye_;
@@ -85,11 +82,6 @@ Common Beg
             mat3 mTBN;
             vec2 mUV;
         } v_out_;
-
-        void main()
-        {
-            sub_program_();
-        }
     VShader End
 
     FShader Beg
@@ -127,11 +119,6 @@ Common Beg
         } v_out_;
 
         out vec4 color_;
-
-        void main()
-        {
-            sub_program_();
-        }
     FShader End
 Common End
 
@@ -141,10 +128,9 @@ Pass Beg
 	DepthWrite
 	RenderType Shadow
 	DrawType Index
-    PassName SubProgram0
 
     VShader Beg
-        subroutine(PassProgram_) void SubProgram0()
+        void main()
         {
 			vec4 apos       = vec4(a_v_, 1);
 			v_out_.mMPos    = vec3(matrix_m_ * apos);
@@ -153,7 +139,7 @@ Pass Beg
     VShader End
 
     FShader Beg
-        subroutine(PassProgram_) void SubProgram0()
+        void main()
         {
             switch (light_type_)
             {
@@ -165,12 +151,12 @@ Pass Beg
             case LIGHT_TYPE_POINT_:
                 {
 					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
-					// gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
+					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
                 }
                 break;
             case LIGHT_TYPE_SPOT_:
                 {
-                    // gl_FragDepth = gl_FragCoord.z;
+                    gl_FragDepth = gl_FragCoord.z;
                 }
                 break;
             }
@@ -185,10 +171,9 @@ Pass Beg
     RenderQueue Geometric
     RenderType Forward
     DrawType Index
-    PassName SubProgram1
 
     VShader Beg
-        subroutine(PassProgram_) void SubProgram1()
+        void main()
         {
             vec4 apos = vec4(a_v_, 1);
             v_out_.mMPos = vec3(matrix_m_ * apos);
@@ -377,7 +362,7 @@ Pass Beg
             return (ambient + (diffuse + specular) * 1) * weight * distance;
         }
 
-        subroutine(PassProgram_) void SubProgram1()
+        void main()
         {
             vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
 

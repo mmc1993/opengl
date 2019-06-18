@@ -33,7 +33,7 @@ public:
         Pass() { memset(this, 0, sizeof(Pass)); }
     };
 public:
-    GLProgram()
+    GLProgram(): _useID(GL_INVALID_INDEX)
     { }
 
     ~GLProgram()
@@ -101,7 +101,6 @@ public:
         glLinkProgram( _passs.back().mID);
         glGetProgramiv(_passs.back().mID, GL_LINK_STATUS, &ret);
         ASSERT_LOG(ret != 0, "Pass GLProgram Error.");
-        _passs.push_back(pass);
     }
 
     bool UsePass(uint i, bool force = false) const

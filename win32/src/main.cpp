@@ -74,13 +74,13 @@ private:
 
 	void InitAssets()
 	{
-        Global::Ref().RefRawManager().BegImport(true);
-        Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
-        Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
-        Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
-        Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
-        Global::Ref().RefRawManager().Import("res/demo2/material/wall.mtl");
-        Global::Ref().RefRawManager().EndImport();
+        //Global::Ref().RefRawManager().BegImport(true);
+        //Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
+        //Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
+        //Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
+        //Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
+        //Global::Ref().RefRawManager().Import("res/demo2/material/wall.mtl");
+        //Global::Ref().RefRawManager().EndImport();
 	}
 
 	void InitObject()

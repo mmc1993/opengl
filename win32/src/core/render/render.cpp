@@ -118,7 +118,7 @@ void Render::BakeLightDepthMap(Light * light, uint shadow)
             }
             Post(command.mTransform);
             Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-		}
+        }
 	}
     _renderTarget[0].Ended();
 }
