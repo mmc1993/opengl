@@ -79,19 +79,23 @@ private:
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
 
+        Global::Ref().RefRawManager().Import("res/demo2/program/deferred_gbuffer.program");
+        Global::Ref().RefRawManager().Import("res/demo2/program/deferred_light_volume.program");
+
         Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
         Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
         Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
         Global::Ref().RefRawManager().Import("res/demo2/material/wall.mtl");
+
         Global::Ref().RefRawManager().EndImport();
+
+        Global::Ref().RefRawManager().Init();
 	}
 
 	void InitObject()
 	{
-        Global::Ref().RefRawManager().Init();
-
         auto sprite = new Sprite();
         sprite->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
 
@@ -112,12 +116,12 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
+			//{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            { glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
+            //{ glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -132,6 +136,7 @@ private:
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
 			light->mNormal = data[4];
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
             light->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
 			auto object = new Object();
 			object->AddComponent(light);
@@ -149,6 +154,7 @@ private:
 			light->mK0 = data[4].x;
 			light->mK1 = data[4].y;
 			light->mK2 = data[4].z;
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
             light->OpenShadow(1, 100);
 			auto object = new Object();
 			object->AddComponent(light);
@@ -169,6 +175,7 @@ private:
 			light->mK2 = data[5].z;
 			light->mInCone = data[6].x;
 			light->mOutCone = data[6].y;
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
             light->OpenShadow(1, 100);
 			auto object = new Object();
 			object->AddComponent(light);

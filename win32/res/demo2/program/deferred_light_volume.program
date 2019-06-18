@@ -1,13 +1,14 @@
-Pass
-	CullFace Front
-    Blend One One
-	RenderType Light
-	DrawType Index
+Common Beg
+#version 330 core
+Common End
 
-	Vertex
-		#version 330 core
+Pass Beg
+	CullFace    Front
+	RenderType  Light
+	DrawType    Index
 
-		layout(location = 0) in vec3 a_pos_;
+	VShader Beg
+		layout(location = 0) in vec3 a_v_;
 
         layout (std140) uniform LightSpot_ {
 			float mK0;
@@ -40,28 +41,26 @@ Pass
             switch (light_type_)
             {
             case LIGHT_TYPE_DIRECT_:
-                gl_Position = vec4(a_pos_, 1);
+                gl_Position    = vec4(a_v_,1);
                 v_out_.mMVPPos = gl_Position;
                 break;
             case LIGHT_TYPE_POINT_:
-                gl_Position = matrix_mvp_ * vec4(a_pos_, 1);
-                v_out_.mMVPPos = gl_Position;
+                gl_Position     = matrix_mvp_ * vec4(a_v_, 1);
+                v_out_.mMVPPos  = gl_Position;
                 break;
             case LIGHT_TYPE_SPOT_:
-                vec3 normal = a_pos_ - vec3(0, 0, 1);
-                vec3 offset = normal * (light_spot_.mOutCone - 0.5f);
-                vec3 point = a_pos_ + offset;
+                vec3 normal     = a_v_ - vec3(0, 0, 1);
+                vec3 offset     = normal * (light_spot_.mOutCone - 0.5f);
+                vec3 point      = a_v_ + offset;
 
-                gl_Position = matrix_mvp_ * vec4(point, 1);
-                v_out_.mMVPPos = gl_Position;
+                gl_Position     = matrix_mvp_ * vec4(point, 1);
+                v_out_.mMVPPos  = gl_Position;
                 break;
             }
 		}
-	End Vertex
+	VShader End
 
-	Fragment
-		#version 330 core
-
+	FShader Beg
         layout (std140) uniform LightDirect_ {
 			mat4 mMatrix;
 			vec3 mNormal;
@@ -172,7 +171,7 @@ Pass
 		{
 			vec3 normal = position - light_point_.mPosition;
 			float z 	= texture(shadow_map_point_0_, normal).r;
-			return length(normal) > z * light_point_.mFar? 0: 1;
+			return length(normal) > z * light_point_.mFar? 0 : 1;
 		}
 
 		//	计算漫反射缩放因子
@@ -278,19 +277,16 @@ Pass
                 break;
             }
 		}
-	End Fragment
-End Pass
+	FShader End
+Pass End
 
-Pass
-	CullFace Front
-    Blend One One
-	RenderType Light
-	DrawType Index
+Pass Beg
+	CullFace    Front
+	RenderType  Light
+	DrawType    Index
 
-	Vertex
-		#version 330 core
-
-		layout(location = 0) in vec3 a_pos_;
+	VShader Beg
+		layout(location = 0) in vec3 a_v_;
 
         layout (std140) uniform LightSpot_ {
 			float mK0;
@@ -323,28 +319,26 @@ Pass
             switch (light_type_)
             {
             case LIGHT_TYPE_DIRECT_:
-                gl_Position = vec4(a_pos_, 1);
-                v_out_.mMVPPos = gl_Position;
+                gl_Position     = vec4(a_v_, 1);
+                v_out_.mMVPPos  = gl_Position;
                 break;
             case LIGHT_TYPE_POINT_:
-                gl_Position = matrix_mvp_ * vec4(a_pos_, 1);
-                v_out_.mMVPPos = gl_Position;
+                gl_Position     = matrix_mvp_ * vec4(a_v_, 1);
+                v_out_.mMVPPos  = gl_Position;
                 break;
             case LIGHT_TYPE_SPOT_:
-                vec3 normal = a_pos_ - vec3(0, 0, 1);
-                vec3 offset = normal * (light_spot_.mOutCone - 0.5f);
-                vec3 point = a_pos_ + offset;
+                vec3 normal     = a_v_ - vec3(0, 0, 1);
+                vec3 offset     = normal * (light_spot_.mOutCone - 0.5f);
+                vec3 point      = a_v_ + offset;
 
-                gl_Position = matrix_mvp_ * vec4(point, 1);
-                v_out_.mMVPPos = gl_Position;
+                gl_Position     = matrix_mvp_ * vec4(point, 1);
+                v_out_.mMVPPos  = gl_Position;
                 break;
             }
 		}
-	End Vertex
+	VShader End
 
-	Fragment
-		#version 330 core
-
+	FShader Beg
         layout (std140) uniform LightDirect_ {
 			mat4 mMatrix;
 			vec3 mNormal;
@@ -395,18 +389,6 @@ Pass
         } v_out_;
 
 		out vec4 color_;
-
-        int CheckInView(vec4 vec)
-        {
-            int ret = 0;
-            if		(vec.x < -vec.w) ret |= 1;
-            else if (vec.x >  vec.w) ret |= 2;
-            else if (vec.y < -vec.w) ret |= 4;
-            else if (vec.y >  vec.w) ret |= 8;
-            else if (vec.z < -vec.w) ret |= 16;
-            else if (vec.z >  vec.w) ret |= 32;
-            return ret;
-        }
 
 		//	计算漫反射缩放因子
 		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
@@ -508,5 +490,5 @@ Pass
                 break;
             }
 		}
-	End Fragment
-End Pass
+    FShader End
+Pass End

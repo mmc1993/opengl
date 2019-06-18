@@ -27,35 +27,35 @@ enum UniformBlockEnum {
 };
 
 //  UBO 方向光数据
-static const char * const UBO_NAME_LIGHT_DIRECT = "LightDirect_";
+static const char * const UBO_NAME_LIGHT_DIRECT     = "LightDirect_";
 //  UBO 点光源数据
-static const char * const UBO_NAME_LIGHT_POINT = "LightPoint_";
+static const char * const UBO_NAME_LIGHT_POINT      = "LightPoint_";
 //  UBO 聚光灯数据
-static const char * const UBO_NAME_LIGHT_SPOT = "LightSpot_";
+static const char * const UBO_NAME_LIGHT_SPOT       = "LightSpot_";
 
-//  光源位置
-static const char * const UNIFORM_LIGHT_POS = "light_pos_";
 //  光源类型
-static const char * const UNIFORM_LIGHT_TYPE = "light_type_";
+static const char * const UNIFORM_LIGHT_TYPE        = "light_type_";
+//  光源位置
+static const char * const UNIFORM_LIGHT_POS         = "light_pos_";
 //  法线矩阵
-static const char * const UNIFORM_MATRIX_N = "matrix_n_";
+static const char * const UNIFORM_MATRIX_N          = "matrix_n_";
 //  模型矩阵
-static const char * const UNIFORM_MATRIX_M = "matrix_m_";
+static const char * const UNIFORM_MATRIX_M          = "matrix_m_";
 //  视图矩阵
-static const char * const UNIFORM_MATRIX_V = "matrix_v_";
+static const char * const UNIFORM_MATRIX_V          = "matrix_v_";
 //  投影矩阵
-static const char * const UNIFORM_MATRIX_P = "matrix_p_";
+static const char * const UNIFORM_MATRIX_P          = "matrix_p_";
 //  模型视图矩阵
-static const char * const UNIFORM_MATRIX_MV = "matrix_mv_";
+static const char * const UNIFORM_MATRIX_MV         = "matrix_mv_";
 //  模型视图投影矩阵
-static const char * const UNIFORM_MATRIX_MVP = "matrix_mvp_";
+static const char * const UNIFORM_MATRIX_MVP        = "matrix_mvp_";
 //  游戏时间
-static const char * const UNIFORM_GAME_TIME = "game_time_";
+static const char * const UNIFORM_GAME_TIME         = "game_time_";
 
 //  相机位置
-static const char * const UNIFORM_CAMERA_POS = "camera_pos_";
+static const char * const UNIFORM_CAMERA_POS        = "camera_pos_";
 //  相机朝向
-static const char * const UNIFORM_CAMERA_EYE = "camera_eye_";
+static const char * const UNIFORM_CAMERA_EYE        = "camera_eye_";
 
 //  材质*
 static const char * const UNIFORM_MATERIAL              = "material_.{0}";
@@ -78,12 +78,7 @@ static const char * const UNIFORM_GBUFFER_SPECULAR      = "gbuffer_specular_";
 static const char * const UNIFORM_GBUFFER_DIFFUSE       = "gbuffer_diffuse_";
 static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
 
-//  预设Shader
-static const char * const BUILTIN_SHADER_LIGHT = "res/built-in/shader/light.shader";
-
 //  内置资源-延迟渲染-光体积
-static const char * const BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME = "res/built-in/program/deferred_light_volume";
-//  内置资源-延迟渲染-光体积
-static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct";
-static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT = "res/built-in/mesh/deferred_light_volume_point";
-static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT = "res/built-in/mesh/deferred_light_volume_spot";
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct.obj";
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT  = "res/built-in/mesh/deferred_light_volume_point.obj";
+static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT   = "res/built-in/mesh/deferred_light_volume_spot.obj";
