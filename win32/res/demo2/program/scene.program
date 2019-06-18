@@ -1,5 +1,5 @@
 Common Beg
-    #version 330 core
+    #version 400 core
     //  矩阵/相机
     uniform vec3 camera_pos_;
     uniform vec3 camera_eye_;
@@ -385,7 +385,7 @@ Pass Beg
                 outColor += CalculateSpot(i, fragNormal, cameraNormal, v_out_.mUV);
             }
 
-            color_ = vec4(outColor, 1.0f);
+            color_ = vec4(outColor, 1);
         }
     FShader End
 Pass End

@@ -177,11 +177,11 @@ void Render::RenderCamera()
     //  ÑÓ³ÙäÖÈ¾
     _renderState.mProgram = nullptr;
     RenderDeferred();
-
+    
     //  ÕýÏòäÖÈ¾
     _renderState.mProgram = nullptr;
     RenderForward();
-
+    
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
         0, 0,
@@ -200,7 +200,6 @@ void Render::RenderCamera()
 void Render::RenderForward()
 {
     PackUBOLightForward();
-
     _renderTarget[1].Start();
     for (auto & commands : _forwardQueues)
     {
@@ -257,6 +256,11 @@ void Render::RenderDeferred()
     }
 
     _renderTarget[1].Ended();
+
+    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 0);
+    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 1);
+    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 2);
+    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 3);
 }
 
 void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
@@ -272,7 +276,9 @@ void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
             Post(command.mMaterial);
             Post(command.mTransform);
             Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-		}
+            auto e = glGetError();
+            e = glGetError();
+        }
 	}
 }
 
@@ -303,8 +309,6 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow
     ASSERT_LOG(command.mProgram->GetPass(1).mRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(1).mRenderType);
     if (shadow != 0)
     {
-        _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
-        _renderState.mProgram->BindUniformTex3D(nullptr, 0, _renderState.mTexBase + 4);
         switch (command.mLight->GetType())
         {
         case Light::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
@@ -315,6 +319,11 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow
     Post(command.mLight);
     Post(command.mTransform);
     Post(DrawTypeEnum::kINDEX, command.mMesh);
+    if (shadow != 0)
+    {
+        _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
+        _renderState.mProgram->BindUniformTex3D(nullptr, 0, _renderState.mTexBase + 4);
+    }
 }
 
 void Render::PackUBOLightForward()

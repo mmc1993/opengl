@@ -4,6 +4,7 @@ Common End
 
 Pass Beg
 	CullFace    Front
+    BlendMode   One One
 	RenderType  Light
 	DrawType    Index
 

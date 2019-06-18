@@ -68,9 +68,6 @@ public:
         const uint   * indexs,  const uint indexLength, 
         uint enabled, uint vUsage = GL_STATIC_DRAW, uint eUsage = GL_STATIC_DRAW)
     {
-        //  根据启用的顶点属性, 计算出单个顶点的数据大小.
-        const auto vertexSize = Vertex::SizeOf(enabled);
-
         _vCount = vertexLength;
         _eCount = indexLength;
 
@@ -79,7 +76,7 @@ public:
 
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexSize * _vCount, vertexs, vUsage);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vCount, vertexs, vUsage);
 
         glGenBuffers(1, &_ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
@@ -88,32 +85,32 @@ public:
         auto idx = 0;
         if (Vertex::kV & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::v)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, v));
+            glVertexAttribPointer(idx, decltype(Vertex::v)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, v));
             glEnableVertexAttribArray(idx++);
         }
         if (Vertex::kN & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::n)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, n));
+            glVertexAttribPointer(idx, decltype(Vertex::n)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, n));
             glEnableVertexAttribArray(idx++);
         }
         if (Vertex::kC & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::c)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, c));
+            glVertexAttribPointer(idx, decltype(Vertex::c)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, c));
             glEnableVertexAttribArray(idx++);
         }
         if (Vertex::kUV & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::uv)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, uv));
+            glVertexAttribPointer(idx, decltype(Vertex::uv)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
             glEnableVertexAttribArray(idx++);
         }
         if (Vertex::kTAN & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::tan)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, tan));
+            glVertexAttribPointer(idx, decltype(Vertex::tan)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, tan));
             glEnableVertexAttribArray(idx++);
         }
         if (Vertex::kBITAN & enabled)
         {
-            glVertexAttribPointer(idx, decltype(Vertex::bitan)::length(), GL_FLOAT, GL_FALSE, vertexSize, (void *)offsetof(Vertex, bitan));
+            glVertexAttribPointer(idx, decltype(Vertex::bitan)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, bitan));
             glEnableVertexAttribArray(idx++);
         }
 

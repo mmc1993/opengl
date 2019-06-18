@@ -142,6 +142,7 @@ public:
         }
         auto res = (GLRes *)nullptr;
         auto raw = std::find(_manifest.begin(), _manifest.end(), name);
+        ASSERT_LOG(raw != _manifest.end(), name.c_str());
         switch (raw->mType)
         {
         case kRAW_MESH: res = LoadResMesh(name); break;
