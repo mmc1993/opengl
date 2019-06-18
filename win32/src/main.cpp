@@ -75,6 +75,7 @@ private:
 	void InitAssets()
 	{
         Global::Ref().RefRawManager().BegImport(true);
+        Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
         Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
         Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");

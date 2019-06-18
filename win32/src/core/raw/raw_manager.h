@@ -63,6 +63,7 @@ public:
 
     class RawMesh : public Raw {
     public:
+        uint                        mMask;
         std::vector<uint>           mIndexs;
         std::vector<GLMesh::Vertex> mVertexs;
         

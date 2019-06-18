@@ -44,12 +44,14 @@ void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
 //  RawMesh
 void RawManager::RawMesh::Serialize(std::ofstream & os)
 {
+    ::Serialize(os, mMask);
     ::Serialize(os, mIndexs);
     ::Serialize(os, mVertexs);
 }
 
 void RawManager::RawMesh::Deserialize(std::ifstream & is)
 {
+    ::Deserialize(is, mMask);
     ::Deserialize(is, mIndexs);
     ::Deserialize(is, mVertexs);
 }
@@ -286,36 +288,61 @@ void RawManager::ImportModel(const std::string & url)
         }
     };
 
-    auto LoadMesh = [this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
+    auto LoadMesh = [this](aiMesh * mesh, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs, uint & mask)
     {
         auto indexBase = vertexs.size();
         for (auto i = 0; i != mesh->mNumVertices; ++i)
         {
             GLMesh::Vertex vertex;
             //	position
-            vertex.v.x = mesh->mVertices[i].x;
-            vertex.v.y = mesh->mVertices[i].y;
-            vertex.v.z = mesh->mVertices[i].z;
+            if (mesh->mVertices != nullptr)
+            {
+                vertex.v.x = mesh->mVertices[i].x;
+                vertex.v.y = mesh->mVertices[i].y;
+                vertex.v.z = mesh->mVertices[i].z;
+                mask |= GLMesh::Vertex::kV;
+            }
+            
             //	normal
-            vertex.n.x = mesh->mNormals[i].x;
-            vertex.n.y = mesh->mNormals[i].y;
-            vertex.n.z = mesh->mNormals[i].z;
-            //  color
-            vertex.c.r = 1.0f;
-            vertex.c.g = 1.0f;
-            vertex.c.b = 1.0f;
-            vertex.c.a = 1.0f;
+            if (mesh->mNormals != nullptr)
+            {
+                vertex.n.x = mesh->mNormals[i].x;
+                vertex.n.y = mesh->mNormals[i].y;
+                vertex.n.z = mesh->mNormals[i].z;
+                mask |= GLMesh::Vertex::kN;
+
+                vertex.c.r = 1.0f;
+                vertex.c.g = 1.0f;
+                vertex.c.b = 1.0f;
+                vertex.c.a = 1.0f;
+                mask |= GLMesh::Vertex::kC;
+            }
+            
             //	tan
-            vertex.tan.x = mesh->mTangents[i].x;
-            vertex.tan.y = mesh->mTangents[i].y;
-            vertex.tan.z = mesh->mTangents[i].z;
+            if (mesh->mTangents != nullptr)
+            {
+                vertex.tan.x = mesh->mTangents[i].x;
+                vertex.tan.y = mesh->mTangents[i].y;
+                vertex.tan.z = mesh->mTangents[i].z;
+                mask |= GLMesh::Vertex::kTAN;
+            }
+            
             //	bitan
-            vertex.bitan.x = mesh->mBitangents[i].x;
-            vertex.bitan.y = mesh->mBitangents[i].y;
-            vertex.bitan.z = mesh->mBitangents[i].z;
+            if (mesh->mBitangents != nullptr)
+            {
+                vertex.bitan.x = mesh->mBitangents[i].x;
+                vertex.bitan.y = mesh->mBitangents[i].y;
+                vertex.bitan.z = mesh->mBitangents[i].z;
+                mask |= GLMesh::Vertex::kBITAN;
+            }
+            
             //	uv
-            vertex.uv.x = mesh->mTextureCoords[0][i].x;
-            vertex.uv.y = mesh->mTextureCoords[0][i].y;
+            if (mesh->mTextureCoords[0] != nullptr)
+            {
+                vertex.uv.x = mesh->mTextureCoords[0][i].x;
+                vertex.uv.y = mesh->mTextureCoords[0][i].y;
+                mask |= GLMesh::Vertex::kUV;
+            }
             vertexs.push_back(vertex);
         }
         if (!indexs.empty())
@@ -330,13 +357,16 @@ void RawManager::ImportModel(const std::string & url)
         }
     };
 
-    auto LoadNode = [&](aiNode * node, const aiScene * scene, const std::string & directory, std::vector<GLMesh::Vertex> & vertexs, std::vector<uint> & indexs)
+    auto LoadNode = [&](const aiNode * node, 
+                        const aiScene * scene, 
+                        const std::string & directory, 
+                        std::vector<GLMesh::Vertex> & vertexs, 
+                        std::vector<uint> & indexs, uint & mask)
     {
         for (auto i = 0; i != node->mNumMeshes; ++i)
         {
-            LoadMesh(scene->mMeshes[node->mMeshes[i]], vertexs, indexs);
-
-            LoadImage(scene->mMeshes[node->mMeshes[i]], scene, directory);
+            LoadMesh( scene->mMeshes[node->mMeshes[i]], vertexs, indexs, mask);
+            LoadImage(scene->mMeshes[node->mMeshes[i]], scene,   directory);
         }
     };
 
@@ -347,9 +377,8 @@ void RawManager::ImportModel(const std::string & url)
     ASSERT_LOG(nullptr != scene, "Error URL: {0}", url);
     ASSERT_LOG(nullptr != scene->mRootNode, "Error URL: {0}", url);
 
-    std::vector<GLMesh::Vertex> vertexs;
-    std::vector<uint>           indexs;
-    std::queue<aiNode *>        nodes;
+    RawMesh                     rawMesh;
+    std::queue<const aiNode *>  nodes;
     nodes.push(scene->mRootNode);
     while (!nodes.empty())
     {
@@ -360,16 +389,12 @@ void RawManager::ImportModel(const std::string & url)
         {
             nodes.push(scene->mRootNode->mChildren[i]);
         }
-        LoadNode(node, scene, url.substr(0, 1 + url.find_last_of('/')), vertexs, indexs);
+        LoadNode(node, scene, url.substr(0, 1 + url.find_last_of('/')), rawMesh.mVertexs, rawMesh.mIndexs, rawMesh.mMask);
     }
    
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_MESH], std::ios::binary | std::ios::app);
     ASSERT_LOG(os, "Import Model Failed. {0}", RAWDATA_URL[kRAW_MESH]);
-
-    RawMesh rawMesh;
-    rawMesh.mIndexs = std::move(indexs);
-    rawMesh.mVertexs = std::move(vertexs);
 
     auto byteOffset = file_tool::GetFileLength(os);
     rawMesh.Serialize(os);
@@ -743,8 +768,7 @@ GLRes * RawManager::LoadResMesh(const std::string & name)
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
 
     auto res = new GLMesh();
-    res->Init(raw->mVertexs, raw->mIndexs,
-              GLMesh::Vertex::kV_N_C_UV_TAN_BITAN);
+    res->Init(raw->mVertexs,raw->mIndexs,raw->mMask);
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }
