@@ -175,8 +175,8 @@ void Render::RenderCamera()
     BakeLightDepthMap();
 
     //  ÑÓ³ÙäÖÈ¾
-    //_renderState.mProgram = nullptr;
-    //RenderDeferred();
+    _renderState.mProgram = nullptr;
+    RenderDeferred();
 
     //  ÕıÏòäÖÈ¾
     _renderState.mProgram = nullptr;
