@@ -18,12 +18,12 @@ public:
         short       mDepthTest;         //  开启深度测试
         short       mDepthWrite;        //  开启深度写入
         //  模板测试
-        iint        mStencilOpFail;	//	模板测试失败
+        iint        mStencilOpFail;	    //	模板测试失败
         iint        mStencilOpZFail;	//	深度测试失败
         iint        mStencilOpZPass;	//	深度测试通过
-        iint		mStencilFunc;	//	模板测试函数
-        iint        mStencilMask;      //  模板测试值
-        iint        mStencilRef;       //  模板测试值
+        iint		mStencilFunc;	    //	模板测试函数
+        iint        mStencilMask;       //  模板测试值
+        iint        mStencilRef;        //  模板测试值
         //  渲染
         uint        mDrawType;			//	绘制类型
         uint        mRenderType;        //  渲染类型
