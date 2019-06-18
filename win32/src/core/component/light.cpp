@@ -137,7 +137,7 @@ void Light::BuildVolume(const TypeEnum type)
     }
 }
 
-Light::Light(TypeEnum type): _type(type), _ubo(0)
+Light::Light(TypeEnum type): _type(type), _ubo(0), _program(nullptr)
 {
     switch (type)
     {
@@ -151,7 +151,6 @@ Light::Light(TypeEnum type): _type(type), _ubo(0)
         _volume = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
         break;
     }
-    _program = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_DEFERRED_LIGHT_VOLUME);
 }
 
 //  --------------------------------------------------------------------------------

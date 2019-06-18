@@ -28,6 +28,10 @@ public:
     virtual void OnUpdate(float dt);
     virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) = 0;
 
+    void BindProgram(GLProgram * program)
+    {
+        _program = program;
+    }
     uint      GetUBO() const { return _ubo; }
     TypeEnum GetType() const { return _type; }
     static float CalLightDistance(float k0, float k1, float k2, float s);
