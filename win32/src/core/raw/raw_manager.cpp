@@ -30,27 +30,44 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
     }
 };
 
+inline void Serialize(std::ostream & os, const RawManager::ManifestSlot & slot)
+{
+    Serialize(os, slot.mType);
+    Serialize(os, slot.mName);
+    Serialize(os, slot.mByteOffset);
+    Serialize(os, slot.mByteLength);
+}
+
+inline void Deserialize(std::istream & is, RawManager::ManifestSlot & slot)
+{
+    Deserialize(is, slot.mType);
+    Deserialize(is, slot.mName);
+    Deserialize(is, slot.mByteOffset);
+    Deserialize(is, slot.mByteLength);
+}
+
+inline void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
+{
+    Serialize(os, item.mKey);
+    Serialize(os, item.mType);
+    Serialize(os, item.mValStr);
+    Serialize(os, item.mValNum);
+}
+
+inline void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
+{
+    Deserialize(is, item.mKey);
+    Deserialize(is, item.mType);
+    Deserialize(is, item.mValStr);
+    Deserialize(is, item.mValNum);
+}
+
 //  Raw Manager
 void RawManager::Init()
 {
     std::ifstream is(MANIFEST_SLOT_URL);
     ASSERT_LOG(is, "Open File Error. {0}", MANIFEST_SLOT_URL);
-
-    uint count = 0;
-    is.read((char *)&count, sizeof(uint));
-    _manifest.resize(count);
-
-    for (auto & slot : _manifest)
-    {
-        is.read((char *)&slot.mByteOffset, sizeof(uint));
-        is.read((char *)&slot.mByteLength, sizeof(uint));
-        is.read((char *)&slot.mType, sizeof(RawTypeEnum));
-
-        uint8 size = 0;
-        is.read((char *) &size, sizeof(uint8));
-        slot.mName.resize(size);
-        is.read((char *)slot.mName.data(), size);
-    }
+    Deserialize(is, _manifest);
     is.close();
 
     //  清空原始资源
@@ -88,20 +105,7 @@ void RawManager::BegImport(bool clear)
 void RawManager::EndImport()
 {
     std::ofstream os(MANIFEST_SLOT_URL, std::ios::binary);
-    
-    uint count = (uint)_manifest.size();
-    os.write((const char *)&count, sizeof(uint));
-
-    for (auto & slot : _manifest)
-    {
-        os.write((const char *)&slot.mByteOffset, sizeof(uint));
-        os.write((const char *)&slot.mByteLength, sizeof(uint));
-        os.write((const char *)&slot.mType, sizeof(RawTypeEnum));
-
-        uint8 size = (uint8)slot.mName.size();
-        os.write((const char *)&size, sizeof(uint8));
-        os.write((const char *)slot.mName.data(), size);
-    }
+    Serialize(os, _manifest);
     os.close();
 }
 
@@ -111,8 +115,9 @@ void RawManager::Import(const std::string & url)
     auto name = string_tool::QueryFileSuffix(url);
     for (auto i = 0u; i != SUFFIX_MAP.size(); ++i)
     {
-        if (std::find(SUFFIX_MAP.at(i).begin(), 
-                      SUFFIX_MAP.at(i).end(), name) != SUFFIX_MAP.at(i).end())
+        if (std::find(SUFFIX_MAP.at(i).begin(),
+                      SUFFIX_MAP.at(i).end(), name)
+                   != SUFFIX_MAP.at(i).end())
         {
             type = (ImportTypeEnum)i;
         }
@@ -134,6 +139,7 @@ RawManager::Raw * RawManager::LoadRaw(const std::string & name)
     {
         return rawIt->second;
     }
+
     auto it = std::find(_manifest.begin(), _manifest.end(), name);
     ASSERT_LOG(it != _manifest.end(), "Not Found Raw. {0}", name);
 
@@ -480,11 +486,6 @@ void RawManager::ImportProgram(const std::string & url)
                     ss >> word;
                     pass->mStencilRef = std::stoi(word);
                 }
-                else if (word == "PassName")
-                {
-                    ss >> word;
-                    memcpy(pass->mPassName, word.c_str(), word.size());
-                }
                 else if (word == "RenderQueue")
                 {
                     ss >> word;
@@ -588,39 +589,37 @@ void RawManager::ImportProgram(const std::string & url)
     //  解析GL Program数据
     auto is = OpenProgramFile(url);
     std::string line;
-    uint vLength = 0u;
-    uint gLength = 0u;
-    uint fLength = 0u;
-    std::string vBuffer;
-    std::string gBuffer;
-    std::string fBuffer;
-    std::vector<GLProgram::Pass> passs;
+    std::string vShader;
+    std::string gShader;
+    std::string fShader;
+    RawProgram rawProgram;
     while (std::getline(is, line))
     {
         if (string_tool::IsEqualSkipSpace(line, "Common Beg"))
         {
-            ParsePass(is, "Common End", vBuffer, gBuffer, fBuffer, nullptr);
+            ParsePass(is, "Common End", vShader, gShader, fShader, nullptr);
         }
         else if (string_tool::IsEqualSkipSpace(line, "Pass Beg"))
         {
-            GLProgram::Pass pass;
-            auto vLen = vBuffer.size();
-            auto gLen = gBuffer.size();
-            auto fLen = fBuffer.size();
-            ParsePass(is, "Pass End", vBuffer, gBuffer, fBuffer, &pass);
-            if (vBuffer.size() != vLen) { vLength = vBuffer.size() - vLen; }
-            if (gBuffer.size() != gLen) { gLength = gBuffer.size() - gLen; }
-            if (fBuffer.size() != fLen) { fLength = fBuffer.size() - fLen; }
-            passs.push_back(pass);
+            rawProgram.mPasss.emplace_back();
+            rawProgram.mVShader.emplace_back(vShader);
+            rawProgram.mGShader.emplace_back(gShader);
+            rawProgram.mFShader.emplace_back(fShader);
+            ParsePass(is, "Pass End", rawProgram.mVShader.back(),
+                                      rawProgram.mGShader.back(),
+                                      rawProgram.mFShader.back(),
+                                      &rawProgram.mPasss.back());
         }
     }
 
-    //  写入GL Program数据
-    RawProgram rawProgram;
-    rawProgram.mPasss = std::move(passs);
-    if (vLength != 0) { rawProgram.mVSBuffer = std::move(vBuffer); }
-    if (gLength != 0) { rawProgram.mGSBuffer = std::move(gBuffer); }
-    if (fLength != 0) { rawProgram.mFSBuffer = std::move(fBuffer); }
+    //  排除空GShader
+    for (auto & shader : rawProgram.mGShader)
+    {
+        if (shader == gShader) 
+        { 
+            shader.clear(); 
+        }
+    }
 
     //  Write File
     std::ofstream os(RAWDATA_URL[kRAW_PROGRAM], std::ios::binary | std::ios::app);
@@ -710,13 +709,13 @@ GLRes * RawManager::LoadResProgram(const std::string & name)
     ASSERT_LOG(raw != nullptr, "Not Found Raw. {0}", name);
 
     auto res = new GLProgram();
-    for (const auto & pass : raw->mPasss)
+    for (auto i = 0; i != raw->mPasss.size(); ++i)
     {
-        res->AddPass(pass);
+        res->AddPass(raw->mPasss.at(i), 
+                     raw->mVShader.at(i).c_str(), raw->mVShader.at(i).size(),
+                     raw->mGShader.at(i).c_str(), raw->mGShader.at(i).size(),
+                     raw->mFShader.at(i).c_str(), raw->mFShader.at(i).size());
     }
-    res->Init(raw->mVSBuffer.c_str(), raw->mVSBuffer.size(),
-              raw->mGSBuffer.c_str(), raw->mGSBuffer.size(),
-              raw->mFSBuffer.c_str(), raw->mFSBuffer.size());
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }

@@ -38,23 +38,27 @@ public:
 
     ~GLProgram()
     { 
-        glDeleteProgram(_id);
+        for (auto & pass : _passs)
+        {
+            glDeleteProgram(pass.mID);
+        }
     }
 
-    void Init(
-        const char * vString, uint vLength,
-        const char * gString, uint gLength,
-        const char * fString, uint fLength)
+    void AddPass(const Pass & pass, 
+                 const char * vString, uint vLength,
+                 const char * gString, uint gLength,
+                 const char * fString, uint fLength)
     {
-        _id = glCreateProgram();
+        _passs.push_back(pass);
+        _passs.back().mID = glCreateProgram();
 
         if (vLength != 0)
         {
             uint vs = glCreateShader(GL_VERTEX_SHADER);
             glShaderSource(vs, 1, &vString, (iint*)&vLength);
             glCompileShader(vs);
-            AssertPass(vs, "VShader Error");
-            glAttachShader(_id, vs);
+            AssertPass(vs, "Pass VShader Error.");
+            glAttachShader(_passs.back().mID, vs);
             glDeleteShader(vs);
         }
 
@@ -63,8 +67,8 @@ public:
             uint gs = glCreateShader(GL_GEOMETRY_SHADER);
             glShaderSource(gs, 1, &gString, (iint*)&gLength);
             glCompileShader(gs);
-            AssertPass(gs, "GShader Error");
-            glAttachShader(_id, gs);
+            AssertPass(gs, "Pass GShader Error.");
+            glAttachShader(_passs.back().mID, gs);
             glDeleteShader(gs);
         }
 
@@ -73,78 +77,93 @@ public:
             uint fs = glCreateShader(GL_FRAGMENT_SHADER);
             glShaderSource(fs, 1, &fString, (iint*)&fLength);
             glCompileShader(fs);
-            AssertPass(fs, "FShader Error");
-            glAttachShader(_id, fs);
+            AssertPass(fs, "Pass FShader Error.");
+            glAttachShader(_passs.back().mID, fs);
             glDeleteShader(fs);
         }
 
         iint ret;
-        glLinkProgram(_id);
-        glGetProgramiv(_id, GL_LINK_STATUS, &ret);
-        ASSERT_LOG(ret != 0, "GLProgram Error");
-    }
-
-    void AddPass(const Pass & pass)
-    {
+        glLinkProgram( _passs.back().mID);
+        glGetProgramiv(_passs.back().mID, GL_LINK_STATUS, &ret);
+        ASSERT_LOG(ret != 0, "Pass GLProgram Error.");
         _passs.push_back(pass);
     }
 
-    const Pass & GetPass(uint i) const
+    bool UsePass(uint i)
     {
-        return _passs.at(i);
+        const auto & pass = _passs.at(i);
+        if (pass.mID == _useID)
+        {
+            return false;
+        }
+
+        if (pass.mCullFace != 0)
+        {
+            glEnable(GL_CULL_FACE);
+            glCullFace(pass.mCullFace);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
+        }
+
+        if (pass.mBlendSrc != 0 && pass.mBlendDst != 0)
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(pass.mBlendSrc, pass.mBlendDst);
+        }
+        else
+        {
+            glDisable(GL_BLEND);
+        }
+
+        if (pass.mDepthTest)
+        {
+            glEnable(GL_DEPTH_TEST);
+        }
+        else
+        {
+            glDisable(GL_DEPTH_TEST);
+        }
+
+        if (pass.mStencilOpFail != 0 && pass.mStencilOpZFail != 0 && pass.mStencilOpZPass != 0)
+        {
+            glEnable(GL_STENCIL_TEST);
+            glStencilMask(0xFF);
+            glStencilFunc(pass.mStencilFunc, pass.mStencilRef, pass.mStencilMask);
+            glStencilOp(pass.mStencilOpFail, pass.mStencilOpZFail, pass.mStencilOpZPass);
+        }
+        else
+        {
+            glDisable(GL_STENCIL_TEST);
+        }
+        glUseProgram(pass.mID);
+        _useID      = pass.mID;
+        return true;
     }
 
-    const std::vector<Pass> & GetPass() const
-    {
-        return _passs;
-    }
-
-    void UsePass(uint i) const
-    {
-        ASSERT_LOG(i < _passs.size(), "Out Range. {0}, {1}", _passs.size(), i);
-        const auto & attr  = _passs.at(i);
-        BindUniformSubProgram(attr.mPassName);
-    }
-
-    void Use() const
-    {
-        glUseProgram(_id);
-    }
-
-    void BindUniformNumber(const char * const key, iint val) const { glUniform1i(glGetUniformLocation(_id, key), val); }
-    void BindUniformNumber(const char * const key, uint val) const { glUniform1i(glGetUniformLocation(_id, key), val); }
-    void BindUniformNumber(const char * const key, float val) const { glUniform1f(glGetUniformLocation(_id, key), val); }
-    void BindUniformNumber(const char * const key, double val) const { glUniform1f(glGetUniformLocation(_id, key), static_cast<float>(val)); }
-    void BindUniformVector(const char * const key, const glm::vec3 & val) const { glUniform3f(glGetUniformLocation(_id, key), val.x, val.y, val.z); }
-    void BindUniformVector(const char * const key, const glm::vec4 & val) const { glUniform4f(glGetUniformLocation(_id, key), val.x, val.y, val.z, val.w); }
-    void BindUniformMatrix(const char * const key, const glm::mat3 & val) const { glUniformMatrix3fv(glGetUniformLocation(_id, key), 1, GL_FALSE, &val[0][0]); }
-    void BindUniformMatrix(const char * const key, const glm::mat4 & val) const {  glUniformMatrix4fv(glGetUniformLocation(_id, key), 1, GL_FALSE, &val[0][0]); }
+    void BindUniformNumber(const char * const key, iint val) const { glUniform1i(glGetUniformLocation(_useID, key), val); }
+    void BindUniformNumber(const char * const key, uint val) const { glUniform1i(glGetUniformLocation(_useID, key), val); }
+    void BindUniformNumber(const char * const key, float val) const { glUniform1f(glGetUniformLocation(_useID, key), val); }
+    void BindUniformNumber(const char * const key, double val) const { glUniform1f(glGetUniformLocation(_useID, key), static_cast<float>(val)); }
+    void BindUniformVector(const char * const key, const glm::vec3 & val) const { glUniform3f(glGetUniformLocation(_useID, key), val.x, val.y, val.z); }
+    void BindUniformVector(const char * const key, const glm::vec4 & val) const { glUniform4f(glGetUniformLocation(_useID, key), val.x, val.y, val.z, val.w); }
+    void BindUniformMatrix(const char * const key, const glm::mat3 & val) const { glUniformMatrix3fv(glGetUniformLocation(_useID, key), 1, GL_FALSE, &val[0][0]); }
+    void BindUniformMatrix(const char * const key, const glm::mat4 & val) const {  glUniformMatrix4fv(glGetUniformLocation(_useID, key), 1, GL_FALSE, &val[0][0]); }
 
     void BindUniformTex2D(const char * const key, const uint val, iint pos) const
     {
         glActiveTexture(GL_TEXTURE0 + pos);
         glBindTexture(MMC_TEXTURE_2D, val);
-        if (key != nullptr) { glUniform1i(glGetUniformLocation(_id, key), pos); }
+        if (key != nullptr) { glUniform1i(glGetUniformLocation(_useID, key), pos); }
     }
 
     void BindUniformTex3D(const char * const key, const uint val, iint pos) const
     {
         glActiveTexture(GL_TEXTURE0 + pos);
         glBindTexture(MMC_TEXTURE_3D, val);
-        if (key != nullptr) { glUniform1i(glGetUniformLocation(_id, key), pos); }
+        if (key != nullptr) { glUniform1i(glGetUniformLocation(_useID, key), pos); }
     }
-
-    void BindUniformSubProgram(const char * const val) const
-    {
-        auto vIndex = glGetSubroutineIndex(_id, GL_VERTEX_SHADER, val);
-        auto gIndex = glGetSubroutineIndex(_id, GL_GEOMETRY_SHADER, val);
-        auto fIndex = glGetSubroutineIndex(_id, GL_FRAGMENT_SHADER, val);
-        if (vIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &vIndex); }
-        if (gIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_GEOMETRY_SHADER, 1, &gIndex); }
-        if (fIndex != GL_INVALID_INDEX) { glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &fIndex); }
-    }
-
-    uint GetID() const { return _id; }
 
 private:
     void AssertPass(uint shaderID, const std::string & errorTxt) const
@@ -161,5 +180,5 @@ private:
 
 private:
     std::vector<Pass> _passs;
-    uint _id;
+    uint              _useID;
 };

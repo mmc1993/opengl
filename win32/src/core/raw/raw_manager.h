@@ -47,6 +47,9 @@ public:
         {
             return name == mName;
         }
+
+        //void ::Serialize(  std::ostream & os, const Item & item)   定义在raw_manager.cpp
+        //void ::Deserialize(std::istream & is,       Item & item)   定义在raw_manager.cpp
     };
 
     class Raw {
@@ -63,15 +66,17 @@ public:
         std::vector<uint>           mIndexs;
         std::vector<GLMesh::Vertex> mVertexs;
         
-        SERIALIZE_BEG
-            SERIALIZE_POD_ARRAY(mIndexs);
-            SERIALIZE_POD_ARRAY(mVertexs);
-        SERIALIZE_END
+        virtual void Serialize(std::ofstream & os) override
+        {
+            ::Serialize(os, mIndexs);
+            ::Serialize(os, mVertexs);
+        }
 
-        DESERIALIZE_BEG
-            DESERIALIZE_POD_ARRAY(mIndexs);
-            DESERIALIZE_POD_ARRAY(mVertexs);
-        DESERIALIZE_END
+        virtual void Deserialize(std::ifstream & is) override
+        {
+            ::Deserialize(is, mIndexs);
+            ::Deserialize(is, mVertexs);
+        }
     };
 
     class RawImage : public Raw {
@@ -80,41 +85,45 @@ public:
         uint mFormat;
         std::string mData;
 
-        SERIALIZE_BEG
-            SERIALIZE_POD(mW);
-            SERIALIZE_POD(mH);
-            SERIALIZE_POD(mFormat);
-            SERIALIZE_POD_ARRAY(mData);
-        SERIALIZE_END
+        virtual void Serialize(std::ofstream & os) override
+        {
+            ::Serialize(os, mW);
+            ::Serialize(os, mH);
+            ::Serialize(os, mData);
+            ::Serialize(os, mFormat);
+        }
 
-        DESERIALIZE_BEG
-            DESERIALIZE_POD(mW);
-            DESERIALIZE_POD(mH);
-            DESERIALIZE_POD(mFormat);
-            DESERIALIZE_POD_ARRAY(mData);
-        DESERIALIZE_END
+        virtual void Deserialize(std::ifstream & is) override
+        {
+            ::Deserialize(is, mW);
+            ::Deserialize(is, mH);
+            ::Deserialize(is, mData);
+            ::Deserialize(is, mFormat);
+        }
     };
 
     class RawProgram : public Raw {
     public:
         std::vector<GLProgram::Pass> mPasss;
-        std::string mVSBuffer;
-        std::string mGSBuffer;
-        std::string mFSBuffer;
+        std::vector<std::string> mVShader;
+        std::vector<std::string> mGShader;
+        std::vector<std::string> mFShader;
 
-        SERIALIZE_BEG
-            SERIALIZE_POD_ARRAY(mPasss);
-            SERIALIZE_POD_ARRAY(mVSBuffer);
-            SERIALIZE_POD_ARRAY(mGSBuffer);
-            SERIALIZE_POD_ARRAY(mFSBuffer);
-        SERIALIZE_END
+        virtual void Serialize(std::ofstream & os) override
+        {
+            ::Serialize(os, mPasss);
+            ::Serialize(os, mVShader);
+            ::Serialize(os, mGShader);
+            ::Serialize(os, mFShader);
+        }
 
-        DESERIALIZE_BEG
-            DESERIALIZE_POD_ARRAY(mPasss);
-            DESERIALIZE_POD_ARRAY(mVSBuffer);
-            DESERIALIZE_POD_ARRAY(mGSBuffer);
-            DESERIALIZE_POD_ARRAY(mFSBuffer);
-        DESERIALIZE_END
+        virtual void Deserialize(std::ifstream & is) override
+        {
+            ::Deserialize(is, mPasss);
+            ::Deserialize(is, mVShader);
+            ::Deserialize(is, mGShader);
+            ::Deserialize(is, mFShader);
+        }
     };
 
     class RawMaterial : public Raw {
@@ -125,74 +134,27 @@ public:
             std::string mValStr;
             float       mValNum;
 
-            void Serialize(std::ofstream & os)
-            {
-                auto size = (uint)mKey.size();
-                os.write((const char *)&mType, sizeof(mType));
-                os.write((const char *)&size,  sizeof(uint));
-                os.write((const char *)mKey.data(), size);
-                switch (mType)
-                {
-                case GLMaterial::Item::TypeEnum::kNUMBER:
-                    {
-                        os.write((const char *)&mValNum, sizeof(float));
-                    }
-                    break;
-                case GLMaterial::Item::TypeEnum::kTEX2D:
-                case GLMaterial::Item::TypeEnum::kTEX3D:
-                    {
-                        size = (uint)mValStr.size();
-                        os.write((const char *)&size, sizeof(uint));
-                        os.write((const char *)mValStr.data(), size);
-                    }
-                    break;
-                }
-            }
-
-            void Deserialize(std::ifstream & is)
-            {
-                is.read((char *)&mType, sizeof(mType));
-
-                auto size = (uint)mKey.size();
-                is.read((char *)&size, sizeof(uint));
-
-                mKey.resize(size);
-                is.read((char *)mKey.data(), size);
-
-                switch (mType)
-                {
-                case GLMaterial::Item::TypeEnum::kNUMBER:
-                    {
-                        is.read((char *)&mValNum, sizeof(float));
-                    }
-                    break;
-                case GLMaterial::Item::TypeEnum::kTEX2D:
-                case GLMaterial::Item::TypeEnum::kTEX3D:
-                    {
-                        is.read((char *)&size, sizeof(uint));
-                        mValStr.resize(size);
-                        is.read((char *)mValStr.data(), size);
-                    }
-                    break;
-                }
-            }
+            //void ::Serialize(  std::ostream & os, const Item & item)   定义在raw_manager.cpp
+            //void ::Deserialize(std::istream & is,       Item & item)   定义在raw_manager.cpp
         };
 
         std::string mMesh;
         std::string mProgram;
         std::vector<Item> mItems;
 
-        SERIALIZE_BEG
-            SERIALIZE_ARRAY(mItems);
-            SERIALIZE_POD_ARRAY(mMesh);
-            SERIALIZE_POD_ARRAY(mProgram);
-        SERIALIZE_END
+        virtual void Serialize(std::ofstream & os) override
+        {
+            ::Serialize(os, mMesh);
+            ::Serialize(os, mItems);
+            ::Serialize(os, mProgram);
+        }
 
-        DESERIALIZE_BEG
-            DESERIALIZE_ARRAY(mItems);
-            DESERIALIZE_POD_ARRAY(mMesh);
-            DESERIALIZE_POD_ARRAY(mProgram);
-        DESERIALIZE_END
+        virtual void Deserialize(std::ifstream & is) override
+        {
+            ::Deserialize(is, mMesh);
+            ::Deserialize(is, mItems);
+            ::Deserialize(is, mProgram);
+        }
     };
 
     //  清单文件
