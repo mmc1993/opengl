@@ -72,12 +72,11 @@ private:
 
     //  Bind 系函数.
     //      该系列函数完成数据提交同时影响渲染器内部状态
-    bool Bind(const GLProgram * program);
     void Bind(const CameraCommand * command);
+    bool Bind(const GLProgram     * program, uint pass);
 
     //  Post 系函数.
     //      该系函数完成数据提交, 但不修改渲染器内部状态
-    void Post(const uint subPass);
     void Post(const Light *light);
     void Post(const GLMaterial * material);
     void Post(const glm::mat4 & transform);

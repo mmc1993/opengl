@@ -44,6 +44,21 @@ public:
         }
     }
 
+    const std::vector<Pass> & GetPasss() const
+    {
+        return _passs;
+    }
+
+    const Pass & GetPass(uint i) const
+    {
+        return _passs.at(i);
+    }
+
+    uint GetUseID() const
+    {
+        return _useID;
+    }
+
     void AddPass(const Pass & pass, 
                  const char * vString, uint vLength,
                  const char * gString, uint gLength,
@@ -89,10 +104,10 @@ public:
         _passs.push_back(pass);
     }
 
-    bool UsePass(uint i)
+    bool UsePass(uint i, bool force = false) const
     {
         const auto & pass = _passs.at(i);
-        if (pass.mID == _useID)
+        if (pass.mID == _useID && !force)
         {
             return false;
         }
@@ -180,5 +195,5 @@ private:
 
 private:
     std::vector<Pass> _passs;
-    uint              _useID;
+    mutable uint      _useID;
 };

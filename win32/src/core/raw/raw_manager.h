@@ -66,17 +66,8 @@ public:
         std::vector<uint>           mIndexs;
         std::vector<GLMesh::Vertex> mVertexs;
         
-        virtual void Serialize(std::ofstream & os) override
-        {
-            ::Serialize(os, mIndexs);
-            ::Serialize(os, mVertexs);
-        }
-
-        virtual void Deserialize(std::ifstream & is) override
-        {
-            ::Deserialize(is, mIndexs);
-            ::Deserialize(is, mVertexs);
-        }
+        virtual void Serialize(  std::ofstream & os) override;
+        virtual void Deserialize(std::ifstream & is) override;
     };
 
     class RawImage : public Raw {
@@ -85,21 +76,8 @@ public:
         uint mFormat;
         std::string mData;
 
-        virtual void Serialize(std::ofstream & os) override
-        {
-            ::Serialize(os, mW);
-            ::Serialize(os, mH);
-            ::Serialize(os, mData);
-            ::Serialize(os, mFormat);
-        }
-
-        virtual void Deserialize(std::ifstream & is) override
-        {
-            ::Deserialize(is, mW);
-            ::Deserialize(is, mH);
-            ::Deserialize(is, mData);
-            ::Deserialize(is, mFormat);
-        }
+        virtual void Serialize(  std::ofstream & os) override;
+        virtual void Deserialize(std::ifstream & is) override;
     };
 
     class RawProgram : public Raw {
@@ -109,21 +87,8 @@ public:
         std::vector<std::string> mGShader;
         std::vector<std::string> mFShader;
 
-        virtual void Serialize(std::ofstream & os) override
-        {
-            ::Serialize(os, mPasss);
-            ::Serialize(os, mVShader);
-            ::Serialize(os, mGShader);
-            ::Serialize(os, mFShader);
-        }
-
-        virtual void Deserialize(std::ifstream & is) override
-        {
-            ::Deserialize(is, mPasss);
-            ::Deserialize(is, mVShader);
-            ::Deserialize(is, mGShader);
-            ::Deserialize(is, mFShader);
-        }
+        virtual void Serialize(  std::ofstream & os) override;
+        virtual void Deserialize(std::ifstream & is) override;
     };
 
     class RawMaterial : public Raw {
@@ -134,27 +99,16 @@ public:
             std::string mValStr;
             float       mValNum;
 
-            //void ::Serialize(  std::ostream & os, const Item & item)   定义在raw_manager.cpp
-            //void ::Deserialize(std::istream & is,       Item & item)   定义在raw_manager.cpp
+            //void Serialize(  std::ostream & os, const Item & item);   //   定义在raw_manager.cpp
+            //void Deserialize(std::istream & is,       Item & item);   //   定义在raw_manager.cpp
         };
 
         std::string mMesh;
         std::string mProgram;
         std::vector<Item> mItems;
 
-        virtual void Serialize(std::ofstream & os) override
-        {
-            ::Serialize(os, mMesh);
-            ::Serialize(os, mItems);
-            ::Serialize(os, mProgram);
-        }
-
-        virtual void Deserialize(std::ifstream & is) override
-        {
-            ::Deserialize(is, mMesh);
-            ::Deserialize(is, mItems);
-            ::Deserialize(is, mProgram);
-        }
+        virtual void Serialize(  std::ofstream & os) override;
+        virtual void Deserialize(std::ifstream & is) override;
     };
 
     //  清单文件

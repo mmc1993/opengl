@@ -8,6 +8,101 @@
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/postprocess.h"
 
+
+inline void Serialize(std::ostream & os, const RawManager::ManifestSlot & slot)
+{
+    Serialize(os, slot.mType);
+    Serialize(os, slot.mName);
+    Serialize(os, slot.mByteOffset);
+    Serialize(os, slot.mByteLength);
+}
+
+inline void Deserialize(std::istream & is, RawManager::ManifestSlot & slot)
+{
+    Deserialize(is, slot.mType);
+    Deserialize(is, slot.mName);
+    Deserialize(is, slot.mByteOffset);
+    Deserialize(is, slot.mByteLength);
+}
+
+void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
+{
+    Serialize(os, item.mKey);
+    Serialize(os, item.mType);
+    Serialize(os, item.mValStr);
+    Serialize(os, item.mValNum);
+}
+
+void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
+{
+    Deserialize(is, item.mKey);
+    Deserialize(is, item.mType);
+    Deserialize(is, item.mValStr);
+    Deserialize(is, item.mValNum);
+}
+
+//  RawMesh
+void RawManager::RawMesh::Serialize(std::ofstream & os)
+{
+    ::Serialize(os, mIndexs);
+    ::Serialize(os, mVertexs);
+}
+
+void RawManager::RawMesh::Deserialize(std::ifstream & is)
+{
+    ::Deserialize(is, mIndexs);
+    ::Deserialize(is, mVertexs);
+}
+
+//  RawImage
+void RawManager::RawImage::Serialize(std::ofstream & os)
+{
+    ::Serialize(os, mW);
+    ::Serialize(os, mH);
+    ::Serialize(os, mData);
+    ::Serialize(os, mFormat);
+}
+
+void RawManager::RawImage::Deserialize(std::ifstream & is)
+{
+    ::Deserialize(is, mW);
+    ::Deserialize(is, mH);
+    ::Deserialize(is, mData);
+    ::Deserialize(is, mFormat);
+}
+
+//  RawProgram
+void RawManager::RawProgram::Serialize(std::ofstream & os)
+{
+    ::Serialize(os, mPasss);
+    ::Serialize(os, mVShader);
+    ::Serialize(os, mGShader);
+    ::Serialize(os, mFShader);
+}
+
+void RawManager::RawProgram::Deserialize(std::ifstream & is)
+{
+    ::Deserialize(is, mPasss);
+    ::Deserialize(is, mVShader);
+    ::Deserialize(is, mGShader);
+    ::Deserialize(is, mFShader);
+}
+
+//  RawMaterial
+void RawManager::RawMaterial::Serialize(std::ofstream & os)
+{
+    ::Serialize(os, mMesh);
+    ::Serialize(os, mItems);
+    ::Serialize(os, mProgram);
+}
+
+void RawManager::RawMaterial::Deserialize(std::ifstream & is)
+{
+    ::Deserialize(is, mMesh);
+    ::Deserialize(is, mItems);
+    ::Deserialize(is, mProgram);
+}
+
 const std::string RawManager::MANIFEST_SLOT_URL = "res/raw/manifest-slot.db";
 
 //  原始数据引用路径
@@ -29,38 +124,6 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
         { ".mtl" },
     }
 };
-
-inline void Serialize(std::ostream & os, const RawManager::ManifestSlot & slot)
-{
-    Serialize(os, slot.mType);
-    Serialize(os, slot.mName);
-    Serialize(os, slot.mByteOffset);
-    Serialize(os, slot.mByteLength);
-}
-
-inline void Deserialize(std::istream & is, RawManager::ManifestSlot & slot)
-{
-    Deserialize(is, slot.mType);
-    Deserialize(is, slot.mName);
-    Deserialize(is, slot.mByteOffset);
-    Deserialize(is, slot.mByteLength);
-}
-
-inline void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
-{
-    Serialize(os, item.mKey);
-    Serialize(os, item.mType);
-    Serialize(os, item.mValStr);
-    Serialize(os, item.mValNum);
-}
-
-inline void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
-{
-    Deserialize(is, item.mKey);
-    Deserialize(is, item.mType);
-    Deserialize(is, item.mValStr);
-    Deserialize(is, item.mValNum);
-}
 
 //  Raw Manager
 void RawManager::Init()
@@ -747,3 +810,4 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
     _resObjectMap.insert(std::make_pair(name, res));
     return res;
 }
+
