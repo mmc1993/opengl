@@ -212,9 +212,9 @@ void Render::RenderDeferred()
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferSet.mGBuffer.mDepthBuffer);
 
-    uint rtbinds[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
+    uint outputs[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
-    glDrawBuffers(4, rtbinds);
+    glDrawBuffers(4, outputs);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -600,7 +600,7 @@ void Render::Post(const glm::mat4 & transform)
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_M, matrixM);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V, matrixV);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P, matrixP);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV, matrixMV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV,  matrixMV);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MVP, matrixMVP);
     _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
     if (_renderState.mCamera != nullptr)
