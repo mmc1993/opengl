@@ -144,7 +144,7 @@ void Window::Update()
         
 		Global::Ref().RefTimer().Update(lasttime);
         Global::Ref().RefObject().RootUpdate(dt);
-        Global::Ref().RefRender().RenderOnce();
+        Global::Ref().RefRender().Once();
         glfwSwapBuffers(_window);
 
 		std::cout <<

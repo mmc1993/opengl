@@ -109,7 +109,7 @@ void Camera::OnUpdate(float dt)
     command.mPos        = GetPos();
     command.mOrder      = GetOrder();
     command.mMask       = GetMask();
-    Global::Ref().RefRender().PostCommand(RenderCommand::TypeEnum::kCAMERA, command);
+    Global::Ref().RefRender().Post(RenderCommand::TypeEnum::kCAMERA, command);
 }
 
 void Camera::Update() const

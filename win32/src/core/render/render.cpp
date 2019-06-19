@@ -45,7 +45,7 @@ MatrixStack & Render::GetMatrixStack()
     return _matrixStack;
 }
 
-void Render::RenderOnce()
+void Render::Once()
 {
     StartRender();
 
@@ -63,7 +63,7 @@ void Render::RenderOnce()
 	ClearCommands();
 }
 
-void Render::PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command)
+void Render::Post(const RenderCommand::TypeEnum type, const RenderCommand & command)
 {
     switch (type)
     {

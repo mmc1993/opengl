@@ -11,6 +11,7 @@ public:
     static constexpr uint LIMIT_LIGHT_POINT = 2;
     static constexpr uint LIMIT_LIGHT_SPOT = 3;
 
+    //  ‰÷»æ◊¥Ã¨
     struct RenderState {
         //  º«¬ºµ±«∞≈˙¥Œ∂•µ„ ˝
         uint mVertexCount;
@@ -29,6 +30,35 @@ public:
             , mVertexCount(0)
             , mRenderCount(0)
             , mTexBase(0) { }
+    };
+
+    struct TextureBufferSet {
+        //  G-Buffer
+        struct GBuffer {
+            uint mPositionTexture;
+            uint mSpecularTexture;
+            uint mDiffuseTexture;
+            uint mNormalTexture;
+            uint mDepthBuffer;
+        } mGBuffer;
+
+        //  “ı”∞Ã˘Õº
+        struct ShadowMap {
+            uint mDirectTexture[LIMIT_LIGHT_DIRECT];
+            uint mPointTexture[LIMIT_LIGHT_POINT];
+            uint mSpotTexture[LIMIT_LIGHT_SPOT];
+        } mShadowMap;
+
+        //  ¿Î∆¡ª∫¥Ê
+        struct OffScreen {
+            uint mColorTexture;
+            uint mDepthTexture;
+        } mOffScreen;
+
+        TextureBufferSet()
+        {
+            memset(this, 0, sizeof(TextureBufferSet));
+        }
     };
 
     struct GBuffer {
@@ -61,9 +91,9 @@ public:
 
 	MatrixStack & GetMatrixStack();
     //  ‰÷»æ
-	void RenderOnce();
+	void Once();
     //  ‰÷»æ√¸¡Ó»Îø⁄
-    void PostCommand(const RenderCommand::TypeEnum type, const RenderCommand & command);
+    void Post(const RenderCommand::TypeEnum type, const RenderCommand & command);
 
     const RenderState & GetRenderState() const { return _renderState; }
 
@@ -101,8 +131,9 @@ private:
     void BindUBOLightForward();
 
 private:
-    RenderTarget    _renderTarget[2];
-    MatrixStack     _matrixStack;
+    TextureBufferSet    _textureBufferSet;
+    RenderTarget        _renderTarget[2];
+    MatrixStack         _matrixStack;
 
     //  ¿Î∆¡buffer
     OffSceneBuffer _offSceneBuffer;
