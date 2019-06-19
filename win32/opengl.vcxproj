@@ -29,15 +29,6 @@
     <ClInclude Include="src\core\raw\gl_res.h" />
     <ClInclude Include="src\core\render\render_enum.h" />
     <ClInclude Include="src\core\render\render_util.h" />
-    <ClInclude Include="src\core\res\mesh.h" />
-    <ClInclude Include="src\core\res\res.h" />
-    <ClInclude Include="src\core\res\res_manager.h" />
-    <ClInclude Include="src\core\res\bitmap.h" />
-    <ClInclude Include="src\core\res\bitmap_cube.h" />
-    <ClInclude Include="src\core\res\file.h" />
-    <ClInclude Include="src\core\res\material.h" />
-    <ClInclude Include="src\core\res\model.h" />
-    <ClInclude Include="src\core\res\shader.h" />
     <ClInclude Include="src\core\base.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />
@@ -390,8 +381,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\raw\raw_manager.cpp" />
-    <ClCompile Include="src\core\res\file.cpp" />
-    <ClCompile Include="src\core\res\shader.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />
@@ -408,7 +397,6 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="src\core\third\assimp\color4.inl" />
     <None Include="src\core\third\assimp\material.inl" />
     <None Include="src\core\third\assimp\matrix3x3.inl" />

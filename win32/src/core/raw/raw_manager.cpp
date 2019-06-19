@@ -8,6 +8,7 @@
 #include "../third/assimp/Importer.hpp"
 #include "../third/assimp/postprocess.h"
 
+#pragma comment(lib, "lib/assimp-vc140-mt.lib")
 
 inline void Serialize(std::ostream & os, const RawManager::ManifestSlot & slot)
 {

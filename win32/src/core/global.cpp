@@ -3,7 +3,6 @@
 #include "timer/timer.h"
 #include "object/object.h"
 #include "render/render.h"
-#include "res/res_manager.h"
 #include "cfg/cfg_manager.h"
 #include "raw/raw_manager.h"
 
@@ -22,7 +21,6 @@ Global::Global()
     , _timer(nullptr)
     , _object(nullptr)
     , _render(nullptr)
-    , _resManager(nullptr)
     , _cfgManager(nullptr)
     , _rawManager(nullptr)
 { }
@@ -38,7 +36,6 @@ void Global::Start()
     ASSERT_LOG(_timer == nullptr, "_timer Error");
     ASSERT_LOG(_object == nullptr, "_object Error");
     ASSERT_LOG(_render == nullptr, "_render Error");
-    ASSERT_LOG(_resManager == nullptr, "_resManager Error");
     ASSERT_LOG(_cfgManager == nullptr, "_cfgManager Error");
     ASSERT_LOG(_rawManager == nullptr, "_rawManager Error");
 
@@ -50,8 +47,6 @@ void Global::Start()
 
     _render = new Render();
 
-    _resManager = new ResManager();
-    
     _cfgManager = new CfgManager();
     _cfgManager->Init(DIR_CONFIG_ROOT);
 
@@ -64,7 +59,6 @@ void Global::Clean()
     SafeDelete(_timer);
     SafeDelete(_object);
     SafeDelete(_render);
-    SafeDelete(_resManager);
     SafeDelete(_cfgManager);
     SafeDelete(_rawManager);
 }

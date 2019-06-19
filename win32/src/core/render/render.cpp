@@ -1,7 +1,4 @@
 #include "render.h"
-#include "../res/mesh.h"
-#include "../res/shader.h"
-#include "../res/material.h"
 #include "../component/light.h"
 #include "../component/camera.h"
 #include "../component/transform.h"

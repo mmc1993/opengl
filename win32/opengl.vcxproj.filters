@@ -1038,40 +1038,13 @@
     <ClInclude Include="src\core\base.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\res\bitmap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\bitmap_cube.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\file.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\material.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\model.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\res.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\render\render_enum.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\render\render_util.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\res\mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\event\event_enum.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\res\res_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\cfg\cfg_manager.h">
@@ -1158,12 +1131,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\global.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\res\file.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\res\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\raw\raw_manager.cpp">
@@ -1591,6 +1558,5 @@
     <None Include="src\core\third\assimp\vector3.inl">
       <Filter>头文件</Filter>
     </None>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

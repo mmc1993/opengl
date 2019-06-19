@@ -1,5 +1,4 @@
 #include "sprite.h"
-#include "../res/file.h"
 #include "../render/render.h"
 
 Sprite::Sprite() : _material(nullptr)

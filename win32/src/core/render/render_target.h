@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../res/bitmap.h"
-#include "../res/bitmap_cube.h"
+#include "../include.h"
 
 class RenderBuffer {
 public:
@@ -55,16 +54,12 @@ public:
 
 public:
     static RenderBuffer * CreateBuffer(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int fmt);
-	static RenderTexture2D * CreateTexture2D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
-	static RenderTexture3D * CreateTexture3D(const std::uint32_t w, const std::uint32_t h, AttachmentType attachment, int texfmt, int rawfmt, int pixtype);
 
     static void Bind(BindType bindType, const RenderTarget & rt);
     static void Bind(BindType bindType);
 
     static void BindAttachment(BindType bindType, AttachmentType attachment, uint buffer);
     static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, uint texture);
-    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture2D * texture);
-    static void BindAttachment(BindType bindType, AttachmentType attachment, TextureType type, const RenderTexture3D * texture);
 
     RenderTarget();
     ~RenderTarget();
@@ -75,8 +70,6 @@ public:
 
     void BindAttachment(AttachmentType attachment, uint buffer);
     void BindAttachment(AttachmentType attachment, TextureType type, uint texture);
-    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture2D * texture2D);
-    void BindAttachment(AttachmentType attachment, TextureType type, RenderTexture3D * texture3D);
 
 private:
 	uint _fbo;

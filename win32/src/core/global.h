@@ -4,7 +4,6 @@ class Event;
 class Timer;
 class Object;
 class Render;
-class ResManager;
 class CfgManager;
 class RawManager;
 
@@ -28,11 +27,6 @@ public:
     inline Render & RefRender()
     {
         return *_render;
-    }
-
-    inline ResManager & RefResManager()
-    {
-        return *_resManager;
     }
 
     inline CfgManager & RefCfgManager()
@@ -62,7 +56,6 @@ private:
     Timer * _timer;
     Object * _object;
     Render * _render;
-    ResManager * _resManager;
     CfgManager * _cfgManager;
     RawManager * _rawManager;
 };

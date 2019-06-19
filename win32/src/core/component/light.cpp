@@ -2,7 +2,6 @@
 #include "transform.h"
 #include "../render/render.h"
 #include "../cfg/cfg_manager.h"
-#include "../res/res_manager.h"
 #include "../raw/raw_manager.h"
 
 void Light::BuildVolume(const TypeEnum type)
