@@ -32,7 +32,7 @@ public:
             , mTexBase(0) { }
     };
 
-    struct TextureBufferSet {
+    struct BufferSet {
         //  G-Buffer
         struct GBuffer {
             uint mPositionTexture;
@@ -54,35 +54,14 @@ public:
             uint mColorTexture;
             uint mDepthTexture;
         } mOffScreen;
-
-        TextureBufferSet()
+        
+        //  光源数据
+        uint mLightUBO[3];
+        
+        BufferSet()
         {
-            memset(this, 0, sizeof(TextureBufferSet));
+            memset(this, 0, sizeof(BufferSet));
         }
-    };
-
-    struct GBuffer {
-        uint mPositionTexture;
-        uint mSpecularTexture;
-        uint mDiffuseTexture;
-        uint mNormalTexture;
-        uint mDepthBuffer;
-        GBuffer()
-            : mPositionTexture(0)
-            , mSpecularTexture(0)
-            , mDiffuseTexture(0)
-            , mNormalTexture(0)
-            , mDepthBuffer(0)
-        { }
-    };
-
-    struct OffSceneBuffer {
-        uint mColorTexture;
-        uint mDepthTexture;
-        OffSceneBuffer()
-            : mColorTexture(0)
-            , mDepthTexture(0)
-        { }
     };
 
 public:
@@ -101,6 +80,8 @@ public:
 private:
     void InitRender();
 
+    void ClearCommands();
+
     //  Bind 系函数.
     //      该系列函数完成数据提交同时影响渲染器内部状态
     void Bind(const CameraCommand * command);
@@ -112,8 +93,6 @@ private:
     void Post(const GLMaterial * material);
     void Post(const glm::mat4 & transform);
     void Post(DrawTypeEnum drawType, const GLMesh * mesh);
-
-    void ClearCommands();
 
     //  逐相机渲染
     void SortLightCommands();
@@ -130,14 +109,9 @@ private:
     void BindUBOLightForward();
 
 private:
-    TextureBufferSet    _textureBufferSet;
-    RenderTarget        _renderTarget[2];
-    MatrixStack         _matrixStack;
-
-    //  离屏buffer
-    OffSceneBuffer _offSceneBuffer;
-    //  延迟渲染
-    GBuffer _bufferG;
+    RenderTarget _renderTarget[2];
+    MatrixStack  _matrixStack;
+    BufferSet    _bufferSet;
 
     //  状态
     RenderState _renderState;
@@ -151,12 +125,5 @@ private:
     std::array<MaterialCommandQueue, 4> _forwardQueues;
     //  延迟渲染队列
     std::array<MaterialCommandQueue, 4> _deferredQueues;
-
-    //  深度贴图
-    uint _shadowMapDirect[LIMIT_LIGHT_DIRECT];
-    uint _shadowMapPoint[LIMIT_LIGHT_POINT];
-    uint _shadowMapSpot[LIMIT_LIGHT_SPOT];
-    //  光源数据
-    uint _lightForwardUBO[3];
 };
 

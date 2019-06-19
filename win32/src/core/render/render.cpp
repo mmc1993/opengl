@@ -9,35 +9,20 @@ Render::Render()
 
 Render::~Render()
 {
-    if (_lightForwardUBO[Light::kDIRECT] != 0)
-    {
-        ASSERT_LOG(_lightForwardUBO[Light::kDIRECT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _lightForwardUBO[Light::kDIRECT]);
-        ASSERT_LOG(_lightForwardUBO[Light::kPOINT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _lightForwardUBO[Light::kPOINT]);
-        ASSERT_LOG(_lightForwardUBO[Light::kSPOT] != 0, "~Render _uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _lightForwardUBO[Light::kSPOT]);
-        glDeleteBuffers(3, _lightForwardUBO);
+    glDeleteTextures(LIMIT_LIGHT_DIRECT, _bufferSet.mShadowMap.mDirectTexture);
+    glDeleteTextures(LIMIT_LIGHT_POINT, _bufferSet.mShadowMap.mPointTexture);
+    glDeleteTextures(LIMIT_LIGHT_SPOT, _bufferSet.mShadowMap.mSpotTexture);
 
-        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapDirect);
-        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapPoint);
-        glDeleteTextures(LIMIT_LIGHT_DIRECT, _shadowMapSpot);
-    }
+    glDeleteTextures(1, &_bufferSet.mGBuffer.mNormalTexture);
+    glDeleteTextures(1, &_bufferSet.mGBuffer.mDiffuseTexture);
+    glDeleteTextures(1, &_bufferSet.mGBuffer.mPositionTexture);
+    glDeleteTextures(1, &_bufferSet.mGBuffer.mSpecularTexture);
+    glDeleteRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
-    if (_bufferG.mPositionTexture != 0)
-    {
-        ASSERT_LOG(_bufferG.mPositionTexture != 0, "~Render _gbuffer.mPositionTexture: {0}", _bufferG.mPositionTexture);
-        ASSERT_LOG(_bufferG.mSpecularTexture != 0, "~Render _gbuffer.mSpecularTexture: {0}", _bufferG.mSpecularTexture);
-        ASSERT_LOG(_bufferG.mDiffuseTexture != 0, "~Render _gbuffer.mDiffuseTexture: {0}", _bufferG.mDiffuseTexture);
-        ASSERT_LOG(_bufferG.mNormalTexture != 0, "~Render _gbuffer.mNormalTexture: {0}", _bufferG.mNormalTexture);
-        ASSERT_LOG(_bufferG.mDepthBuffer != 0, "~Render _gbuffer.mDepthBuffer: {0}", _bufferG.mDepthBuffer);
-        glDeleteTextures(4, &_bufferG.mPositionTexture);
-        glDeleteRenderbuffers(1,&_bufferG.mDepthBuffer);
-    }
+    glDeleteTextures(1, &_bufferSet.mOffScreen.mColorTexture);
+    glDeleteTextures(1, &_bufferSet.mOffScreen.mDepthTexture);
 
-    if (_offSceneBuffer.mColorTexture != 0)
-    {
-        ASSERT_LOG(_offSceneBuffer.mColorTexture != 0, "~Render _offSceneBuffer.mColorTexture : {0}", _offSceneBuffer.mColorTexture);
-        ASSERT_LOG(_offSceneBuffer.mDepthTexture != 0, "~Render _offSceneBuffer.mDepthTexture : {0}", _offSceneBuffer.mDepthTexture);
-        glDeleteTextures(2, &_offSceneBuffer.mColorTexture);
-    }
+    glDeleteBuffers(3, _bufferSet.mLightUBO);
 }
 
 MatrixStack & Render::GetMatrixStack()
@@ -147,15 +132,15 @@ void Render::BakeLightDepthMap()
 {
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kDIRECT).at(i).mLight, _shadowMapDirect[i]);
+        BakeLightDepthMap(_lightQueues.at(Light::kDIRECT).at(i).mLight, _bufferSet.mShadowMap.mDirectTexture[i]);
     }
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kPOINT).at(i).mLight, _shadowMapPoint[i]);
+        BakeLightDepthMap(_lightQueues.at(Light::kPOINT).at(i).mLight, _bufferSet.mShadowMap.mPointTexture[i]);
     }
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
-        BakeLightDepthMap(_lightQueues.at(Light::kSPOT).at(i).mLight, _shadowMapSpot[i]);
+        BakeLightDepthMap(_lightQueues.at(Light::kSPOT).at(i).mLight, _bufferSet.mShadowMap.mSpotTexture[i]);
     }
     ASSERT_LOG(_renderState.mCamera != nullptr, "_renderState.mCamera != nullptr");
     glViewport(
@@ -221,11 +206,11 @@ void Render::RenderForward()
 void Render::RenderDeferred()
 {
     _renderTarget[0].Start(RenderTarget::BindType::kALL);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferG.mPositionTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferG.mSpecularTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferG.mDiffuseTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferG.mNormalTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferG.mDepthBuffer);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mPositionTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mSpecularTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferSet.mGBuffer.mDepthBuffer);
 
     uint rtbinds[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
@@ -261,17 +246,17 @@ void Render::RenderDeferred()
 
     for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _shadowMapDirect[i]: 0);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _shadowMapPoint[i] : 0);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
     }
 
     for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _shadowMapSpot[i] : 0);
+        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
     }
 
     _renderTarget[1].Ended();
@@ -281,10 +266,10 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow
 {
     if (Bind(command.mProgram, shadow != 0u? 0u: 1u))
     {
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _bufferG.mPositionTexture, _renderState.mTexBase + 0);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _bufferG.mSpecularTexture, _renderState.mTexBase + 1);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferG.mDiffuseTexture, _renderState.mTexBase + 2);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferG.mNormalTexture, _renderState.mTexBase + 3);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _bufferSet.mGBuffer.mPositionTexture, _renderState.mTexBase + 0);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _bufferSet.mGBuffer.mSpecularTexture, _renderState.mTexBase + 1);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferSet.mGBuffer.mDiffuseTexture, _renderState.mTexBase + 2);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferSet.mGBuffer.mNormalTexture, _renderState.mTexBase + 3);
     }
     ASSERT_LOG(command.mProgram->GetPass(0).mRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(0).mRenderType);
     ASSERT_LOG(command.mProgram->GetPass(1).mRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(1).mRenderType);
@@ -309,7 +294,7 @@ void Render::PackUBOLightForward()
     const auto SPOT_UBO_LEN = LightSpot::GetUBOLength();
 
     auto offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kDIRECT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _bufferSet.mLightUBO[Light::kDIRECT]);
     for (auto i = 0u; i != std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kDIRECT).at(i).mLight->GetUBO());
@@ -319,7 +304,7 @@ void Render::PackUBOLightForward()
     }
 
     offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kPOINT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _bufferSet.mLightUBO[Light::kPOINT]);
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kPOINT).at(i).mLight->GetUBO());
@@ -329,7 +314,7 @@ void Render::PackUBOLightForward()
     }
 
     offset = 0;
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _lightForwardUBO[Light::kSPOT]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, _bufferSet.mLightUBO[Light::kSPOT]);
     for (auto i = 0; i != std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
         glBindBuffer(GL_COPY_READ_BUFFER, _lightQueues.at(Light::kSPOT).at(i).mLight->GetUBO());
@@ -355,9 +340,9 @@ void Render::BindUBOLightForward()
     glUniformBlockBinding(_renderState.mProgram->GetUseID(), indexPoint, UniformBlockEnum::kLIGHT_POINT);
     glUniformBlockBinding(_renderState.mProgram->GetUseID(), indexSpot, UniformBlockEnum::kLIGHT_SPOT);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _lightForwardUBO[Light::kDIRECT]);
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _lightForwardUBO[Light::kPOINT]);
-    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _lightForwardUBO[Light::kSPOT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _bufferSet.mLightUBO[Light::kDIRECT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _bufferSet.mLightUBO[Light::kPOINT]);
+    glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _bufferSet.mLightUBO[Light::kSPOT]);
 
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_DIRECT_, countDirect);
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, countPoint);
@@ -365,15 +350,15 @@ void Render::BindUBOLightForward()
 
     for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _shadowMapDirect[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _bufferSet.mShadowMap.mDirectTexture[i], _renderState.mTexBase++);
     }
     for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
     {
-        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _shadowMapPoint[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _bufferSet.mShadowMap.mPointTexture[i], _renderState.mTexBase++);
     }
     for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _shadowMapSpot[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _bufferSet.mShadowMap.mSpotTexture[i], _renderState.mTexBase++);
     }
 }
 
@@ -437,30 +422,30 @@ void Render::Post(const Light * light)
 
 void Render::InitRender()
 {
-    if (_lightForwardUBO[Light::kDIRECT] == 0)
+    if (_bufferSet.mGBuffer.mPositionTexture == 0)
     {
-        ASSERT_LOG(_lightForwardUBO[Light::kDIRECT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kDIRECT]: {0}", _lightForwardUBO[Light::kDIRECT]);
-        ASSERT_LOG(_lightForwardUBO[Light::kPOINT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kPOINT]: {0}", _lightForwardUBO[Light::kPOINT]);
-        ASSERT_LOG(_lightForwardUBO[Light::kSPOT] == 0, "_uboLightForward[UBOLightForwardTypeEnum::kSPOT]: {0}", _lightForwardUBO[Light::kSPOT]);
+        auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
+        auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
+        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
 
-        glGenBuffers(3, _lightForwardUBO);
-        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kDIRECT]);
+        //  光源UBO
+        glGenBuffers(3, _bufferSet.mLightUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kDIRECT]);
         glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kPOINT]);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kPOINT]);
         glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _lightForwardUBO[Light::kSPOT]);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kSPOT]);
         glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        //  深度贴图初始化
-        auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
-        auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
-        glGenTextures(LIMIT_LIGHT_DIRECT, _shadowMapDirect);
-        glGenTextures(LIMIT_LIGHT_POINT, _shadowMapPoint);
-        glGenTextures(LIMIT_LIGHT_SPOT, _shadowMapSpot);
+        //  阴影贴图
+        glGenTextures(LIMIT_LIGHT_DIRECT, _bufferSet.mShadowMap.mDirectTexture);
+        glGenTextures(LIMIT_LIGHT_POINT, _bufferSet.mShadowMap.mPointTexture);
+        glGenTextures(LIMIT_LIGHT_SPOT, _bufferSet.mShadowMap.mSpotTexture);
         for (auto i = 0; i != LIMIT_LIGHT_DIRECT; ++i)
         {
-            glBindTexture(GL_TEXTURE_2D, _shadowMapDirect[i]);
+            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mDirectTexture[i]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -471,7 +456,7 @@ void Render::InitRender()
 
         for (auto i = 0; i != LIMIT_LIGHT_POINT; ++i)
         {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, _shadowMapPoint[i]);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _bufferSet.mShadowMap.mPointTexture[i]);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -488,7 +473,7 @@ void Render::InitRender()
 
         for (auto i = 0; i != LIMIT_LIGHT_SPOT; ++i)
         {
-            glBindTexture(GL_TEXTURE_2D, _shadowMapSpot[i]);
+            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mSpotTexture[i]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -496,44 +481,33 @@ void Render::InitRender()
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         }
         glBindTexture(GL_TEXTURE_2D, 0);
-    }
 
-    if (_bufferG.mPositionTexture == 0)
-    {
-        ASSERT_LOG(_bufferG.mPositionTexture == 0, "_gbuffer.mPositionTexture: {0}", _bufferG.mPositionTexture);
-        ASSERT_LOG(_bufferG.mSpecularTexture == 0, "_gbuffer.mSpecularTexture: {0}", _bufferG.mSpecularTexture);
-        ASSERT_LOG(_bufferG.mDiffuseTexture == 0, "_gbuffer.mDiffuseTexture: {0}", _bufferG.mDiffuseTexture);
-        ASSERT_LOG(_bufferG.mNormalTexture == 0, "_gbuffer.mNormalTexture: {0}", _bufferG.mNormalTexture);
-        ASSERT_LOG(_bufferG.mDepthBuffer == 0, "_gbuffer.mDepthBuffer: {0}", _bufferG.mDepthBuffer);
+        //  G-Buffer
+        glGenTextures(4,  &_bufferSet.mGBuffer.mPositionTexture);
+        glGenRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
-        glGenTextures(4, &_bufferG.mPositionTexture);
-        glGenRenderbuffers(1,&_bufferG.mDepthBuffer);
-
-        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
-
-        glBindTexture(GL_TEXTURE_2D, _bufferG.mPositionTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _bufferG.mSpecularTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mSpecularTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _bufferG.mDiffuseTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mDiffuseTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _bufferG.mNormalTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mNormalTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -541,28 +515,21 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        glBindRenderbuffer(GL_RENDERBUFFER, _bufferG.mDepthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _bufferSet.mGBuffer.mDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    }
-    
-    if (_offSceneBuffer.mColorTexture == 0)
-    {
-        ASSERT_LOG(_offSceneBuffer.mColorTexture == 0, "_offSceneBuffer.mColorTexture : {0}", _offSceneBuffer.mColorTexture);
-        ASSERT_LOG(_offSceneBuffer.mDepthTexture == 0, "_offSceneBuffer.mDepthTexture : {0}", _offSceneBuffer.mDepthTexture);
-        glGenTextures(2, &_offSceneBuffer.mColorTexture);
 
-        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
+        //  Off Screen Texture
+        glGenTextures(2, &_bufferSet.mOffScreen.mColorTexture);
 
-        glBindTexture(GL_TEXTURE_2D, _offSceneBuffer.mColorTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mColorTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _offSceneBuffer.mDepthTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mDepthTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -571,8 +538,8 @@ void Render::InitRender()
         glBindTexture(GL_TEXTURE_2D, 0);
 
         _renderTarget[1].Start();
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _offSceneBuffer.mColorTexture);
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _offSceneBuffer.mDepthTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mColorTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH,  RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mDepthTexture);
         _renderTarget[1].Ended();
     }
 
