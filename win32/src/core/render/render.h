@@ -93,12 +93,13 @@ public:
     //  渲染
 	void Once();
     //  渲染命令入口
-    void Post(const RenderCommand::TypeEnum type, const RenderCommand & command);
+    void Post(const RenderCommand::TypeEnum type,
+              const RenderCommand & command);
 
     const RenderState & GetRenderState() const { return _renderState; }
 
 private:
-    void StartRender();
+    void InitRender();
 
     //  Bind 系函数.
     //      该系列函数完成数据提交同时影响渲染器内部状态
@@ -107,7 +108,7 @@ private:
 
     //  Post 系函数.
     //      该系函数完成数据提交, 但不修改渲染器内部状态
-    void Post(const Light *light);
+    void Post(const Light * light);
     void Post(const GLMaterial * material);
     void Post(const glm::mat4 & transform);
     void Post(DrawTypeEnum drawType, const GLMesh * mesh);
@@ -122,8 +123,6 @@ private:
     void RenderCamera();
     void RenderForward();
     void RenderDeferred();
-	void RenderForwardCommands(const MaterialCommandQueue & commands);
-	void RenderDeferredCommands(const MaterialCommandQueue & commands);
     void RenderDeferredLightVolume(const LightCommand & command, uint shadow);
 
     //  正向渲染相关

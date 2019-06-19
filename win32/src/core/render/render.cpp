@@ -47,7 +47,7 @@ MatrixStack & Render::GetMatrixStack()
 
 void Render::Once()
 {
-    StartRender();
+    InitRender();
 
     std::sort(_cameraQueue.begin(), _cameraQueue.end(), [](const auto & a, const auto & b)
         {
@@ -201,7 +201,19 @@ void Render::RenderForward()
     _renderTarget[1].Start();
     for (auto & commands : _forwardQueues)
     {
-        RenderForwardCommands(commands);
+        for (const auto & command : commands)
+        {
+            if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
+            {
+                if (Bind(command.mMaterial->GetProgram(), command.mSubPass))
+                {
+                    BindUBOLightForward();
+                }
+                Post(command.mMaterial);
+                Post(command.mTransform);
+                Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
+            }
+        }
     }
     _renderTarget[1].Ended();
 }
@@ -223,7 +235,16 @@ void Render::RenderDeferred()
 
     for (auto & commands : _deferredQueues)
     {
-        RenderDeferredCommands(commands);
+        for (auto & command : commands)
+        {
+            if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
+            {
+                Bind(command.mMaterial->GetProgram(), command.mSubPass);
+                Post(command.mMaterial);
+                Post(command.mTransform);
+                Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
+            }
+        }
     }
 
     _renderTarget[0].Start(RenderTarget::BindType::kREAD);
@@ -254,37 +275,6 @@ void Render::RenderDeferred()
     }
 
     _renderTarget[1].Ended();
-}
-
-void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
-{
-	for (const auto & command : commands)
-	{
-		if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
-		{
-			if (Bind(command.mMaterial->GetProgram(), command.mSubPass))
-            {
-                BindUBOLightForward();
-            }
-            Post(command.mMaterial);
-            Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-        }
-	}
-}
-
-void Render::RenderDeferredCommands(const MaterialCommandQueue & commands)
-{
-    for (auto & command : commands)
-    {
-        if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
-        {
-            Bind(command.mMaterial->GetProgram(), command.mSubPass);
-            Post(command.mMaterial);
-            Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-        }
-    }
 }
 
 void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow)
@@ -445,7 +435,7 @@ void Render::Post(const Light * light)
     _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, light->GetType());
 }
 
-void Render::StartRender()
+void Render::InitRender()
 {
     if (_lightForwardUBO[Light::kDIRECT] == 0)
     {
