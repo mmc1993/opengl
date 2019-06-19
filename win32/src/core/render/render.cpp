@@ -248,17 +248,14 @@ void Render::RenderDeferred()
     {
         RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
     }
-
     for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
     {
         RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
     }
-
     for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
     {
         RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
     }
-
     _renderTarget[1].Ended();
 }
 

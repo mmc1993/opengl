@@ -168,6 +168,8 @@ public:
     void BindUniformTex2D(const char * const key, const uint val, iint pos) const
     {
         glActiveTexture(GL_TEXTURE0 + pos);
+        glBindTexture(MMC_TEXTURE_2D, 0);
+        glBindTexture(MMC_TEXTURE_3D, 0);
         glBindTexture(MMC_TEXTURE_2D, val);
         if (key != nullptr) { glUniform1i(glGetUniformLocation(_useID, key), pos); }
     }
@@ -175,6 +177,8 @@ public:
     void BindUniformTex3D(const char * const key, const uint val, iint pos) const
     {
         glActiveTexture(GL_TEXTURE0 + pos);
+        glBindTexture(MMC_TEXTURE_2D, 0);
+        glBindTexture(MMC_TEXTURE_3D, 0);
         glBindTexture(MMC_TEXTURE_3D, val);
         if (key != nullptr) { glUniform1i(glGetUniformLocation(_useID, key), pos); }
     }
