@@ -48,15 +48,15 @@ Common Beg
     };
 
     layout (std140) uniform LightDirect_ {
-        LightDirectParam_ mParam[2];
+        LightDirectParam_ mParam[1];
     } light_direct_;
 
     layout (std140) uniform LightPoint_ {
-        LightPointParam_ mParam[4];
+        LightPointParam_ mParam[2];
     } light_point_;
 
     layout (std140) uniform LightSpot_ {
-        LightSpotParam_ mParam[4];
+        LightSpotParam_ mParam[2];
     } light_spot_;
 
     uniform int light_count_direct_;

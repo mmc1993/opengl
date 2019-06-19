@@ -7,9 +7,9 @@
 
 class Render {
 public:
-    static constexpr uint LIMIT_LIGHT_DIRECT = 2;
-    static constexpr uint LIMIT_LIGHT_POINT = 4;
-    static constexpr uint LIMIT_LIGHT_SPOT = 4;
+    static constexpr uint LIMIT_LIGHT_DIRECT = 1;
+    static constexpr uint LIMIT_LIGHT_POINT = 2;
+    static constexpr uint LIMIT_LIGHT_SPOT = 3;
 
     struct RenderState {
         //  记录当前批次顶点数
