@@ -19,7 +19,9 @@ bool Window::Create(const std::string & title)
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#if _DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     _window = glfwCreateWindow(CW_DEFAULT, CW_DEFAULT, title.c_str(), nullptr, nullptr);
     if (nullptr == _window)
@@ -37,9 +39,9 @@ bool Window::Create(const std::string & title)
         glfwTerminate();
         return false;
     }
-    //  ×¢²áDebug»Øµ÷
+#if _DEBUG
     glDebugMessageCallback(Window::OnGLDebugProc, this);
-
+#endif
     return true;
 }
 
@@ -193,8 +195,20 @@ void Window::OnClose(GLFWwindow * window)
 
 void GLAPIENTRY Window::OnGLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam)
 {
-    auto window = reinterpret_cast<const Window *>(userParam);
-    window->OnGLError(source, type, id, severity, length, message);
-    ASSERT_LOG(false, "OpenGL Error.");
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR:
+    case GL_DEBUG_TYPE_PERFORMANCE:
+    case GL_DEBUG_TYPE_PORTABILITY:
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        {
+            auto window = reinterpret_cast<const Window *>(userParam);
+            window->OnGLError(source, type, id, severity, length, message);
+            ASSERT_LOG(false, "OpenGL Error.");
+        }
+        break;
+    }
+
 }
 

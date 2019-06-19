@@ -10,7 +10,19 @@ void Serialize(std::ostream & os, const T & val)
 //  ÈÝÆ÷
 template <class T, typename std::enable_if_t<
     std::is_same_v<typename T::iterator, decltype(std::declval<T>().begin())> &&
-    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())>, int> N = 0>
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())> &&
+    std::is_trivially_copyable_v<typename T::value_type>, int> N = 0>
+    void Serialize(std::ostream & os, const T & val)
+{
+    unsigned int size = val.size();
+    os.write((const char *)&size, sizeof(size));
+    os.write((const char *)val.data(), size * sizeof(typename T::value_type));
+}
+
+template <class T, typename std::enable_if_t<
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().begin())> &&
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())> &&
+    !std::is_trivially_copyable_v<typename T::value_type>, int> N = 0>
 void Serialize(std::ostream & os, const T & val)
 {
     unsigned int size = val.size();
@@ -28,7 +40,20 @@ void Deserialize(std::istream & is, T & val)
 //  ÈÝÆ÷
 template <class T, typename std::enable_if_t<
     std::is_same_v<typename T::iterator, decltype(std::declval<T>().begin())> &&
-    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())>, int> N = 0>
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())> &&
+    std::is_trivially_copyable_v<typename T::value_type>, int> N = 0>
+    void Deserialize(std::istream & is, T & val)
+{
+    unsigned int size = 0;
+    is.read((char *)&size, sizeof(unsigned int));
+    val.resize(size);
+    is.read((char *)val.data(), size * sizeof(typename T::value_type));
+}
+
+template <class T, typename std::enable_if_t<
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().begin())> &&
+    std::is_same_v<typename T::iterator, decltype(std::declval<T>().end())> &&
+    !std::is_trivially_copyable_v<typename T::value_type>, int> N = 0>
 void Deserialize(std::istream & is, T & val)
 {
     unsigned int size = 0;
