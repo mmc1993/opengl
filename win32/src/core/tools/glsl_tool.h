@@ -61,4 +61,145 @@ namespace glsl_tool {
         glBufferSubData(GL_UNIFORM_BUFFER, base, sizeof(T), &v);
         return UBOOffsetFill<T>(base);
     }
+
+    //  生成光源网格
+    inline void BuildDirectVolume(uint num, const std::string & file)
+    {
+        std::ofstream os(file);
+        os
+            << "v " << -1.0f << " " << -1.0f << " " << 0.0f << std::endl
+            << "v " <<  1.0f << " " << -1.0f << " " << 0.0f << std::endl
+            << "v " <<  1.0f << " " <<  1.0f << " " << 0.0f << std::endl
+            << "v " << -1.0f << " " <<  1.0f << " " << 0.0f << std::endl;
+        os << std::endl;
+        os
+            << "f " << 1 << " " << 3 << " " << 2 << std::endl
+            << "f " << 1 << " " << 4 << " " << 3 << std::endl;
+        os << std::endl;
+        os.close();
+    }
+
+    inline void BuildPointVolume(uint num, const std::string & file)
+    {
+        const auto N0 = 8;
+        const auto N1 = N0 * 2 - 2;
+        std::vector<uint>   indexs;
+        std::vector<float>  vertexs;
+
+        vertexs.push_back(0);
+        vertexs.push_back(1);
+        vertexs.push_back(0);
+        for (auto i = 0; i != N1; ++i)
+        {
+            indexs.emplace_back(0);
+            indexs.emplace_back((i) % N1 + 1);
+            indexs.emplace_back((i + 1) % N1 + 1);
+        }
+
+        auto step = static_cast<float>(M_PI / (N0 - 1));
+        for (auto i = 1; i != N0 - 1; ++i)
+        {
+            auto x = std::sin(step * i);
+            auto y = std::cos(step * i);
+            auto base = (i - 2) * N1 + 1;
+            for (auto j = 0; j != N1; ++j)
+            {
+                if (i != 1)
+                {
+                    indexs.push_back(base + j);
+                    indexs.push_back(base + N1 + j);
+                    indexs.push_back(base + N1 + (j + 1) % N1);
+
+                    indexs.push_back(base + j);
+                    indexs.push_back(base + N1 + (j + 1) % N1);
+                    indexs.push_back(base + (j + 1) % N1);
+                }
+                auto l = x;
+                auto x = std::sin(step * j) * l;
+                auto z = std::cos(step * j) * l;
+                vertexs.push_back(x);
+                vertexs.push_back(y);
+                vertexs.push_back(z);
+            }
+        }
+
+        auto base = (N0 - 3) * N1 + 1;
+        for (auto i = 0; i != N1; ++i)
+        {
+            indexs.emplace_back(base + i);
+            indexs.emplace_back(base + N1);
+            indexs.emplace_back(base + (i + 1) % N1);
+        }
+
+        vertexs.push_back( 0);
+        vertexs.push_back(-1);
+        vertexs.push_back( 0);
+
+        std::ofstream os(file);
+        for (auto i = 0; i != vertexs.size(); i += 3)
+        {
+            os << "v "
+                << vertexs.at(i    ) << " "
+                << vertexs.at(i + 1) << " "
+                << vertexs.at(i + 2) << std::endl;
+        }
+        os << std::endl;
+        for (auto i = 0; i != indexs.size(); i += 3)
+        {
+            os << "f "
+                << indexs.at(i    ) + 1 << " "
+                << indexs.at(i + 1) + 1 << " "
+                << indexs.at(i + 2) + 1 << std::endl;
+        }
+        os.close();
+    }
+
+    inline void BuildSpotVolume(uint num, const std::string & file)
+    {
+        const auto N=num;
+        std::vector<uint>   indexs;
+        std::vector<float>  vertexs;
+
+        vertexs.push_back(0);
+        vertexs.push_back(0);
+        vertexs.push_back(0);
+        auto step = static_cast<float>(M_PI * 2 / N);
+        for (auto i = 0; i != N; ++i)
+        {
+            auto x = std::sin(step * i);
+            auto y = std::cos(step * i);
+            vertexs.push_back(x);
+            vertexs.push_back(y);
+            vertexs.push_back(1);
+
+            indexs.emplace_back( 0    );
+            indexs.emplace_back( i + 1);
+            indexs.emplace_back((i + 1) % N + 1);
+
+            if (i != 0)
+            {
+                indexs.emplace_back((i + 1) % N + 1);
+                indexs.emplace_back(i + 1);
+                indexs.emplace_back(1);
+            }
+        }
+
+        std::ofstream os(file);
+        for (auto i = 0; i != vertexs.size(); ++i)
+        {
+            os << "f "
+                << vertexs.at(i    ) << " "
+                << vertexs.at(i + 1) << " "
+                << vertexs.at(i + 2) << std::endl;
+        }
+        os << std::endl;
+        for (auto i = 0; i != indexs.size(); i += 3)
+        {
+            os << "f "
+                << indexs.at(i) + 1 << " "
+                << indexs.at(i + 1) + 1 << " "
+                << indexs.at(i + 2) + 1 << std::endl;
+        }
+        os.close();
+    }
 }

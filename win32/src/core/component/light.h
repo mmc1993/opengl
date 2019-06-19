@@ -17,8 +17,6 @@ public:
 		kSPOT,
 	};
 
-    static void BuildVolume(TypeEnum type);
-
 public:
     Light(TypeEnum type);
     virtual ~Light() {  }
