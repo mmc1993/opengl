@@ -19,6 +19,7 @@ bool Window::Create(const std::string & title)
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     _window = glfwCreateWindow(CW_DEFAULT, CW_DEFAULT, title.c_str(), nullptr, nullptr);
     if (nullptr == _window)
@@ -36,6 +37,9 @@ bool Window::Create(const std::string & title)
         glfwTerminate();
         return false;
     }
+    //  ×¢²áDebug»Øµ÷
+    glDebugMessageCallback(Window::OnGLDebugProc, this);
+
     return true;
 }
 
@@ -121,6 +125,11 @@ void Window::Loop()
     _window = nullptr;
 }
 
+void Window::OnGLError(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message) const
+{
+    std::cout << SFormat("source: {0}, type: {1}, id: {2}, severity: {3}, length: {4}, message: {5}", source, type, id, severity, length, message) << std::endl;
+}
+
 void Window::Update()
 {
     auto lasttime = time_tool::Now();
@@ -139,8 +148,8 @@ void Window::Update()
         glfwSwapBuffers(_window);
 
 		std::cout <<
-			SFormat("Error: {0} FPS: {1} DiffTie: {2} RenderCount: {3} mVertexCount: {4}", 
-					glGetError(), _renderInfo.renderFPS / dt, dt,
+			SFormat("FPS: {0} DiffTime: {1} RenderCount: {2} mVertexCount: {3}", 
+					_renderInfo.renderFPS / dt, dt,
 					Global::Ref().RefRender().GetRenderState().mRenderCount,
 					Global::Ref().RefRender().GetRenderState().mVertexCount)
 			<< std::endl;
@@ -180,5 +189,12 @@ void Window::OnSize(GLFWwindow * window, int w, int h)
 
 void Window::OnClose(GLFWwindow * window)
 {
+}
+
+void GLAPIENTRY Window::OnGLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam)
+{
+    auto window = reinterpret_cast<const Window *>(userParam);
+    window->OnGLError(source, type, id, severity, length, message);
+    ASSERT_LOG(false, "OpenGL Error.");
 }
 

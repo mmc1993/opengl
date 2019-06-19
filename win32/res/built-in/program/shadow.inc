@@ -5,7 +5,6 @@ RenderType  Shadow
 DrawType    Index
 
 VShader Beg
-
     layout(location = 0) in vec3 a_v_;
 
     uniform mat4 matrix_mvp_;

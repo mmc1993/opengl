@@ -200,6 +200,7 @@ void Render::RenderCamera()
 void Render::RenderForward()
 {
     PackUBOLightForward();
+
     _renderTarget[1].Start();
     for (auto & commands : _forwardQueues)
     {
@@ -256,11 +257,6 @@ void Render::RenderDeferred()
     }
 
     _renderTarget[1].Ended();
-
-    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 0);
-    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 1);
-    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 2);
-    _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 3);
 }
 
 void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
@@ -276,8 +272,6 @@ void Render::RenderForwardCommands(const MaterialCommandQueue & commands)
             Post(command.mMaterial);
             Post(command.mTransform);
             Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-            auto e = glGetError();
-            e = glGetError();
         }
 	}
 }
@@ -319,11 +313,6 @@ void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow
     Post(command.mLight);
     Post(command.mTransform);
     Post(DrawTypeEnum::kINDEX, command.mMesh);
-    if (shadow != 0)
-    {
-        _renderState.mProgram->BindUniformTex2D(nullptr, 0, _renderState.mTexBase + 4);
-        _renderState.mProgram->BindUniformTex3D(nullptr, 0, _renderState.mTexBase + 4);
-    }
 }
 
 void Render::PackUBOLightForward()
@@ -623,15 +612,15 @@ bool Render::Bind(const GLProgram * program, uint pass)
 
 void Render::Post(const GLMaterial * material)
 {
-    auto texBase = _renderState.mTexBase;
-    for (const auto & item : material->GetItems())
+    for (auto i = 0; i != material->GetItems().size(); ++i)
     {
-        auto key = SFormat(UNIFORM_MATERIAL, item.mKey);
+        auto & item = material->GetItems().at(i);
+        auto key    = SFormat(UNIFORM_MATERIAL, item.mKey);
         switch (item.mType)
         {
         case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
-        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), texBase++); } break;
-        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), texBase++); } break;
+        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
         }
     }
 }

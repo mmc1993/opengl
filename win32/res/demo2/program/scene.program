@@ -1,5 +1,5 @@
 Common Beg
-    #version 400 core
+    #version 330 core
     //  矩阵/相机
     uniform vec3 camera_pos_;
     uniform vec3 camera_eye_;

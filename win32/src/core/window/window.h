@@ -40,6 +40,9 @@ public:
     size_t GetH() const;
     void Loop();
 
+protected:
+    virtual void OnGLError(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message) const;
+
 private:
     void Update();
 
@@ -49,6 +52,7 @@ private:
     static void OnKey(GLFWwindow * window, int key, int scan, int act, int stat);
     static void OnSize(GLFWwindow * window, int w, int h);
     static void OnClose(GLFWwindow * window);
+    static void GLAPIENTRY OnGLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 private:
     GLFWwindow * _window;
