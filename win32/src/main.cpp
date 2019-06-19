@@ -102,7 +102,7 @@ private:
 
         auto object0 = new Object();
         object0->AddComponent(sprite0);
-        object0->GetTransform()->Translate(-1, 0, 0);
+        object0->GetTransform()->Translate(-5, 0, 0);
         object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
@@ -110,7 +110,7 @@ private:
         
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(1, 0, 0);
+        object1->GetTransform()->Translate(5, 0, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 
