@@ -287,6 +287,8 @@ int main()
     auto windowTitle = Global::Ref().RefCfgManager().At("init")->At("window", "title")->ToString();
 
     AppWindow app;
+    Global::Ref().BindWindow(&app);
+
     app.Create(windowTitle);
     app.Move(windowX, windowY, 
              windowW, windowH);

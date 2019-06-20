@@ -55,6 +55,7 @@ void Global::Start()
 
 void Global::Clean()
 {
+    _window = nullptr;
     SafeDelete(_event);
     SafeDelete(_timer);
     SafeDelete(_object);

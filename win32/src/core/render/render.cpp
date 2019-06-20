@@ -1,4 +1,5 @@
 #include "render.h"
+#include "../window/window.h"
 #include "../component/light.h"
 #include "../component/camera.h"
 #include "../component/transform.h"
@@ -167,11 +168,11 @@ void Render::RenderCamera()
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
         0, 0,
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt(),
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
         0, 0,
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[1].Ended();
 
@@ -236,11 +237,11 @@ void Render::RenderDeferred()
     _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
     glBlitFramebuffer(
         0, 0,
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt(),
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
         0, 0,
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt(),
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
         GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[0].Ended();
 

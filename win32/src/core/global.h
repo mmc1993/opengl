@@ -4,11 +4,17 @@ class Event;
 class Timer;
 class Object;
 class Render;
+class Window;
 class CfgManager;
 class RawManager;
 
 class Global {
 public:
+    inline void BindWindow(Window * window)
+    {
+        _window = window;
+    }
+
     inline Event & RefEvent()
     {
         return *_event;
@@ -27,6 +33,11 @@ public:
     inline Render & RefRender()
     {
         return *_render;
+    }
+
+    inline Window & RefWindow()
+    {
+        return *_window;
     }
 
     inline CfgManager & RefCfgManager()
@@ -56,6 +67,7 @@ private:
     Timer * _timer;
     Object * _object;
     Render * _render;
+    Window * _window;
     CfgManager * _cfgManager;
     RawManager * _rawManager;
 };
