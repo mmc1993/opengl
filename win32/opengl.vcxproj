@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\component\roaming.h" />
     <ClInclude Include="src\core\config.h" />
     <ClInclude Include="src\core\event\event_enum.h" />
     <ClInclude Include="src\core\raw\gl_material.h" />
@@ -380,6 +381,7 @@
     <ClInclude Include="src\core\window\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\component\roaming.cpp" />
     <ClCompile Include="src\core\raw\raw_manager.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />

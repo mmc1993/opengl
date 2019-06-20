@@ -1092,6 +1092,9 @@
     <ClInclude Include="src\core\tools\serialize_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\component\roaming.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1137,6 +1140,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\third\code\code.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\component\roaming.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -118,10 +118,10 @@ void Window::Loop()
     glClearColor(0, 0, 0, 1);
 
     //  °ó¶¨Input
-    glfwSetKeyCallback(_window, Window::OnKey);
-    glfwSetCursorPosCallback(_window, Window::OnCur);
+    glfwSetKeyCallback(_window, Window::OnKeybord);
+    glfwSetCursorPosCallback(_window, Window::OnMouseMove);
     glfwSetWindowSizeCallback(_window, Window::OnSize);
-    glfwSetMouseButtonCallback(_window, Window::OnBtn);
+    glfwSetMouseButtonCallback(_window, Window::OnMouseButton);
     glfwSetWindowCloseCallback(_window, Window::OnClose);
     while (!glfwWindowShouldClose(_window)) { Update(); }
     _window = nullptr;
@@ -158,24 +158,30 @@ void Window::Update()
     }
 }
 
-void Window::OnBtn(GLFWwindow * window, int btn, int act, int stat)
+void Window::OnMouseButton(GLFWwindow * window, int btn, int act, int stat)
 {
+    auto self = (Window *)glfwGetWindowUserPointer(window);
     EventMouseParam param;
     param.act = act;
     param.btn = btn;
-    param.stat = stat;
+    param.stat  = stat;
+    param.x     = self->_mouseInfo.x;
+    param.y     = self->_mouseInfo.y;
     Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_BUTTON, param);
 }
 
-void Window::OnCur(GLFWwindow * window, double x, double y)
+void Window::OnMouseMove(GLFWwindow * window, double x, double y)
 {
+    auto self = (Window *)glfwGetWindowUserPointer(window);
     EventMouseParam param;
-    param.x = static_cast<float>(x);
-    param.y = static_cast<float>(y);
+    param.x     = static_cast<float>(x);
+    param.y     = static_cast<float>(y);
+    param.dx    = param.x - self->_mouseInfo.x;
+    param.dy    = param.y - self->_mouseInfo.y;
     Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_MOVEED, param);
 }
 
-void Window::OnKey(GLFWwindow * window, int key, int scan, int act, int stat)
+void Window::OnKeybord(GLFWwindow * window, int key, int scan, int act, int stat)
 {
     EventKeyParam param;
     param.key = key;
