@@ -90,8 +90,8 @@ void Roaming::OnEventMouse(const std::any & any)
     }
     else
     { 
-        _mdiff.x = param.dx * 0.001f;
-        _mdiff.y = param.dy * 0.001f;
+        _mdiff.x = param.dx * 0.01f;
+        _mdiff.y = param.dy * 0.01f;
         _mdiff.z = 0.0f;
     }
 }
