@@ -42,14 +42,14 @@ void Camera::SetOrder(const uint order)
 
 void Camera::SetEye(const glm::vec3 & eye)
 {
-	_eye = eye;
-	auto right = glm::cross(_eye, glm::vec3(0, 1, 0));
-	_up = glm::cross(right, _eye); _change = true;
+    _eye    = eye;
+	_change = true;
 }
 
 void Camera::SetPos(const glm::vec3 & pos)
 {
-	_pos = pos; _change = true;
+	_pos    = pos;
+    _change = true;
 }
 
 void Camera::SetViewport(const glm::vec4 & viewport)
