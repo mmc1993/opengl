@@ -27,20 +27,73 @@ void Roaming::OnDel()
 
 void Roaming::OnUpdate(float dt)
 {
+    auto camera = GetOwner()->GetComponent<Camera>();
+    ASSERT_LOG(camera != nullptr, "Not Find Camera");
+    auto up     = camera->GetUp();
+    auto eye    = camera->GetEye();
+    auto pos    = camera->GetPos();
+    auto right  = glm::cross(up, eye);
+    //  计算eye
+    eye        += _mdiff.y * up;
+    eye        += _mdiff.x * right;
+    //  计算up
+    up         -= eye * glm::dot(eye, up);
+    //  计算pos
+    if ((_direct & kUP)     != 0) { pos.y += 1 * 0.1f; }
+    if ((_direct & kDOWN)   != 0) { pos.y -= 1 * 0.1f; }
+    if ((_direct & kFRONT)  != 0) { pos   += eye * 0.1f; }
+    if ((_direct & kBACK)   != 0) { pos   -= eye * 0.1f; }
+    if ((_direct & kLEFT)   != 0) { pos   += glm::cross(up, eye) * 0.1f; }
+    if ((_direct & kRIGHT)  != 0) { pos   -= glm::cross(up, eye) * 0.1f; }
+
+    //  是否持续转向
+    if (_mdiff.z == 0.0f)
+    {
+        _mdiff.x = 0;
+        _mdiff.y = 0;
+    }
+
+    //  调整相机
+    camera->LookAt(pos, pos + eye, up);
 }
 
 void Roaming::OnEventMouse(const std::any & any)
 {
+    const auto windowW = Global::Ref().RefWindow().GetW();
+    const auto windowH = Global::Ref().RefWindow().GetH();
+    const auto margin = (float)std::sqrt(windowW * windowH) * 0.1f;
+
     auto param  = std::any_cast<Window::EventMouseParam>(any);
-    auto camera = GetOwner()->GetComponent<Camera>();
-    ASSERT_LOG(camera != nullptr, "Not Find Camera");
-
-    auto right  = camera->GetUp()  * camera->GetEye();
-    auto offset = right           * param.dy * 0.1f;
-    offset     += camera->GetUp() * param.dx * 0.1f;
-    auto eye    = camera->GetEye() + offset;
-
-    camera->SetEye()
+    if (param.x < margin)
+    { 
+        _mdiff.x = 0.05f;
+        _mdiff.y = 0;
+        _mdiff.z = 1;
+    }
+    else if (param.x > windowW - margin) 
+    {
+        _mdiff.x = -0.05f;
+        _mdiff.y = 0;
+        _mdiff.z = 1;
+    }
+    else if (param.y < margin)   
+    {
+        _mdiff.y = 0.05f;
+        _mdiff.x = 0;
+        _mdiff.z = 1;
+    }
+    else if (param.y > windowH - margin) 
+    {
+        _mdiff.y = -0.05f;
+        _mdiff.x = 0;
+        _mdiff.z = 1;
+    }
+    else
+    { 
+        _mdiff.x = param.dx * 0.001f;
+        _mdiff.y = param.dy * 0.001f;
+        _mdiff.z = 0.0f;
+    }
 }
 
 void Roaming::OnEventKeybord(const std::any & any)

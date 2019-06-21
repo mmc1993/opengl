@@ -56,10 +56,10 @@ void Global::Start()
 void Global::Clean()
 {
     _window = nullptr;
-    SafeDelete(_event);
-    SafeDelete(_timer);
     SafeDelete(_object);
     SafeDelete(_render);
+    SafeDelete(_event);
+    SafeDelete(_timer);
     SafeDelete(_cfgManager);
     SafeDelete(_rawManager);
 }

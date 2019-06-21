@@ -7,6 +7,7 @@
 #include "core/component/sprite.h"
 #include "core/component/light.h"
 #include "core/component/transform.h"
+#include "core/component/roaming.h"
 #include "core/raw/raw_manager.h"
 #include "core/cfg/cfg_manager.h"
 #include "core/event/event_enum.h"
@@ -49,6 +50,8 @@ public:
 private:
 	void InitCamera()
 	{
+        auto object = new Object();
+
 		auto camera = new Camera();
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 30000);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
@@ -58,9 +61,10 @@ private:
 			glm::vec3(0, 1, 0));
         camera->SetMask(Camera::kMASK0);
         camera->SetOrder(0);
-
-        auto object = new Object();
         object->AddComponent(camera);
+
+        auto roaming = new Roaming();
+        object->AddComponent(roaming);
 
         Global::Ref().RefObject().AddChild(object);
 
@@ -111,10 +115,10 @@ private:
 
 	void InitEvents()
 	{
-		Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
-		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_KEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
-		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
-		Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
+		//Global::Ref().RefTimer().Add(0.016f, std::bind(&AppWindow::OnTimerUpdate, this));
+		//Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_KEYBOARD, std::bind(&AppWindow::OnKeyEvent, this, std::placeholders::_1));
+		//Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_BUTTON, std::bind(&AppWindow::OnMouseButton, this, std::placeholders::_1));
+		//Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_MOVEED, std::bind(&AppWindow::OnMouseMoveed, this, std::placeholders::_1));
 	}
 
 	void InitLights()
@@ -220,6 +224,7 @@ private:
 	{
 		auto  param = std::any_cast<Window::EventMouseParam>(any);
 		auto l = glm::vec2(GetW() * 0.5f, GetH() * 0.5f);
+
 		auto v = glm::vec2(param.x - l.x, l.y - param.y);
 		if (glm::length(v) < 100)
 		{

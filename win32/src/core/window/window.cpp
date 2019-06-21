@@ -176,8 +176,10 @@ void Window::OnMouseMove(GLFWwindow * window, double x, double y)
     EventMouseParam param;
     param.x     = static_cast<float>(x);
     param.y     = static_cast<float>(y);
-    param.dx    = param.x - self->_mouseInfo.x;
-    param.dy    = param.y - self->_mouseInfo.y;
+    param.dx    = self->_mouseInfo.x - param.x;
+    param.dy    = self->_mouseInfo.y - param.y;
+    self->_mouseInfo.x = param.x;
+    self->_mouseInfo.y = param.y;
     Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_MOVEED, param);
 }
 

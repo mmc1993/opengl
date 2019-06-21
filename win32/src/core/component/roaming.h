@@ -31,5 +31,5 @@ private:
     size_t _ekid;
     size_t _emid;
     uint _direct;
-    //glm::vec
+    glm::vec3 _mdiff;
 };
