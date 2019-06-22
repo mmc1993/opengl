@@ -26,7 +26,7 @@ inline void Deserialize(std::istream & is, RawManager::ManifestSlot & slot)
     Deserialize(is, slot.mByteLength);
 }
 
-void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
+inline void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
 {
     Serialize(os, item.mKey);
     Serialize(os, item.mType);
@@ -34,7 +34,7 @@ void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
     Serialize(os, item.mValNum);
 }
 
-void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
+inline void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
 {
     Deserialize(is, item.mKey);
     Deserialize(is, item.mType);
