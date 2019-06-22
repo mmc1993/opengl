@@ -17,6 +17,7 @@ void Roaming::OnAdd()
 {
     _ekid = Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_KEYBOARD,   std::bind(&Roaming::OnEventKeybord, this, std::placeholders::_1));
     _emid = Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_MOVEED, std::bind(&Roaming::OnEventMouse, this, std::placeholders::_1));
+    _emid = Global::Ref().RefEvent().Add(EventTypeEnum::kWINDOW_MOUSE_BUTTON, std::bind(&Roaming::OnEventMouse, this, std::placeholders::_1));
 }
 
 void Roaming::OnDel()
@@ -34,24 +35,27 @@ void Roaming::OnUpdate(float dt)
     auto pos    = camera->GetPos();
     auto right  = glm::cross(up, eye);
     //  计算eye
-    eye        += _mdiff.y * up;
-    eye        += _mdiff.x * right;
-    //  计算up
-    up         -= eye * glm::dot(eye, up);
-    auto max    = std::max({ std::abs(up.x), 
-                             std::abs( up.y), 
-                             std::abs(up.z) });
-    if (max == up.x)
+    if (_mdiff.z != 0)
     {
-        up = up.x < 0 ? glm::vec3(-1, 0, 0) : glm::vec3(1, 0, 0);
-    }
-    else if (max == up.y)
-    {
-        up = up.y < 0 ? glm::vec3(0, -1, 0) : glm::vec3(0, 1, 0);
-    }
-    else if (max == up.z)
-    {
-        up = up.z < 0 ? glm::vec3(0, 0, -1) : glm::vec3(0, 0, 1);
+        eye        += _mdiff.y * up;
+        eye        += _mdiff.x * right;
+        //  计算up
+        up         -= eye * glm::dot(eye, up);
+        auto max    = std::max({ std::abs(up.x), 
+                                    std::abs( up.y), 
+                                    std::abs(up.z) });
+        if (max == up.x)
+        {
+            up = up.x < 0 ? glm::vec3(-1, 0, 0) : glm::vec3(1, 0, 0);
+        }
+        else if (max == up.y)
+        {
+            up = up.y < 0 ? glm::vec3(0, -1, 0) : glm::vec3(0, 1, 0);
+        }
+        else if (max == up.z)
+        {
+            up = up.z < 0 ? glm::vec3(0, 0, -1) : glm::vec3(0, 0, 1);
+        }
     }
     //  计算pos
     if ((_direct & kUP)     != 0) { pos.y += 1 * 0.1f; }
@@ -61,13 +65,8 @@ void Roaming::OnUpdate(float dt)
     if ((_direct & kLEFT)   != 0) { pos   += glm::cross(up, eye) * 0.1f; }
     if ((_direct & kRIGHT)  != 0) { pos   -= glm::cross(up, eye) * 0.1f; }
 
-    //  是否持续转向
-    if (_mdiff.z == 0.0f)
-    {
-        _mdiff.x = 0;
-        _mdiff.y = 0;
-    }
-
+    _mdiff.x = 0;
+    _mdiff.y = 0;
     //  调整相机
     camera->LookAt(pos, pos + eye, up);
 }
@@ -79,36 +78,9 @@ void Roaming::OnEventMouse(const std::any & any)
     const auto margin = (float)std::sqrt(windowW * windowH) * 0.1f;
 
     auto param  = std::any_cast<Window::EventMouseParam>(any);
-    if (param.x < margin)
-    { 
-        _mdiff.x = 0.05f;
-        _mdiff.y = 0;
-        _mdiff.z = 1;
-    }
-    else if (param.x > windowW - margin) 
-    {
-        _mdiff.x = -0.05f;
-        _mdiff.y = 0;
-        _mdiff.z = 1;
-    }
-    else if (param.y < margin)   
-    {
-        _mdiff.y = 0.05f;
-        _mdiff.x = 0;
-        _mdiff.z = 1;
-    }
-    else if (param.y > windowH - margin) 
-    {
-        _mdiff.y = -0.05f;
-        _mdiff.x = 0;
-        _mdiff.z = 1;
-    }
-    else
-    { 
-        _mdiff.x = param.dx * 0.01f;
-        _mdiff.y = param.dy * 0.01f;
-        _mdiff.z = 0.0f;
-    }
+    _mdiff.z = param.btn == 0 && param.act == 1 ? 1.0f : 0.0f;
+    _mdiff.x = param.dx * 0.01f;
+    _mdiff.y = param.dy * 0.01f;
 }
 
 void Roaming::OnEventKeybord(const std::any & any)
