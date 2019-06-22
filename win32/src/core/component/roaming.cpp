@@ -37,25 +37,11 @@ void Roaming::OnUpdate(float dt)
     //  º∆À„eye
     if (_mdiff.z != 0)
     {
-        eye        += _mdiff.y * up;
-        eye        += _mdiff.x * right;
-        //  º∆À„up
-        up         -= eye * glm::dot(eye, up);
-        auto max    = std::max({ std::abs(up.x), 
-                                    std::abs( up.y), 
-                                    std::abs(up.z) });
-        if (max == up.x)
-        {
-            up = up.x < 0 ? glm::vec3(-1, 0, 0) : glm::vec3(1, 0, 0);
-        }
-        else if (max == up.y)
-        {
-            up = up.y < 0 ? glm::vec3(0, -1, 0) : glm::vec3(0, 1, 0);
-        }
-        else if (max == up.z)
-        {
-            up = up.z < 0 ? glm::vec3(0, 0, -1) : glm::vec3(0, 0, 1);
-        }
+        eye += _mdiff.y * up;
+        eye += _mdiff.x * right;
+        eye.y = eye.y > 0.999f ? 0.999f
+            : eye.y < -0.999f ? -0.999f
+            : eye.y;
     }
     //  º∆À„pos
     if ((_direct & kUP)     != 0) { pos.y += 1 * 0.1f; }

@@ -32,6 +32,9 @@ public:
     struct MouseInfo {
         iint x;
         iint y;
+        int act;
+        int btn;
+        int stat;
     };
 
 public:
