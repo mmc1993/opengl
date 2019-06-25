@@ -523,7 +523,9 @@ void Render::RenderSSAO()
 {
     _renderTarget[0].Start(RenderTarget::BindType::kDRAW);
     //  绑定SSAO贴图
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, _bufferSet.mSSAOTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
+                                    RenderTarget::TextureType::k2D, 
+                                    _bufferSet.mSSAOTexture);
     //  设置输出位
     glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
     //  开始渲染SSAO
