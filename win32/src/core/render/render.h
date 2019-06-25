@@ -78,8 +78,10 @@ public:
     const RenderState & GetRenderState() const { return _renderState; }
 
 private:
+    //  初始化渲染数据
     void InitRender();
 
+    //  清理所有命令
     void ClearCommands();
 
     //  Bind 系函数.
@@ -94,15 +96,24 @@ private:
     void Post(const glm::mat4 & transform);
     void Post(DrawTypeEnum drawType, const GLMesh * mesh);
 
-    //  逐相机渲染
+    //  根据距离排序光源
     void SortLightCommands();
+    //  烘培阴影
     void BakeLightDepthMap();
     void BakeLightDepthMap(Light * light, uint shadow);
 
+    //  逐相机渲染
     void RenderCamera();
+    //  渲染SSAO
+    void RenderSSAO();
+    //  渲染GBuffer
+    void RenderGBuffer();
+    //  正向渲染
     void RenderForward();
+    //  延迟渲染
     void RenderDeferred();
-    void RenderDeferredLightVolume(const LightCommand & command, uint shadow);
+    //  光体渲染
+    void RenderLightVolume(const LightCommand & command, uint shadow);
 
     //  正向渲染相关
     void PackUBOLightForward();

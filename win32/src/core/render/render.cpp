@@ -433,10 +433,18 @@ void Render::RenderCamera()
 
     BakeLightDepthMap();
 
+    //  GBuffer
+    _renderState.mProgram = nullptr;
+    RenderGBuffer();
+
+    //  SSAO
+    _renderState.mProgram = nullptr;
+    RenderSSAO();
+
     //  延迟渲染
     _renderState.mProgram = nullptr;
     RenderDeferred();
-    
+
     //  正向渲染
     _renderState.mProgram = nullptr;
     RenderForward();
@@ -454,6 +462,41 @@ void Render::RenderCamera()
 
 	//	后期处理
     _renderState.mProgram = nullptr;
+}
+
+void Render::RenderSSAO()
+{
+}
+
+void Render::RenderGBuffer()
+{
+    _renderTarget[0].Start(RenderTarget::BindType::kALL);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mPositionTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mSpecularTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferSet.mGBuffer.mDepthBuffer);
+
+    uint outputs[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1,
+                       RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
+    glDrawBuffers(4, outputs);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (auto & commands : _deferredQueues)
+    {
+        for (auto & command : commands)
+        {
+            if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
+            {
+                Bind(command.mMaterial->GetProgram(), command.mSubPass);
+                Post(command.mMaterial);
+                Post(command.mTransform);
+                Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
+            }
+        }
+    }
+    _renderTarget[0].Ended();
 }
 
 void Render::RenderForward()
@@ -482,33 +525,6 @@ void Render::RenderForward()
 
 void Render::RenderDeferred()
 {
-    _renderTarget[0].Start(RenderTarget::BindType::kALL);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mPositionTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mSpecularTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferSet.mGBuffer.mDepthBuffer);
-
-    uint outputs[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1, 
-                       RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
-    glDrawBuffers(4, outputs);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    for (auto & commands : _deferredQueues)
-    {
-        for (auto & command : commands)
-        {
-            if ((_renderState.mCamera->mMask & command.mCameraMask) != 0)
-            {
-                Bind(command.mMaterial->GetProgram(), command.mSubPass);
-                Post(command.mMaterial);
-                Post(command.mTransform);
-                Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
-            }
-        }
-    }
-
     _renderTarget[0].Start(RenderTarget::BindType::kREAD);
     _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
     glBlitFramebuffer(
@@ -523,20 +539,20 @@ void Render::RenderDeferred()
 
     for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
+        RenderLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
     }
     for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
+        RenderLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
     }
     for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
     {
-        RenderDeferredLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
+        RenderLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
     }
     _renderTarget[1].Ended();
 }
 
-void Render::RenderDeferredLightVolume(const LightCommand & command, uint shadow)
+void Render::RenderLightVolume(const LightCommand & command, uint shadow)
 {
     if (Bind(command.mProgram, shadow != 0u? 0u: 1u))
     {

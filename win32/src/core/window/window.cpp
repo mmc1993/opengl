@@ -162,13 +162,13 @@ void Window::OnMouseButton(GLFWwindow * window, int btn, int act, int stat)
 {
     auto self = (Window *)glfwGetWindowUserPointer(window);
     EventMouseParam param;
-    param.act   = act;
-    param.btn   = btn;
-    param.stat  = stat;
-    param.x     = self->_mouseInfo.x;
-    param.y     = self->_mouseInfo.y;
-    param.dx    = 0;
-    param.dy    = 0;
+    param.act               = act;
+    param.btn               = btn;
+    param.stat              = stat;
+    param.x                 = self->_mouseInfo.x;
+    param.y                 = self->_mouseInfo.y;
+    param.dx                = 0;
+    param.dy                = 0;
     self->_mouseInfo.act    = act;
     self->_mouseInfo.btn    = btn;
     self->_mouseInfo.stat   = stat;
@@ -179,15 +179,15 @@ void Window::OnMouseMove(GLFWwindow * window, double x, double y)
 {
     auto self = (Window *)glfwGetWindowUserPointer(window);
     EventMouseParam param;
-    param.x     = static_cast<float>(x);
-    param.y     = static_cast<float>(y);
-    param.dx    = self->_mouseInfo.x - param.x;
-    param.dy    = self->_mouseInfo.y - param.y;
-    param.act   = self->_mouseInfo.act;
-    param.btn   = self->_mouseInfo.btn;
-    param.stat  = self->_mouseInfo.stat;
-    self->_mouseInfo.x = param.x;
-    self->_mouseInfo.y = param.y;
+    param.act           = self->_mouseInfo.act;
+    param.btn           = self->_mouseInfo.btn;
+    param.stat          = self->_mouseInfo.stat;
+    param.x             = (float)x;
+    param.y             = (float)y;
+    param.dx            = self->_mouseInfo.x - param.x;
+    param.dy            = self->_mouseInfo.y - param.y;
+    self->_mouseInfo.x  = param.x;
+    self->_mouseInfo.y  = param.y;
     Global::Ref().RefEvent().Post(EventTypeEnum::kWINDOW_MOUSE_MOVEED, param);
 }
 

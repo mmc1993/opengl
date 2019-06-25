@@ -9,7 +9,7 @@ enum RenderQueueEnum {
 
 enum RenderTypeEnum {
     kLIGHT,         //  渲染光源
-	kSHADOW,        //  烘培阴影贴图
+	kSHADOW,        //  阴影贴图
 	kFORWARD,       //  正向渲染
 	kDEFERRED,      //  延迟渲染
 };

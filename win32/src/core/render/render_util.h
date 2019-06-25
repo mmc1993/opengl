@@ -8,14 +8,7 @@
 #include "../raw/gl_material.h"
 #include "../raw/gl_texture2d.h"
 
-class Mesh;
-class Pass;
 class Light;
-class Camera;
-class Shader;
-class Bitmap;
-class Material;
-class BitmapCube;
 
 class MatrixStack {
 public:
@@ -91,21 +84,21 @@ struct RenderCommand {
 
 struct MaterialCommand : public RenderCommand {
     MaterialCommand() { }
-    const GLMaterial * mMaterial;
-    glm::mat4 mTransform;
-    uint mCameraMask;
-    uint mSubPass;
+    const GLMaterial *  mMaterial;
+    glm::mat4           mTransform;
+    uint                mCameraMask;
+    uint                mSubPass;
 };
 
 struct CameraCommand : public RenderCommand {
     CameraCommand() { }
-    glm::vec4 mViewport;
-    glm::mat4 mProj;
-    glm::mat4 mView;
-    glm::vec3 mPos;
-    glm::vec3 mEye;
-    uint mOrder;
-    uint mMask;
+    glm::vec4   mViewport;
+    glm::mat4   mProj;
+    glm::mat4   mView;
+    glm::vec3   mPos;
+    glm::vec3   mEye;
+    uint        mOrder;
+    uint        mMask;
 };
 
 struct LightCommand: public RenderCommand {
