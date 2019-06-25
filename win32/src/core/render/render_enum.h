@@ -79,6 +79,9 @@ static const char * const UNIFORM_GBUFFER_SPECULAR      = "gbuffer_specular_";
 static const char * const UNIFORM_GBUFFER_DIFFUSE       = "gbuffer_diffuse_";
 static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
 
+//  SSAO
+static const char * const UNIFORM_SCREEN_DEPTH         = "screen_depth_";
+
 //  内置资源-延迟渲染-光体积
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct.obj";
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT  = "res/built-in/mesh/deferred_light_volume_point.obj";

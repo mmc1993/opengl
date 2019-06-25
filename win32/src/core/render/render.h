@@ -54,6 +54,9 @@ public:
             uint mColorTexture;
             uint mDepthTexture;
         } mOffScreen;
+
+        //  SSAO
+        uint mSSAOTexture;
         
         //  光源数据
         uint mLightUBO[3];
@@ -104,14 +107,14 @@ private:
 
     //  逐相机渲染
     void RenderCamera();
-    //  渲染SSAO
-    void RenderSSAO();
     //  渲染GBuffer
     void RenderGBuffer();
-    //  正向渲染
-    void RenderForward();
+    //  渲染SSAO
+    void RenderSSAO();
     //  延迟渲染
     void RenderDeferred();
+    //  正向渲染
+    void RenderForward();
     //  光体渲染
     void RenderLightVolume(const LightCommand & command, uint shadow);
 

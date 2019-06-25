@@ -23,6 +23,8 @@ Render::~Render()
     glDeleteTextures(1, &_bufferSet.mOffScreen.mColorTexture);
     glDeleteTextures(1, &_bufferSet.mOffScreen.mDepthTexture);
 
+    glDeleteTextures(1, &_bufferSet.mSSAOTexture);
+
     glDeleteBuffers(3, _bufferSet.mLightUBO);
 }
 
@@ -183,6 +185,15 @@ void Render::InitRender()
         glBindRenderbuffer(GL_RENDERBUFFER, _bufferSet.mGBuffer.mDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        //  SSAO
+        glGenTextures(1, &_bufferSet.mSSAOTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mSSAOTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, windowW, windowH, 0, GL_RED, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         //  Off Screen Texture
         glGenTextures(2, &_bufferSet.mOffScreen.mColorTexture);
@@ -465,14 +476,6 @@ void Render::RenderCamera()
     _renderState.mProgram = nullptr;
 }
 
-void Render::RenderSSAO()
-{
-    for (auto & cmd : _ssaoQueue)
-    {
-        
-    }
-}
-
 void Render::RenderGBuffer()
 {
     _renderTarget[0].Start(RenderTarget::BindType::kALL);
@@ -516,6 +519,48 @@ void Render::RenderGBuffer()
     _renderTarget[1].Ended();
 }
 
+void Render::RenderSSAO()
+{
+    _renderTarget[0].Start(RenderTarget::BindType::kDRAW);
+    //  绑定SSAO贴图
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, _bufferSet.mSSAOTexture);
+    //  设置输出位
+    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
+    //  开始渲染SSAO
+    for (const auto & cmd : _ssaoQueue)
+    {
+        if (Bind(cmd.mMaterial->GetProgram(), cmd.mSubPass))
+        {
+            _renderState.mProgram->BindUniformTex2D(UNIFORM_SCREEN_DEPTH, _bufferSet.mOffScreen.mDepthTexture, 0);
+        }
+        Post(cmd.mTransform);
+        Post((DrawTypeEnum)cmd.mMaterial->GetProgram()->GetPass(cmd.mSubPass).mDrawType,cmd.mMaterial->GetMesh());
+    }
+    _renderTarget[0].Ended();
+}
+
+void Render::RenderDeferred()
+{
+    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
+
+    for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
+    {
+        RenderLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
+    }
+    for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
+    {
+        RenderLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
+    }
+    for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
+    {
+        RenderLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
+    }
+
+    _renderTarget[1].Ended();
+}
+
+
+
 void Render::RenderForward()
 {
     PackUBOLightForward();
@@ -540,25 +585,6 @@ void Render::RenderForward()
     _renderTarget[1].Ended();
 }
 
-void Render::RenderDeferred()
-{
-    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
-
-    for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
-    {
-        RenderLightVolume(_lightQueues.at(Light::kDIRECT).at(i), i < LIMIT_LIGHT_DIRECT? _bufferSet.mShadowMap.mDirectTexture[i]: 0);
-    }
-    for (auto i = 0u; i != _lightQueues.at(Light::kPOINT).size(); ++i)
-    {
-        RenderLightVolume(_lightQueues.at(Light::kPOINT).at(i), i < LIMIT_LIGHT_POINT ? _bufferSet.mShadowMap.mPointTexture[i] : 0);
-    }
-    for (auto i = 0u; i != _lightQueues.at(Light::kSPOT).size(); ++i)
-    {
-        RenderLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
-    }
-
-    _renderTarget[1].Ended();
-}
 
 void Render::RenderLightVolume(const LightCommand & command, uint shadow)
 {
