@@ -207,12 +207,12 @@ int main()
 {
     Global::Ref().Start();
 
-    auto renderFPS = Global::Ref().RefCfgManager().At("init")->At("render", "fps")->ToInt();
-    auto windowX = Global::Ref().RefCfgManager().At("init")->At("window", "x")->ToInt();
-    auto windowY = Global::Ref().RefCfgManager().At("init")->At("window", "y")->ToInt();
-    auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-    auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
-    auto windowTitle = Global::Ref().RefCfgManager().At("init")->At("window", "title")->ToString();
+    auto renderFPS = Global::Ref().RefCfgManager().At("init", "render", "fps")->ToInt();
+    auto windowX = Global::Ref().RefCfgManager().At("init", "window", "x")->ToInt();
+    auto windowY = Global::Ref().RefCfgManager().At("init", "window", "y")->ToInt();
+    auto windowW = Global::Ref().RefCfgManager().At("init", "window", "w")->ToInt();
+    auto windowH = Global::Ref().RefCfgManager().At("init", "window", "h")->ToInt();
+    auto windowTitle = Global::Ref().RefCfgManager().At("init", "window", "title")->ToString();
 
     AppWindow app;
     Global::Ref().BindWindow(&app);

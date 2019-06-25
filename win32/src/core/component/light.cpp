@@ -93,8 +93,8 @@ bool LightDirect::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
     if (0 == count)
     {
         glViewport(0, 0,
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt(), 
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt());
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
@@ -144,8 +144,8 @@ void LightPoint::OnUpdate(float dt)
 
 void LightPoint::OpenShadow(const float n, const float f)
 {
-    auto viewW = Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt();
-    auto viewH = Global::Ref().RefCfgManager().At("init")->At("shadow_map", "h")->ToInt();
+    auto viewW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
+    auto viewH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
 
     if (GetUBO() == 0)
     {
@@ -169,8 +169,8 @@ bool LightPoint::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
     else
     {
         glViewport(0, 0, 
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt(),
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt());
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
     }
 
     if (count < 6)
@@ -263,8 +263,8 @@ bool LightSpot::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
     if (count == 0)
     {
         glViewport(0, 0, 
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "w")->ToInt(), 
-            Global::Ref().RefCfgManager().At("init")->At("shadow_map", "h")->ToInt());
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(), 
+            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
         Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
         Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);

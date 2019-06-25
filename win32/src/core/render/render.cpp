@@ -90,8 +90,8 @@ void Render::InitRender()
     {
         auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
         auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
-        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
+        auto windowW = Global::Ref().RefCfgManager().At("init", "window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgManager().At("init", "window", "h")->ToInt();
 
         //  π‚‘¥UBO
         glGenBuffers(3, _bufferSet.mLightUBO);
