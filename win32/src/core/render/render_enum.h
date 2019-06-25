@@ -8,6 +8,7 @@ enum RenderQueueEnum {
 };
 
 enum RenderTypeEnum {
+    kSSAO,          //  SSAO
     kLIGHT,         //  渲染光源
 	kSHADOW,        //  阴影贴图
 	kFORWARD,       //  正向渲染
