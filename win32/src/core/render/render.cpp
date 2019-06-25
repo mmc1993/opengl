@@ -84,44 +84,298 @@ void Render::Post(const RenderCommand::TypeEnum type, const RenderCommand & comm
     }
 }
 
-void Render::BakeLightDepthMap(Light * light, uint shadow)
+void Render::InitRender()
 {
-    _renderState.mProgram = nullptr;
-    _renderTarget[0].Start();
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    for (auto i = 0; light->NextDrawShadow(i, shadow, &_renderTarget[0]); ++i)
-	{
-        glClear(GL_DEPTH_BUFFER_BIT);
-		for (auto & command : _shadowQueue)
-		{
-            if (Bind(command.mMaterial->GetProgram(), command.mSubPass))
-            {
-                Post(light);
-            }
-            Post(command.mTransform);
-            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
+    if (_bufferSet.mGBuffer.mPositionTexture == 0)
+    {
+        auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
+        auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
+        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
+        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
+
+        //  光源UBO
+        glGenBuffers(3, _bufferSet.mLightUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kDIRECT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kPOINT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kSPOT]);
+        glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        //  阴影贴图
+        glGenTextures(LIMIT_LIGHT_DIRECT, _bufferSet.mShadowMap.mDirectTexture);
+        glGenTextures(LIMIT_LIGHT_POINT, _bufferSet.mShadowMap.mPointTexture);
+        glGenTextures(LIMIT_LIGHT_SPOT, _bufferSet.mShadowMap.mSpotTexture);
+        for (auto i = 0; i != LIMIT_LIGHT_DIRECT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mDirectTexture[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         }
-	}
-    _renderTarget[0].Ended();
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        for (auto i = 0; i != LIMIT_LIGHT_POINT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _bufferSet.mShadowMap.mPointTexture[i]);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+        for (auto i = 0; i != LIMIT_LIGHT_SPOT; ++i)
+        {
+            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mSpotTexture[i]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        //  G-Buffer
+        glGenTextures(4, &_bufferSet.mGBuffer.mPositionTexture);
+        glGenRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mSpecularTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mDiffuseTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mNormalTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, _bufferSet.mGBuffer.mDepthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        //  Off Screen Texture
+        glGenTextures(2, &_bufferSet.mOffScreen.mColorTexture);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mColorTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mDepthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        _renderTarget[1].Start();
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mColorTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mDepthTexture);
+        _renderTarget[1].Ended();
+    }
+
+    _renderState.mVertexCount = 0;
+    _renderState.mRenderCount = 0;
+
+    _renderTarget[1].Start();
+    glClear(GL_COLOR_BUFFER_BIT |
+        GL_DEPTH_BUFFER_BIT);
+    _renderTarget[1].Ended();
+}
+
+void Render::ClearCommands()
+{
+    _cameraQueue.clear();
+    _shadowQueue.clear();
+    for (auto & queue : _lightQueues) { queue.clear(); }
+    for (auto & queue : _forwardQueues) { queue.clear(); }
+    for (auto & queue : _deferredQueues) { queue.clear(); }
+}
+
+void Render::Bind(const CameraCommand * command)
+{
+    if (command != nullptr)
+    {
+        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
+        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
+        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, command->mView);
+        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
+        glViewport((int)command->mViewport.x, (int)command->mViewport.y,
+                   (int)command->mViewport.z, (int)command->mViewport.w);
+        _renderState.mCamera = command;
+    }
+    else
+    {
+        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
+        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
+        _renderState.mCamera = nullptr;
+    }
+}
+
+bool Render::Bind(const GLProgram * program, uint pass)
+{
+    if (_renderState.mProgram != program)
+    {
+        _renderState.mTexBase = 0;
+        _renderState.mProgram = program;
+        _renderState.mProgram->UsePass(pass, true);
+        return true;
+    }
+    return _renderState.mProgram->UsePass(pass);
+}
+
+void Render::Post(const Light * light)
+{
+    switch (light->GetType())
+    {
+    case Light::kDIRECT:
+        {
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_DIRECT);
+            if (GL_INVALID_INDEX != idx)
+            {
+                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_DIRECT);
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetUBO());
+            }
+        }
+        break;
+    case Light::kPOINT:
+        {
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_POINT);
+            if (GL_INVALID_INDEX != idx)
+            {
+                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_POINT);
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, light->GetUBO());
+            }
+        }
+        break;
+    case Light::kSPOT:
+        {
+            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_SPOT);
+            if (GL_INVALID_INDEX != idx)
+            {
+                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_SPOT);
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, light->GetUBO());
+            }
+        }
+        break;
+    }
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, light->GetType());
+}
+
+void Render::Post(const GLMaterial * material)
+{
+    for (auto i = 0; i != material->GetItems().size(); ++i)
+    {
+        auto & item = material->GetItems().at(i);
+        auto key = SFormat(UNIFORM_MATERIAL, item.mKey);
+        switch (item.mType)
+        {
+        case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
+        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+        }
+    }
+}
+
+void Render::Post(const glm::mat4 & transform)
+{
+    auto & matrixM = transform;
+    auto & matrixV = _matrixStack.GetV();
+    auto & matrixP = _matrixStack.GetP();
+    const auto & matrixN = glm::transpose(glm::inverse(glm::mat3(matrixM)));
+    const auto & matrixMV = matrixV * matrixM;
+    const auto & matrixMVP = matrixP * matrixMV;
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_N, matrixN);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_M, matrixM);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V, matrixV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P, matrixP);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV, matrixMV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MVP, matrixMVP);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
+    if (_renderState.mCamera != nullptr)
+    {
+        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _renderState.mCamera->mPos);
+        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_EYE, _renderState.mCamera->mEye);
+    }
+}
+
+void Render::Post(DrawTypeEnum drawType, const GLMesh * mesh)
+{
+    ASSERT_LOG(mesh->GetVAO() != 0, "Draw VAO Error");
+
+    glBindVertexArray(mesh->GetVAO());
+    switch (drawType)
+    {
+    case DrawTypeEnum::kINSTANCE:
+        {
+            //	TODO, 暂不实现
+        }
+        break;
+    case DrawTypeEnum::kVERTEX:
+        {
+            _renderState.mVertexCount += mesh->GetVCount();
+            glDrawArrays(GL_TRIANGLES, 0, mesh->GetVCount());
+        }
+        break;
+    case DrawTypeEnum::kINDEX:
+        {
+            _renderState.mVertexCount += mesh->GetECount();
+            glDrawElements(GL_TRIANGLES, mesh->GetECount(), GL_UNSIGNED_INT, nullptr);
+        }
+        break;
+    }
+    ++_renderState.mRenderCount;
 }
 
 void Render::SortLightCommands()
 {
     const auto & cameraPos = _renderState.mCamera->mPos;
 
-    std::sort(_lightQueues.at(Light::kPOINT).begin(), 
-              _lightQueues.at(Light::kPOINT).end(),
-              [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+    std::sort(_lightQueues.at(Light::kPOINT).begin(),
+        _lightQueues.at(Light::kPOINT).end(),
+        [&cameraPos](const LightCommand & command0, const LightCommand & command1)
         {
             auto diff0 = (cameraPos - command0.mLight->mPosition);
             auto diff1 = (cameraPos - command1.mLight->mPosition);
             return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
         });
 
-    std::sort(_lightQueues.at(Light::kSPOT).begin(), 
-              _lightQueues.at(Light::kSPOT).end(),
-              [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+    std::sort(_lightQueues.at(Light::kSPOT).begin(),
+        _lightQueues.at(Light::kSPOT).end(),
+        [&cameraPos](const LightCommand & command0, const LightCommand & command1)
         {
             auto diff0 = (cameraPos - command0.mLight->mPosition);
             auto diff1 = (cameraPos - command1.mLight->mPosition);
@@ -149,6 +403,28 @@ void Render::BakeLightDepthMap()
         (iint)_renderState.mCamera->mViewport.y,
         (iint)_renderState.mCamera->mViewport.z,
         (iint)_renderState.mCamera->mViewport.w);
+}
+
+void Render::BakeLightDepthMap(Light * light, uint shadow)
+{
+    _renderState.mProgram = nullptr;
+    _renderTarget[0].Start();
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    for (auto i = 0; light->NextDrawShadow(i, shadow, &_renderTarget[0]); ++i)
+	{
+        glClear(GL_DEPTH_BUFFER_BIT);
+		for (auto & command : _shadowQueue)
+		{
+            if (Bind(command.mMaterial->GetProgram(), command.mSubPass))
+            {
+                Post(light);
+            }
+            Post(command.mTransform);
+            Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
+        }
+	}
+    _renderTarget[0].Ended();
 }
 
 void Render::RenderCamera()
@@ -358,280 +634,4 @@ void Render::BindUBOLightForward()
     {
         _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _bufferSet.mShadowMap.mSpotTexture[i], _renderState.mTexBase++);
     }
-}
-
-void Render::Bind(const CameraCommand * command)
-{
-	if (command != nullptr)
-	{
-		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
-		Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, command->mView);
-		Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
-		glViewport((int)command->mViewport.x, (int)command->mViewport.y,
-				   (int)command->mViewport.z, (int)command->mViewport.w);
-        _renderState.mCamera = command;
-	}
-	else
-	{
-		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
-		Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
-        _renderState.mCamera = nullptr;
-	}
-}
-
-void Render::Post(const Light * light)
-{
-    switch (light->GetType())
-    {
-    case Light::kDIRECT:
-        {
-            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_DIRECT);
-            if (GL_INVALID_INDEX != idx)
-            {
-                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_DIRECT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetUBO());
-            }
-        }
-        break;
-    case Light::kPOINT:
-        {
-            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_POINT);
-            if (GL_INVALID_INDEX != idx)
-            {
-                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_POINT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, light->GetUBO());
-            }
-        }
-        break;
-    case Light::kSPOT:
-        {
-            auto idx = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_SPOT);
-            if (GL_INVALID_INDEX != idx)
-            {
-                glUniformBlockBinding(_renderState.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_SPOT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, light->GetUBO());
-            }
-        }
-        break;
-    }
-    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, light->GetType());
-}
-
-void Render::InitRender()
-{
-    if (_bufferSet.mGBuffer.mPositionTexture == 0)
-    {
-        auto shadowW = Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt();
-        auto shadowH = Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt();
-        auto windowW = Global::Ref().RefCfgManager().At("init")->At("window", "w")->ToInt();
-        auto windowH = Global::Ref().RefCfgManager().At("init")->At("window", "h")->ToInt();
-
-        //  光源UBO
-        glGenBuffers(3, _bufferSet.mLightUBO);
-        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kDIRECT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightDirect::GetUBOLength() * LIMIT_LIGHT_DIRECT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kPOINT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightPoint::GetUBOLength() * LIMIT_LIGHT_POINT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, _bufferSet.mLightUBO[Light::kSPOT]);
-        glBufferData(GL_UNIFORM_BUFFER, LightSpot::GetUBOLength() * LIMIT_LIGHT_SPOT, nullptr, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        //  阴影贴图
-        glGenTextures(LIMIT_LIGHT_DIRECT, _bufferSet.mShadowMap.mDirectTexture);
-        glGenTextures(LIMIT_LIGHT_POINT, _bufferSet.mShadowMap.mPointTexture);
-        glGenTextures(LIMIT_LIGHT_SPOT, _bufferSet.mShadowMap.mSpotTexture);
-        for (auto i = 0; i != LIMIT_LIGHT_DIRECT; ++i)
-        {
-            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mDirectTexture[i]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        for (auto i = 0; i != LIMIT_LIGHT_POINT; ++i)
-        {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, _bufferSet.mShadowMap.mPointTexture[i]);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        }
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-        for (auto i = 0; i != LIMIT_LIGHT_SPOT; ++i)
-        {
-            glBindTexture(GL_TEXTURE_2D, _bufferSet.mShadowMap.mSpotTexture[i]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        //  G-Buffer
-        glGenTextures(4,  &_bufferSet.mGBuffer.mPositionTexture);
-        glGenRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mSpecularTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mDiffuseTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mNormalTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, _bufferSet.mGBuffer.mDepthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-        //  Off Screen Texture
-        glGenTextures(2, &_bufferSet.mOffScreen.mColorTexture);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mColorTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mDepthTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        _renderTarget[1].Start();
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mColorTexture);
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH,  RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mDepthTexture);
-        _renderTarget[1].Ended();
-    }
-
-    _renderState.mVertexCount = 0;
-    _renderState.mRenderCount = 0;
-
-    _renderTarget[1].Start();
-    glClear(GL_COLOR_BUFFER_BIT |
-            GL_DEPTH_BUFFER_BIT);
-    _renderTarget[1].Ended();
-}
-
-bool Render::Bind(const GLProgram * program, uint pass)
-{
-    if (_renderState.mProgram != program)
-    {
-        _renderState.mTexBase = 0;
-        _renderState.mProgram = program;
-        _renderState.mProgram->UsePass(pass, true);
-        return true;
-    }
-    return _renderState.mProgram->UsePass(pass);
-}
-
-void Render::Post(const GLMaterial * material)
-{
-    for (auto i = 0; i != material->GetItems().size(); ++i)
-    {
-        auto & item = material->GetItems().at(i);
-        auto key    = SFormat(UNIFORM_MATERIAL, item.mKey);
-        switch (item.mType)
-        {
-        case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
-        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
-        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
-        }
-    }
-}
-
-void Render::ClearCommands()
-{
-    _cameraQueue.clear();
-    _shadowQueue.clear();
-    for (auto & queue : _lightQueues) { queue.clear(); }
-	for (auto & queue : _forwardQueues) { queue.clear(); }
-	for (auto & queue : _deferredQueues) { queue.clear(); }
-}
-
-void Render::Post(const glm::mat4 & transform)
-{
-	auto & matrixM			= transform;
-	auto & matrixV			= _matrixStack.GetV();
-	auto & matrixP			= _matrixStack.GetP();
-	const auto & matrixN	= glm::transpose(glm::inverse(glm::mat3(matrixM)));
-	const auto & matrixMV	= matrixV * matrixM;
-	const auto & matrixMVP	= matrixP * matrixMV;
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_N, matrixN);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_M, matrixM);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V, matrixV);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P, matrixP);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV,  matrixMV);
-    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MVP, matrixMVP);
-    _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
-    if (_renderState.mCamera != nullptr)
-    {
-        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _renderState.mCamera->mPos);
-        _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_EYE, _renderState.mCamera->mEye);
-    }
-}
-
-void Render::Post(DrawTypeEnum drawType, const GLMesh * mesh)
-{
-    ASSERT_LOG(mesh->GetVAO() != 0, "Draw VAO Error");
-
-	glBindVertexArray(mesh->GetVAO());
-	switch (drawType)
-	{
-	case DrawTypeEnum::kINSTANCE:
-		{
-			//	TODO, 暂不实现
-		}
-		break;
-	case DrawTypeEnum::kVERTEX:
-		{
-			_renderState.mVertexCount += mesh->GetVCount();
-			glDrawArrays(GL_TRIANGLES, 0, mesh->GetVCount());
-		}
-		break;
-	case DrawTypeEnum::kINDEX:
-		{
-            _renderState.mVertexCount += mesh->GetECount();
-			glDrawElements(GL_TRIANGLES, mesh->GetECount(), GL_UNSIGNED_INT, nullptr);
-		}
-		break;
-	}
-	++_renderState.mRenderCount;
 }
