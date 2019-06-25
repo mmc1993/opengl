@@ -128,6 +128,8 @@ private:
     RenderState _renderState;
     //  相机渲染队列
     CameraCommandQueue _cameraQueue;
+    //  SSAO队列
+    MaterialCommandQueue _ssaoQueue;
     //  阴影烘培队列
     MaterialCommandQueue _shadowQueue;
     //  光源类型队列

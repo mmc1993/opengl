@@ -77,7 +77,6 @@ struct RenderCommand {
     enum TypeEnum {
         kMATERIAL,
         kCAMERA,
-        kOBJECT,
         kLIGHT,
     };
 };

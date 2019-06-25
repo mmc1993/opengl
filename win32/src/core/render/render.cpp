@@ -63,9 +63,10 @@ void Render::Post(const RenderCommand::TypeEnum type, const RenderCommand & comm
                 auto &  pass = cmd.mMaterial->GetProgram()->GetPass(i);
                 switch (pass.mRenderType)
                 {
-                case RenderTypeEnum::kSHADOW: _shadowQueue.push_back(cmd); break;
-                case RenderTypeEnum::kFORWARD: _forwardQueues.at(pass.mRenderQueue).push_back(cmd); break;
-                case RenderTypeEnum::kDEFERRED: _deferredQueues.at(pass.mRenderQueue).push_back(cmd); break;
+                case RenderTypeEnum::kSSAO:     _ssaoQueue.push_back(cmd);                              break;
+                case RenderTypeEnum::kSHADOW:   _shadowQueue.push_back(cmd);                            break;
+                case RenderTypeEnum::kFORWARD:  _forwardQueues.at(pass.mRenderQueue).push_back(cmd);    break;
+                case RenderTypeEnum::kDEFERRED: _deferredQueues.at(pass.mRenderQueue).push_back(cmd);   break;
                 }
             }
         }
@@ -466,6 +467,10 @@ void Render::RenderCamera()
 
 void Render::RenderSSAO()
 {
+    for (auto & cmd : _ssaoQueue)
+    {
+        
+    }
 }
 
 void Render::RenderGBuffer()
@@ -496,7 +501,19 @@ void Render::RenderGBuffer()
             }
         }
     }
+    
+    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
+    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
+    glBlitFramebuffer(
+        0, 0,
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
+        0, 0,
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
+        GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[0].Ended();
+    _renderTarget[1].Ended();
 }
 
 void Render::RenderForward()
@@ -525,17 +542,7 @@ void Render::RenderForward()
 
 void Render::RenderDeferred()
 {
-    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
     _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
-    glBlitFramebuffer(
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    _renderTarget[0].Ended();
 
     for (auto i = 0u; i != _lightQueues.at(Light::kDIRECT).size(); ++i)
     {
@@ -549,6 +556,7 @@ void Render::RenderDeferred()
     {
         RenderLightVolume(_lightQueues.at(Light::kSPOT).at(i), i < LIMIT_LIGHT_SPOT ? _bufferSet.mShadowMap.mSpotTexture[i] : 0);
     }
+
     _renderTarget[1].Ended();
 }
 
