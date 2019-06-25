@@ -81,7 +81,7 @@ namespace glsl_tool {
 
     inline void BuildPointVolume(uint num, const std::string & file)
     {
-        const auto N0 = 8;
+        const auto N0 = num;
         const auto N1 = N0 * 2 - 2;
         std::vector<uint>   indexs;
         std::vector<float>  vertexs;
@@ -156,7 +156,7 @@ namespace glsl_tool {
 
     inline void BuildSpotVolume(uint num, const std::string & file)
     {
-        const auto N=num;
+        const auto N = num;
         std::vector<uint>   indexs;
         std::vector<float>  vertexs;
 

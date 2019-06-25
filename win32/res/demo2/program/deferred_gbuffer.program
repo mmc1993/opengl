@@ -97,3 +97,101 @@ Pass Beg
 		}
 	FShader End
 Pass End
+
+Pass Beg
+	CullFace Back
+	DepthTest
+	DepthWrite
+	RenderQueue Geometric
+	RenderType SSAO
+	DrawType Index
+
+    VShader Beg
+		layout(location = 0) in vec3 a_v_;
+
+		uniform mat4 matrix_mvp_;
+		uniform mat4 matrix_m_;
+
+		out V_OUT_ {
+			vec4 mMVPPos;
+			vec3 mMPos;
+		} v_out_;
+
+		void main()
+		{
+			vec4 apos       = vec4(a_v_, 1);
+			v_out_.mMPos    = vec3(matrix_m_    * apos);
+			v_out_.mMVPPos  = vec4(matrix_mvp_  * apos);
+			gl_Position = v_out_.mMVPPos;
+		}
+	VShader End
+
+    FShader Beg
+        uniform mat4 matrix_mvp_;
+		uniform mat4 matrix_v_;
+		uniform mat4 matrix_p_;
+		
+        //  球形采样偏移数据
+        vec3 samples[] = {
+            {  0,            1,              0           },
+            {  0,            0.707107,       0.707107    },
+            {  0.5,          0.707107,       0.5         },
+            {  0.707107,     0.707107,      -3.09086e-08 },
+            {  0.5,          0.707107,      -0.5         },
+            { -6.18172e-08,  0.707107,      -0.707107    },
+            { -0.5,          0.707107,      -0.5         },
+            { -0.707107,     0.707107,       8.43216e-09 },
+            { -0.5,          0.707107,       0.5         },
+            {  0,           -4.37114e-08,    1           },
+            {  0.707107,    -4.37114e-08,    0.707107    },
+            {  1,           -4.37114e-08,   -4.37114e-08 },
+            {  0.707107,    -4.37114e-08,   -0.707107    },
+            { -8.74228e-08, -4.37114e-08,   -1           },
+            { -0.707107,    -4.37114e-08,   -0.707107    },
+            { -1,           -4.37114e-08,    1.19249e-08 },
+            { -0.707107,    -4.37114e-08,    0.707107    },
+            {  0,           -0.707107,       0.707107    },
+            {  0.5,         -0.707107,       0.5         },
+            {  0.707107,    -0.707107,      -3.09086e-08 },
+            {  0.5,         -0.707107,      -0.5         },
+            { -6.18172e-08, -0.707107,      -0.707107    },
+            { -0.5,         -0.707107,      -0.5         },
+            { -0.707107,    -0.707107,       8.43216e-09 },
+            { -0.5,         -0.707107,       0.5         },
+            {  0,           -1,              0           },
+        };
+
+        in V_OUT_{
+			vec4 mMVPPos;
+			vec3 mMPos;
+		} v_out_;
+
+        out vec4 color_;
+
+        float DepthToLiner(float depth)
+        {
+            float z = depth * 2.0 - 1.0;
+            return (2.0 * camera_n_ * camera_f_)
+                 / (camera_f_ + camera_n_ - z
+                 * (camera_f_ - camera_n_));
+        }
+
+		void main()
+		{
+            //  TODO
+            float depth = DepthToLiner(gl_Position.z);
+
+            float weight = 0;
+            for (int i = 0; i != length(samples); ++i)
+            {
+                vec4 pos = vec4(v_out_.mMPos + samples[i], 1);
+                pos = matrix_v_ * pos;
+                if (pos.z > depth)
+                {
+                    ++weight;
+                }
+            }
+            v_out_.mMPos
+		}
+	FShader End
+Pass End
