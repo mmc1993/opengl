@@ -150,7 +150,7 @@ void Render::InitRender()
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //  G-Buffer
-        glGenTextures(4, &_bufferSet.mGBuffer.mPositionTexture);
+        glGenTextures(4,  &_bufferSet.mGBuffer.mPositionTexture);
         glGenRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
         glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
@@ -161,7 +161,7 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mSpecularTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -458,11 +458,11 @@ void Render::RenderCamera()
 
     //  ÑÓ³ÙäÖÈ¾
     _renderState.mProgram = nullptr;
-    RenderDeferred();
+    //RenderDeferred();
 
     //  ÕýÏòäÖÈ¾
     _renderState.mProgram = nullptr;
-    RenderForward();
+    //RenderForward();
     
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
@@ -529,6 +529,7 @@ void Render::RenderSSAO()
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
                                     RenderTarget::TextureType::k2D, 
                                     _bufferSet.mSSAOTexture);
+    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
     glClear(GL_COLOR_BUFFER_BIT);
     //  ¿ªÊ¼äÖÈ¾SSAO
     for (const auto & cmd : _ssaoQueue)
@@ -541,6 +542,19 @@ void Render::RenderSSAO()
         Post((DrawTypeEnum)cmd.mMaterial->GetProgram()->GetPass(cmd.mSubPass).mDrawType,cmd.mMaterial->GetMesh());
     }
     _renderTarget[0].Ended();
+
+    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
+    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
+    glBlitFramebuffer(
+        0, 0,
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
+        0, 0,
+        Global::Ref().RefWindow().GetW(),
+        Global::Ref().RefWindow().GetH(),
+        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    _renderTarget[0].Ended();
+    _renderTarget[1].Ended();
 }
 
 void Render::RenderDeferred()

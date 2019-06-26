@@ -131,7 +131,7 @@ const std::array<std::vector<std::string>, RawManager::kImportTypeEnum> RawManag
 //  Raw Manager
 void RawManager::Init()
 {
-    std::ifstream is(MANIFEST_SLOT_URL);
+    std::ifstream is(MANIFEST_SLOT_URL, std::ios::binary);
     ASSERT_LOG(is, "Open File Error. {0}", MANIFEST_SLOT_URL);
     Deserialize(is, _manifest);
     is.close();

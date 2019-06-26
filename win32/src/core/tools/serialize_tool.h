@@ -45,7 +45,7 @@ template <class T, typename std::enable_if_t<
     void Deserialize(std::istream & is, T & val)
 {
     unsigned int size = 0;
-    is.read((char *)&size, sizeof(unsigned int));
+    is.read((char *)&size, sizeof(size));
     val.resize(size);
     is.read((char *)val.data(), size * sizeof(typename T::value_type));
 }
@@ -57,7 +57,7 @@ template <class T, typename std::enable_if_t<
 void Deserialize(std::istream & is, T & val)
 {
     unsigned int size = 0;
-    is.read((char *)&size, sizeof(unsigned int));
+    is.read((char *)&size, sizeof(size));
     val.resize(size);
     for (auto & v : val) { Deserialize(is, v); }
 }
