@@ -178,20 +178,14 @@ Pass Beg
 
 		void main()
 		{
-            //  TODO
+            float weight= 0;
             float depth = DepthToLiner(gl_Position.z);
-
-            float weight = 0;
             for (int i = 0; i != length(samples); ++i)
             {
                 vec4 pos = vec4(v_out_.mMPos + samples[i], 1);
-                pos = matrix_v_ * pos;
-                if (pos.z > depth)
-                {
-                    ++weight;
-                }
+                if (matrix_v_ * pos.z > depth) { ++weight; }
             }
-            v_out_.mMPos
+            color_.r = 1 - weight / length(samples);
 		}
 	FShader End
 Pass End
