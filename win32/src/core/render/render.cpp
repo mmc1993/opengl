@@ -312,12 +312,12 @@ void Render::Post(const GLMaterial * material)
     for (auto i = 0; i != material->GetItems().size(); ++i)
     {
         auto & item = material->GetItems().at(i);
-        auto key = SFormat(UNIFORM_MATERIAL, item.mKey);
+        auto key    = SFormat(UNIFORM_MATERIAL, item.mKey);
         switch (item.mType)
         {
         case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
-        case GLMaterial::Item::kTEX2D: { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
-        case GLMaterial::Item::kTEX3D: { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+        case GLMaterial::Item::kTEX2D:  { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+        case GLMaterial::Item::kTEX3D:  { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
         }
     }
 }
