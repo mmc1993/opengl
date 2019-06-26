@@ -62,6 +62,8 @@ private:
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+        Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
+        Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
 
         Global::Ref().RefRawManager().Import("res/demo2/program/deferred_gbuffer.program");
         Global::Ref().RefRawManager().Import("res/demo2/program/deferred_light_volume.program");

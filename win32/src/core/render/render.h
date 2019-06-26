@@ -126,6 +126,8 @@ private:
     RenderTarget _renderTarget[2];
     MatrixStack  _matrixStack;
     BufferSet    _bufferSet;
+    GLMesh *     _screenQuad;
+    GLProgram * _ssaoProgram;
 
     //  ״̬
     RenderState _renderState;

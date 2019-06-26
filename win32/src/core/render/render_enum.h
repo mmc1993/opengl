@@ -84,9 +84,13 @@ static const char * const UNIFORM_GBUFFER_DIFFUSE       = "gbuffer_diffuse_";
 static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
 
 //  SSAO
-static const char * const UNIFORM_SCREEN_DEPTH         = "screen_depth_";
+static const char * const UNIFORM_SCREEN_POSTION        = "screen_position_";
+static const char * const UNIFORM_SCREEN_DEPTH          = "screen_depth_";
 
 //  内置资源-延迟渲染-光体积
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct.obj";
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT  = "res/built-in/mesh/deferred_light_volume_point.obj";
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT   = "res/built-in/mesh/deferred_light_volume_spot.obj";
+static const char * const BUILTIN_MESH_SCREEN_QUAD                  = "res/built-in/mesh/screen_quad.obj";
+//  SSAO 着色器
+static const char * const BUILTIN_PROGRAM_SSAO                      = "res/built-in/program/ssao.program";

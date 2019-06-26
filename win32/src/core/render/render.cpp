@@ -3,6 +3,7 @@
 #include "../component/light.h"
 #include "../component/camera.h"
 #include "../component/transform.h"
+#include "../raw/raw_manager.h"
 #include "../cfg/cfg_manager.h"
 
 Render::Render()
@@ -65,7 +66,6 @@ void Render::Post(const RenderCommand::TypeEnum type, const RenderCommand & comm
                 auto &  pass = cmd.mMaterial->GetProgram()->GetPass(i);
                 switch (pass.mRenderType)
                 {
-                case RenderTypeEnum::kSSAO:     _ssaoQueue.push_back(cmd);                              break;
                 case RenderTypeEnum::kSHADOW:   _shadowQueue.push_back(cmd);                            break;
                 case RenderTypeEnum::kFORWARD:  _forwardQueues.at(pass.mRenderQueue).push_back(cmd);    break;
                 case RenderTypeEnum::kDEFERRED: _deferredQueues.at(pass.mRenderQueue).push_back(cmd);   break;
@@ -213,6 +213,11 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
+        //  全屏网格
+        _screenQuad = Global::Ref().RefRawManager().LoadRes<GLMesh>(BUILTIN_MESH_SCREEN_QUAD);
+        //  SSAO 着色器
+        _ssaoProgram = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_SSAO);
+
         _renderTarget[1].Start();
         _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mColorTexture);
         _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mDepthTexture);
@@ -230,7 +235,6 @@ void Render::InitRender()
 
 void Render::ClearCommands()
 {
-    _ssaoQueue.clear();
     _cameraQueue.clear();
     _shadowQueue.clear();
     for (auto & queue : _lightQueues) { queue.clear(); }
@@ -524,36 +528,34 @@ void Render::RenderGBuffer()
 
 void Render::RenderSSAO()
 {
-    _renderTarget[0].Start(RenderTarget::BindType::kDRAW);
-    //  绑定SSAO贴图
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
-                                    RenderTarget::TextureType::k2D, 
-                                    _bufferSet.mSSAOTexture);
-    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    //  开始渲染SSAO
-    for (const auto & cmd : _ssaoQueue)
-    {
-        if (Bind(cmd.mMaterial->GetProgram(), cmd.mSubPass))
-        {
-            _renderState.mProgram->BindUniformTex2D(UNIFORM_SCREEN_DEPTH, _bufferSet.mOffScreen.mDepthTexture, 0);
-        }
-        Post(cmd.mTransform);
-        Post((DrawTypeEnum)cmd.mMaterial->GetProgram()->GetPass(cmd.mSubPass).mDrawType,cmd.mMaterial->GetMesh());
-    }
-    _renderTarget[0].Ended();
+    //_renderTarget[0].Start(RenderTarget::BindType::kDRAW);
+    //_renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
+    //                                RenderTarget::TextureType::k2D, 
+    //                                _bufferSet.mSSAOTexture);
+    //glClear(GL_COLOR_BUFFER_BIT);
 
-    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
-    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
-    glBlitFramebuffer(
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    _renderTarget[0].Ended();
+
+
+    //_renderTarget[0].Start(RenderTarget::BindType::kREAD);
+    _renderTarget[1].Start(RenderTarget::BindType::kALL);
+    Bind(_ssaoProgram, 0);
+    Post(glm::mat4(    ));
+    _ssaoProgram->BindUniformTex2D(
+        UNIFORM_SCREEN_DEPTH, 
+        _bufferSet.mOffScreen.mDepthTexture, 0);
+    _ssaoProgram->BindUniformTex2D(
+        UNIFORM_SCREEN_POSTION,
+        _bufferSet.mGBuffer.mPositionTexture, 1);
+    Post(DrawTypeEnum::kINDEX,     _screenQuad);
+    //glBlitFramebuffer(
+    //    0, 0,
+    //    Global::Ref().RefWindow().GetW(),
+    //    Global::Ref().RefWindow().GetH(),
+    //    0, 0,
+    //    Global::Ref().RefWindow().GetW(),
+    //    Global::Ref().RefWindow().GetH(),
+    //    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    //_renderTarget[0].Ended();
     _renderTarget[1].Ended();
 }
 
@@ -576,8 +578,6 @@ void Render::RenderDeferred()
 
     _renderTarget[1].Ended();
 }
-
-
 
 void Render::RenderForward()
 {
