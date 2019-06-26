@@ -96,6 +96,7 @@ struct CameraCommand : public RenderCommand {
     glm::mat4   mView;
     glm::vec3   mPos;
     glm::vec3   mEye;
+    float       mN, mF;
     uint        mOrder;
     uint        mMask;
 };

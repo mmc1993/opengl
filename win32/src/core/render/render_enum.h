@@ -53,6 +53,10 @@ static const char * const UNIFORM_MATRIX_MVP        = "matrix_mvp_";
 //  游戏时间
 static const char * const UNIFORM_GAME_TIME         = "game_time_";
 
+//  相机近裁剪距离
+static const char * const UNIFORM_CAMERA_N          = "camera_n_";
+//  相机远裁剪距离
+static const char * const UNIFORM_CAMERA_F          = "camera_f_";
 //  相机位置
 static const char * const UNIFORM_CAMERA_POS        = "camera_pos_";
 //  相机朝向

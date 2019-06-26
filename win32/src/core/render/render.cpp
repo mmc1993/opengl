@@ -224,12 +224,13 @@ void Render::InitRender()
 
     _renderTarget[1].Start();
     glClear(GL_COLOR_BUFFER_BIT |
-        GL_DEPTH_BUFFER_BIT);
+            GL_DEPTH_BUFFER_BIT);
     _renderTarget[1].Ended();
 }
 
 void Render::ClearCommands()
 {
+    _ssaoQueue.clear();
     _cameraQueue.clear();
     _shadowQueue.clear();
     for (auto & queue : _lightQueues) { queue.clear(); }
@@ -339,6 +340,8 @@ void Render::Post(const glm::mat4 & transform)
     _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
     if (_renderState.mCamera != nullptr)
     {
+        _renderState.mProgram->BindUniformNumber(UNIFORM_CAMERA_N, _renderState.mCamera->mN);
+        _renderState.mProgram->BindUniformNumber(UNIFORM_CAMERA_F, _renderState.mCamera->mF);
         _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _renderState.mCamera->mPos);
         _renderState.mProgram->BindUniformVector(UNIFORM_CAMERA_EYE, _renderState.mCamera->mEye);
     }
@@ -526,8 +529,6 @@ void Render::RenderSSAO()
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
                                     RenderTarget::TextureType::k2D, 
                                     _bufferSet.mSSAOTexture);
-    //  设置输出位
-    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
     //  开始渲染SSAO
     for (const auto & cmd : _ssaoQueue)
     {
