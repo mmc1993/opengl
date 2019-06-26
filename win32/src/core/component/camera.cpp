@@ -109,6 +109,16 @@ void Camera::OnUpdate(float dt)
     command.mPos        = GetPos();
     command.mOrder      = GetOrder();
     command.mMask       = GetMask();
+    if (_type = TypeEnum::kPERSPECTIVE)
+    {
+        command.mN = _info.mPersp.n;
+        command.mF = _info.mPersp.f;
+    }
+    else
+    {
+        command.mN = _info.mOrtho.n;
+        command.mF = _info.mOrtho.f;
+    }
     Global::Ref().RefRender().Post(RenderCommand::TypeEnum::kCAMERA, command);
 }
 

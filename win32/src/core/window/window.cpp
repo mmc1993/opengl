@@ -211,20 +211,19 @@ void Window::OnClose(GLFWwindow * window)
 
 void GLAPIENTRY Window::OnGLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam)
 {
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR:
-    case GL_DEBUG_TYPE_PERFORMANCE:
-    case GL_DEBUG_TYPE_PORTABILITY:
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-        {
-            auto window = reinterpret_cast<const Window *>(userParam);
-            window->OnGLError(source, type, id, severity, length, message);
-            ASSERT_LOG(false, "OpenGL Error.");
-        }
-        break;
-    }
-
+    //switch (type)
+    //{
+    //case GL_DEBUG_TYPE_ERROR:
+    //case GL_DEBUG_TYPE_PERFORMANCE:
+    //case GL_DEBUG_TYPE_PORTABILITY:
+    //case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+    //case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+    //    {
+    //        auto window = reinterpret_cast<const Window *>(userParam);
+    //        window->OnGLError(source, type, id, severity, length, message);
+    //        ASSERT_LOG(false, "OpenGL Error.");
+    //    }
+    //    break;
+    //}
 }
 

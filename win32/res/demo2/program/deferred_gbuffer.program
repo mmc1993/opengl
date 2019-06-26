@@ -130,6 +130,8 @@ Pass Beg
         uniform mat4 matrix_mvp_;
 		uniform mat4 matrix_v_;
 		uniform mat4 matrix_p_;
+		uniform float camera_f_;
+		uniform float camera_n_;
 		
         //  球形采样偏移数据
         vec3 samples[] = {
@@ -179,13 +181,13 @@ Pass Beg
 		void main()
 		{
             float weight= 0;
-            float depth = DepthToLiner(gl_Position.z);
-            for (int i = 0; i != length(samples); ++i)
+            float depth = DepthToLiner(gl_FragCoord.z);
+            for (int i = 0; i != samples.length(); ++i)
             {
                 vec4 pos = vec4(v_out_.mMPos + samples[i], 1);
-                if (matrix_v_ * pos.z > depth) { ++weight; }
+                if ((matrix_v_ * pos).z > depth) { ++weight; }
             }
-            color_.r = 1 - weight / length(samples);
+            color_.r = 1 - weight / samples.length();
 		}
 	FShader End
 Pass End

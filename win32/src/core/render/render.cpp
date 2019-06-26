@@ -529,6 +529,7 @@ void Render::RenderSSAO()
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, 
                                     RenderTarget::TextureType::k2D, 
                                     _bufferSet.mSSAOTexture);
+    glClear(GL_COLOR_BUFFER_BIT);
     //  ¿ªÊ¼äÖÈ¾SSAO
     for (const auto & cmd : _ssaoQueue)
     {
