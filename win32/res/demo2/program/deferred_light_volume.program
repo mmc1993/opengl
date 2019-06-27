@@ -98,6 +98,7 @@ Pass Beg
 		uniform	sampler2D gbuffer_specular_;
 		uniform	sampler2D gbuffer_diffuse_;
 		uniform	sampler2D gbuffer_normal_;
+        uniform sampler2D screen_sao_;
 
         uniform sampler2D   shadow_map_direct_0_;
         uniform samplerCube shadow_map_point_0_;
@@ -202,24 +203,25 @@ Pass Beg
 			return clamp((cone - outCone) / (inCone - outCone), 0, 1);
 		}
 
-		vec3 CalculateDirect(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+		vec3 CalculateDirect(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
 		{
 			float shadow = CalculateDirectShadow(fragCoord);
-			float diff = CalculateDiffuseScale(fragNormal, -light_direct_.mNormal, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, -light_direct_.mNormal, cameraNormal, specular.a);
+			float diff   = CalculateDiffuseScale(fragNormal, -light_direct_.mNormal, cameraNormal);
+			float spec   = CalculateSpecularScale(fragNormal, -light_direct_.mNormal, cameraNormal, specular.a);
+            float occlus = texture(screen_sao_, uv).r;
 
-			return diffuse * light_direct_.mAmbient
+			return diffuse * light_direct_.mAmbient * (1 - occlus)
                 + (diffuse * light_direct_.mDiffuse * diff
-                + specular.rgb * light_direct_.mSpecular * spec) * shadow;
+                +  specular.rgb * light_direct_.mSpecular * spec) * shadow;
 		}
 
-        vec3 CalculatePoint(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+        vec3 CalculatePoint(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
         {
 			float shadow = CalculatePointShadow(fragCoord);
             vec3 fragToLight = normalize(light_point_.mPosition - fragCoord);
-			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
-
+			float diff       = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+			float spec       = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+            float occlus     = texture(screen_sao_, uv).r;
 			//	距离衰减
 			float distance = CalculateDistanceScale(fragCoord, 
 													light_point_.mPosition, 
@@ -227,17 +229,18 @@ Pass Beg
 													light_point_.mK1,
 													light_point_.mK2);
 
-			return (diffuse * light_point_.mAmbient 
+			return (diffuse * light_point_.mAmbient * (1 - occlus)
                 + (diffuse * light_point_.mDiffuse * diff 
                 + specular.rgb * light_point_.mSpecular * spec) * shadow) * distance;
         }
 
-		vec3 CalculateSpot(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+		vec3 CalculateSpot(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
 		{
 			float shadow = CalculateSpotShadow(fragCoord);
 			vec3 fragToLight = normalize(light_spot_.mPosition - fragCoord);
-			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+			float diff       = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+			float spec       = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+            float occlus     = texture(screen_sao_, uv).r;
 
 			//	光锥衰减
 			float weight = CalculateOutConeScale(light_spot_.mInCone, 
@@ -251,7 +254,7 @@ Pass Beg
                                                     light_spot_.mK1, 
                                                     light_spot_.mK2);
 
-			return (diffuse * light_spot_.mAmbient 
+			return (diffuse * light_spot_.mAmbient * (1 - occlus)
                 + (diffuse * light_spot_.mDiffuse * diff 
                 + specular.rgb * light_spot_.mSpecular * spec) * shadow) * weight * distance;
 		}
@@ -268,13 +271,13 @@ Pass Beg
             switch (light_type_)
             {
             case LIGHT_TYPE_DIRECT_:
-                color_ = vec4(CalculateDirect(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculateDirect(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             case LIGHT_TYPE_POINT_:
-                color_ = vec4(CalculatePoint(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculatePoint(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             case LIGHT_TYPE_SPOT_:
-                color_ = vec4(CalculateSpot(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculateSpot(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             }
 		}
@@ -376,6 +379,7 @@ Pass Beg
 		uniform	sampler2D gbuffer_specular_;
 		uniform	sampler2D gbuffer_diffuse_;
 		uniform	sampler2D gbuffer_normal_;
+        uniform sampler2D screen_sao_;
 
         uniform int light_type_;
 
@@ -418,21 +422,23 @@ Pass Beg
 			return clamp((cone - outCone) / (inCone - outCone), 0, 1);
 		}
 
-		vec3 CalculateDirect(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+		vec3 CalculateDirect(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
 		{
-			float diff = CalculateDiffuseScale(fragNormal, -light_direct_.mNormal, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, -light_direct_.mNormal, cameraNormal, specular.a);
+			float diff   = CalculateDiffuseScale(fragNormal, -light_direct_.mNormal, cameraNormal);
+			float spec   = CalculateSpecularScale(fragNormal, -light_direct_.mNormal, cameraNormal, specular.a);
+            float occlus = texture(screen_sao_, uv).r;
 
-			return diffuse * light_direct_.mAmbient
+			return diffuse * light_direct_.mAmbient * (1 - occlus)
                 + (diffuse * light_direct_.mDiffuse * diff
                 + specular.rgb * light_direct_.mSpecular * spec);
 		}
 
-        vec3 CalculatePoint(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+        vec3 CalculatePoint(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
         {
             vec3 fragToLight = normalize(light_point_.mPosition - fragCoord);
-			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+			float diff       = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+			float spec       = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+            float occlus     = texture(screen_sao_, uv).r;
 
 			//	距离衰减
 			float distance = CalculateDistanceScale(fragCoord, 
@@ -441,16 +447,17 @@ Pass Beg
 													light_point_.mK1,
 													light_point_.mK2);
 
-			return (diffuse * light_point_.mAmbient 
+			return (diffuse * light_point_.mAmbient * (1 - occlus)
                 + (diffuse * light_point_.mDiffuse * diff 
                 + specular.rgb * light_point_.mSpecular * spec)) * distance;
         }
 
-		vec3 CalculateSpot(vec3 fragCoord, vec3 fragNormal, vec3 cameraNormal, vec3 diffuse, vec4 specular)
+		vec3 CalculateSpot(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const vec4 specular, const vec2 uv)
 		{
 			vec3 fragToLight = normalize(light_spot_.mPosition - fragCoord);
-			float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
-			float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+			float diff       = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+			float spec       = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal, specular.w);
+            float occlus     = texture(screen_sao_, uv).r;
 
 			//	光锥衰减
 			float weight = CalculateOutConeScale(light_spot_.mInCone, 
@@ -464,7 +471,7 @@ Pass Beg
                                                     light_spot_.mK1, 
                                                     light_spot_.mK2);
 
-			return (diffuse * light_spot_.mAmbient 
+			return (diffuse * light_spot_.mAmbient * (1 - occlus)
                 + (diffuse * light_spot_.mDiffuse * diff 
                 + specular.rgb * light_spot_.mSpecular * spec)) * weight * distance;
 		}
@@ -481,13 +488,13 @@ Pass Beg
             switch (light_type_)
             {
             case LIGHT_TYPE_DIRECT_:
-                color_ = vec4(CalculateDirect(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculateDirect(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             case LIGHT_TYPE_POINT_:
-                color_ = vec4(CalculatePoint(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculatePoint(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             case LIGHT_TYPE_SPOT_:
-                color_ = vec4(CalculateSpot(position, normal, normalize(camera_pos_ - position), diffuse, specular), 1);
+                color_ = vec4(CalculateSpot(position, normal, normalize(camera_pos_ - position), diffuse, specular, uv), 1);
                 break;
             }
 		}

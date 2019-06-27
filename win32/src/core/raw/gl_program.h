@@ -160,6 +160,7 @@ public:
     void BindUniformNumber(const char * const key, uint val) const { glUniform1i(glGetUniformLocation(_useID, key), val); }
     void BindUniformNumber(const char * const key, float val) const { glUniform1f(glGetUniformLocation(_useID, key), val); }
     void BindUniformNumber(const char * const key, double val) const { glUniform1f(glGetUniformLocation(_useID, key), static_cast<float>(val)); }
+    void BindUniformVector(const char * const key, const glm::vec2 & val) const { glUniform2f(glGetUniformLocation(_useID, key), val.x, val.y); }
     void BindUniformVector(const char * const key, const glm::vec3 & val) const { glUniform3f(glGetUniformLocation(_useID, key), val.x, val.y, val.z); }
     void BindUniformVector(const char * const key, const glm::vec4 & val) const { glUniform4f(glGetUniformLocation(_useID, key), val.x, val.y, val.z, val.w); }
     void BindUniformMatrix(const char * const key, const glm::mat3 & val) const { glUniformMatrix3fv(glGetUniformLocation(_useID, key), 1, GL_FALSE, &val[0][0]); }

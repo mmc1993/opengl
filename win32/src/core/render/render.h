@@ -56,7 +56,10 @@ public:
         } mOffScreen;
 
         //  SSAO
-        uint mSSAOTexture;
+        struct SSAO {
+            uint mOcclusionTexture0;    //  一阶段(模糊前)
+            uint mOcclusionTexture1;    //  二阶段(模糊后)
+        } mSSAO;
         
         //  光源数据
         uint mLightUBO[3];

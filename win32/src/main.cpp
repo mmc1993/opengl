@@ -43,8 +43,8 @@ private:
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 30000);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(0, 10, 10),
-			glm::vec3(0, 0, 0),
+			glm::vec3(6.54757166, 7.99653006, 5.79673719),
+			glm::vec3(6.00890923, 7.65702724, 5.02564669),
 			glm::vec3(0, 1, 0));
         camera->SetMask(Camera::kMASK0);
         camera->SetOrder(0);
@@ -83,20 +83,20 @@ private:
 
 	void InitObject()
 	{
-        auto sprite0 = new Sprite();
-        sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
+        //auto sprite0 = new Sprite();
+        //sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
 
-        auto object0 = new Object();
-        object0->AddComponent(sprite0);
-        object0->GetTransform()->Translate(-5, 0, 0);
-        object0->SetParent(&Global::Ref().RefObject());
+        //auto object0 = new Object();
+        //object0->AddComponent(sprite0);
+        //object0->GetTransform()->Translate(-5, 0, 0);
+        //object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene_deferred.mtl"));
         
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(5, 0, 0);
+        object1->GetTransform()->Translate(0, 0, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 
@@ -112,7 +112,7 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.3f, 0.3f, 0.3f), glm::normalize(glm::vec3(0, -1, -1)) },
+			{ glm::vec3(0, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.8f, 0.1f, 0.1f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2

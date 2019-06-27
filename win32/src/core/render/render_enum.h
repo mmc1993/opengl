@@ -8,7 +8,6 @@ enum RenderQueueEnum {
 };
 
 enum RenderTypeEnum {
-    kSSAO,          //  SSAO
     kLIGHT,         //  渲染光源
 	kSHADOW,        //  阴影贴图
 	kFORWARD,       //  正向渲染
@@ -53,6 +52,8 @@ static const char * const UNIFORM_MATRIX_MVP        = "matrix_mvp_";
 //  游戏时间
 static const char * const UNIFORM_GAME_TIME         = "game_time_";
 
+//  分辨率尺寸
+static const char * const UNIFORM_VIEW_SIZE         = "view_size_";
 //  相机近裁剪距离
 static const char * const UNIFORM_CAMERA_N          = "camera_n_";
 //  相机远裁剪距离
@@ -86,6 +87,7 @@ static const char * const UNIFORM_GBUFFER_NORMAL        = "gbuffer_normal_";
 //  SSAO
 static const char * const UNIFORM_SCREEN_POSTION        = "screen_position_";
 static const char * const UNIFORM_SCREEN_DEPTH          = "screen_depth_";
+static const char * const UNIFORM_SCREEN_SAO            = "screen_sao_";
 
 //  内置资源-延迟渲染-光体积
 static const char * const BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT = "res/built-in/mesh/deferred_light_volume_direct.obj";

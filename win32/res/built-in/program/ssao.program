@@ -3,17 +3,13 @@ Common Beg
 Common End
 
 Pass Beg
-	CullFace Back
+	CullFace    Back
+	DrawType    Index
 	RenderQueue Geometric
-	RenderType SSAO
-	DrawType Index
 
     VShader Beg
 		layout(location = 0) in vec3 a_v_;
 		layout(location = 1) in vec2 a_uv_;
-
-		uniform mat4 matrix_mvp_;
-		uniform mat4 matrix_m_;
 
         out V_OUT_ {
             vec2 mUV;
@@ -27,11 +23,8 @@ Pass Beg
 	VShader End
 
     FShader Beg
-        uniform mat4 matrix_mvp_;
 		uniform mat4 matrix_v_;
 		uniform mat4 matrix_p_;
-		uniform float camera_f_;
-		uniform float camera_n_;
 
         uniform sampler2D screen_depth_;
         uniform sampler2D screen_position_;
@@ -72,26 +65,69 @@ Pass Beg
 
         out vec4 color_;
 
-        float DepthToLiner(float depth)
-        {
-            float z = depth * 2.0 - 1.0;
-            return (2.0 * camera_n_ * camera_f_)
-                 / (camera_f_ + camera_n_ - z
-                 * (camera_f_ - camera_n_));
-        }
+		void main()
+		{
+            float weight   = 0;
+            vec4  model    = texture(screen_position_, v_out_.mUV);
+            vec4  depth    = texture(screen_depth_   , v_out_.mUV);
+            mat4  viewproj = matrix_p_ * matrix_v_;
+            for (int i = 0; i != samples.length(); ++i)
+            {
+                vec4 pos = vec4(model.xyz + samples[i], 1);
+                pos      = viewproj * pos;
+                pos.xyz  = pos.xyz  / pos.w;
+                pos.xyz  = (pos.xyz + 1) * 0.5;
+                pos      = texture(screen_depth_, pos.xy);
+                if (pos.r < depth.r) { ++weight; }
+            }
+            weight = max( weight - samples.length() * 0.5, 0);
+            color_ = vec4(weight / samples.length() * 0.5, 0, 0, 1);
+		}
+	FShader End
+Pass End
+
+Pass Beg
+	CullFace    Back
+	DrawType    Index
+	RenderQueue Geometric
+
+    VShader Beg
+		layout(location = 0) in vec3 a_v_;
+		layout(location = 1) in vec2 a_uv_;
+
+        out V_OUT_ {
+            vec2 mUV;
+        } v_out_;
 
 		void main()
 		{
-            // vec3 mpos = texture(screen_position_, v_out_.uv).xyz;
-            // float weight= 0;
-            // float depth = DepthToLiner(gl_FragCoord.z);
-            // for (int i = 0; i != samples.length(); ++i)
-            // {
-            //     vec4 pos = vec4(mpos + samples[i], 1);
-            //     if ((matrix_v_ * pos).z > depth) { ++weight; }
-            // }
-            // color_.r = vec4(1 - weight / samples.length(), 0, 0, 1);
-            color_.r = texture(screen_depth_, v_out_.mUV).r;
+            v_out_.mUV  = a_uv_;
+			gl_Position = vec4(a_v_, 1);
+		}
+	VShader End
+
+    FShader Beg
+        uniform vec2        view_size_;
+        uniform sampler2D   screen_sao_;
+		
+        in V_OUT_ {
+            vec2 mUV;
+        } v_out_;
+
+        out vec4 color_;
+
+		void main()
+		{
+            vec2 step = 1.0f / textureSize(screen_sao_, 0);
+            float red = 0;
+            for (int x = -1; x != 2; ++x)
+            {
+                for (int y = -1; y != 2; ++y)
+                {
+                    red += texture(screen_sao_, v_out_.mUV + vec2(x * step.x, y * step.y)).r;
+                }
+            }
+            color_ = vec4(red / 9, 0, 0, 1);
 		}
 	FShader End
 Pass End
