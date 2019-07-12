@@ -47,8 +47,18 @@ static const char * const UNIFORM_MATRIX_V          = "matrix_v_";
 static const char * const UNIFORM_MATRIX_P          = "matrix_p_";
 //  模型视图矩阵
 static const char * const UNIFORM_MATRIX_MV         = "matrix_mv_";
+//  视图投影矩阵
+static const char * const UNIFORM_MATRIX_VP         = "matrix_vp_";
 //  模型视图投影矩阵
 static const char * const UNIFORM_MATRIX_MVP        = "matrix_mvp_";
+//  视图矩阵(逆)
+static const char * const UNIFORM_MATRIX_V_INV      = "matrix_v_inv_";
+//  投影矩阵(逆)
+static const char * const UNIFORM_MATRIX_P_INV      = "matrix_p_inv_";
+//  模型视图矩阵(逆)
+static const char * const UNIFORM_MATRIX_MV_INV     = "matrix_mv_inv_";
+//  视图投影矩阵(逆)
+static const char * const UNIFORM_MATRIX_VP_INV     = "matrix_vp_inv_";
 //  游戏时间
 static const char * const UNIFORM_GAME_TIME         = "game_time_";
 

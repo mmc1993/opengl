@@ -99,6 +99,11 @@ struct CameraCommand : public RenderCommand {
     float       mN, mF;
     uint        mOrder;
     uint        mMask;
+
+    bool operator<(const CameraCommand & other) const
+    {
+        return mOrder < other.mOrder;
+    }
 };
 
 struct LightCommand: public RenderCommand {

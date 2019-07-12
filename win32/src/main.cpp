@@ -83,20 +83,20 @@ private:
 
 	void InitObject()
 	{
-        auto sprite0 = new Sprite();
-        sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
+        //auto sprite0 = new Sprite();
+        //sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
 
-        auto object0 = new Object();
-        object0->AddComponent(sprite0);
-        object0->GetTransform()->Translate( 8, 0, 0);
-        object0->SetParent(&Global::Ref().RefObject());
+        //auto object0 = new Object();
+        //object0->AddComponent(sprite0);
+        //object0->GetTransform()->Translate( 8, 0, 0);
+        //object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene_deferred.mtl"));
         
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(-8, 0, 0);
+        object1->GetTransform()->Translate(0, 0, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 

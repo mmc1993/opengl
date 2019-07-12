@@ -37,10 +37,7 @@ void Render::Once()
 {
     InitRender();
 
-    std::sort(_cameraQueue.begin(), _cameraQueue.end(), [](const auto & a, const auto & b)
-        {
-            return a.mOrder < b.mOrder;
-        });
+    std::sort(_cameraQueue.begin(), _cameraQueue.end());
 
     for (const auto & command : _cameraQueue)
     {
@@ -340,13 +337,24 @@ void Render::Post(const glm::mat4 & transform)
     auto & matrixP = _matrixStack.GetP();
     const auto & matrixN = glm::transpose(glm::inverse(glm::mat3(matrixM)));
     const auto & matrixMV = matrixV * matrixM;
+    const auto & matrixVP = matrixP * matrixV;
     const auto & matrixMVP = matrixP * matrixMV;
+    //  矩阵
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_N, matrixN);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_M, matrixM);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V, matrixV);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P, matrixP);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV, matrixMV);
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_VP, matrixVP);
     _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MVP, matrixMVP);
+
+    //  逆矩阵
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_V_INV, glm::inverse(matrixV));
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_P_INV, glm::inverse(matrixP));
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV_INV, glm::inverse(matrixMV));
+    _renderState.mProgram->BindUniformMatrix(UNIFORM_MATRIX_VP_INV, glm::inverse(matrixVP));
+
+    //  其他参数
     _renderState.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
     if (_renderState.mCamera != nullptr)
     {
@@ -478,12 +486,8 @@ void Render::RenderCamera()
     
     _renderTarget[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
+        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
+        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[1].Ended();
 
@@ -523,12 +527,8 @@ void Render::RenderGBuffer()
     _renderTarget[0].Start(RenderTarget::BindType::kREAD);
     _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
     glBlitFramebuffer(
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
-        0, 0,
-        Global::Ref().RefWindow().GetW(),
-        Global::Ref().RefWindow().GetH(),
+        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
+        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
         GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _renderTarget[0].Ended();
     _renderTarget[1].Ended();
