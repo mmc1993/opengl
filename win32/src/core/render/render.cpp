@@ -198,7 +198,7 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        //  Off Screen Texture
+        //  ºóÆÚÆÁÄ»
         glGenTextures(2, &_bufferSet.mPostScreen.mColorTexture);
 
         glBindTexture(GL_TEXTURE_2D, _bufferSet.mPostScreen.mColorTexture);
