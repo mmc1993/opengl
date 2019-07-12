@@ -88,7 +88,7 @@ private:
 
         //auto object0 = new Object();
         //object0->AddComponent(sprite0);
-        //object0->GetTransform()->Translate( 8, 0, 0);
+        //object0->GetTransform()->Translate( 8, 0, 2);
         //object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();

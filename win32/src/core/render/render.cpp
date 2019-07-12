@@ -19,7 +19,6 @@ Render::~Render()
     glDeleteTextures(1, &_bufferSet.mGBuffer.mDiffuseTexture);
     glDeleteTextures(1, &_bufferSet.mGBuffer.mPositionTexture);
     glDeleteTextures(1, &_bufferSet.mGBuffer.mSpecularTexture);
-    glDeleteRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
     glDeleteTextures(1, &_bufferSet.mPostScreen.mColorTexture);
     glDeleteTextures(1, &_bufferSet.mPostScreen.mDepthTexture);
@@ -147,7 +146,6 @@ void Render::InitRender()
 
         //  G-Buffer
         glGenTextures(4,  &_bufferSet.mGBuffer.mPositionTexture);
-        glGenRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
         glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -177,10 +175,6 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, _bufferSet.mGBuffer.mDepthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowW, windowH);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         //  SSAO
         glGenTextures(2, &_bufferSet.mSSAO.mOcclusionTexture0);
@@ -502,7 +496,7 @@ void Render::RenderGBuffer()
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mSpecularTexture);
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, _bufferSet.mGBuffer.mDepthBuffer);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mPostScreen.mDepthTexture);
 
     uint outputs[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1,
                        RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
@@ -523,15 +517,6 @@ void Render::RenderGBuffer()
             }
         }
     }
-    
-    _renderTarget[0].Start(RenderTarget::BindType::kREAD);
-    _renderTarget[1].Start(RenderTarget::BindType::kDRAW);
-    glBlitFramebuffer(
-        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
-        0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
-        GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    _renderTarget[0].Ended();
-    _renderTarget[1].Ended();
 }
 
 void Render::RenderSSAO()

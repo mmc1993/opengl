@@ -39,7 +39,6 @@ public:
             uint mSpecularTexture;
             uint mDiffuseTexture;
             uint mNormalTexture;
-            uint mDepthBuffer;
         } mGBuffer;
 
         //  “ı”∞Ã˘Õº
