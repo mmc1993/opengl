@@ -49,11 +49,11 @@ public:
             uint mSpotTexture[LIMIT_LIGHT_SPOT];
         } mShadowMap;
 
-        //  ÀëÆÁ»º´æ
-        struct OffScreen {
+        //  ºóÆÚÆÁÄ»
+        struct PostScreen {
             uint mColorTexture;
             uint mDepthTexture;
-        } mOffScreen;
+        } mPostScreen;
 
         //  SSAO
         struct SSAO {

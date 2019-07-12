@@ -21,8 +21,8 @@ Render::~Render()
     glDeleteTextures(1, &_bufferSet.mGBuffer.mSpecularTexture);
     glDeleteRenderbuffers(1, &_bufferSet.mGBuffer.mDepthBuffer);
 
-    glDeleteTextures(1, &_bufferSet.mOffScreen.mColorTexture);
-    glDeleteTextures(1, &_bufferSet.mOffScreen.mDepthTexture);
+    glDeleteTextures(1, &_bufferSet.mPostScreen.mColorTexture);
+    glDeleteTextures(1, &_bufferSet.mPostScreen.mDepthTexture);
     glDeleteTextures(2, &_bufferSet.mSSAO.mOcclusionTexture0);
 
     glDeleteBuffers(3, _bufferSet.mLightUBO);
@@ -199,16 +199,16 @@ void Render::InitRender()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         //  Off Screen Texture
-        glGenTextures(2, &_bufferSet.mOffScreen.mColorTexture);
+        glGenTextures(2, &_bufferSet.mPostScreen.mColorTexture);
 
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mColorTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mPostScreen.mColorTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mOffScreen.mDepthTexture);
+        glBindTexture(GL_TEXTURE_2D, _bufferSet.mPostScreen.mDepthTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowW, windowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -222,8 +222,8 @@ void Render::InitRender()
         _ssaoProgram = Global::Ref().RefRawManager().LoadRes<GLProgram>(BUILTIN_PROGRAM_SSAO);
 
         _renderTarget[1].Start();
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mColorTexture);
-        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mOffScreen.mDepthTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mPostScreen.mColorTexture);
+        _renderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mPostScreen.mDepthTexture);
         _renderTarget[1].Ended();
     }
 
@@ -548,7 +548,7 @@ void Render::RenderSSAO()
     Post(glm::mat4(    ));
     _ssaoProgram->BindUniformTex2D(
         UNIFORM_SCREEN_DEPTH, 
-        _bufferSet.mOffScreen.mDepthTexture, 0);
+        _bufferSet.mPostScreen.mDepthTexture, 0);
     _ssaoProgram->BindUniformTex2D(
         UNIFORM_SCREEN_POSTION,
         _bufferSet.mGBuffer.mPositionTexture, 1);
