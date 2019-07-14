@@ -1,0 +1,54 @@
+# Blender MTL File: 'scene.blend'
+# Material Count: 4
+
+newmtl floor
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump texture\\floor_normal.png
+map_Kd texture\\floor_diffuse.png
+map_Ks texture\\floor_spacular.png
+
+newmtl wall
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump texture\\wall_normal.png
+map_Kd texture\\wall_diffuse.png
+map_Ks texture\\wall_specular.png
+
+newmtl wall2
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump texture\\wall2_normal.png
+map_Kd texture\\wall2_diffuse.png
+map_Ks texture\\wall2_spacular.png
+
+newmtl wall3
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump texture\\wall3_normal.png
+map_Kd texture\\wall3_diffuse.png
+map_Ks texture\\wall3_spacular.png
