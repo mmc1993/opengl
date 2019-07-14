@@ -137,15 +137,15 @@ Pass Beg
 			float zorder = pos.z;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadow_map_direct_0_, 0);
-            float depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x,  0		)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,          0	    )).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x,  0	    )).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,		  -texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x,  0		)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,          0	    )).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x,  0	    )).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( 0,		  -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_direct_0_, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
         }
 
@@ -157,15 +157,15 @@ Pass Beg
 			float zorder = pos.z;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadow_map_spot_0_, 0);
-            float depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,          0        )).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,	        -texstep.y)).r; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,          0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( 0,	        -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadow_map_spot_0_, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
 		}
 
@@ -173,20 +173,17 @@ Pass Beg
 		{
 			vec3 normal = position - light_point_.mPosition;
 			float z 	= texture(shadow_map_point_0_, normal).r;
-			return length(normal) > z * light_point_.mFar? 0 : 1;
+			return length(normal) > z * light_point_.mFar + 1? 0 : 1;
 		}
 
 		//	计算漫反射缩放因子
 		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
 		{
-            return floor(max(dot(fragNormal, lightNormal), 0) * 10 / 3) * 3;
-		}
-
-		//	计算镜面反射缩放因子
-		float CalculateSpecularScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal, float shininess)
-		{
-			vec3 h = (lightNormal + cameraNormal) * 0.5f;
-			return pow(max(dot(fragNormal, h), 0), shininess);
+            float v = max(dot(fragNormal, lightNormal), 0);
+            if (v < 0.3)        return 0;
+            else if (v < 0.5)   return 0.3;
+            else if (v < 0.8)   return 0.5;
+            else                return 1;
 		}
 
 		//	计算距离衰减缩放因子

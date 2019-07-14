@@ -43,8 +43,8 @@ private:
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 30000);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
 		camera->LookAt(
-			glm::vec3(6.54757166, 7.99653006, 5.79673719),
-			glm::vec3(6.00890923, 7.65702724, 5.02564669),
+			glm::vec3(10.2153053, 18.6474419, 8.25051212),
+			glm::vec3(9.65997696, 18.1241894, 7.60412455),
 			glm::vec3(0, 1, 0));
         camera->SetMask(Camera::kMASK0);
         camera->SetOrder(0);
@@ -65,16 +65,19 @@ private:
         Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
         Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
 
-        Global::Ref().RefRawManager().Import("res/demo2/program/deferred_gbuffer.program");
-        Global::Ref().RefRawManager().Import("res/demo2/program/deferred_light_volume.program");
+        Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
+        Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
 
-        Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
-        Global::Ref().RefRawManager().Import("res/demo2/scene.obj");
-        Global::Ref().RefRawManager().Import("res/demo2/mesh/wall.obj");
-        Global::Ref().RefRawManager().Import("res/demo2/program/scene.program");
-        Global::Ref().RefRawManager().Import("res/demo2/material/scene.mtl");
-        Global::Ref().RefRawManager().Import("res/demo2/material/wall.mtl");
-        Global::Ref().RefRawManager().Import("res/demo2/material/scene_deferred.mtl");
+        Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
+        Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
+
+
+        Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
+        Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
+
+        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
+        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
+        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
 
         Global::Ref().RefRawManager().EndImport();
 
@@ -83,20 +86,20 @@ private:
 
 	void InitObject()
 	{
-        //auto sprite0 = new Sprite();
-        //sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene.mtl"));
+        auto sprite0 = new Sprite();
+        sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/scene.mtl"));
 
-        //auto object0 = new Object();
-        //object0->AddComponent(sprite0);
-        //object0->GetTransform()->Translate( 8, 0, 2);
-        //object0->SetParent(&Global::Ref().RefObject());
+        auto object0 = new Object();
+        object0->AddComponent(sprite0);
+        object0->GetTransform()->Translate(0, 0, 0);
+        object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
-        sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/demo2/material/scene_deferred.mtl"));
+        sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
         
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(0, 0, 0);
+        object1->GetTransform()->Translate(3, 2, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 
@@ -112,17 +115,17 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.8f, 0.1f, 0.1f), glm::normalize(glm::vec3(0, -1, -1)) },
+			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.1f, 0.1f, 0.1f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            { glm::vec3(-1.5f, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
+            //{ glm::vec3(8, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
 		const std::vector<std::array<glm::vec3, 7>> spots = {
-			{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
+			//{ glm::vec3(-1.5f, 10, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0, -1, 0), glm::vec3(1.0f, 0.0001f, 0.01f), glm::vec3(0.9f, 0.8f, 0.0f) },
 		};
 
 		for (auto & data : directs)
@@ -132,7 +135,7 @@ private:
 			light->mDiffuse = data[2];
 			light->mSpecular = data[3];
 			light->mNormal = data[4];
-            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/lambert/program/deferred_light_volume.program"));
             light->OpenShadow({ -50, 50 }, { -50, 50 }, { -10, 1000 });
 			auto object = new Object();
 			object->AddComponent(light);
@@ -150,7 +153,7 @@ private:
 			light->mK0 = data[4].x;
 			light->mK1 = data[4].y;
 			light->mK2 = data[4].z;
-            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/lambert/program/deferred_light_volume.program"));
             light->OpenShadow(1, 100);
 			auto object = new Object();
 			object->AddComponent(light);
@@ -171,7 +174,7 @@ private:
 			light->mK2 = data[5].z;
 			light->mInCone = data[6].x;
 			light->mOutCone = data[6].y;
-            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/demo2/program/deferred_light_volume.program"));
+            light->BindProgram(Global::Ref().RefRawManager().LoadRes<GLProgram>("res/lambert/program/deferred_light_volume.program"));
             light->OpenShadow(1, 100);
 			auto object = new Object();
 			object->AddComponent(light);

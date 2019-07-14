@@ -1,10 +1,10 @@
 {
-    "mesh":         "res/demo2/scene.obj",
-    "program":      "res/demo2/program/scene.program",
+    "mesh":         "res/lambert/scene.obj",
+    "program":      "res/lambert/program/deferred_gbuffer.program",
     "items": [
         { "type": "number", "key": "mShininess",     "val": 32.0 },
-        { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/demo2/texture/wall2_diffuse.png" },
-        { "type": "tex2d",  "key": "mSpecular",     "val": "res/demo2/texture/wall2_spacular.png" },
-        { "type": "tex2d",  "key": "mNormal",       "val": "res/demo2/texture/wall2_normal.png" }
+        { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/lambert/texture/ball_diffuse.png" },
+        { "type": "tex2d",  "key": "mSpecular",     "val": "res/lambert/texture/ball_specular.png" },
+        { "type": "tex2d",  "key": "mNormal",       "val": "res/lambert/texture/ball_normal.png" }
     ]
 }
