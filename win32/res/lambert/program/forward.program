@@ -196,18 +196,18 @@ Pass Beg
             vec4 pos = light_direct_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z - 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
-            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0		 )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          0	     )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0	     )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0		 )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          0	     )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0	     )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
         }
 
@@ -216,35 +216,34 @@ Pass Beg
 			vec4 pos = light_spot_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z - 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
-            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
 		}
 
 		float CalculatePointShadow(const int i, const samplerCube shadowMap)
 		{
 			vec3 normal 	= v_out_.mMPos - light_point_.mParam[i].mPosition;
-			float zorder 	= texture(shadowMap, normal).r + 1.0f;
-			return length(normal) > zorder * light_point_.mParam[i].mFar? 0: 1;
+			float zorder 	= texture(shadowMap, normal).r;
+			return length(normal) > zorder * light_point_.mParam[i].mFar + 1? 0: 1;
 		}
 
         //	计算漫反射缩放因子
         float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
         {
             float v = max(dot(fragNormal, lightNormal), 0) * 0.5f + 0.5f;
-            if (v < 0.3)        return 0;
-            else if (v < 0.5)   return 0.3;
-            else if (v < 0.8)   return 0.5;
+            if (v < 0.55)       return 0.0;
+            else if (v < 0.80)  return 0.5;
             else                return 1;
         }
 
