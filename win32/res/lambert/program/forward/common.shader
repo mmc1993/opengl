@@ -1,7 +1,7 @@
 Common Beg
-    #version 330 core
     //  矩阵/相机
     uniform vec3 camera_pos_;
+    uniform vec3 camera_eye_;
     uniform mat4 matrix_mvp_;
     uniform mat4 matrix_mv_;
     uniform mat4 matrix_m_;
@@ -77,6 +77,8 @@ Common Beg
             vec4 mMVPPos;
             vec3 mMVPos;
             vec3 mMPos;
+            mat3 mTBNR;
+            mat3 mTBN;
             vec2 mUV;
         } v_out_;
     VShader End
@@ -96,6 +98,9 @@ Common Beg
 
         //  材质
         uniform struct Material_ {
+            float mShininess;
+            sampler2D mNormal;
+            sampler2D mSpecular;
             sampler2D mDiffuse0;
             sampler2D mDiffuse1;
             sampler2D mDiffuse2;
@@ -107,76 +112,13 @@ Common Beg
             vec4 mMVPPos;
             vec3 mMVPos;
             vec3 mMPos;
+            mat3 mTBNR;
+            mat3 mTBN;
             vec2 mUV;
         } v_out_;
 
         out vec4 color_;
     FShader End
-Common End
-
-Pass Beg
-    CullFace Front
-    DepthTest
-	DepthWrite
-	RenderType Shadow
-	DrawType Index
-
-    VShader Beg
-        void main()
-        {
-			vec4 apos       = vec4(a_v_, 1);
-			v_out_.mMPos    = vec3(matrix_m_ * apos);
-			gl_Position     = vec4(matrix_mvp_ * apos);
-        }
-    VShader End
-
-    FShader Beg
-        void main()
-        {
-            switch (light_type_)
-            {
-            case LIGHT_TYPE_DIRECT_:
-                {
-                    gl_FragDepth = gl_FragCoord.z;
-                }
-                break;
-            case LIGHT_TYPE_POINT_:
-                {
-					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
-					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
-                }
-                break;
-            case LIGHT_TYPE_SPOT_:
-                {
-                    gl_FragDepth = gl_FragCoord.z;
-                }
-                break;
-            }
-        }
-    FShader End
-Pass End
-
-Pass Beg
-    CullFace        Back
-    DepthTest
-    DepthWrite
-    RenderQueue     Geometric
-    RenderType      Forward
-    DrawType        Index
-
-    VShader Beg
-        void main()
-        {
-            vec4 apos       = vec4(a_v_, 1);
-            v_out_.mMPos    = vec3(matrix_m_ * apos);
-            v_out_.mMVPos   = vec3(matrix_mv_ * apos);
-            v_out_.mNormal  = vec3(matrix_n_ * a_n_);
-            v_out_.mMVPPos  = vec4(matrix_mvp_ * apos);
-            v_out_.mUV      = a_uv_;
-
-            gl_Position = v_out_.mMVPPos;
-        }
-    VShader End
 
     FShader Beg
         int CheckInView(vec4 vec)
@@ -196,18 +138,18 @@ Pass Beg
             vec4 pos = light_direct_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z + 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
-            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0		 )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          0	     )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0	     )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0		 )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          0	     )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0	     )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
         }
 
@@ -216,18 +158,18 @@ Pass Beg
 			vec4 pos = light_spot_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z + 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
-            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,          0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0        )).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
-                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r + 0.001f; shadow += zorder < depth? 1: 0;
+            float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,          0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x,  0        )).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2(-texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( 0,		   -texstep.y)).r; shadow += zorder < depth? 1: 0;
+                  depth = texture(shadowMap, pos.xy + vec2( texstep.x, -texstep.y)).r; shadow += zorder < depth? 1: 0;
             return shadow / 9.0f;
 		}
 
@@ -241,11 +183,14 @@ Pass Beg
         //	计算漫反射缩放因子
         float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
         {
-            float v = max(dot(fragNormal, lightNormal), 0) * 0.5f + 0.5f;
-            if (v < 0.3)        return 0;
-            else if (v < 0.5)   return 0.3;
-            else if (v < 0.8)   return 0.5;
-            else                return 1;
+            return max(dot(fragNormal, lightNormal), 0);
+        }
+
+        //	计算镜面反射缩放因子
+        float CalculateSpecularScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
+        {
+            vec3 h = (lightNormal + cameraNormal) * 0.5f;
+            return pow(max(dot(fragNormal, h), 0), material_.mShininess);
         }
 
         //	计算距离衰减缩放因子
@@ -272,10 +217,12 @@ Pass Beg
 			}
 
             float diff = CalculateDiffuseScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
+            float spec = CalculateSpecularScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
 
             vec3 ambient = light_direct_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_direct_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
-            return ambient + diffuse * shadow * 1;
+            vec3 specular = light_direct_.mParam[i].mSpecular * texture(material_.mSpecular, uv).rgb * spec;
+            return ambient + (diffuse + specular) * shadow * 1;
         }
 
         vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
@@ -292,8 +239,12 @@ Pass Beg
             vec3 fragToLight = normalize(light_point_.mParam[i].mPosition - v_out_.mMPos);
 
             float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+            float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal);
+
             vec3 ambient = light_point_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_point_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
+            vec3 specular = light_point_.mParam[i].mSpecular * texture(material_.mSpecular, uv).rgb * spec;
+
             //	距离衰减
             float distance = CalculateDistanceScale(v_out_.mMPos, 
                                                     light_point_.mParam[i].mPosition, 
@@ -301,7 +252,7 @@ Pass Beg
                                                     light_point_.mParam[i].mK1,
                                                     light_point_.mParam[i].mK2);
 
-            return (ambient + diffuse * shadow) * distance;
+            return (ambient + (diffuse + specular) * shadow) * distance;
         }
 
         vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
@@ -318,9 +269,11 @@ Pass Beg
             vec3 fragToLight = normalize(light_spot_.mParam[i].mPosition - v_out_.mMPos);
 
             float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+            float spec = CalculateSpecularScale(fragNormal, fragToLight, cameraNormal);
 
             vec3 ambient = light_spot_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_spot_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
+            vec3 specular = light_spot_.mParam[i].mSpecular * texture(material_.mSpecular, uv).rgb * spec;
 
             //	光锥衰减
             float weight = CalculateOutConeScale(light_spot_.mParam[i].mInCone, 
@@ -334,30 +287,9 @@ Pass Beg
                                                     light_spot_.mParam[i].mK1, 
                                                     light_spot_.mParam[i].mK2);
 
-            return (ambient + diffuse * shadow) * weight * distance;
-        }
-
-        void main()
-        {
-            vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
-
-            vec3 outColor = vec3(0, 0, 0);
-            for (int i = 0; i != light_count_direct_; ++i)
-            {
-                outColor += CalculateDirect(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
-            }
-
-            for (int i = 0; i != light_count_point_; ++i)
-            {
-                outColor += CalculatePoint(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
-            }
-
-            for (int i = 0; i != light_count_spot_; ++i)
-            {
-                outColor += CalculateSpot(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
-            }
-
-            color_ = vec4(outColor, 1);
+            return (ambient + (diffuse + specular) * shadow) * weight * distance;
         }
     FShader End
-Pass End
+Common End
+
+
