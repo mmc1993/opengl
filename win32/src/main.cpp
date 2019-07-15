@@ -67,6 +67,7 @@ private:
 
         Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
         Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
+        Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
 
         Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
         Global::Ref().RefRawManager().Import("res/lambert/scene.obj");

@@ -210,7 +210,7 @@ Pass Beg
             vec4 pos = light_direct_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z + 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
             float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
@@ -230,7 +230,7 @@ Pass Beg
 			vec4 pos = light_spot_.mParam[i].mMatrix * vec4(v_out_.mMPos, 1);
             if (CheckInView(pos) != 0) { return 0; }
             pos.xyz = pos.xyz / pos.w * 0.5f + 0.5f;
-			float zorder = pos.z;
+			float zorder = pos.z + 0.001f;
             float shadow = 0.0f;
             vec2 texstep = 1.0f / textureSize(shadowMap, 0);
             float depth = texture(shadowMap, pos.xy + vec2(-texstep.x,  texstep.y)).r; shadow += zorder < depth? 1: 0;
@@ -248,7 +248,7 @@ Pass Beg
 		float CalculatePointShadow(const int i, const samplerCube shadowMap)
 		{
 			vec3 normal 	= v_out_.mMPos - light_point_.mParam[i].mPosition;
-			float zorder 	= texture(shadowMap, normal).r;
+			float zorder 	= texture(shadowMap, normal).r + 1.0f;
 			return length(normal) > zorder * light_point_.mParam[i].mFar? 0: 1;
 		}
 

@@ -1,6 +1,6 @@
 {
     "mesh":         "res/lambert/scene.obj",
-    "program":      "res/lambert/program/deferred_gbuffer.program",
+    "program":      "res/lambert/program/forward.program",
     "items": [
         { "type": "number", "key": "mShininess",     "val": 32.0 },
         { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/lambert/texture/ball_diffuse.png" },
