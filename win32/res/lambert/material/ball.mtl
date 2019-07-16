@@ -2,9 +2,7 @@
     "mesh":         "res/lambert/ball.obj",
     "program":      "res/lambert/program/forward.program",
     "items": [
-        { "type": "number", "key": "mShininess",     "val": 32.0 },
         { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/lambert/texture/ball_diffuse.png" },
-        { "type": "tex2d",  "key": "mSpecular",     "val": "res/lambert/texture/ball_specular.png" },
         { "type": "tex2d",  "key": "mNormal",       "val": "res/lambert/texture/ball_normal.png" }
     ]
 }
