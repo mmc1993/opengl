@@ -657,36 +657,33 @@ void Render::PackUBOLightForward()
 
 void Render::BindUBOLightForward()
 {
-    auto countDirect = std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT);
-    auto countPoint = std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT);
-    auto countSpot = std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT);
-
-    auto indexDirect = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_DIRECT);
-    auto indexPoint = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_POINT);
-    auto indexSpot = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_SPOT);
-
-    glUniformBlockBinding(_renderState.mProgram->GetUseID(), indexDirect, UniformBlockEnum::kLIGHT_DIRECT);
-    glUniformBlockBinding(_renderState.mProgram->GetUseID(), indexPoint, UniformBlockEnum::kLIGHT_POINT);
-    glUniformBlockBinding(_renderState.mProgram->GetUseID(), indexSpot, UniformBlockEnum::kLIGHT_SPOT);
+    auto index0 = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_DIRECT);
+    auto index1 = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_POINT);
+    auto index2 = glGetUniformBlockIndex(_renderState.mProgram->GetUseID(), UBO_NAME_LIGHT_SPOT);
+    glUniformBlockBinding(_renderState.mProgram->GetUseID(), index0, UniformBlockEnum::kLIGHT_DIRECT);
+    glUniformBlockBinding(_renderState.mProgram->GetUseID(), index1, UniformBlockEnum::kLIGHT_POINT);
+    glUniformBlockBinding(_renderState.mProgram->GetUseID(), index2, UniformBlockEnum::kLIGHT_SPOT);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, _bufferSet.mLightUBO[Light::kDIRECT]);
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, _bufferSet.mLightUBO[Light::kPOINT]);
     glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, _bufferSet.mLightUBO[Light::kSPOT]);
 
-    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_DIRECT_, countDirect);
-    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, countPoint);
-    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_SPOT_, countSpot);
-
-    for (auto i = 0, directCount = 0; i != countDirect; ++i, ++directCount)
+    auto count0 = std::min(_lightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT);
+    auto count1 = std::min(_lightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT);
+    auto count2 = std::min(_lightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_DIRECT_, count0);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_POINT_, count1);
+    _renderState.mProgram->BindUniformNumber(UNIFORM_LIGHT_COUNT_SPOT_, count2);
+    for (auto i = 0, n = 0; i != count0; ++i, ++n)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, directCount).c_str(), _bufferSet.mShadowMap.mDirectTexture[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, n).c_str(), _bufferSet.mShadowMap.mDirectTexture[i], _renderState.mTexBase++);
     }
-    for (auto i = 0, pointCount = 0; i != countPoint; ++i, ++pointCount)
+    for (auto i = 0, n = 0; i != count1; ++i, ++n)
     {
-        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, pointCount).c_str(), _bufferSet.mShadowMap.mPointTexture[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, n).c_str(), _bufferSet.mShadowMap.mPointTexture[i], _renderState.mTexBase++);
     }
-    for (auto i = 0, spotCount = 0; i != countSpot; ++i, ++spotCount)
+    for (auto i = 0, n = 0; i != count2; ++i, ++n)
     {
-        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, spotCount).c_str(), _bufferSet.mShadowMap.mSpotTexture[i], _renderState.mTexBase++);
+        _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, n).c_str(), _bufferSet.mShadowMap.mSpotTexture[i],  _renderState.mTexBase++);
     }
 }
