@@ -124,9 +124,10 @@ private:
     void BindUBOLightForward();
 
 private:
-    RenderTarget _renderTarget[2];
-    MatrixStack  _matrixStack;
+    //  0 随意使用, 1 离屏输出
+    RenderTarget _target[2];
     BufferSet    _bufferSet;
+    MatrixStack  _matrixStack;
     GLMesh *     _screenQuad;
     GLProgram * _ssaoProgram;
 
@@ -134,8 +135,8 @@ private:
     RenderState _renderState;
     //  相机渲染队列
     CameraCommandQueue _cameraQueue;
-    //  SSAO队列
-    MaterialCommandQueue _ssaoQueue;
+    //  深度队列
+    MaterialCommandQueue _depthQueue;
     //  阴影烘培队列
     MaterialCommandQueue _shadowQueue;
     //  光源类型队列

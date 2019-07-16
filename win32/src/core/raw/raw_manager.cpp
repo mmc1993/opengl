@@ -588,9 +588,10 @@ void RawManager::ImportProgram(const std::string & url)
                 {
                     ss >> word;
                     if (word == "Light")            { pass->mRenderType = 0; }
-                    else if (word == "Shadow")      { pass->mRenderType = 1; }
-                    else if (word == "Forward")     { pass->mRenderType = 2; }
-                    else if (word == "Deferred")    { pass->mRenderType = 3; }
+                    else if (word == "Depth")       { pass->mRenderType = 1; }
+                    else if (word == "Shadow")      { pass->mRenderType = 2; }
+                    else if (word == "Forward")     { pass->mRenderType = 3; }
+                    else if (word == "Deferred")    { pass->mRenderType = 4; }
                     else { ASSERT_LOG(false, "½âÎöPassÊôĞÔ´íÎó: {0}, {1}", word, line); }
                 }
                 else if (word == "DrawType")
