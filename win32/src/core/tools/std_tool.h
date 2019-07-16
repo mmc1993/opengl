@@ -21,4 +21,10 @@ namespace std {
     {
         return none_of(first, last, [&](const auto & ele) { return ele == val; });
     }
+
+    template <class T>
+    size_t length(const T & arr)
+    {
+        return std::distance(std::begin(arr), std::end(arr));
+    }
 }

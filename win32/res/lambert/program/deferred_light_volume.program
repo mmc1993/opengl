@@ -1,22 +1,59 @@
 Common Beg
-#version 330 core
+    #version 330 core
 
-#define LIGHT_TYPE_DIRECT_  0
-#define LIGHT_TYPE_POINT_   1
-#define LIGHT_TYPE_SPOT_    2
+    #define LIGHT_TYPE_DIRECT_  0
+    #define LIGHT_TYPE_POINT_   1
+    #define LIGHT_TYPE_SPOT_    2
 
-uniform vec3    camera_pos_;
-uniform mat4    matrix_mvp_;
-uniform int     light_type_;
+    uniform vec3    camera_pos_;
+    uniform mat4    matrix_mvp_;
+    uniform int     light_type_;
 
-uniform	sampler2D gbuffer_position_;
-uniform	sampler2D gbuffer_diffuse_;
-uniform	sampler2D gbuffer_normal_;
-uniform sampler2D screen_sao_;
+    uniform	sampler2D gbuffer_position_;
+    uniform	sampler2D gbuffer_diffuse_;
+    uniform	sampler2D gbuffer_normal_;
+    uniform sampler2D screen_sao_;
 
-uniform sampler2D   shadow_map_direct_0_;
-uniform samplerCube shadow_map_point_0_;
-uniform sampler2D   shadow_map_spot_0_;
+    uniform sampler2D   shadow_map_direct_0_;
+    uniform samplerCube shadow_map_point_0_;
+    uniform sampler2D   shadow_map_spot_0_;
+
+    FShader Beg
+        int CheckInView(vec4 vec)
+        {
+            int ret = 0;
+            if		(vec.x < -vec.w) ret |= 1;
+            else if (vec.x >  vec.w) ret |= 2;
+            else if (vec.y < -vec.w) ret |= 4;
+            else if (vec.y >  vec.w) ret |= 8;
+            else if (vec.z < -vec.w) ret |= 16;
+            else if (vec.z >  vec.w) ret |= 32;
+            return ret;
+        }
+
+        //	计算漫反射缩放因子
+        float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
+        {
+            float v = max(dot(fragNormal, lightNormal), 0);
+            if (v < 0.55)       return 0.0;
+            else if (v < 0.80)  return 0.5;
+            else                return 1;
+        }
+
+        //	计算距离衰减缩放因子
+        float CalculateDistanceScale(vec3 fragPosition, vec3 lightPosition, float k0, float k1, float k2)
+        {
+            float len = length(fragPosition - lightPosition);
+            return 1.0f / (k0 + k1 * len + k2 * len * len);
+        }
+
+        //	计算外锥衰减缩放因子
+        float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 lightToFrag)
+        {
+            float cone = dot(lightNormal, lightToFrag);
+            return clamp((cone - outCone) / (inCone - outCone), 0, 1);
+        }
+    FShader End
 
 Common End
 
@@ -104,25 +141,11 @@ Pass Beg
 			vec3 mPosition;
         } light_spot_;
 
-
-
         in V_OUT_ {
             vec4 mMVPPos;
         } v_out_;
 
 		out vec4 color_;
-
-        int CheckInView(vec4 vec)
-        {
-            int ret = 0;
-            if		(vec.x < -vec.w) ret |= 1;
-            else if (vec.x >  vec.w) ret |= 2;
-            else if (vec.y < -vec.w) ret |= 4;
-            else if (vec.y >  vec.w) ret |= 8;
-            else if (vec.z < -vec.w) ret |= 16;
-            else if (vec.z >  vec.w) ret |= 32;
-            return ret;
-        }
 
         float CalculateDirectShadow(const vec3 position)
         {
@@ -169,30 +192,6 @@ Pass Beg
 			vec3 normal = position - light_point_.mPosition;
 			float z 	= texture(shadow_map_point_0_, normal).r;
 			return length(normal) > z * light_point_.mFar + 1? 0 : 1;
-		}
-
-		//	计算漫反射缩放因子
-		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
-		{
-            float v = max(dot(fragNormal, lightNormal), 0);
-            if (v < 0.3)        return 0;
-            else if (v < 0.5)   return 0.3;
-            else if (v < 0.8)   return 0.5;
-            else                return 1;
-		}
-
-		//	计算距离衰减缩放因子
-		float CalculateDistanceScale(vec3 fragPosition, vec3 lightPosition, float k0, float k1, float k2)
-		{
-			float len = length(fragPosition - lightPosition);
-			return 1.0f / (k0 + k1 * len + k2 * len * len);
-		}
-
-		//	计算外锥衰减缩放因子
-		float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 lightToFrag)
-		{
-			float cone = dot(lightNormal, lightToFrag);
-			return clamp((cone - outCone) / (inCone - outCone), 0, 1);
 		}
 
 		vec3 CalculateDirect(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const float occlus, const vec2 uv)
@@ -350,26 +349,6 @@ Pass Beg
         } v_out_;
 
 		out vec4 color_;
-
-		//	计算漫反射缩放因子
-		float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
-		{
-			return max(dot(fragNormal, lightNormal), 0);
-		}
-
-		//	计算距离衰减缩放因子
-		float CalculateDistanceScale(vec3 fragPosition, vec3 lightPosition, float k0, float k1, float k2)
-		{
-			float len = length(fragPosition - lightPosition);
-			return 1.0f / (k0 + k1 * len + k2 * len * len);
-		}
-
-		//	计算外锥衰减缩放因子
-		float CalculateOutConeScale(float inCone, float outCone, vec3 lightNormal, vec3 lightToFrag)
-		{
-			float cone = dot(lightNormal, lightToFrag);
-			return clamp((cone - outCone) / (inCone - outCone), 0, 1);
-		}
 
 		vec3 CalculateDirect(const vec3 fragCoord, const vec3 fragNormal, const vec3 cameraNormal, const vec3 diffuse, const float occlus, const vec2 uv)
 		{

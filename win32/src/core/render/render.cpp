@@ -15,10 +15,7 @@ Render::~Render()
     glDeleteTextures(LIMIT_LIGHT_POINT, _bufferSet.mShadowMap.mPointTexture);
     glDeleteTextures(LIMIT_LIGHT_SPOT, _bufferSet.mShadowMap.mSpotTexture);
 
-    glDeleteTextures(1, &_bufferSet.mGBuffer.mNormalTexture);
-    glDeleteTextures(1, &_bufferSet.mGBuffer.mDiffuseTexture);
-    glDeleteTextures(1, &_bufferSet.mGBuffer.mPositionTexture);
-    glDeleteTextures(1, &_bufferSet.mGBuffer.mSpecularTexture);
+    glDeleteTextures(3, &_bufferSet.mGBuffer.mPositionTexture);
 
     glDeleteTextures(1, &_bufferSet.mPostScreen.mColorTexture);
     glDeleteTextures(1, &_bufferSet.mPostScreen.mDepthTexture);
@@ -145,17 +142,10 @@ void Render::InitRender()
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //  G-Buffer
-        glGenTextures(4,  &_bufferSet.mGBuffer.mPositionTexture);
+        glGenTextures(3,  &_bufferSet.mGBuffer.mPositionTexture);
 
         glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mPositionTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGB, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glBindTexture(GL_TEXTURE_2D, _bufferSet.mGBuffer.mSpecularTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -493,14 +483,17 @@ void Render::RenderGBuffer()
 {
     _renderTarget[0].Start(RenderTarget::BindType::kALL);
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mPositionTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mSpecularTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
-    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR3, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
+    _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
     _renderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mPostScreen.mDepthTexture);
 
-    uint outputs[] = { RenderTarget::AttachmentType::kCOLOR0, RenderTarget::AttachmentType::kCOLOR1,
-                       RenderTarget::AttachmentType::kCOLOR2, RenderTarget::AttachmentType::kCOLOR3 };
-    glDrawBuffers(4, outputs);
+    auto e = glGetError();
+
+    uint outputs[] = {
+        RenderTarget::AttachmentType::kCOLOR0, 
+        RenderTarget::AttachmentType::kCOLOR1, 
+        RenderTarget::AttachmentType::kCOLOR2 };
+    glDrawBuffers(std::length(outputs), outputs);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -603,10 +596,9 @@ void Render::RenderLightVolume(const LightCommand & command, uint shadow)
     if (Bind(command.mProgram, shadow != 0u? 0u: 1u))
     {
         _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_POSIITON, _bufferSet.mGBuffer.mPositionTexture, _renderState.mTexBase + 0);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_SPECULAR, _bufferSet.mGBuffer.mSpecularTexture, _renderState.mTexBase + 1);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferSet.mGBuffer.mDiffuseTexture, _renderState.mTexBase + 2);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferSet.mGBuffer.mNormalTexture, _renderState.mTexBase + 3);
-        _renderState.mProgram->BindUniformTex2D(UNIFORM_SCREEN_SAO, _bufferSet.mSSAO.mOcclusionTexture1, _renderState.mTexBase + 4);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_DIFFUSE, _bufferSet.mGBuffer.mDiffuseTexture, _renderState.mTexBase + 1);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_GBUFFER_NORMAL, _bufferSet.mGBuffer.mNormalTexture, _renderState.mTexBase + 2);
+        _renderState.mProgram->BindUniformTex2D(UNIFORM_SCREEN_SAO, _bufferSet.mSSAO.mOcclusionTexture1, _renderState.mTexBase + 3);
     }
     ASSERT_LOG(command.mProgram->GetPass(0).mRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(0).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(0).mRenderType);
     ASSERT_LOG(command.mProgram->GetPass(1).mRenderType == RenderTypeEnum::kLIGHT, "command.mProgram->GetPass(1).vRenderType == RenderTypeEnum::kLIGHT. {0}", command.mProgram->GetPass(1).mRenderType);
@@ -614,9 +606,9 @@ void Render::RenderLightVolume(const LightCommand & command, uint shadow)
     {
         switch (command.mLight->GetType())
         {
-        case Light::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), shadow, _renderState.mTexBase + 5); break;
-        case Light::kPOINT: _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), shadow, _renderState.mTexBase + 5); break;
-        case Light::kSPOT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), shadow, _renderState.mTexBase + 5); break;
+        case Light::kDIRECT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_DIRECT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
+        case Light::kPOINT: _renderState.mProgram->BindUniformTex3D(SFormat(UNIFORM_SHADOW_MAP_POINT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
+        case Light::kSPOT: _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, 0).c_str(), shadow, _renderState.mTexBase + 4); break;
         }
     }
     Post(command.mLight);

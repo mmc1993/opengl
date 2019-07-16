@@ -36,7 +36,6 @@ public:
         //  G-Buffer
         struct GBuffer {
             uint mPositionTexture;
-            uint mSpecularTexture;
             uint mDiffuseTexture;
             uint mNormalTexture;
         } mGBuffer;

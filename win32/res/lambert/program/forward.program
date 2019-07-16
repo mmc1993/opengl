@@ -1,5 +1,11 @@
 Common Beg
     #version 330 core
+
+    //  光源
+    #define LIGHT_TYPE_DIRECT_ 0
+    #define LIGHT_TYPE_POINT_ 1
+    #define LIGHT_TYPE_SPOT_ 2
+
     //  矩阵/相机
     uniform vec3 camera_pos_;
     uniform mat4 matrix_mvp_;
@@ -9,10 +15,21 @@ Common Beg
     uniform mat4 matrix_v_;
     uniform mat3 matrix_n_;
 
-    //  光源
-    #define LIGHT_TYPE_DIRECT_ 0
-    #define LIGHT_TYPE_POINT_ 1
-    #define LIGHT_TYPE_SPOT_ 2
+    uniform int light_count_direct_;
+    uniform int light_count_point_;
+    uniform int light_count_spot_;
+    uniform int light_type_;
+
+    uniform sampler2D   shadow_map_direct_0_;
+    uniform sampler2D   shadow_map_direct_1_;
+    uniform samplerCube shadow_map_point_0_;
+    uniform samplerCube shadow_map_point_1_;
+    uniform samplerCube shadow_map_point_2_;
+    uniform samplerCube shadow_map_point_3_;
+    uniform sampler2D   shadow_map_spot_0_;
+    uniform sampler2D   shadow_map_spot_1_;
+    uniform sampler2D   shadow_map_spot_2_;
+    uniform sampler2D   shadow_map_spot_3_;
 
     struct LightDirectParam_ {
         mat4 mMatrix;
@@ -58,11 +75,6 @@ Common Beg
         LightSpotParam_ mParam[2];
     } light_spot_;
 
-    uniform int light_count_direct_;
-    uniform int light_count_point_;
-    uniform int light_count_spot_;
-    uniform int light_type_;
-
     VShader Beg
         layout(location = 0) in vec3 a_v_;
         layout(location = 1) in vec3 a_n_;
@@ -82,18 +94,6 @@ Common Beg
     VShader End
 
     FShader Beg
-        //  阴影
-		uniform sampler2D   shadow_map_direct_0_;
-		uniform sampler2D   shadow_map_direct_1_;
-		uniform samplerCube shadow_map_point_0_;
-		uniform samplerCube shadow_map_point_1_;
-		uniform samplerCube shadow_map_point_2_;
-		uniform samplerCube shadow_map_point_3_;
-		uniform sampler2D   shadow_map_spot_0_;
-		uniform sampler2D   shadow_map_spot_1_;
-		uniform sampler2D   shadow_map_spot_2_;
-		uniform sampler2D   shadow_map_spot_3_;
-
         //  材质
         uniform struct Material_ {
             sampler2D mDiffuse0;
@@ -115,11 +115,11 @@ Common Beg
 Common End
 
 Pass Beg
-    CullFace Front
+    CullFace    Front
     DepthTest
 	DepthWrite
-	RenderType Shadow
-	DrawType Index
+	RenderType  Shadow
+	DrawType    Index
 
     VShader Beg
         void main()
