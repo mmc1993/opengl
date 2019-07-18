@@ -734,12 +734,7 @@ void RawManager::ImportMaterial(const std::string & url)
     {
         RawMaterial::Item item;
         item.mKey = jitem.mValue->At("key")->ToString();
-        if (jitem.mValue->At("type")->ToString() == "number")
-        {
-            item.mType = GLMaterial::Item::kNUMBER;
-            item.mValNum = (float)jitem.mValue->At("val")->ToDouble();
-        }
-        else if (jitem.mValue->At("type")->ToString() == "tex2d")
+        if      (jitem.mValue->At("type")->ToString() == "tex2d")
         {
             item.mType = GLMaterial::Item::kTEX2D;
             item.mValStr = jitem.mValue->At("val")->ToString();
@@ -821,14 +816,9 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
     {
         switch (item.mType)
         {
-        case GLMaterial::Item::kNUMBER:
-            {
-                res->SetItem(item.mType, item.mKey, item.mValNum);
-            }
-            break;
         case GLMaterial::Item::kTEX2D:
             {
-                res->SetItem(item.mType, item.mKey, LoadRes<GLTexture2D>(item.mValStr));
+                res->SetItem(item.mKey, LoadRes<GLTexture2D>(item.mValStr));
             }
             break;
         }

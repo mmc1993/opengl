@@ -306,11 +306,9 @@ void Render::Post(const GLMaterial * material)
     {
         auto & item = material->GetItems().at(i);
         auto key    = SFormat(UNIFORM_MATERIAL, item.mKey);
-        switch (item.mType)
+        if (item.mTex2D != nullptr)
         {
-        case GLMaterial::Item::kNUMBER: { _renderState.mProgram->BindUniformNumber(key.c_str(), std::any_cast<const float &>(item.mVal)); } break;
-        case GLMaterial::Item::kTEX2D:  { _renderState.mProgram->BindUniformTex2D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
-        case GLMaterial::Item::kTEX3D:  { _renderState.mProgram->BindUniformTex3D(key.c_str(), std::any_cast<GLTexture2D *>(item.mVal)->GetID(), _renderState.mTexBase + i); } break;
+            _renderState.mProgram->BindUniformTex2D(key.c_str(), item.mTex2D->GetID(), _renderState.mTexBase + i);
         }
     }
 }

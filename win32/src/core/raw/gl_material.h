@@ -9,26 +9,25 @@ class GLMaterial : public GLRes {
 public:
     struct Item {
         enum TypeEnum {
-            kNUMBER,
             kTEX2D,
             kTEX3D,
         };
 
-        std::string mKey;
-        std::any    mVal;
-        TypeEnum    mType;
+        std::string         mKey;
+        const GLTexture2D * mTex2D;
         
-        template <class Val>
-        Item(const TypeEnum type, const std::string & key, const Val & val)
-            : mType(type), mKey(key), mVal(val)
+        Item() 
+            : mTex2D(nullptr) 
+        { }
+
+        Item(const std::string & key, const GLTexture2D * tex2D)
+            : mKey(key), mTex2D(tex2D)
         { }
 
         bool operator==(const std::string & key) const
         {
             return mKey == key;
         }
-
-        Item() = default;
     };
 
 public:
@@ -55,21 +54,12 @@ public:
         return _glProgram;
     }
 
-    template <class Val>
-    void SetItem(const Item::TypeEnum type, const std::string & key, const Val & val)
+    template <class T>
+    void SetItem(const std::string & key, const T & val)
     {
         auto it = std::find(_items.begin(), _items.end(), key);
-        if (it == _items.end())
-        {
-            _items.emplace_back(type, key, val);
-        }
-        else
-        {
-            ASSERT_LOG(it->mVal.type() == typeid(Val), "{0}, {1}", 
-                       it->mVal.type().name(), typeid(Val).name());
-            ASSERT_LOG(it->mType == type, "{0}, {1}", it->mType, type);
-            it->mVal.emplace<Val>(val);
-        }
+        if (it != _items.end()) { *it = Item(key, val); }
+        else { _items.emplace_back(key, val); }
     }
 
     const std::vector<Item> & GetItems() const
