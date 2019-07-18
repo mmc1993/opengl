@@ -25,9 +25,9 @@
     <ClInclude Include="src\core\raw\gl_material.h" />
     <ClInclude Include="src\core\raw\gl_mesh.h" />
     <ClInclude Include="src\core\raw\gl_program.h" />
+    <ClInclude Include="src\core\raw\gl_res.h" />
     <ClInclude Include="src\core\raw\gl_texture2d.h" />
     <ClInclude Include="src\core\raw\raw_manager.h" />
-    <ClInclude Include="src\core\raw\gl_res.h" />
     <ClInclude Include="src\core\render\render_enum.h" />
     <ClInclude Include="src\core\render\render_util.h" />
     <ClInclude Include="src\core\base.h" />
@@ -382,7 +382,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\roaming.cpp" />
-    <ClCompile Include="src\core\raw\raw_manager.cpp" />
     <ClCompile Include="src\core\component\light.cpp" />
     <ClCompile Include="src\core\component\sprite.cpp" />
     <ClCompile Include="src\core\component\transform.cpp" />
@@ -390,6 +389,7 @@
     <ClCompile Include="src\core\global.cpp" />
     <ClCompile Include="src\core\component\camera.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
+    <ClCompile Include="src\core\raw\raw_manager.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\render\render_target.cpp" />
     <ClCompile Include="src\core\third\code\code.cpp" />

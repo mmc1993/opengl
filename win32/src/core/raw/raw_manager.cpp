@@ -532,14 +532,14 @@ void RawManager::ImportProgram(const std::string & url)
                 else if (word == "DepthFunc")
                 {
                     ss >> word;
-                    if (word == "Less")                     { pass->mBlendSrc = GL_LESS; }
-                    else if (word == "Never")               { pass->mBlendSrc = GL_NEVER; }
-                    else if (word == "Equal")               { pass->mBlendSrc = GL_EQUAL; }
-                    else if (word == "LEqual")              { pass->mBlendSrc = GL_LEQUAL; }
-                    else if (word == "GEqual")              { pass->mBlendSrc = GL_GEQUAL; }
-                    else if (word == "Always")              { pass->mBlendSrc = GL_ALWAYS; }
-                    else if (word == "Greater")             { pass->mBlendSrc = GL_GREATER; }
-                    else if (word == "NoteQual")            { pass->mBlendSrc = GL_NOTEQUAL; }
+                    if (word == "Less")                     { pass->mDepthFunc = GL_LESS; }
+                    else if (word == "Never")               { pass->mDepthFunc = GL_NEVER; }
+                    else if (word == "Equal")               { pass->mDepthFunc = GL_EQUAL; }
+                    else if (word == "LEqual")              { pass->mDepthFunc = GL_LEQUAL; }
+                    else if (word == "GEqual")              { pass->mDepthFunc = GL_GEQUAL; }
+                    else if (word == "Always")              { pass->mDepthFunc = GL_ALWAYS; }
+                    else if (word == "Greater")             { pass->mDepthFunc = GL_GREATER; }
+                    else if (word == "NoteQual")            { pass->mDepthFunc = GL_NOTEQUAL; }
                     else { ASSERT_LOG(false, "½âÎöPassÊôÐÔ´íÎó: {0}, {1}", word, line); }
                 }
                 else if (word == "DepthTest")               { pass->mDepthTest = true; }

@@ -180,7 +180,7 @@ Pass End
 
 Pass Beg
     CullFace        Back
-    DepthFunc       Always
+    DepthFunc       Equal
     DepthTest
     RenderQueue     Geometric
     RenderType      Forward

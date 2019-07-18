@@ -1050,28 +1050,10 @@
     <ClInclude Include="src\core\cfg\cfg_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\raw\raw_manager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\tools\file_tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\raw\gl_res.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\raw\gl_texture2d.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\raw\gl_mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\raw\gl_program.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\raw\gl_material.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\config.h">
@@ -1093,6 +1075,24 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\component\roaming.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_res.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_texture2d.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\raw_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\raw\gl_program.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1136,13 +1136,13 @@
     <ClCompile Include="src\core\global.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\raw\raw_manager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\third\code\code.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\component\roaming.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\raw\raw_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
