@@ -15,6 +15,7 @@ public:
         iint        mBlendSrc;
         iint        mBlendDst;
         //  深度测试
+        iint        mDepthFunc;         //  深度测试函数
         short       mDepthTest;         //  开启深度测试
         short       mDepthWrite;        //  开启深度写入
         //  模板测试
@@ -131,6 +132,11 @@ public:
             glDisable(GL_BLEND);
         }
 
+        if (pass.mDepthFunc != 0)
+        {
+            glDepthFunc(pass.mDepthFunc);
+        }
+
         if (pass.mDepthTest)
         {
             glEnable(GL_DEPTH_TEST);
@@ -138,6 +144,15 @@ public:
         else
         {
             glDisable(GL_DEPTH_TEST);
+        }
+        
+        if (pass.mDepthWrite)
+        {
+            glDepthMask(GL_TRUE);
+        }
+        else
+        {
+            glDepthMask(GL_FALSE);
         }
 
         if (pass.mStencilOpFail != 0 && pass.mStencilOpZFail != 0 && pass.mStencilOpZPass != 0)

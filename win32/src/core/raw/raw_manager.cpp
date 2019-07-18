@@ -482,6 +482,7 @@ void RawManager::ImportProgram(const std::string & url)
 
             if (string_tool::IsEqualSkipSpace(line, "CullFace") 
                 || string_tool::IsEqualSkipSpace(line, "BlendMode")
+                || string_tool::IsEqualSkipSpace(line, "DepthFunc")
                 || string_tool::IsEqualSkipSpace(line, "DepthTest")
                 || string_tool::IsEqualSkipSpace(line, "DepthWrite")
                 || string_tool::IsEqualSkipSpace(line, "StencilTest")
@@ -526,6 +527,19 @@ void RawManager::ImportProgram(const std::string & url)
                     else if (word == "OneMinusSrcColor")    { pass->mBlendDst = GL_ONE_MINUS_SRC_COLOR; }
                     else if (word == "OneMinusSrcAlpha")    { pass->mBlendDst = GL_ONE_MINUS_SRC_ALPHA; }
                     else if (word == "OneMinusDstAlpha")    { pass->mBlendDst = GL_ONE_MINUS_DST_ALPHA; }
+                    else { ASSERT_LOG(false, "½âÎöPassÊôÐÔ´íÎó: {0}, {1}", word, line); }
+                }
+                else if (word == "DepthFunc")
+                {
+                    ss >> word;
+                    if (word == "Less")                     { pass->mBlendSrc = GL_LESS; }
+                    else if (word == "Never")               { pass->mBlendSrc = GL_NEVER; }
+                    else if (word == "Equal")               { pass->mBlendSrc = GL_EQUAL; }
+                    else if (word == "LEqual")              { pass->mBlendSrc = GL_LEQUAL; }
+                    else if (word == "GEqual")              { pass->mBlendSrc = GL_GEQUAL; }
+                    else if (word == "Always")              { pass->mBlendSrc = GL_ALWAYS; }
+                    else if (word == "Greater")             { pass->mBlendSrc = GL_GREATER; }
+                    else if (word == "NoteQual")            { pass->mBlendSrc = GL_NOTEQUAL; }
                     else { ASSERT_LOG(false, "½âÎöPassÊôÐÔ´íÎó: {0}, {1}", word, line); }
                 }
                 else if (word == "DepthTest")               { pass->mDepthTest = true; }

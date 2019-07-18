@@ -97,7 +97,7 @@ private:
 
         auto sprite1 = new Sprite();
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
-        
+
         auto object1 = new Object();
         object1->AddComponent(sprite1);
         object1->GetTransform()->Translate(3, 2, 0);

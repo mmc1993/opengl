@@ -117,6 +117,7 @@ Common End
 Pass Beg
     CullFace    Front
     DepthTest
+    DepthFunc   Less
 	DepthWrite
 	RenderType  Shadow
 	DrawType    Index
@@ -157,9 +158,30 @@ Pass Beg
 Pass End
 
 Pass Beg
-    CullFace        Back
+    CullFace    Back
     DepthTest
-    DepthWrite
+	DepthWrite
+	RenderType  Depth
+	DrawType    Index
+
+    VShader Beg
+        void main()
+        {
+			gl_Position = vec4(matrix_mvp_ * vec4(a_v_, 1));
+        }
+    VShader End
+
+    FShader Beg
+        void main()
+        {
+        }
+    FShader End
+Pass End
+
+Pass Beg
+    CullFace        Back
+    DepthFunc       Always
+    DepthTest
     RenderQueue     Geometric
     RenderType      Forward
     DrawType        Index

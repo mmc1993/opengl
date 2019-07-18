@@ -45,6 +45,7 @@ public:
 		kCOLOR6 = GL_COLOR_ATTACHMENT0 + 6,
 		kDEPTH  = GL_DEPTH_ATTACHMENT,
 		kSTENCIL = GL_DEPTH_STENCIL_ATTACHMENT,
+        kNONE   = GL_NONE,
 	};
 
 	enum TextureType {

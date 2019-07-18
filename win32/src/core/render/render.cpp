@@ -223,6 +223,7 @@ void Render::InitRender()
 
 void Render::ClearCommands()
 {
+    _depthQueue.clear();
     _cameraQueue.clear();
     _shadowQueue.clear();
     for (auto & queue : _lightQueues) { queue.clear(); }
@@ -466,16 +467,16 @@ void Render::RenderCamera()
     //  正向渲染
     _renderState.mProgram = nullptr;
     RenderForward();
-    
+
+    //	后期处理
+    _renderState.mProgram = nullptr;
+
     _target[1].Start(RenderTarget::BindType::kREAD);
     glBlitFramebuffer(
         0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
         0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     _target[1].Ended();
-
-	//	后期处理
-    _renderState.mProgram = nullptr;
 }
 
 void Render::RenderGBuffer()
@@ -485,8 +486,6 @@ void Render::RenderGBuffer()
     _target[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR1, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mDiffuseTexture);
     _target[0].BindAttachment(RenderTarget::AttachmentType::kCOLOR2, RenderTarget::TextureType::k2D, _bufferSet.mGBuffer.mNormalTexture);
     _target[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, _bufferSet.mPostScreen.mDepthTexture);
-
-    auto e = glGetError();
 
     uint outputs[] = {
         RenderTarget::AttachmentType::kCOLOR0, 
@@ -509,20 +508,26 @@ void Render::RenderGBuffer()
             }
         }
     }
+    _target[0].Ended();
 }
 
 void Render::RenderSSAO()
 {
     _target[0].Start(RenderTarget::BindType::kDRAW);
-    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
+    glDrawBuffer(RenderTarget::AttachmentType::kNONE);
 
-    for (const auto & cmd : _depthQueue)
+    //  Render Depth
+    for (const auto & command: _depthQueue)
     {
-        if (Bind(cmd.mMaterial->GetProgram(), cmd.mSubPass))
-        {
-            //  TODO
-        }
+        Bind(command.mMaterial->GetProgram(), command.mSubPass);
+        Post(command.mTransform);
+        Post((DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, command.mMaterial->GetMesh());
     }
+    _target[0].Ended();
+
+    //  Render SSAO
+    _target[0].Start(RenderTarget::BindType::kDRAW);
+    glDrawBuffer(RenderTarget::AttachmentType::kCOLOR0);
 
     //  SSAO => 0
     _target[0].BindAttachment(
@@ -532,11 +537,9 @@ void Render::RenderSSAO()
     Bind(_ssaoProgram, 0);
     Post(glm::mat4(    ));
     _ssaoProgram->BindUniformTex2D(
-        UNIFORM_SCREEN_DEPTH, 
-        _bufferSet.mPostScreen.mDepthTexture, 0);
+        UNIFORM_SCREEN_DEPTH, _bufferSet.mPostScreen.mDepthTexture, 0);
     _ssaoProgram->BindUniformTex2D(
-        UNIFORM_SCREEN_POSTION,
-        _bufferSet.mGBuffer.mPositionTexture, 1);
+        UNIFORM_SCREEN_POSTION, _bufferSet.mGBuffer.mPositionTexture, 1);
     Post(DrawTypeEnum::kINDEX,      _screenQuad);
 
     //  SSAO => 1
@@ -545,8 +548,7 @@ void Render::RenderSSAO()
                                     _bufferSet.mSSAO.mOcclusionTexture1);
     Bind(_ssaoProgram, 1);
     _ssaoProgram->BindUniformTex2D(
-        UNIFORM_SCREEN_SAO,
-        _bufferSet.mSSAO.mOcclusionTexture0, 0);
+        UNIFORM_SCREEN_SAO, _bufferSet.mSSAO.mOcclusionTexture0, 0);
     Post(DrawTypeEnum::kINDEX, _screenQuad);
 
     //  SSAO => OK
@@ -596,7 +598,6 @@ void Render::RenderForward()
     }
     _target[1].Ended();
 }
-
 
 void Render::RenderLightVolume(const LightCommand & command, uint shadow)
 {
