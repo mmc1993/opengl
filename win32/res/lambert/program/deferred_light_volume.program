@@ -34,7 +34,7 @@ Common Beg
         //	计算漫反射缩放因子
         float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
         {
-            float v = max(dot(fragNormal, lightNormal), 0);
+            float v = max(dot(fragNormal, lightNormal), 0) * 0.5f + 0.5f;
             if (v < 0.55)       return 0.0;
             else if (v < 0.80)  return 0.5;
             else                return 1;

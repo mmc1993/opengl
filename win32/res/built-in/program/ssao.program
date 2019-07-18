@@ -23,11 +23,10 @@ Pass Beg
 	VShader End
 
     FShader Beg
-		uniform mat4 matrix_v_;
-		uniform mat4 matrix_p_;
+        uniform mat4 matrix_vp_;
+        uniform mat4 matrix_vp_inv_;
 
         uniform sampler2D screen_depth_;
-        uniform sampler2D screen_position_;
 		
         //  球形采样偏移数据
         vec3 samples[] = vec3[](
@@ -67,21 +66,23 @@ Pass Beg
 
 		void main()
 		{
-            float weight   = 0;
-            vec4  model    = texture(screen_position_, v_out_.mUV);
-            vec4  depth    = texture(screen_depth_   , v_out_.mUV);
-            mat4  viewproj = matrix_p_ * matrix_v_;
+            float weight = 0;
+            vec2 uv      = v_out_.mUV * 2 - 1;
+            vec4 depth   = texture(screen_depth_, v_out_.mUV);
+            vec4 coord   = matrix_vp_inv_ * vec4(uv, depth.r, 1);
+            coord.xyz    = coord.xyz / coord.w;
+            
             for (int i = 0; i != samples.length(); ++i)
             {
-                vec4 pos = vec4(model.xyz + samples[i], 1);
-                pos      = viewproj * pos;
+                vec4 pos = vec4(coord.xyz + samples[i], 1);
+                pos      = matrix_vp_ * pos;
                 pos.xyz  = pos.xyz  / pos.w;
                 pos.xyz  = (pos.xyz + 1) * 0.5;
                 pos      = texture(screen_depth_, pos.xy);
                 if (pos.r < depth.r) { ++weight; }
             }
             weight = max( weight - samples.length() * 0.5, 0);
-            color_ = vec4(weight / samples.length() * 0.5, 0, 0, 1);
+            color_ = vec4(weight / samples.length(), 0, 0, 1);
 		}
 	FShader End
 Pass End

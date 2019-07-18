@@ -513,10 +513,10 @@ void Render::RenderGBuffer()
 
 void Render::RenderSSAO()
 {
+    //  Render Depth
     _target[0].Start(RenderTarget::BindType::kDRAW);
     glDrawBuffer(RenderTarget::AttachmentType::kNONE);
 
-    //  Render Depth
     for (const auto & command: _depthQueue)
     {
         Bind(command.mMaterial->GetProgram(), command.mSubPass);
@@ -538,8 +538,6 @@ void Render::RenderSSAO()
     Post(glm::mat4(    ));
     _ssaoProgram->BindUniformTex2D(
         UNIFORM_SCREEN_DEPTH, _bufferSet.mPostScreen.mDepthTexture, 0);
-    _ssaoProgram->BindUniformTex2D(
-        UNIFORM_SCREEN_POSTION, _bufferSet.mGBuffer.mPositionTexture, 1);
     Post(DrawTypeEnum::kINDEX,      _screenQuad);
 
     //  SSAO => 1
@@ -694,4 +692,5 @@ void Render::BindUBOLightForward()
     {
         _renderState.mProgram->BindUniformTex2D(SFormat(UNIFORM_SHADOW_MAP_SPOT_, n).c_str(), _bufferSet.mShadowMap.mSpotTexture[i],  _renderState.mTexBase++);
     }
+    _renderState.mProgram->BindUniformTex2D(UNIFORM_SCREEN_SAO, _bufferSet.mSSAO.mOcclusionTexture1, _renderState.mTexBase++);
 }

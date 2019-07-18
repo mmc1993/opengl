@@ -7,6 +7,7 @@ Common Beg
     #define LIGHT_TYPE_SPOT_ 2
 
     //  矩阵/相机
+    uniform vec2 view_size_;
     uniform vec3 camera_pos_;
     uniform mat4 matrix_mvp_;
     uniform mat4 matrix_mv_;
@@ -30,6 +31,7 @@ Common Beg
     uniform sampler2D   shadow_map_spot_1_;
     uniform sampler2D   shadow_map_spot_2_;
     uniform sampler2D   shadow_map_spot_3_;
+    uniform sampler2D   screen_sao_;
 
     struct LightDirectParam_ {
         mat4 mMatrix;
@@ -283,7 +285,7 @@ Pass Beg
             return clamp((cone - outCone) / (inCone - outCone), 0, 1);
         }
 
-        vec3 CalculateDirect(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
+        vec3 CalculateDirect(const int i, const vec3 fragNormal, const vec3 cameraNormal, const vec2 uv, const float ssao)
         {
             float shadow = 0;
 			switch (i)
@@ -292,14 +294,13 @@ Pass Beg
 			case 1: shadow = CalculateDirectShadow(i, shadow_map_direct_0_); break;
 			}
 
-            float diff = CalculateDiffuseScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
-
+            float diff   = CalculateDiffuseScale(fragNormal, -light_direct_.mParam[i].mNormal, cameraNormal);
             vec3 ambient = light_direct_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_direct_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
-            return ambient + diffuse * shadow * 1;
+            return ambient * (1 - ssao) + diffuse * shadow * 1;
         }
 
-        vec3 CalculatePoint(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
+        vec3 CalculatePoint(const int i, const vec3 fragNormal, const vec3 cameraNormal, const vec2 uv, const float ssao)
         {
             float shadow = 0;
 			switch (i)
@@ -312,7 +313,7 @@ Pass Beg
 
             vec3 fragToLight = normalize(light_point_.mParam[i].mPosition - v_out_.mMPos);
 
-            float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
+            float diff   = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
             vec3 ambient = light_point_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_point_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
             //	距离衰减
@@ -321,11 +322,10 @@ Pass Beg
                                                     light_point_.mParam[i].mK0, 
                                                     light_point_.mParam[i].mK1,
                                                     light_point_.mParam[i].mK2);
-
-            return (ambient + diffuse * shadow) * distance;
+            return (ambient * (1 - ssao) + diffuse * shadow) * distance;
         }
 
-        vec3 CalculateSpot(const int i, vec3 fragNormal, vec3 cameraNormal, vec2 uv)
+        vec3 CalculateSpot(const int i, const vec3 fragNormal, const vec3 cameraNormal, const vec2 uv, const float ssao)
         {
             float shadow = 0;
 			switch (i)
@@ -338,16 +338,13 @@ Pass Beg
 
             vec3 fragToLight = normalize(light_spot_.mParam[i].mPosition - v_out_.mMPos);
 
-            float diff = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
-
+            float diff   = CalculateDiffuseScale(fragNormal, fragToLight, cameraNormal);
             vec3 ambient = light_spot_.mParam[i].mAmbient * texture(material_.mDiffuse0, uv).rgb;
             vec3 diffuse = light_spot_.mParam[i].mDiffuse * texture(material_.mDiffuse0, uv).rgb * diff;
-
             //	光锥衰减
             float weight = CalculateOutConeScale(light_spot_.mParam[i].mInCone, 
                                                     light_spot_.mParam[i].mOutCone, 
                                                     light_spot_.mParam[i].mNormal, -fragToLight);
-
             //	距离衰减
             float distance = CalculateDistanceScale(v_out_.mMPos, 
                                                     light_spot_.mParam[i].mPosition, 
@@ -355,27 +352,30 @@ Pass Beg
                                                     light_spot_.mParam[i].mK1, 
                                                     light_spot_.mParam[i].mK2);
 
-            return (ambient + diffuse * shadow) * weight * distance;
+            return (ambient * (1 - ssao) + diffuse * shadow) * weight * distance;
         }
 
         void main()
         {
+            vec2 screenUV     = vec2(gl_FragCoord.x / view_size_.x,
+                                     gl_FragCoord.y / view_size_.y);
+            float screenSao   = texture(screen_sao_, screenUV).r;
             vec3 cameraNormal = normalize(camera_pos_ - v_out_.mMPos);
 
             vec3 outColor = vec3(0, 0, 0);
             for (int i = 0; i != light_count_direct_; ++i)
             {
-                outColor += CalculateDirect(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
+                outColor += CalculateDirect(i, v_out_.mNormal, cameraNormal, v_out_.mUV, screenSao);
             }
 
             for (int i = 0; i != light_count_point_; ++i)
             {
-                outColor += CalculatePoint(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
+                outColor += CalculatePoint(i, v_out_.mNormal, cameraNormal, v_out_.mUV, screenSao);
             }
 
             for (int i = 0; i != light_count_spot_; ++i)
             {
-                outColor += CalculateSpot(i, v_out_.mNormal, cameraNormal, v_out_.mUV);
+                outColor += CalculateSpot(i, v_out_.mNormal, cameraNormal, v_out_.mUV, screenSao);
             }
 
             color_ = vec4(outColor, 1);
