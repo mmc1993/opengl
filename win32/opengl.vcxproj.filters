@@ -30,9 +30,6 @@
     <ClInclude Include="src\core\object\object.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\third\glm\detail\_features.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1098,6 +1095,12 @@
     <ClInclude Include="src\core\render\render_type.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\render\renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1110,9 +1113,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\object\object.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\render\render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\third\glm\detail\glm.cpp">
@@ -1146,6 +1146,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\raw\raw_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

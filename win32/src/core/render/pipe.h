@@ -4,7 +4,8 @@
 #include "render_type.h"
 #include "render_target.h"
 
-struct PipeState {
+class PipeState {
+public:
     PipeState()
     {
         memset(&mSSAO,          0,      sizeof(mSSAO));
@@ -18,6 +19,7 @@ struct PipeState {
     //  光源数据
     uint mLightUBO[3];
 
+    //  渲染时信息
     struct RenderTime {
         //  记录当前批次顶点数
         uint mVertexCount;
@@ -84,10 +86,12 @@ struct PipeState {
     std::array<std::vector<MaterialCommand>, 4> mDeferredQueues;
 };
 
+class Renderer;
+
 class Pipe {
 public:
     virtual ~Pipe() {}
-    virtual void OnAdd(PipeState * state) = 0;
-    virtual void OnDel(PipeState * state) = 0;
-    virtual void OnUpdate(PipeState * state) = 0;
+    virtual void OnAdd(Renderer * renderer, PipeState * state) = 0;
+    virtual void OnDel(Renderer * renderer, PipeState * state) = 0;
+    virtual void OnUpdate(Renderer * renderer, PipeState * state) = 0;
 };

@@ -29,7 +29,7 @@ void Light::OnUpdate(float dt)
     command.mMesh     = _volume;
     command.mProgram  = _program;
     command.mTransform= Global::Ref().RefRender().GetMatrixStack().GetM();
-    Global::Ref().RefRender().Post(RenderCommand::kLIGHT, command);
+    Global::Ref().RefRender().Post(CommandEnum::kLIGHT, command);
 
     mPosition = command.mTransform * glm::vec4(0, 0, 0, 1);
 }

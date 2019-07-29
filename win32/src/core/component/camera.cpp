@@ -119,7 +119,7 @@ void Camera::OnUpdate(float dt)
         command.mN = _info.mOrtho.n;
         command.mF = _info.mOrtho.f;
     }
-    Global::Ref().RefRender().Post(RenderCommand::TypeEnum::kCAMERA, command);
+    Global::Ref().RefRender().Post(CommandEnum::kCAMERA, command);
 }
 
 void Camera::Update() const

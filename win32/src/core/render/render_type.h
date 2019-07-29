@@ -176,13 +176,13 @@ private:
     mutable std::array<std::stack<glm::mat4>, 3> _matrixs;
 };
 
+enum class CommandEnum {
+    kMATERIAL,
+    kCAMERA,
+    kLIGHT,
+};
 //  用于渲染的命令结构
 struct RenderCommand {
-    enum TypeEnum {
-        kMATERIAL,
-        kCAMERA,
-        kLIGHT,
-    };
 };
 
 //  材质渲染命令
