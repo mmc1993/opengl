@@ -3,6 +3,8 @@
 #include <iterator>
 #include <algorithm>
 
+#define SAFE_DELETE(ptr)        { delete ptr; ptr = nullptr; }
+
 namespace std {
     template <class Iter, class Val>
     bool all_ofv(Iter first, Iter last, const Val & val)
