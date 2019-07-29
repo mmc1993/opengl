@@ -28,8 +28,9 @@
     <ClInclude Include="src\core\raw\gl_res.h" />
     <ClInclude Include="src\core\raw\gl_texture2d.h" />
     <ClInclude Include="src\core\raw\raw_manager.h" />
-    <ClInclude Include="src\core\render\render_enum.h" />
-    <ClInclude Include="src\core\render\render_util.h" />
+    <ClInclude Include="src\core\render\pipe.h" />
+    <ClInclude Include="src\core\render\pipe_forward.h" />
+    <ClInclude Include="src\core\render\render_type.h" />
     <ClInclude Include="src\core\base.h" />
     <ClInclude Include="src\core\component\component.h" />
     <ClInclude Include="src\core\component\light.h" />

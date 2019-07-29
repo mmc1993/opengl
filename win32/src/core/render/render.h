@@ -1,16 +1,11 @@
 #pragma once
 
 #include "../include.h"
-#include "render_util.h"
-#include "render_enum.h"
+#include "render_type.h"
 #include "render_target.h"
 
 class Render {
 public:
-    static constexpr uint LIMIT_LIGHT_DIRECT = 1;
-    static constexpr uint LIMIT_LIGHT_POINT = 2;
-    static constexpr uint LIMIT_LIGHT_SPOT = 3;
-
     //  渲染状态
     struct RenderState {
         //  记录当前批次顶点数
@@ -128,22 +123,22 @@ private:
     RenderTarget _target[2];
     BufferSet    _bufferSet;
     MatrixStack  _matrixStack;
-    GLMesh *     _screenQuad;
-    GLProgram * _ssaoProgram;
+    GLMesh     * _screenQuad;
+    GLProgram  * _ssaoProgram;
 
     //  状态
     RenderState _renderState;
     //  相机渲染队列
-    CameraCommandQueue _cameraQueue;
+    std::vector<CameraCommand> _cameraQueue;
     //  深度队列
-    MaterialCommandQueue _depthQueue;
+    std::vector<MaterialCommand> _depthQueue;
     //  阴影烘培队列
-    MaterialCommandQueue _shadowQueue;
+    std::vector<MaterialCommand> _shadowQueue;
     //  光源类型队列
-    std::array<LightCommandQueue, 3> _lightQueues;
+    std::array<std::vector<LightCommand>, 3> _lightQueues;
     //  正向渲染队列
-    std::array<MaterialCommandQueue, 4> _forwardQueues;
+    std::array<std::vector<MaterialCommand>, 4> _forwardQueues;
     //  延迟渲染队列
-    std::array<MaterialCommandQueue, 4> _deferredQueues;
+    std::array<std::vector<MaterialCommand>, 4> _deferredQueues;
 };
 

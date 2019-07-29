@@ -1038,12 +1038,6 @@
     <ClInclude Include="src\core\base.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render_enum.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\render\render_util.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\event\event_enum.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1093,6 +1087,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\core\raw\gl_program.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\pipe.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\pipe_forward.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\render_type.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
