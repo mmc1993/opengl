@@ -4,6 +4,8 @@
 #include "render_type.h"
 #include "render_target.h"
 
+class Light;
+
 class Render {
 public:
     //  渲染状态
@@ -90,7 +92,7 @@ private:
 
     //  Post 系函数.
     //      该系函数完成数据提交, 但不修改渲染器内部状态
-    void Post(const Light * light);
+    void Post(const LightCommand &command);
     void Post(const GLMaterial * material);
     void Post(const glm::mat4 & transform);
     void Post(DrawTypeEnum drawType, const GLMesh * mesh);

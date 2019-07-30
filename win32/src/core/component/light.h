@@ -44,6 +44,7 @@ public:
 protected:
     uint        _ubo;
     glm::mat4   _proj;
+    glm::mat4   _view;
     GLProgram   * _program;
     GLMesh      * _volume;
 private:
@@ -82,9 +83,6 @@ public:
 
 public:
     glm::vec3 mNormal;
-
-private:
-    glm::mat4 _view;
 };
 
 class LightPoint : public Light {
@@ -152,7 +150,4 @@ public:
 	glm::vec3 mNormal;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
-
-private:
-    glm::mat4 _view;
 };

@@ -1101,6 +1101,9 @@
     <ClInclude Include="src\core\render\render.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\render\pipe_shadow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1155,6 +1158,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\pipe.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\pipe_shadow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

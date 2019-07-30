@@ -15,9 +15,9 @@ Renderer::~Renderer()
     SAFE_DELETE(_state);
 }
 
-MatrixStack & Renderer::GetMaterialStack()
+MatrixStack & Renderer::GetMatrixStack()
 {
-    return _state->mMaterialStack;
+    return _state->mMatrixStack;
 }
 
 uint Renderer::GetVertexCount()
@@ -42,6 +42,7 @@ void Renderer::RenderOnce()
     for (auto & camera : _state->mCameraQueue)
     {
         Bind(&camera);
+        SortLightCommands();
         for (auto & pipe : _pipes)
         {pipe->OnUpdate(this, _state);}
         Bind((CameraCommand *)nullptr);
@@ -64,22 +65,45 @@ void Renderer::ClearCommands()
     for (auto & queue : _state->mDeferredQueues) { queue.clear(); }
 }
 
+void Renderer::SortLightCommands()
+{
+    const auto & cameraPos = _state->mRenderTime.mCamera->mPos;
+
+    std::sort(_state->mLightQueues.at(Light::kPOINT).begin(),
+              _state->mLightQueues.at(Light::kPOINT).end(),
+        [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+        {
+            auto diff0 = (cameraPos - command0.mPosition);
+            auto diff1 = (cameraPos - command1.mPosition);
+            return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
+        });
+
+    std::sort(_state->mLightQueues.at(Light::kSPOT).begin(),
+              _state->mLightQueues.at(Light::kSPOT).end(),
+        [&cameraPos](const LightCommand & command0, const LightCommand & command1)
+        {
+            auto diff0 = (cameraPos - command0.mPosition);
+            auto diff1 = (cameraPos - command1.mPosition);
+            return glm::dot(diff0, diff0) < glm::dot(diff1, diff1);
+        });
+}
+
 void Renderer::Bind(const CameraCommand * command)
 {
     if (command != nullptr)
     {
-        _state->mMaterialStack.Identity(MatrixStack::kVIEW);
-        _state->mMaterialStack.Identity(MatrixStack::kPROJ);
-        _state->mMaterialStack.Mul(MatrixStack::kVIEW, command->mView);
-        _state->mMaterialStack.Mul(MatrixStack::kPROJ, command->mProj);
+        _state->mMatrixStack.Identity(MatrixStack::kVIEW);
+        _state->mMatrixStack.Identity(MatrixStack::kPROJ);
+        _state->mMatrixStack.Mul(MatrixStack::kVIEW, command->mView);
+        _state->mMatrixStack.Mul(MatrixStack::kPROJ, command->mProj);
         glViewport((int)command->mViewport.x, (int)command->mViewport.y,
                    (int)command->mViewport.z, (int)command->mViewport.w);
         _state->mRenderTime.mCamera = command;
     }
     else
     {
-        _state->mMaterialStack.Pop(MatrixStack::kVIEW);
-        _state->mMaterialStack.Pop(MatrixStack::kPROJ);
+        _state->mMatrixStack.Pop(MatrixStack::kVIEW);
+        _state->mMatrixStack.Pop(MatrixStack::kPROJ);
         _state->mRenderTime.mCamera = nullptr;
     }
 }
@@ -96,9 +120,9 @@ bool Renderer::Bind(const GLProgram * program, uint pass)
     return _state->mRenderTime.mProgram->UsePass(pass);
 }
 
-void Renderer::Post(const Light * light)
+void Renderer::Post(const LightCommand * command)
 {
-    switch (light->GetType())
+    switch (command->mType)
     {
     case Light::kDIRECT:
         {
@@ -106,7 +130,7 @@ void Renderer::Post(const Light * light)
             if (GL_INVALID_INDEX != idx)
             {
                 glUniformBlockBinding(_state->mRenderTime.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_DIRECT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, light->GetUBO());
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_DIRECT, command->mUBO);
             }
         }
         break;
@@ -116,7 +140,7 @@ void Renderer::Post(const Light * light)
             if (GL_INVALID_INDEX != idx)
             {
                 glUniformBlockBinding(_state->mRenderTime.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_POINT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, light->GetUBO());
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_POINT, command->mUBO);
             }
         }
         break;
@@ -126,19 +150,19 @@ void Renderer::Post(const Light * light)
             if (GL_INVALID_INDEX != idx)
             {
                 glUniformBlockBinding(_state->mRenderTime.mProgram->GetUseID(), idx, UniformBlockEnum::kLIGHT_SPOT);
-                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, light->GetUBO());
+                glBindBufferBase(GL_UNIFORM_BUFFER, UniformBlockEnum::kLIGHT_SPOT, command->mUBO);
             }
         }
         break;
     }
-    _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, light->GetType());
+    _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, command->mType);
 }
 
 void Renderer::Post(const glm::mat4 * model)
 {
     const auto & matrixM    = *model;
-    const auto & matrixV    = _state->mMaterialStack.GetV();
-    const auto & matrixP    = _state->mMaterialStack.GetP();
+    const auto & matrixV    = _state->mMatrixStack.GetV();
+    const auto & matrixP    = _state->mMatrixStack.GetP();
     const auto & matrixN    = glm::transpose(glm::inverse(glm::mat3(matrixM)));
     const auto & matrixMV   = matrixV * matrixM;
     const auto & matrixVP   = matrixP * matrixV;
@@ -217,18 +241,18 @@ void Renderer::Post(const CommandEnum type, const RenderCommand * command)
     case CommandEnum::kLIGHT:
         {
             const auto & cmd = (const LightCommand &)command;
-            _state->mLightQueues.at(cmd.mLight->GetType()).push_back(cmd);
+            _state->mLightQueues.at(cmd.mType).push_back(cmd);
         }
         break;
     }
 }
 
-void Renderer::Post(const DrawTypeEnum type, const GLMesh * mesh)
+void Renderer::Post(const DrawTypeEnum draw, const FragTypeEnum frag, const GLMesh * mesh)
 {
     ASSERT_LOG(mesh->GetVAO() != 0, "Draw VAO Error");
 
     glBindVertexArray(mesh->GetVAO());
-    switch (type)
+    switch (draw)
     {
     case DrawTypeEnum::kINSTANCE:
         {

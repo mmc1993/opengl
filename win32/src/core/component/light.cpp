@@ -24,14 +24,17 @@ Light::Light(TypeEnum type): _type(type), _ubo(0), _program(nullptr)
 //  光源实现
 void Light::OnUpdate(float dt)
 {
+    const auto & transform = Global::Ref().RefRender().GetMatrixStack().GetM();
     LightCommand command;
-    command.mLight    = this;
-    command.mMesh     = _volume;
-    command.mProgram  = _program;
-    command.mTransform= Global::Ref().RefRender().GetMatrixStack().GetM();
+    command.mPosition   = mPosition;
+    command.mTransform  = transform;
+    command.mView       = _view;
+    command.mProj       = _proj;
+    command.mType       = _type;
+    command.mUBO        = _ubo;
+    command.mMesh       = _volume;
+    command.mProgram    = _program;
     Global::Ref().RefRender().Post(CommandEnum::kLIGHT, command);
-
-    mPosition = command.mTransform * glm::vec4(0, 0, 0, 1);
 }
 
 float Light::CalLightDistance(float k0, float k1, float k2, float s)
@@ -55,8 +58,8 @@ uint LightDirect::GetUBOLength()
 
 void LightDirect::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
-
+    const auto & transform = Global::Ref().RefRender().GetMatrixStack().GetM();
+    mPosition   = transform * glm::vec4(0, 0, 0, 1);
     auto up     = std::abs(mNormal.y) > 0.999f
                 ? glm::vec3(0, 0, 1)
                 : glm::vec3(0, 1, 0);
@@ -73,6 +76,8 @@ void LightDirect::OnUpdate(float dt)
     base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
     base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    Light::OnUpdate(dt);
 }
 
 void LightDirect::OpenShadow(const glm::vec2 & orthoX, const glm::vec2 & orthoY, const glm::vec2 & orthoZ)
@@ -125,7 +130,8 @@ uint LightPoint::GetUBOLength()
 
 void LightPoint::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
+    const auto & transform = Global::Ref().RefRender().GetMatrixStack().GetM();
+    mPosition = transform * glm::vec4(0, 0, 0, 1);
 
     glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
     auto base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(0, mFar);
@@ -140,6 +146,8 @@ void LightPoint::OnUpdate(float dt)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
+
+    Light::OnUpdate(dt);
 }
 
 void LightPoint::OpenShadow(const float n, const float f)
@@ -215,8 +223,8 @@ uint LightSpot::GetUBOLength()
 
 void LightSpot::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
-
+    const auto & transform = Global::Ref().RefRender().GetMatrixStack().GetM();
+    mPosition   = transform * glm::vec4(0, 0, 0, 1);
     auto up     = std::abs(mNormal.y) > 0.999f
                 ? glm::vec3(0, 0, 1)
                 : glm::vec3(0, 1, 0);
@@ -240,6 +248,8 @@ void LightSpot::OnUpdate(float dt)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
+
+    Light::OnUpdate(dt);
 }
 
 void LightSpot::OpenShadow(const float n, const float f)

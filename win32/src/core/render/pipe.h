@@ -59,7 +59,7 @@ public:
     } mSSAO;
 
     //  äÖÈ¾Ê÷¾ØÕó
-    MatrixStack mMaterialStack;
+    MatrixStack mMatrixStack;
 
     //  äÖÈ¾Ä¿±ê
     RenderTarget mRenderTarget[2];
