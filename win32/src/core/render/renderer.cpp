@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "pipe.h"
+#include "../window/window.h"
 #include "../component/light.h"
 
 Renderer::Renderer(): _state(nullptr)
@@ -46,6 +47,13 @@ void Renderer::RenderOnce()
         for (auto & pipe : _pipes)
         {pipe->OnUpdate(this, _state);}
         Bind((CameraCommand *)nullptr);
+
+        _state->mRenderTarget[1].Start(RenderTarget::BindType::kREAD);
+        glBlitFramebuffer(
+            0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
+            0, 0, Global::Ref().RefWindow().GetW(), Global::Ref().RefWindow().GetH(),
+            GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        _state->mRenderTarget[1].Ended();
     }
     ClearCommands();
 }

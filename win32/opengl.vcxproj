@@ -29,8 +29,11 @@
     <ClInclude Include="src\core\raw\gl_texture2d.h" />
     <ClInclude Include="src\core\raw\raw_manager.h" />
     <ClInclude Include="src\core\render\pipe.h" />
+    <ClInclude Include="src\core\render\pipe_deferred.h" />
     <ClInclude Include="src\core\render\pipe_forward.h" />
+    <ClInclude Include="src\core\render\pipe_gbuffer.h" />
     <ClInclude Include="src\core\render\pipe_shadow.h" />
+    <ClInclude Include="src\core\render\pipe_ssao.h" />
     <ClInclude Include="src\core\render\render.h" />
     <ClInclude Include="src\core\render\render_type.h" />
     <ClInclude Include="src\core\base.h" />
@@ -394,7 +397,11 @@
     <ClCompile Include="src\core\object\object.cpp" />
     <ClCompile Include="src\core\raw\raw_manager.cpp" />
     <ClCompile Include="src\core\render\pipe.cpp" />
+    <ClCompile Include="src\core\render\pipe_deferred.cpp" />
+    <ClCompile Include="src\core\render\pipe_forward.cpp" />
+    <ClCompile Include="src\core\render\pipe_gbuffer.cpp" />
     <ClCompile Include="src\core\render\pipe_shadow.cpp" />
+    <ClCompile Include="src\core\render\pipe_ssao.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\render\renderer.cpp" />
     <ClCompile Include="src\core\render\render_target.cpp" />

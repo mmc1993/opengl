@@ -1104,6 +1104,15 @@
     <ClInclude Include="src\core\render\pipe_shadow.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\render\pipe_gbuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\pipe_deferred.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\render\pipe_ssao.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\component\sprite.cpp">
@@ -1161,6 +1170,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\pipe_shadow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\pipe_forward.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\pipe_gbuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\pipe_deferred.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\render\pipe_ssao.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
