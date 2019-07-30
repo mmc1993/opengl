@@ -64,15 +64,15 @@ void PipeShadow::OnUpdate(Renderer * renderer, PipeState * state)
 {
     for (auto i = 0; i != std::min(state->mLightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
-        DoBakeShadow(renderer, state, state->mShadowMap.mDirectTexture[i], &state->mLightQueues.at(Light::kDIRECT).at(i), &PipeShadow::OnBakeShadow2D);
+        BakeShadow(renderer, state, state->mShadowMap.mDirectTexture[i], &state->mLightQueues.at(Light::kDIRECT).at(i), &PipeShadow::OnBakeShadow2D);
     }
     for (auto i = 0; i != std::min(state->mLightQueues.at(Light::kPOINT).size(), LIMIT_LIGHT_POINT); ++i)
     {
-        DoBakeShadow(renderer, state, state->mShadowMap.mPointTexture[i], &state->mLightQueues.at(Light::kPOINT).at(i), &PipeShadow::OnBakeShadow3D);
+        BakeShadow(renderer, state, state->mShadowMap.mPointTexture[i], &state->mLightQueues.at(Light::kPOINT).at(i), &PipeShadow::OnBakeShadow3D);
     }
     for (auto i = 0; i != std::min(state->mLightQueues.at(Light::kSPOT).size(), LIMIT_LIGHT_SPOT); ++i)
     {
-        DoBakeShadow(renderer, state, state->mShadowMap.mSpotTexture[i], &state->mLightQueues.at(Light::kSPOT).at(i), &PipeShadow::OnBakeShadow2D);
+        BakeShadow(renderer, state, state->mShadowMap.mSpotTexture[i], &state->mLightQueues.at(Light::kSPOT).at(i), &PipeShadow::OnBakeShadow2D);
     }
     ASSERT_LOG(state->mRenderTime.mCamera != nullptr, "Camera Must Not Null");
     glViewport(
@@ -82,7 +82,7 @@ void PipeShadow::OnUpdate(Renderer * renderer, PipeState * state)
         (iint)state->mRenderTime.mCamera->mViewport.w);
 }
 
-inline void PipeShadow::DoBakeShadow(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light, const BakeFunc_t bakefunc)
+inline void PipeShadow::BakeShadow(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light, const BakeFunc_t bakefunc)
 {
     state->mRenderTarget[0].Start();
     glDrawBuffer(GL_NONE);
@@ -125,7 +125,6 @@ inline void PipeShadow::OnBakeShadow3D(Renderer * renderer, PipeState * state, u
         auto view = glm::lookAt(         light->mPosition,
             std::get<0>(s_faceInfo[i]) + light->mPosition,
             std::get<1>(s_faceInfo[i]));
-
         renderer->GetMatrixStack().Identity(MatrixStack::kVIEW);
         renderer->GetMatrixStack().Identity(MatrixStack::kPROJ);
         renderer->GetMatrixStack().Mul(MatrixStack::kVIEW, view);

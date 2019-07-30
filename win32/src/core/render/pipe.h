@@ -16,7 +16,7 @@ public:
         //  记录当前批次顶点数
         uint mVertexCount;
         //  记录当前批次渲染数
-        uint mDrawCount;
+        uint mRenderCount;
         //  记录当前Texture基址
         uint mTexBase;
         //  当前绑定的Program
@@ -27,7 +27,7 @@ public:
             : mProgram(nullptr)
             , mCamera(nullptr)
             , mVertexCount(0)
-            , mDrawCount(0)
+            , mRenderCount(0)
             , mTexBase(0) 
         { }
     } mRenderTime;

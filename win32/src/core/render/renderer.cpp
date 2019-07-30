@@ -25,14 +25,14 @@ uint Renderer::GetVertexCount()
     return _state->mRenderTime.mVertexCount;
 }
 
-uint Renderer::GetDrawCount()
+uint Renderer::GetRenderCount()
 {
-    return _state->mRenderTime.mDrawCount;
+    return _state->mRenderTime.mRenderCount;
 }
 
 void Renderer::RenderOnce()
 {
-    _state->mRenderTime.mDrawCount   = 0;
+    _state->mRenderTime.mRenderCount = 0;
     _state->mRenderTime.mVertexCount = 0;
     _state->mRenderTarget[1].Start();
     glClear(GL_COLOR_BUFFER_BIT |
@@ -47,6 +47,7 @@ void Renderer::RenderOnce()
         {pipe->OnUpdate(this, _state);}
         Bind((CameraCommand *)nullptr);
     }
+    ClearCommands();
 }
 
 void Renderer::AddPipe(Pipe * pipe)
@@ -272,5 +273,5 @@ void Renderer::Post(const DrawTypeEnum draw, const FragTypeEnum frag, const GLMe
         }
         break;
     }
-    ++_state->mRenderTime.mDrawCount;
+    ++_state->mRenderTime.mRenderCount;
 }
