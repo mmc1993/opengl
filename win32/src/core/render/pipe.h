@@ -6,15 +6,7 @@
 
 class PipeState {
 public:
-    PipeState()
-    {
-        memset(&mSSAO,          0,      sizeof(mSSAO));
-        memset(&mGBuffer,       0,      sizeof(mGBuffer));
-        memset(&mLightUBO,      0,      sizeof(mLightUBO));
-        memset(&mShadowMap,     0,      sizeof(mShadowMap));
-        memset(&mRenderTime,    0,      sizeof(mRenderTime));
-        memset(&mPostScreen,    0,      sizeof(mPostScreen));
-    }
+    PipeState();
 
     //  光源数据
     uint mLightUBO[3];

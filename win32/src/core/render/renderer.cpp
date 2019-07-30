@@ -32,6 +32,13 @@ uint Renderer::GetDrawCount()
 
 void Renderer::RenderOnce()
 {
+    _state->mRenderTime.mDrawCount   = 0;
+    _state->mRenderTime.mVertexCount = 0;
+    _state->mRenderTarget[1].Start();
+    glClear(GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT);
+    _state->mRenderTarget[1].Ended();
+
     for (auto & camera : _state->mCameraQueue)
     {
         Bind(&camera);
@@ -45,6 +52,16 @@ void Renderer::AddPipe(Pipe * pipe)
 {
     _pipes.push_back(pipe);
     pipe->OnAdd(this, _state);
+}
+
+void Renderer::ClearCommands()
+{
+    _state->mDepthQueue.clear();
+    _state->mCameraQueue.clear();
+    _state->mShadowQueue.clear();
+    for (auto & queue : _state->mLightQueues) { queue.clear(); }
+    for (auto & queue : _state->mForwardQueues) { queue.clear(); }
+    for (auto & queue : _state->mDeferredQueues) { queue.clear(); }
 }
 
 void Renderer::Bind(const CameraCommand * command)

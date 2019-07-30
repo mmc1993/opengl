@@ -392,6 +392,7 @@
     <ClCompile Include="src\core\component\camera.cpp" />
     <ClCompile Include="src\core\object\object.cpp" />
     <ClCompile Include="src\core\raw\raw_manager.cpp" />
+    <ClCompile Include="src\core\render\pipe.cpp" />
     <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\render\renderer.cpp" />
     <ClCompile Include="src\core\render\render_target.cpp" />

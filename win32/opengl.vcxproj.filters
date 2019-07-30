@@ -1154,6 +1154,9 @@
     <ClCompile Include="src\core\render\render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\render\pipe.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\third\glm\detail\func_common.inl">
