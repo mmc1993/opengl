@@ -6,6 +6,36 @@
 #define MMC_TEXTURE_2D  GL_TEXTURE_2D
 #define MMC_TEXTURE_3D  GL_TEXTURE_CUBE_MAP
 
+class GLProgramState {
+public:
+    struct Value {
+        Value() = default;
+        Value(      Value && value) = default;
+        Value(const Value &  value) = default;
+
+        bool operator=(Value && value)
+        {
+            mKey = std::move(value.mKey);
+            mVal = std::move(value.mVal);
+        }
+
+        bool operator=(const Value & value)
+        {
+            mKey = value.mKey;
+            mVal = value.mVal;
+        }
+
+        template <class T>
+        Value(const std::string & key, const T & val)
+            : mKey(key), mVal(val)
+        { }
+
+        std::string mKey;
+        std::any    mVal;
+    };
+    std::vector<Value> mValues;
+};
+
 class GLProgram : public GLRes {
 public:
     struct Pass {

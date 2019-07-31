@@ -168,6 +168,47 @@ void Renderer::Post(const LightCommand * command)
     _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, command->mType);
 }
 
+void Renderer::Post(const GLProgramState * state)
+{
+    if (state == nullptr)
+    {
+        return;
+    }
+    for (const auto & value : state->mValues)
+    {
+        if (value.mVal.type() == typeid(iint) ||
+            value.mVal.type() == typeid(uint))
+        {
+            _state->mRenderTime.mProgram->BindUniformNumber(value.mKey.c_str(), std::any_cast<iint>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(float) ||
+                 value.mVal.type() == typeid(double))
+        {
+            _state->mRenderTime.mProgram->BindUniformNumber(value.mKey.c_str(), std::any_cast<float>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(glm::vec2))
+        {
+            _state->mRenderTime.mProgram->BindUniformVector(value.mKey.c_str(), std::any_cast<glm::vec2>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(glm::vec3))
+        {
+            _state->mRenderTime.mProgram->BindUniformVector(value.mKey.c_str(), std::any_cast<glm::vec3>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(glm::vec4))
+        {
+            _state->mRenderTime.mProgram->BindUniformVector(value.mKey.c_str(), std::any_cast<glm::vec4>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(glm::mat3))
+        {
+            _state->mRenderTime.mProgram->BindUniformMatrix(value.mKey.c_str(), std::any_cast<glm::mat3>(value.mVal));
+        }
+        else if (value.mVal.type() == typeid(glm::mat4))
+        {
+            _state->mRenderTime.mProgram->BindUniformMatrix(value.mKey.c_str(), std::any_cast<glm::mat4>(value.mVal));
+        }
+    }
+}
+
 void Renderer::Post(const glm::mat4 * model)
 {
     const auto & matrixM    = model != nullptr? *model: glm::mat4();

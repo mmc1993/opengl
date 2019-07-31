@@ -141,6 +141,7 @@ inline void PipeShadow::PostBatch(Renderer * renderer, PipeState * state, const 
         if (renderer->Bind(command.mMaterial->GetProgram(), command.mSubPass))
         {
             renderer->Post(light);
+            renderer->Post(command.mProgramState);
         }
         renderer->Post(&command.mTransform);
         renderer->Post(

@@ -188,16 +188,19 @@ enum class CommandEnum {
     kLIGHT,
 };
 //  用于渲染的命令结构
-struct RenderCommand {
-};
+struct RenderCommand { };
 
 //  材质渲染命令
 struct MaterialCommand : public RenderCommand {
-    MaterialCommand() { }
-    const GLMaterial *  mMaterial;
-    glm::mat4           mTransform;
-    uint                mCameraMask;
-    uint                mSubPass;
+    MaterialCommand() 
+        : mProgramState(nullptr)
+        , mMaterial(nullptr)
+    { }
+    const GLProgramState  * mProgramState;
+    const GLMaterial      * mMaterial;
+    glm::mat4               mTransform;
+    uint                    mCameraMask;
+    uint                    mSubPass;
 };
 
 //  相机渲染命令
@@ -220,7 +223,10 @@ struct CameraCommand : public RenderCommand {
 
 //  光源渲染命令
 struct LightCommand : public RenderCommand {
-    LightCommand() { }
+    LightCommand() 
+        : mMesh(nullptr)
+        , mProgram(nullptr)
+    { }
     glm::vec3   mPosition;
     glm::mat4   mTransform;
     glm::mat4   mView;
