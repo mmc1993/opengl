@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "../render/render.h"
+#include "../render/renderer.h"
 
 Camera::Camera() : _change(true)
 { }
@@ -119,7 +119,7 @@ void Camera::OnUpdate(float dt)
         command.mN = _info.mOrtho.n;
         command.mF = _info.mOrtho.f;
     }
-    Global::Ref().RefRender().Post(CommandEnum::kCAMERA, command);
+    Global::Ref().RefRenderer().Post(CommandEnum::kCAMERA, &command);
 }
 
 void Camera::Update() const

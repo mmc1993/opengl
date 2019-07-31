@@ -16,7 +16,6 @@ void PipeForward::OnAdd(Renderer * renderer, PipeState * state)
 
 void PipeForward::OnDel(Renderer * renderer, PipeState * state)
 {
-    glDeleteBuffers(3, state->mLightUBO);
 }
 
 void PipeForward::OnUpdate(Renderer * renderer, PipeState * state)

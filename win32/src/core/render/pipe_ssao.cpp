@@ -29,9 +29,10 @@ void PipeSSAO::OnAdd(Renderer * renderer, PipeState * state)
 
 void PipeSSAO::OnDel(Renderer * renderer, PipeState * state)
 {
-    glDeleteTextures(2, &state->mSSAO.mOcclusionTexture0);
     Global::Ref().RefRawManager().FreeRes(BUILTIN_PROGRAM_SSAO);
     Global::Ref().RefRawManager().FreeRes(BUILTIN_MESH_SCREEN_QUAD);
+    _program = nullptr;
+    _screen  = nullptr;
 }
 
 void PipeSSAO::OnUpdate(Renderer * renderer, PipeState * state)

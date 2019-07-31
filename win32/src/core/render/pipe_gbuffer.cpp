@@ -34,7 +34,6 @@ void PipeGBuffer::OnAdd(Renderer * renderer, PipeState * state)
 
 void PipeGBuffer::OnDel(Renderer * renderer, PipeState * state)
 {
-    glDeleteTextures(3, &state->mGBuffer.mPositionTexture);
 }
 
 void PipeGBuffer::OnUpdate(Renderer * renderer, PipeState * state)

@@ -29,6 +29,7 @@ public:
     void Post(const CommandEnum     type, const RenderCommand * command);
     void Post(const DrawTypeEnum    draw, const FragTypeEnum frag, const GLMesh * mesh);
 
+    void Init();
 private:
     PipeState *         _state;
     std::vector<Pipe *> _pipes;

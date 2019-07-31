@@ -10,6 +10,7 @@ Renderer::~Renderer()
 {
     while (!_pipes.empty())
     {
+        _pipes.back()->OnDel(this, _state);
         delete _pipes.back();
         _pipes.pop_back();
     }
@@ -169,7 +170,7 @@ void Renderer::Post(const LightCommand * command)
 
 void Renderer::Post(const glm::mat4 * model)
 {
-    const auto & matrixM    = *model;
+    const auto & matrixM    = model != nullptr? *model: glm::mat4();
     const auto & matrixV    = _state->mMatrixStack.GetV();
     const auto & matrixP    = _state->mMatrixStack.GetP();
     const auto & matrixN    = glm::transpose(glm::inverse(glm::mat3(matrixM)));
@@ -226,7 +227,7 @@ void Renderer::Post(const CommandEnum type, const RenderCommand * command)
     {
     case CommandEnum::kMATERIAL:
         {
-            auto cmd = (MaterialCommand &)command;
+            auto cmd = *(MaterialCommand *)command;
             auto pro = cmd.mMaterial->GetProgram();
             for (auto it = pro->GetPasss().begin();
                  it != pro->GetPasss().end(); ++it)
@@ -244,12 +245,12 @@ void Renderer::Post(const CommandEnum type, const RenderCommand * command)
         break;
     case CommandEnum::kCAMERA:
         {
-            _state->mCameraQueue.push_back((const CameraCommand &)command);
+            _state->mCameraQueue.push_back(*(const CameraCommand *)command);
         }
         break;
     case CommandEnum::kLIGHT:
         {
-            const auto & cmd = (const LightCommand &)command;
+            const auto & cmd = *(const LightCommand *)command;
             _state->mLightQueues.at(cmd.mType).push_back(cmd);
         }
         break;
@@ -282,4 +283,9 @@ void Renderer::Post(const DrawTypeEnum draw, const FragTypeEnum frag, const GLMe
         break;
     }
     ++_state->mRenderTime.mRenderCount;
+}
+
+void Renderer::Init()
+{
+    _state = new PipeState();
 }

@@ -2,7 +2,7 @@
 #include "../component/light.h"
 #include "../cfg/cfg_manager.h"
 
-inline PipeState::PipeState()
+PipeState::PipeState()
 {
     memset(&mSSAO, 0, sizeof(mSSAO));
     memset(&mGBuffer, 0, sizeof(mGBuffer));
@@ -37,4 +37,19 @@ inline PipeState::PipeState()
     mRenderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, mPostScreen.mColorTexture);
     mRenderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH,  RenderTarget::TextureType::k2D, mPostScreen.mDepthTexture);
     mRenderTarget[1].Ended();
+}
+
+PipeState::~PipeState()
+{
+    glDeleteTextures(LIMIT_LIGHT_DIRECT, mShadowMap.mDirectTexture);
+    glDeleteTextures(LIMIT_LIGHT_POINT, mShadowMap.mPointTexture);
+    glDeleteTextures(LIMIT_LIGHT_SPOT, mShadowMap.mSpotTexture);
+
+    glDeleteTextures(3, &mGBuffer.mPositionTexture);
+
+    glDeleteTextures(1, &mPostScreen.mColorTexture);
+    glDeleteTextures(1, &mPostScreen.mDepthTexture);
+    glDeleteTextures(2, &mSSAO.mOcclusionTexture0);
+
+    glDeleteBuffers(3, mLightUBO);
 }

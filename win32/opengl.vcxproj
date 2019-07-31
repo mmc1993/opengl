@@ -34,7 +34,6 @@
     <ClInclude Include="src\core\render\pipe_gbuffer.h" />
     <ClInclude Include="src\core\render\pipe_shadow.h" />
     <ClInclude Include="src\core\render\pipe_ssao.h" />
-    <ClInclude Include="src\core\render\render.h" />
     <ClInclude Include="src\core\render\render_type.h" />
     <ClInclude Include="src\core\base.h" />
     <ClInclude Include="src\core\component\component.h" />
@@ -402,7 +401,6 @@
     <ClCompile Include="src\core\render\pipe_gbuffer.cpp" />
     <ClCompile Include="src\core\render\pipe_shadow.cpp" />
     <ClCompile Include="src\core\render\pipe_ssao.cpp" />
-    <ClCompile Include="src\core\render\render.cpp" />
     <ClCompile Include="src\core\render\renderer.cpp" />
     <ClCompile Include="src\core\render\render_target.cpp" />
     <ClCompile Include="src\core\third\code\code.cpp" />

@@ -1,8 +1,8 @@
 #include "window.h"
 #include "../event/event.h"
 #include "../timer/timer.h"
-#include "../render/render.h"
 #include "../object/object.h"
+#include "../render/renderer.h"
 #include "../event/event_enum.h"
 
 Window::Window()
@@ -14,7 +14,7 @@ Window::~Window()
 {
 }
 
-bool Window::Create(const std::string & title)
+bool Window::Create(const std::string & title, int x, int y, uint w, uint h)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -42,25 +42,26 @@ bool Window::Create(const std::string & title)
 #if _DEBUG
     glDebugMessageCallback(Window::OnGLDebugProc, this);
 #endif
+    Move(x, y, w, h);
     return true;
 }
 
-void Window::Move(size_t x)
+void Window::Move(int x)
 {
     Move(x, GetY(), GetW(), GetH());
 }
 
-void Window::Move(size_t x, size_t y)
+void Window::Move(int x, int y)
 {
     Move(x, y, GetW(), GetH());
 }
 
-void Window::Move(size_t x, size_t y, size_t w)
+void Window::Move(int x, int y, uint w)
 {
     Move(x, y, w, GetH());
 }
 
-void Window::Move(size_t x, size_t y, size_t w, size_t h)
+void Window::Move(int x, int y, uint w, uint h)
 {
     ASSERT_LOG(nullptr != _window, "_window Error");
 
@@ -146,14 +147,14 @@ void Window::Update()
         
 		Global::Ref().RefTimer().Update(lasttime);
         Global::Ref().RefObject().RootUpdate(dt);
-        Global::Ref().RefRender().Once();
+        Global::Ref().RefRenderer().RenderOnce();
         glfwSwapBuffers(_window);
 
 		std::cout <<
 			SFormat("Err: {0}, FPS: {1} DiffTime: {2} RenderCount: {3} mVertexCount: {4}", 
 					glGetError(), _renderInfo.renderFPS / dt, dt,
-					Global::Ref().RefRender().GetRenderState().mRenderCount,
-					Global::Ref().RefRender().GetRenderState().mVertexCount)
+					Global::Ref().RefRenderer().GetRenderCount(),
+					Global::Ref().RefRenderer().GetVertexCount())
 			<< std::endl;
     }
 }

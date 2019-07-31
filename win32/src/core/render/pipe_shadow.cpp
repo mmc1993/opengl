@@ -55,9 +55,6 @@ void PipeShadow::OnAdd(Renderer * renderer, PipeState * state)
 
 void PipeShadow::OnDel(Renderer * renderer, PipeState * state)
 {
-    glDeleteTextures(LIMIT_LIGHT_DIRECT, state->mShadowMap.mDirectTexture);
-    glDeleteTextures(LIMIT_LIGHT_POINT, state->mShadowMap.mPointTexture);
-    glDeleteTextures(LIMIT_LIGHT_SPOT, state->mShadowMap.mSpotTexture);
 }
 
 void PipeShadow::OnUpdate(Renderer * renderer, PipeState * state)

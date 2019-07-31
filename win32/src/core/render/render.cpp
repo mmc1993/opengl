@@ -235,18 +235,18 @@ void Render::Bind(const CameraCommand * command)
 {
     if (command != nullptr)
     {
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, command->mView);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
+        Global::Ref().RefRenderer().GetMatrixStack().Identity(MatrixStack::kVIEW);
+        Global::Ref().RefRenderer().GetMatrixStack().Identity(MatrixStack::kPROJ);
+        Global::Ref().RefRenderer().GetMatrixStack().Mul(MatrixStack::kVIEW, command->mView);
+        Global::Ref().RefRenderer().GetMatrixStack().Mul(MatrixStack::kPROJ, command->mProj);
         glViewport((int)command->mViewport.x, (int)command->mViewport.y,
                    (int)command->mViewport.z, (int)command->mViewport.w);
         _renderState.mCamera = command;
     }
     else
     {
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
+        Global::Ref().RefRenderer().GetMatrixStack().Pop(MatrixStack::kVIEW);
+        Global::Ref().RefRenderer().GetMatrixStack().Pop(MatrixStack::kPROJ);
         _renderState.mCamera = nullptr;
     }
 }

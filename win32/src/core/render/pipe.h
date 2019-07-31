@@ -7,6 +7,7 @@
 class PipeState {
 public:
     PipeState();
+    ~PipeState();
 
     //  光源数据
     uint mLightUBO[3];

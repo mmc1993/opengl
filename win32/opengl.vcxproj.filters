@@ -1098,9 +1098,6 @@
     <ClInclude Include="src\core\render\renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\render\render.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\render\pipe_shadow.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -1161,9 +1158,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\renderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\render\render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\core\render\pipe.cpp">
