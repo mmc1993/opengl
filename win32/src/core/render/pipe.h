@@ -4,25 +4,20 @@
 #include "render_type.h"
 #include "render_target.h"
 
-struct PipeState {
-    PipeState()
-    {
-        memset(&mSSAO,          0,      sizeof(mSSAO));
-        memset(&mGBuffer,       0,      sizeof(mGBuffer));
-        memset(&mLightUBO,      0,      sizeof(mLightUBO));
-        memset(&mShadowMap,     0,      sizeof(mShadowMap));
-        memset(&mRenderTime,    0,      sizeof(mRenderTime));
-        memset(&mPostScreen,    0,      sizeof(mPostScreen));
-    }
+class PipeState {
+public:
+    PipeState();
+    ~PipeState();
 
     //  光源数据
     uint mLightUBO[3];
 
+    //  渲染时信息
     struct RenderTime {
         //  记录当前批次顶点数
         uint mVertexCount;
         //  记录当前批次渲染数
-        uint mDrawCount;
+        uint mRenderCount;
         //  记录当前Texture基址
         uint mTexBase;
         //  当前绑定的Program
@@ -33,7 +28,7 @@ struct PipeState {
             : mProgram(nullptr)
             , mCamera(nullptr)
             , mVertexCount(0)
-            , mDrawCount(0)
+            , mRenderCount(0)
             , mTexBase(0) 
         { }
     } mRenderTime;
@@ -65,7 +60,7 @@ struct PipeState {
     } mSSAO;
 
     //  渲染树矩阵
-    MatrixStack mMaterialStack;
+    MatrixStack mMatrixStack;
 
     //  渲染目标
     RenderTarget mRenderTarget[2];
@@ -84,10 +79,12 @@ struct PipeState {
     std::array<std::vector<MaterialCommand>, 4> mDeferredQueues;
 };
 
+class Renderer;
+
 class Pipe {
 public:
     virtual ~Pipe() {}
-    virtual void OnAdd(PipeState * state) = 0;
-    virtual void OnDel(PipeState * state) = 0;
-    virtual void OnUpdate(PipeState * state) = 0;
+    virtual void OnAdd(Renderer * renderer, PipeState * state) = 0;
+    virtual void OnDel(Renderer * renderer, PipeState * state) = 0;
+    virtual void OnUpdate(Renderer * renderer, PipeState * state) = 0;
 };

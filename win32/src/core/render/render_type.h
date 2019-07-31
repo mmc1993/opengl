@@ -27,6 +27,12 @@ enum DrawTypeEnum {
 	kINDEX,			    //	索引draw
 };
 
+enum FragTypeEnum {
+    kTRIANGLE   = GL_TRIANGLES,
+    kPOINT      = GL_POINTS,
+    kLINE       = GL_LINES,
+};
+
 enum UniformBlockEnum {
     kLIGHT_DIRECT,      //  方向光绑定点
     kLIGHT_POINT,       //  点光源绑定点
@@ -176,13 +182,13 @@ private:
     mutable std::array<std::stack<glm::mat4>, 3> _matrixs;
 };
 
+enum class CommandEnum {
+    kMATERIAL,
+    kCAMERA,
+    kLIGHT,
+};
 //  用于渲染的命令结构
 struct RenderCommand {
-    enum TypeEnum {
-        kMATERIAL,
-        kCAMERA,
-        kLIGHT,
-    };
 };
 
 //  材质渲染命令
@@ -213,11 +219,14 @@ struct CameraCommand : public RenderCommand {
 };
 
 //  光源渲染命令
-class Light;    //  TODO: 优化掉
 struct LightCommand : public RenderCommand {
     LightCommand() { }
-    Light        * mLight;
-    GLMesh       * mMesh;
-    GLProgram    * mProgram;
-    glm::mat4      mTransform;
+    glm::vec3   mPosition;
+    glm::mat4   mTransform;
+    glm::mat4   mView;
+    glm::mat4   mProj;
+    uint        mType;
+    uint        mUBO;
+    GLMesh    * mMesh;
+    GLProgram * mProgram;
 };

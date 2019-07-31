@@ -24,7 +24,6 @@ public:
     virtual void OnAdd() {}
     virtual void OnDel() {}
     virtual void OnUpdate(float dt);
-    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) = 0;
 
     void BindProgram(GLProgram * program)
     {
@@ -44,6 +43,7 @@ public:
 protected:
     uint        _ubo;
     glm::mat4   _proj;
+    glm::mat4   _view;
     GLProgram   * _program;
     GLMesh      * _volume;
 private:
@@ -77,14 +77,8 @@ public:
 	void OpenShadow(const glm::vec2 & orthoX,	//	左右
 					const glm::vec2 & orthoY,	//	上下
 					const glm::vec2 & orthoZ);	//	前后
-
-	virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
-
 public:
     glm::vec3 mNormal;
-
-private:
-    glm::mat4 _view;
 };
 
 class LightPoint : public Light {
@@ -111,9 +105,6 @@ public:
     virtual void OnUpdate(float dt) override;
 
 	void OpenShadow(const float n, const float f);
-
-    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
-
 public:
     float mFar, mNear;
     float mK0, mK1, mK2;
@@ -145,14 +136,8 @@ public:
     virtual void OnUpdate(float dt) override;
 
 	void OpenShadow(const float n, const float f);
-
-    virtual bool NextDrawShadow(uint count, uint shadow, RenderTarget * rt) override;
-
 public:
 	glm::vec3 mNormal;
     float mK0, mK1, mK2;
 	float mOutCone, mInCone;
-
-private:
-    glm::mat4 _view;
 };

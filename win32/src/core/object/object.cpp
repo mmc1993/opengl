@@ -1,5 +1,5 @@
 #include "object.h"
-#include "../render/render.h"
+#include "../render/renderer.h"
 #include "../component/component.h"
 #include "../component/transform.h"
 
@@ -147,8 +147,8 @@ bool Object::IsActive() const
 
 void Object::Update(float dt)
 {
-	Global::Ref().RefRender().GetMatrixStack().Push(MatrixStack::ModeType::kMODEL);
-	Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::ModeType::kMODEL, GetTransform()->GetMatrix());
+	Global::Ref().RefRenderer().GetMatrixStack().Push(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRenderer().GetMatrixStack().Mul(MatrixStack::ModeType::kMODEL, GetTransform()->GetMatrix());
 
 	OnUpdate(dt);
 
@@ -168,16 +168,16 @@ void Object::Update(float dt)
 		}
 	}
 
-	Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRenderer().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
 }
 
 void Object::RootUpdate(float dt)
 {
-	Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRenderer().GetMatrixStack().Identity(MatrixStack::ModeType::kMODEL);
 	
 	Update(dt);
 
-	Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
+	Global::Ref().RefRenderer().GetMatrixStack().Pop(MatrixStack::ModeType::kMODEL);
 }
 
 void Object::SetParent(Object * parent)

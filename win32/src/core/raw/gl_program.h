@@ -27,6 +27,7 @@ public:
         iint        mStencilRef;        //  模板测试值
         //  渲染
         uint        mDrawType;			//	绘制类型
+        uint        mFragType;			//	片段类型
         uint        mRenderType;        //  渲染类型
         uint        mRenderQueue;       //  渲染通道
         uint        mID;                //  ID

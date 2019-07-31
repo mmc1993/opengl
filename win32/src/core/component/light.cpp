@@ -1,6 +1,6 @@
 #include "light.h"
 #include "transform.h"
-#include "../render/render.h"
+#include "../render/renderer.h"
 #include "../cfg/cfg_manager.h"
 #include "../raw/raw_manager.h"
 
@@ -24,14 +24,17 @@ Light::Light(TypeEnum type): _type(type), _ubo(0), _program(nullptr)
 //  光源实现
 void Light::OnUpdate(float dt)
 {
+    const auto & transform = Global::Ref().RefRenderer().GetMatrixStack().GetM();
     LightCommand command;
-    command.mLight    = this;
-    command.mMesh     = _volume;
-    command.mProgram  = _program;
-    command.mTransform= Global::Ref().RefRender().GetMatrixStack().GetM();
-    Global::Ref().RefRender().Post(RenderCommand::kLIGHT, command);
-
-    mPosition = command.mTransform * glm::vec4(0, 0, 0, 1);
+    command.mPosition   = mPosition;
+    command.mTransform  = transform;
+    command.mView       = _view;
+    command.mProj       = _proj;
+    command.mType       = _type;
+    command.mUBO        = _ubo;
+    command.mMesh       = _volume;
+    command.mProgram    = _program;
+    Global::Ref().RefRenderer().Post(CommandEnum::kLIGHT, &command);
 }
 
 float Light::CalLightDistance(float k0, float k1, float k2, float s)
@@ -55,8 +58,8 @@ uint LightDirect::GetUBOLength()
 
 void LightDirect::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
-
+    const auto & transform = Global::Ref().RefRenderer().GetMatrixStack().GetM();
+    mPosition   = transform * glm::vec4(0, 0, 0, 1);
     auto up     = std::abs(mNormal.y) > 0.999f
                 ? glm::vec3(0, 0, 1)
                 : glm::vec3(0, 1, 0);
@@ -73,6 +76,8 @@ void LightDirect::OnUpdate(float dt)
     base = glsl_tool::UBOAddData<decltype(UBOData::mSpecular)>(base, mSpecular);
     base = glsl_tool::UBOAddData<decltype(UBOData::mPosition)>(base, mPosition);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    Light::OnUpdate(dt);
 }
 
 void LightDirect::OpenShadow(const glm::vec2 & orthoX, const glm::vec2 & orthoY, const glm::vec2 & orthoZ)
@@ -86,27 +91,6 @@ void LightDirect::OpenShadow(const glm::vec2 & orthoX, const glm::vec2 & orthoY,
     }
 
     _proj = glm::ortho(orthoX.x, orthoX.y, orthoY.x, orthoY.y, orthoZ.x, orthoZ.y);
-}
-
-bool LightDirect::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
-{
-    if (0 == count)
-    {
-        glViewport(0, 0,
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, shadow);
-    }
-    else
-    {
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
-    }
-    return count == 0;
 }
 
 uint LightPoint::GetUBOLength()
@@ -125,7 +109,8 @@ uint LightPoint::GetUBOLength()
 
 void LightPoint::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
+    const auto & transform = Global::Ref().RefRenderer().GetMatrixStack().GetM();
+    mPosition = transform * glm::vec4(0, 0, 0, 1);
 
     glBindBuffer(GL_UNIFORM_BUFFER, GetUBO());
     auto base = glsl_tool::UBOAddData<decltype(UBOData::mFar)>(0, mFar);
@@ -140,6 +125,8 @@ void LightPoint::OnUpdate(float dt)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
+
+    Light::OnUpdate(dt);
 }
 
 void LightPoint::OpenShadow(const float n, const float f)
@@ -157,44 +144,6 @@ void LightPoint::OpenShadow(const float n, const float f)
 
 	_proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
     mFar = f; mNear = n;
-}
-
-bool LightPoint::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
-{
-    if (count != 0)
-    {
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
-    }
-    else
-    {
-        glViewport(0, 0, 
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
-    }
-
-    if (count < 6)
-    {
-        static const std::tuple<glm::vec3, glm::vec3> s_faceInfo[6] = {
-            { glm::vec3( 1,  0,  0), glm::vec3(0, -1,  0) },
-            { glm::vec3(-1,  0,  0), glm::vec3(0, -1,  0) },
-            { glm::vec3( 0,  1,  0), glm::vec3(0,  0,  1) },
-            { glm::vec3( 0, -1,  0), glm::vec3(0,  0, -1) },
-            { glm::vec3( 0,  0,  1), glm::vec3(0, -1,  0) },
-            { glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0) },
-        };
-
-        auto view = glm::lookAt(mPosition, 
-            std::get<0>(s_faceInfo[count]) + mPosition, 
-            std::get<1>(s_faceInfo[count]));
-
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW,  view);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, (RenderTarget::TextureType)(RenderTarget::TextureType::k3D + count), shadow);
-    }
-    return count != 6;
 }
 
 uint LightSpot::GetUBOLength()
@@ -215,8 +164,8 @@ uint LightSpot::GetUBOLength()
 
 void LightSpot::OnUpdate(float dt)
 {
-    Light::OnUpdate(dt);
-
+    const auto & transform = Global::Ref().RefRenderer().GetMatrixStack().GetM();
+    mPosition   = transform * glm::vec4(0, 0, 0, 1);
     auto up     = std::abs(mNormal.y) > 0.999f
                 ? glm::vec3(0, 0, 1)
                 : glm::vec3(0, 1, 0);
@@ -240,6 +189,8 @@ void LightSpot::OnUpdate(float dt)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     GetOwner()->GetTransform()->Scale(Light::CalLightDistance(mK0, mK1, mK2, 0.1f));
+
+    Light::OnUpdate(dt);
 }
 
 void LightSpot::OpenShadow(const float n, const float f)
@@ -257,25 +208,3 @@ void LightSpot::OpenShadow(const float n, const float f)
 
     _proj = glm::perspective(glm::radians(90.0f), (float)viewW / (float)viewH, n, f);
 }
-
-bool LightSpot::NextDrawShadow(uint count, uint shadow, RenderTarget * rt)
-{
-    if (count == 0)
-    {
-        glViewport(0, 0, 
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(), 
-            Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kVIEW);
-        Global::Ref().RefRender().GetMatrixStack().Identity(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kVIEW, _view);
-        Global::Ref().RefRender().GetMatrixStack().Mul(MatrixStack::kPROJ, _proj);
-        rt->BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, shadow);
-    }
-    else
-    {
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kPROJ);
-        Global::Ref().RefRender().GetMatrixStack().Pop(MatrixStack::kVIEW);
-    }
-    return count == 0;
-}
-

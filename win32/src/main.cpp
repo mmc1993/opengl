@@ -3,7 +3,7 @@
 #include "core/event/event.h"
 #include "core/window/window.h"
 #include "core/component/camera.h"
-#include "core/render/render.h"
+#include "core/render/renderer.h"
 #include "core/component/sprite.h"
 #include "core/component/light.h"
 #include "core/component/transform.h"
@@ -11,23 +11,17 @@
 #include "core/raw/raw_manager.h"
 #include "core/cfg/cfg_manager.h"
 #include "core/event/event_enum.h"
+#include "core/render/pipe_shadow.h"
+#include "core/render/pipe_ssao.h"
+#include "core/render/pipe_forward.h"
+#include "core/render/pipe_deferred.h"
+#include "core/render/pipe_gbuffer.h"
 #include <filesystem>
 
 class AppWindow : public Window {
 public:
     void InitGame()
     {
-        //  初始化 OpenGL 配置
-        auto opengl = Global::Ref().RefCfgManager().At("init", "open_gl");
-        for (auto pair : opengl)
-        {
-            if (pair.mKey == "enable_primitive_restar")
-            {
-                glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-                glPrimitiveRestartIndex(pair.mValue->ToInt());
-            }
-        }
-
         InitAssets();
 		InitCamera();
 		InitEvents();
@@ -58,31 +52,31 @@ private:
 
 	void InitAssets()
 	{
-        Global::Ref().RefRawManager().BegImport(true);
-        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
-        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
-        Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
-        Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
-        Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
+        //Global::Ref().RefRawManager().BegImport(true);
+        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
+        //Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
 
-        Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
-        Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
-        Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
+        //Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
+        //Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
+        //Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
 
-        Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
-        Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
+        //Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
+        //Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
 
 
-        Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
-        Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
+        //Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
+        //Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
 
-        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
-        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
-        Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
+        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
+        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
+        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
 
-        Global::Ref().RefRawManager().EndImport();
+        //Global::Ref().RefRawManager().EndImport();
 
-        Global::Ref().RefRawManager().Init();
+        //Global::Ref().RefRawManager().Init();
 	}
 
 	void InitObject()
@@ -209,25 +203,72 @@ private:
 
 int main()
 {
+    AppWindow app;
+
     Global::Ref().Start();
 
+    //  绑定App
+    Global::Ref().BindWindow(&app);
+
+    //  初始化配置文件
+    Global::Ref().RefCfgManager().Init("res/config");
+
+    //  创建窗口
     auto renderFPS = Global::Ref().RefCfgManager().At("init", "render", "fps")->ToInt();
     auto windowX = Global::Ref().RefCfgManager().At("init", "window", "x")->ToInt();
     auto windowY = Global::Ref().RefCfgManager().At("init", "window", "y")->ToInt();
     auto windowW = Global::Ref().RefCfgManager().At("init", "window", "w")->ToInt();
     auto windowH = Global::Ref().RefCfgManager().At("init", "window", "h")->ToInt();
     auto windowTitle = Global::Ref().RefCfgManager().At("init", "window", "title")->ToString();
-
-    AppWindow app;
-    Global::Ref().BindWindow(&app);
-
-    app.Create(windowTitle);
-    app.Move(windowX, windowY, 
-             windowW, windowH);
+    app.Create(windowTitle, windowX, windowY, windowW, windowH);
     app.SetFPS(renderFPS);
+
+    //  初始化OpenGL
+    auto opengl = Global::Ref().RefCfgManager().At("init", "open_gl");
+    for (auto pair : opengl)
+    {
+        if (pair.mKey == "enable_primitive_restar")
+        {
+            glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+            glPrimitiveRestartIndex(pair.mValue->ToInt());
+        }
+    }
+
+    //  初始化资源
+    Global::Ref().RefRawManager().BegImport(true);
+    Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
+    Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
+    Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
+    Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
+    Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
+    Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
+    Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
+    Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
+    Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
+    Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
+    Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
+    Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
+    Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
+    Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
+    Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
+    Global::Ref().RefRawManager().EndImport();
+    Global::Ref().RefRawManager().Init();
+
+    //  初始化渲染器
+    Global::Ref().RefRenderer().Init();
+    Global::Ref().RefRenderer().AddPipe(    new PipeShadow()    );
+    Global::Ref().RefRenderer().AddPipe(    new PipeGBuffer()   );
+    Global::Ref().RefRenderer().AddPipe(    new PipeSSAO()      );
+    Global::Ref().RefRenderer().AddPipe(    new PipeDeferred()  );
+    Global::Ref().RefRenderer().AddPipe(    new PipeForward()   );
+
+    //  自定义初始化
     app.InitGame();
+
+    //  进入窗口循环
     app.Loop();
 
+    //  结束
     Global::Ref().Clean();
 
     return 0;

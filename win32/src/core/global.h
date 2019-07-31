@@ -3,8 +3,8 @@
 class Event;
 class Timer;
 class Object;
-class Render;
 class Window;
+class Renderer;
 class CfgManager;
 class RawManager;
 
@@ -30,14 +30,14 @@ public:
         return *_object;
     }
 
-    inline Render & RefRender()
-    {
-        return *_render;
-    }
-
     inline Window & RefWindow()
     {
         return *_window;
+    }
+
+    inline Renderer & RefRenderer()
+    {
+        return *_renderer;
     }
 
     inline CfgManager & RefCfgManager()
@@ -66,8 +66,8 @@ private:
     Event * _event;
     Timer * _timer;
     Object * _object;
-    Render * _render;
     Window * _window;
+    Renderer * _renderer;
     CfgManager * _cfgManager;
     RawManager * _rawManager;
 };

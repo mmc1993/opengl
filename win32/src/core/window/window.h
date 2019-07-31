@@ -40,11 +40,11 @@ public:
 public:
     Window();
     ~Window();
-    bool Create(const std::string & title);
-    void Move(size_t x);
-    void Move(size_t x, size_t y);
-    void Move(size_t x, size_t y, size_t w);
-    void Move(size_t x, size_t y, size_t w, size_t h);
+    bool Create(const std::string & title, int x = 0, int y = 0, uint w = 512, uint h = 512);
+    void Move(int x);
+    void Move(int x, int y);
+    void Move(int x, int y, uint w);
+    void Move(int x, int y, uint w, uint h);
     void SetFPS(size_t fps);
     size_t GetX() const;
     size_t GetY() const;
