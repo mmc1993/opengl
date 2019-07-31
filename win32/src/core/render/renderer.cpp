@@ -168,13 +168,13 @@ void Renderer::Post(const LightCommand * command)
     _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_LIGHT_TYPE, command->mType);
 }
 
-void Renderer::Post(const GLProgramState * state)
+void Renderer::Post(const GLProgramParam * param)
 {
-    if (state == nullptr)
+    if (param == nullptr)
     {
         return;
     }
-    for (const auto & value : state->mValues)
+    for (const auto & value : param->mValues)
     {
         if (value.mVal.type() == typeid(iint) ||
             value.mVal.type() == typeid(uint))

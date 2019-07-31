@@ -193,10 +193,10 @@ struct RenderCommand { };
 //  ≤ƒ÷ ‰÷»æ√¸¡Ó
 struct MaterialCommand : public RenderCommand {
     MaterialCommand() 
-        : mProgramState(nullptr)
+        : mProgramParam(nullptr)
         , mMaterial(nullptr)
     { }
-    const GLProgramState  * mProgramState;
+    const GLProgramParam  * mProgramParam;
     const GLMaterial      * mMaterial;
     glm::mat4               mTransform;
     uint                    mCameraMask;

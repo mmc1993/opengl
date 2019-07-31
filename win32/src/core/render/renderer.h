@@ -26,7 +26,7 @@ public:
     void Post(const glm::mat4   * model);
     void Post(const GLMaterial  * material);
     void Post(const LightCommand * command);
-    void Post(const GLProgramState * state);
+    void Post(const GLProgramParam * param);
     void Post(const CommandEnum     type, const RenderCommand * command);
     void Post(const DrawTypeEnum    draw, const FragTypeEnum frag, const GLMesh * mesh);
 
