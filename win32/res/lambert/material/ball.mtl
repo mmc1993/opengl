@@ -1,6 +1,6 @@
 {
     "mesh":         "res/lambert/ball.obj",
-    "program":      "res/lambert/program/forward.program",
+    "program":      "res/lambert/program/billboard.program",
     "items": [
         { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/lambert/texture/ball_diffuse.png" },
         { "type": "tex2d",  "key": "mNormal",       "val": "res/lambert/texture/ball_normal.png" }

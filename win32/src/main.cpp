@@ -52,31 +52,6 @@ private:
 
 	void InitAssets()
 	{
-        //Global::Ref().RefRawManager().BegImport(true);
-        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_DIRECT);
-        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_POINT);
-        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_DEFERRED_LIGHT_VOLUME_SPOT);
-        //Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
-        //Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
-
-        //Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
-        //Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
-        //Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
-
-        //Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
-        //Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
-
-
-        //Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
-        //Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
-
-        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
-        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
-        //Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
-
-        //Global::Ref().RefRawManager().EndImport();
-
-        //Global::Ref().RefRawManager().Init();
 	}
 
 	void InitObject()
@@ -243,6 +218,7 @@ int main()
     Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
     Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
     Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
+    Global::Ref().RefRawManager().Import("res/lambert/program/billboard.program");
     Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
     Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
     Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
