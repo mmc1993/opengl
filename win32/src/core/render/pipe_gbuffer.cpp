@@ -60,6 +60,7 @@ void PipeGBuffer::OnUpdate(Renderer * renderer, PipeState * state)
                 renderer->Bind(command.mMaterial->GetProgram(), command.mSubPass);
                 renderer->Post(command.mMaterial  );
                 renderer->Post(&command.mTransform);
+                renderer->Post(command.mProgramParam);
                 renderer->Post(
                     (DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType, 
                     (FragTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mFragType,

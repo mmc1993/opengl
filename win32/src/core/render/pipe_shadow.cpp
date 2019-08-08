@@ -142,6 +142,7 @@ inline void PipeShadow::PostBatch(Renderer * renderer, PipeState * state, const 
         {
             renderer->Post(light);
         }
+        renderer->Post(command.mProgramParam);
         renderer->Post(&command.mTransform);
         renderer->Post(
             (DrawTypeEnum)command.mMaterial->GetProgram()->GetPass(command.mSubPass).mDrawType,

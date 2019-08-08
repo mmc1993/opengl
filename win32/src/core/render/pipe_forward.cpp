@@ -33,6 +33,7 @@ void PipeForward::OnUpdate(Renderer * renderer, PipeState * state)
                 {
                     BindUBO(renderer, state);
                 }
+                renderer->Post(command.mProgramParam);
                 renderer->Post( command.mMaterial );
                 renderer->Post(&command.mTransform);
                 renderer->Post(
