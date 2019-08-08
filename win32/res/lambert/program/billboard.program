@@ -116,48 +116,48 @@ Common Beg
     FShader End
 Common End
 
-Pass Beg
-    CullFace    Front
-    DepthTest
-    DepthFunc   Less
-	DepthWrite
-	RenderType  Shadow
-	DrawType    Index
+// Pass Beg
+//     CullFace    Front
+//     DepthTest
+//     DepthFunc   Less
+// 	DepthWrite
+// 	RenderType  Shadow
+// 	DrawType    Index
 
-    VShader Beg
-        void main()
-        {
-			vec4 apos       = vec4(a_v_, 1);
-			v_out_.mMPos    = vec3(matrix_m_ * apos);
-			gl_Position     = vec4(matrix_mvp_ * apos);
-        }
-    VShader End
+//     VShader Beg
+//         void main()
+//         {
+// 			vec4 apos       = vec4(a_v_, 1);
+// 			v_out_.mMPos    = vec3(matrix_m_ * apos);
+// 			gl_Position     = vec4(matrix_mvp_ * apos);
+//         }
+//     VShader End
 
-    FShader Beg
-        void main()
-        {
-            switch (light_type_)
-            {
-            case LIGHT_TYPE_DIRECT_:
-                {
-                    gl_FragDepth = gl_FragCoord.z;
-                }
-                break;
-            case LIGHT_TYPE_POINT_:
-                {
-					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
-					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
-                }
-                break;
-            case LIGHT_TYPE_SPOT_:
-                {
-                    gl_FragDepth = gl_FragCoord.z;
-                }
-                break;
-            }
-        }
-    FShader End
-Pass End
+//     FShader Beg
+//         void main()
+//         {
+//             switch (light_type_)
+//             {
+//             case LIGHT_TYPE_DIRECT_:
+//                 {
+//                     gl_FragDepth = gl_FragCoord.z;
+//                 }
+//                 break;
+//             case LIGHT_TYPE_POINT_:
+//                 {
+// 					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
+// 					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
+//                 }
+//                 break;
+//             case LIGHT_TYPE_SPOT_:
+//                 {
+//                     gl_FragDepth = gl_FragCoord.z;
+//                 }
+//                 break;
+//             }
+//         }
+//     FShader End
+// Pass End
 
 // Pass Beg
 //     CullFace    Back
@@ -169,7 +169,19 @@ Pass End
 //     VShader Beg
 //         void main()
 //         {
-// 			gl_Position = vec4(matrix_mvp_ * vec4(a_v_, 1));
+//             vec4 apos       = vec4(a_v_, 1);
+//             vec3 mPos       = vec3(matrix_m_ * apos);
+
+//             vec3 front          = normalize(camera_pos_ - mPos);
+//             front.y = 0; front  = normalize(front);
+
+//             vec3 up         = vec3(0, 1, 0);
+//             vec3 right      = cross(front, up);
+//             up              = cross(right, front);
+
+//             mat3 rotate     = mat3(right, up, front);
+//                  apos       = vec4(rotate * a_v_, 1);
+//             gl_Position     = vec4(matrix_mvp_ * apos);
 //         }
 //     VShader End
 
@@ -182,8 +194,9 @@ Pass End
 
 Pass Beg
     CullFace        Back
-    DepthFunc       Equal
+    DepthFunc       Less
     DepthTest
+    DepthWrite
     RenderQueue     Geometric
     RenderType      Forward
     DrawType        Index
@@ -191,16 +204,21 @@ Pass Beg
     VShader Beg
         void main()
         {
-            //  计算世界坐标
             vec4 apos       = vec4(a_v_, 1);
             vec3 mPos       = vec3(matrix_m_ * apos);
-            //  计算广告牌坐标
-            vec3 cp         = normalize(camera_pos_ - mPos);
-            vec3 dir        = matrix_n_ * vec3(0, 0, 1);
-            vec3 pos        = normalize(a_v_) - dot(cp, dir) * cp;
-            pos            *= length(a_v_);
+
+            vec3 front      = normalize(camera_pos_ - mPos);
+            vec3 up         = abs(front.y) > 0.999999999999f
+                            ? vec3(0, 0, 1)
+                            : vec3(0, 1, 0);
+            vec3 right      = cross(up, front);
+            up              = cross(front, right);
+
+            apos.xyz        = right * a_v_.x
+                            + up    * a_v_.y
+                            + front * a_v_.z;
+
             //  最终坐标
-            apos            = vec4(pos, 1);
             v_out_.mMPos    = vec3(matrix_m_   * apos);
             v_out_.mNormal  = vec3(matrix_n_   * a_n_);
             v_out_.mMVPos   = vec3(matrix_mv_  * apos);
@@ -271,7 +289,7 @@ Pass Beg
 			return length(normal) > zorder * light_point_.mParam[i].mFar + 1? 0: 1;
 		}
 
-        //	计算漫反射缩放因�?
+        //	计算漫反射缩放因子
         float CalculateDiffuseScale(vec3 fragNormal, vec3 lightNormal, vec3 cameraNormal)
         {
             float v = max(dot(fragNormal, lightNormal), 0) * 0.5f + 0.5f;

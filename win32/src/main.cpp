@@ -56,12 +56,12 @@ private:
 
 	void InitObject()
 	{
-        auto sprite0 = new Sprite();
-        sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/scene.mtl"));
-        auto object0 = new Object();
-        object0->AddComponent(sprite0);
-        object0->GetTransform()->Translate(0, 0, 0);
-        object0->SetParent(&Global::Ref().RefObject());
+        //auto sprite0 = new Sprite();
+        //sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/scene.mtl"));
+        //auto object0 = new Object();
+        //object0->AddComponent(sprite0);
+        //object0->GetTransform()->Translate(0, 0, 0);
+        //object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
@@ -222,6 +222,7 @@ int main()
     Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
     Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
     Global::Ref().RefRawManager().Import("res/lambert/scene.obj");
+    Global::Ref().RefRawManager().Import("res/lambert/wall.obj");
     Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
     Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
     Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
