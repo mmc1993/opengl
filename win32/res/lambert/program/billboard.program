@@ -159,44 +159,48 @@ Common End
 //     FShader End
 // Pass End
 
-// Pass Beg
-//     CullFace    Back
-//     DepthTest
-// 	DepthWrite
-// 	RenderType  Depth
-// 	DrawType    Index
+Pass Beg
+    CullFace    Back
+    DepthTest
+	DepthWrite
+	RenderType  Depth
+	DrawType    Index
 
-//     VShader Beg
-//         void main()
-//         {
-//             vec4 apos       = vec4(a_v_, 1);
-//             vec3 mPos       = vec3(matrix_m_ * apos);
+    VShader Beg
+        void main()
+        {
+            vec4 apos       = vec4(a_v_, 1);
+            vec3 mPos       = vec3(matrix_m_ * apos);
 
-//             vec3 front          = normalize(camera_pos_ - mPos);
-//             front.y = 0; front  = normalize(front);
+            vec3 front      = normalize(camera_pos_ - mPos);
+            vec3 up         = abs(front.y) > 0.999999999999f
+                            ? vec3(0, 0, 1)
+                            : vec3(0, 1, 0);
+            vec3 right      = cross(up, front);
+            up              = cross(front, right);
 
-//             vec3 up         = vec3(0, 1, 0);
-//             vec3 right      = cross(front, up);
-//             up              = cross(right, front);
+            apos.xyz        = right * a_v_.x
+                            + up    * a_v_.y
+                            + front * a_v_.z;
 
-//             mat3 rotate     = mat3(right, up, front);
-//                  apos       = vec4(rotate * a_v_, 1);
-//             gl_Position     = vec4(matrix_mvp_ * apos);
-//         }
-//     VShader End
+            apos            = matrix_mv_ * apos;
+            normalize apos
+            apos.z         -= 1;
+            gl_Position     = vec4(matrix_p_ * apos);
+        }
+    VShader End
 
-//     FShader Beg
-//         void main()
-//         {
-//         }
-//     FShader End
-// Pass End
+    FShader Beg
+        void main()
+        {
+        }
+    FShader End
+Pass End
 
 Pass Beg
     CullFace        Back
     DepthFunc       Less
     DepthTest
-    DepthWrite
     RenderQueue     Geometric
     RenderType      Forward
     DrawType        Index
