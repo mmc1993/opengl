@@ -16,8 +16,7 @@ public:
         std::string         mKey;
         const GLTexture2D * mTex2D;
         
-        Item() 
-            : mTex2D(nullptr) 
+        Item() : mTex2D(nullptr) 
         { }
 
         Item(const std::string & key, const GLTexture2D * tex2D)
