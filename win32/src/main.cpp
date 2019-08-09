@@ -225,6 +225,7 @@ int main()
     Global::Ref().RefRawManager().Import("res/lambert/wall.obj");
     Global::Ref().RefRawManager().Import("res/lambert/material/ball.mtl");
     Global::Ref().RefRawManager().Import("res/lambert/material/scene.mtl");
+    Global::Ref().RefRawManager().Import("res/lambert/texture/billboard.png");
     Global::Ref().RefRawManager().Import("res/lambert/texture/ball_specular.png");
     Global::Ref().RefRawManager().Import("res/lambert/texture/ball_diffuse.png");
     Global::Ref().RefRawManager().Import("res/lambert/texture/ball_normal.png");
