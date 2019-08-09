@@ -59,6 +59,9 @@ void PipeShadow::OnDel(Renderer * renderer, PipeState * state)
 
 void PipeShadow::OnUpdate(Renderer * renderer, PipeState * state)
 {
+    glViewport(0, 0,
+               Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
+               Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
     for (auto i = 0; i != std::min(state->mLightQueues.at(Light::kDIRECT).size(), LIMIT_LIGHT_DIRECT); ++i)
     {
         BakeShadow(renderer, state, state->mShadowMap.mDirectTexture[i], &state->mLightQueues.at(Light::kDIRECT).at(i), &PipeShadow::OnBakeShadow2D);
@@ -89,9 +92,6 @@ inline void PipeShadow::BakeShadow(Renderer * renderer, PipeState * state, uint 
 
 inline void PipeShadow::OnBakeShadow2D(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light)
 {
-    glViewport(0, 0,
-        Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
     renderer->GetMatrixStack().Identity(MatrixStack::kVIEW);
     renderer->GetMatrixStack().Identity(MatrixStack::kPROJ);
     renderer->GetMatrixStack().Mul(MatrixStack::kVIEW, light->mView);
@@ -112,10 +112,6 @@ inline void PipeShadow::OnBakeShadow3D(Renderer * renderer, PipeState * state, u
         { glm::vec3( 0,  0,  1), glm::vec3(0, -1,  0) },
         { glm::vec3( 0,  0, -1), glm::vec3(0, -1,  0) },
     };
-    glViewport(0, 0,
-        Global::Ref().RefCfgManager().At("init", "shadow_map", "w")->ToInt(),
-        Global::Ref().RefCfgManager().At("init", "shadow_map", "h")->ToInt());
-
     for (auto i = 0; i != 6; ++i)
     {
         auto view = glm::lookAt(         light->mPosition,
