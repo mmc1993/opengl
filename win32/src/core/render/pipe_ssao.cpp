@@ -41,7 +41,7 @@ void PipeSSAO::OnUpdate(Renderer * renderer, PipeState * state)
     
     //  渲染完整深度
     state->mRenderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
-                                           RenderTarget::TextureType::k2D,
+                                           RenderTarget::TextureType::k2D   ,
                                            state->mPostScreen.mDepthTexture);
     glDrawBuffer(RenderTarget::AttachmentType::kNONE);
 

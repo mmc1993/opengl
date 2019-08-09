@@ -67,7 +67,7 @@ private:
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(2, 3, 0);
+        object1->GetTransform()->Translate(3, 3, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 
@@ -83,12 +83,12 @@ private:
 	{
 		//	坐标，环境光，漫反射，镜面反射，方向
 		const std::vector<std::array<glm::vec3, 5>> directs = {
-			{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.1f, 0.1f, 0.1f), glm::normalize(glm::vec3(0, -1, -1)) },
+			//{ glm::vec3(0, 10, 10), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.1f, 0.1f, 0.1f), glm::normalize(glm::vec3(0, -1, -1)) },
 		};
 
 		//	坐标，环境光，漫反射，镜面反射，衰减k0, k1, k2
 		const std::vector<std::array<glm::vec3, 5>> points = {
-            //{ glm::vec3(8, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
+            { glm::vec3(8, 8, 3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0001f, 0.01f) },
 		};
 
 		//	坐标，环境，漫反射，镜面反射，方向，衰减k0, k1, k2，内切角，外切角
@@ -217,7 +217,7 @@ int main()
     Global::Ref().RefRawManager().Import(BUILTIN_MESH_SCREEN_QUAD);
     Global::Ref().RefRawManager().Import(BUILTIN_PROGRAM_SSAO);
     Global::Ref().RefRawManager().Import("res/lambert/program/deferred_light_volume.program");
-    Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
+    //Global::Ref().RefRawManager().Import("res/lambert/program/deferred_gbuffer.program");
     Global::Ref().RefRawManager().Import("res/lambert/program/billboard.program");
     Global::Ref().RefRawManager().Import("res/lambert/program/forward.program");
     Global::Ref().RefRawManager().Import("res/lambert/ball.obj");
@@ -234,9 +234,9 @@ int main()
     //  初始化渲染器
     Global::Ref().RefRenderer().Init();
     Global::Ref().RefRenderer().AddPipe(    new PipeShadow()    );
-    Global::Ref().RefRenderer().AddPipe(    new PipeGBuffer()   );
+    //Global::Ref().RefRenderer().AddPipe(    new PipeGBuffer()   );
     Global::Ref().RefRenderer().AddPipe(    new PipeSSAO()      );
-    Global::Ref().RefRenderer().AddPipe(    new PipeDeferred()  );
+    //Global::Ref().RefRenderer().AddPipe(    new PipeDeferred()  );
     Global::Ref().RefRenderer().AddPipe(    new PipeForward()   );
 
     //  自定义初始化

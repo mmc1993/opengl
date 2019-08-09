@@ -121,6 +121,8 @@ void Renderer::Bind(const CameraCommand * command)
 
 bool Renderer::Bind(const GLProgram * program, uint pass)
 {
+    ASSERT_LOG(_state->mRenderTime.mTexBase < 16, "_state->mRenderTime.mTexBase Overflow");
+
     if (_state->mRenderTime.mProgram != program)
     {
         _state->mRenderTime.mTexBase = 0;
@@ -128,7 +130,12 @@ bool Renderer::Bind(const GLProgram * program, uint pass)
         _state->mRenderTime.mProgram->UsePass(pass, true);
         return true;
     }
-    return _state->mRenderTime.mProgram->UsePass(pass);
+    if (_state->mRenderTime.mProgram->UsePass(pass))
+    {
+        _state->mRenderTime.mTexBase = 0;
+        return true;
+    }
+    return false;
 }
 
 void Renderer::Post(const LightCommand * command)

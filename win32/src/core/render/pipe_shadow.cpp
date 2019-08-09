@@ -81,10 +81,9 @@ void PipeShadow::OnUpdate(Renderer * renderer, PipeState * state)
 
 inline void PipeShadow::BakeShadow(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light, const BakeFunc_t bakefunc)
 {
-    state->mRenderTarget[0].Start();
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    (this->*bakefunc)(renderer, state, texture, light);
+    state->mRenderTarget[0].Start(RenderTarget::BindType::kDRAW);
+    glDrawBuffer(RenderTarget::AttachmentType::kNONE);
+    (this->*bakefunc)(renderer, state, texture,light);
     state->mRenderTarget[0].Ended();
 }
 
