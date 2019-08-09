@@ -22,7 +22,7 @@ void PipeForward::OnUpdate(Renderer * renderer, PipeState * state)
 {
     PackUBO(renderer, state);
 
-    state->mRenderTarget[1].Start();
+    state->mRenderTarget[1].Start(RenderTarget::BindType::kDRAW);
     for (auto & commands : state->mForwardQueues)
     {
         for (const auto & command : commands)

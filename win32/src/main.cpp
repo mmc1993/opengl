@@ -34,12 +34,16 @@ private:
         auto object = new Object();
 
 		auto camera = new Camera();
-		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 30000);
+		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 100.0f);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
-		camera->LookAt(
-			glm::vec3(10.2153053, 18.6474419, 8.25051212),
-			glm::vec3(9.65997696, 18.1241894, 7.60412455),
-			glm::vec3(0, 1, 0));
+		//camera->LookAt(
+		//	glm::vec3(10.2153053, 18.6474419, 8.25051212),
+		//	glm::vec3(9.65997696, 18.1241894, 7.60412455),
+		//	glm::vec3(0, 1, 0));
+        camera->LookAt(
+            glm::vec3(0, 0, 5),
+            glm::vec3(0, 0, 0),
+            glm::vec3(0, 1, 0));
         camera->SetMask(Camera::kMASK0);
         camera->SetOrder(0);
         object->AddComponent(camera);
@@ -67,7 +71,7 @@ private:
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(3, 2, 0);
+        object1->GetTransform()->Translate(0, 0, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 

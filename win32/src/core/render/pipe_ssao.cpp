@@ -40,6 +40,9 @@ void PipeSSAO::OnUpdate(Renderer * renderer, PipeState * state)
     state->mRenderTarget[0].Start(RenderTarget::BindType::kDRAW);
     
     //  渲染完整深度
+    state->mRenderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
+                                           RenderTarget::TextureType::k2D,
+                                           state->mPostScreen.mDepthTexture);
     glDrawBuffer(RenderTarget::AttachmentType::kNONE);
 
     for (const auto & command : state->mDepthQueue)

@@ -49,7 +49,7 @@ void PipeGBuffer::OnUpdate(Renderer * renderer, PipeState * state)
         RenderTarget::AttachmentType::kCOLOR1,
         RenderTarget::AttachmentType::kCOLOR2 };
     glDrawBuffers(std::length(outputs), outputs);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     for (auto & commands : state->mDeferredQueues)
     {

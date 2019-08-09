@@ -98,7 +98,7 @@ inline void PipeShadow::OnBakeShadow2D(Renderer * renderer, PipeState * state, u
     renderer->GetMatrixStack().Mul(MatrixStack::kVIEW, light->mView);
     renderer->GetMatrixStack().Mul(MatrixStack::kPROJ, light->mProj);
     state->mRenderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, RenderTarget::TextureType::k2D, texture);
-    PostBatch(renderer, state, light);
+    DrawShadow(renderer, state, light);
     renderer->GetMatrixStack().Pop(MatrixStack::kPROJ);
     renderer->GetMatrixStack().Pop(MatrixStack::kVIEW);
 }
@@ -128,12 +128,13 @@ inline void PipeShadow::OnBakeShadow3D(Renderer * renderer, PipeState * state, u
         renderer->GetMatrixStack().Mul(MatrixStack::kPROJ, light->mProj);
         state->mRenderTarget[0].BindAttachment(RenderTarget::AttachmentType::kDEPTH, 
             (RenderTarget::TextureType)(RenderTarget::TextureType::k3D + i), texture);
+        DrawShadow(renderer, state, light);
         renderer->GetMatrixStack().Pop(MatrixStack::kPROJ);
         renderer->GetMatrixStack().Pop(MatrixStack::kVIEW);
     }
 }
 
-inline void PipeShadow::PostBatch(Renderer * renderer, PipeState * state, const LightCommand * light)
+inline void PipeShadow::DrawShadow(Renderer * renderer, PipeState * state, const LightCommand * light)
 {
     glClear(GL_DEPTH_BUFFER_BIT);
     for (auto & command : state->mShadowQueue)

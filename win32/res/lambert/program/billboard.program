@@ -161,6 +161,7 @@ Common End
 
 Pass Beg
     CullFace    Back
+    DepthFunc   Less
     DepthTest
 	DepthWrite
 	RenderType  Depth
@@ -184,8 +185,7 @@ Pass Beg
                             + front * a_v_.z;
 
             apos            = matrix_mv_ * apos;
-            normalize apos
-            apos.z         -= 1;
+            apos.xyz       += normalize(apos.xyz);
             gl_Position     = vec4(matrix_p_ * apos);
         }
     VShader End

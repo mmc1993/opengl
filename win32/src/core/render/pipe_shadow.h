@@ -15,5 +15,5 @@ private:
     void BakeShadow(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light, const BakeFunc_t bakefunc);
     void OnBakeShadow2D(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light);
     void OnBakeShadow3D(Renderer * renderer, PipeState * state, uint texture, const LightCommand * light);
-    void PostBatch(Renderer * renderer, PipeState * state, const LightCommand * light);
+    void DrawShadow(Renderer * renderer, PipeState * state, const LightCommand * light);
 };
