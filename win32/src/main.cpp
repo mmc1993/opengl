@@ -36,14 +36,10 @@ private:
 		auto camera = new Camera();
 		camera->InitPerspective(60, (float)GetW(), (float)GetH(), 1.0f, 100.0f);
 		camera->SetViewport({ 0, 0, GetW(), GetH() });
-		//camera->LookAt(
-		//	glm::vec3(10.2153053, 18.6474419, 8.25051212),
-		//	glm::vec3(9.65997696, 18.1241894, 7.60412455),
-		//	glm::vec3(0, 1, 0));
-        camera->LookAt(
-            glm::vec3(0, 0, 5),
-            glm::vec3(0, 0, 0),
-            glm::vec3(0, 1, 0));
+		camera->LookAt(
+			glm::vec3(10.2153053, 18.6474419, 8.25051212),
+			glm::vec3(9.65997696, 18.1241894, 7.60412455),
+			glm::vec3(0, 1, 0));
         camera->SetMask(Camera::kMASK0);
         camera->SetOrder(0);
         object->AddComponent(camera);
@@ -60,18 +56,18 @@ private:
 
 	void InitObject()
 	{
-        //auto sprite0 = new Sprite();
-        //sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/scene.mtl"));
-        //auto object0 = new Object();
-        //object0->AddComponent(sprite0);
-        //object0->GetTransform()->Translate(0, 0, 0);
-        //object0->SetParent(&Global::Ref().RefObject());
+        auto sprite0 = new Sprite();
+        sprite0->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/scene.mtl"));
+        auto object0 = new Object();
+        object0->AddComponent(sprite0);
+        object0->GetTransform()->Translate(0, 0, 0);
+        object0->SetParent(&Global::Ref().RefObject());
 
         auto sprite1 = new Sprite();
         sprite1->BindMaterial(Global::Ref().RefRawManager().LoadRes<GLMaterial>("res/lambert/material/ball.mtl"));
         auto object1 = new Object();
         object1->AddComponent(sprite1);
-        object1->GetTransform()->Translate(0, 0, 0);
+        object1->GetTransform()->Translate(2, 3, 0);
         object1->SetParent(&Global::Ref().RefObject());
 	}
 

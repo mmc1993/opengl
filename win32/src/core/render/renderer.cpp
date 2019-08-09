@@ -37,6 +37,7 @@ void Renderer::RenderOnce()
     _state->mRenderTime.mRenderCount = 0;
     _state->mRenderTime.mVertexCount = 0;
     _state->mRenderTarget[1].Start();
+    glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT |
             GL_DEPTH_BUFFER_BIT);
     _state->mRenderTarget[1].Ended();
@@ -234,18 +235,17 @@ void Renderer::Post(const glm::mat4 * model)
     _state->mRenderTime.mProgram->BindUniformMatrix(UNIFORM_MATRIX_MV_INV, glm::inverse(matrixMV));
     _state->mRenderTime.mProgram->BindUniformMatrix(UNIFORM_MATRIX_VP_INV, glm::inverse(matrixVP));
 
+    //  相机参数
+    _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_CAMERA_N, _state->mRenderTime.mCamera->mN);
+    _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_CAMERA_F, _state->mRenderTime.mCamera->mF);
+    _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _state->mRenderTime.mCamera->mPos);
+    _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_CAMERA_EYE, _state->mRenderTime.mCamera->mEye);
+    _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_VIEW_SIZE, glm::vec2(
+        _state->mRenderTime.mCamera->mViewport.z - _state->mRenderTime.mCamera->mViewport.x,
+        _state->mRenderTime.mCamera->mViewport.w - _state->mRenderTime.mCamera->mViewport.y));
+
     //  其他参数
     _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_GAME_TIME, glfwGetTime());
-    if (_state->mRenderTime.mCamera != nullptr)
-    {
-        _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_CAMERA_N, _state->mRenderTime.mCamera->mN);
-        _state->mRenderTime.mProgram->BindUniformNumber(UNIFORM_CAMERA_F, _state->mRenderTime.mCamera->mF);
-        _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_CAMERA_POS, _state->mRenderTime.mCamera->mPos);
-        _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_CAMERA_EYE, _state->mRenderTime.mCamera->mEye);
-        _state->mRenderTime.mProgram->BindUniformVector(UNIFORM_VIEW_SIZE, glm::vec2(
-            _state->mRenderTime.mCamera->mViewport.z - _state->mRenderTime.mCamera->mViewport.x,
-            _state->mRenderTime.mCamera->mViewport.w - _state->mRenderTime.mCamera->mViewport.y));
-    }
 }
 
 void Renderer::Post(const GLMaterial * material)

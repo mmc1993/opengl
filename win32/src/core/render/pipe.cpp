@@ -33,7 +33,7 @@ PipeState::PipeState()
     glBindTexture(GL_TEXTURE_2D, 0);
 
     //  °ó¶¨äÖÈ¾Ä¿±ê
-    mRenderTarget[1].Start();
+    mRenderTarget[1].Start(RenderTarget::BindType::kALL);
     mRenderTarget[1].BindAttachment(RenderTarget::AttachmentType::kCOLOR0, RenderTarget::TextureType::k2D, mPostScreen.mColorTexture);
     mRenderTarget[1].BindAttachment(RenderTarget::AttachmentType::kDEPTH,  RenderTarget::TextureType::k2D, mPostScreen.mDepthTexture);
     mRenderTarget[1].Ended();

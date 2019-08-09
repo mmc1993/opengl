@@ -116,48 +116,65 @@ Common Beg
     FShader End
 Common End
 
-// Pass Beg
-//     CullFace    Front
-//     DepthTest
-//     DepthFunc   Less
-// 	DepthWrite
-// 	RenderType  Shadow
-// 	DrawType    Index
+Pass Beg
+    CullFace    Front
+    DepthTest
+    DepthFunc   Less
+	DepthWrite
+	RenderType  Shadow
+	DrawType    Index
 
-//     VShader Beg
-//         void main()
-//         {
-// 			vec4 apos       = vec4(a_v_, 1);
-// 			v_out_.mMPos    = vec3(matrix_m_ * apos);
-// 			gl_Position     = vec4(matrix_mvp_ * apos);
-//         }
-//     VShader End
+    VShader Beg
+        void main()
+        {
+            vec4 apos       = vec4(a_v_, 1);
+            vec3 mPos       = vec3(matrix_m_*vec4(0,0,0,1));
+            vec3 front      = normalize(camera_pos_ - mPos);
+            vec3 up         = abs(front.y) > 0.9999f
+                            ? vec3(0, 0, 1)
+                            : vec3(0, 1, 0);
+            vec3 right      = cross(up, front);
+            up              = cross(front, right);
 
-//     FShader Beg
-//         void main()
-//         {
-//             switch (light_type_)
-//             {
-//             case LIGHT_TYPE_DIRECT_:
-//                 {
-//                     gl_FragDepth = gl_FragCoord.z;
-//                 }
-//                 break;
-//             case LIGHT_TYPE_POINT_:
-//                 {
-// 					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
-// 					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
-//                 }
-//                 break;
-//             case LIGHT_TYPE_SPOT_:
-//                 {
-//                     gl_FragDepth = gl_FragCoord.z;
-//                 }
-//                 break;
-//             }
-//         }
-//     FShader End
-// Pass End
+            apos.xyz        = right * a_v_.x
+                            + up    * a_v_.y
+                            + front * a_v_.z;
+
+            apos            = matrix_mv_ * apos;
+            apos.xyz       += normalize(apos.xyz);
+            gl_Position     = vec4(matrix_p_ * apos);
+
+			// vec4 apos       = vec4(a_v_, 1);
+			// v_out_.mMPos    = vec3(matrix_m_ * apos);
+			// gl_Position     = vec4(matrix_mvp_ * apos);
+        }
+    VShader End
+
+    FShader Beg
+        void main()
+        {
+            switch (light_type_)
+            {
+            case LIGHT_TYPE_DIRECT_:
+                {
+                    gl_FragDepth = gl_FragCoord.z;
+                }
+                break;
+            case LIGHT_TYPE_POINT_:
+                {
+					vec3 normal = v_out_.mMPos - light_point_.mParam[0].mPosition;
+					gl_FragDepth = length(normal) / light_point_.mParam[0].mFar;
+                }
+                break;
+            case LIGHT_TYPE_SPOT_:
+                {
+                    gl_FragDepth = gl_FragCoord.z;
+                }
+                break;
+            }
+        }
+    FShader End
+Pass End
 
 Pass Beg
     CullFace    Back
@@ -171,10 +188,9 @@ Pass Beg
         void main()
         {
             vec4 apos       = vec4(a_v_, 1);
-            vec3 mPos       = vec3(matrix_m_ * apos);
-
+            vec3 mPos       = vec3(matrix_m_*vec4(0,0,0,1));
             vec3 front      = normalize(camera_pos_ - mPos);
-            vec3 up         = abs(front.y) > 0.999999999999f
+            vec3 up         = abs(front.y) > 0.9999f
                             ? vec3(0, 0, 1)
                             : vec3(0, 1, 0);
             vec3 right      = cross(up, front);
@@ -209,10 +225,9 @@ Pass Beg
         void main()
         {
             vec4 apos       = vec4(a_v_, 1);
-            vec3 mPos       = vec3(matrix_m_ * apos);
-
+            vec3 mPos       = vec3(matrix_m_*vec4(0,0,0,1));
             vec3 front      = normalize(camera_pos_ - mPos);
-            vec3 up         = abs(front.y) > 0.999999999999f
+            vec3 up         = abs(front.y) > 0.9999f
                             ? vec3(0, 0, 1)
                             : vec3(0, 1, 0);
             vec3 right      = cross(up, front);

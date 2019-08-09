@@ -1,5 +1,5 @@
 {
-    "mesh":         "res/lambert/wall.obj",
+    "mesh":         "res/lambert/ball.obj",
     "program":      "res/lambert/program/billboard.program",
     "items": [
         { "type": "tex2d",  "key": "mDiffuse0",     "val": "res/lambert/texture/ball_diffuse.png" },
