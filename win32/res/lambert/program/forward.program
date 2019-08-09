@@ -161,6 +161,7 @@ Pass End
 
 Pass Beg
     CullFace    Back
+    DepthFunc   Less
     DepthTest
 	DepthWrite
 	RenderType  Depth
@@ -182,7 +183,7 @@ Pass End
 
 Pass Beg
     CullFace        Back
-    DepthFunc       Equal
+    DepthFunc       LEqual
     DepthTest
     RenderQueue     Geometric
     RenderType      Forward
