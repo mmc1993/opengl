@@ -19,7 +19,7 @@ public:
     enum RawTypeEnum {
         kRAW_MESH,          //  网格
         kRAW_IMAGE,         //  图片
-        kRAW_PROGRAM,       //  着色器
+        kRAW_PROGRAM,       //  着色
         kRAW_MATERIAL,      //  材质
         kRawTypeEnum,
     };
@@ -48,8 +48,8 @@ public:
             return name == mName;
         }
 
-        //void ::Serialize(  std::ostream & os, const Item & item)   定义在raw_manager.cpp
-        //void ::Deserialize(std::istream & is,       Item & item)   定义在raw_manager.cpp
+        //void ::Serialize(  std::ostream & os, const ManifestSlot & manifestSlot)   定义在raw_manager.cpp
+        //void ::Deserialize(std::istream & is,       ManifestSlot & manifestSlot)   定义在raw_manager.cpp
     };
 
     class Raw {
@@ -94,19 +94,18 @@ public:
 
     class RawMaterial : public Raw {
     public:
-        struct Item {
-            GLMaterial::Item::TypeEnum mType;
+        struct Texture {
+            GLMaterial::Texture::TypeEnum mType;
             std::string mKey;
-            std::string mValStr;
-            float       mValNum;
+            std::string mVal;
 
-            //void Serialize(  std::ostream & os, const Item & item);   //   定义在raw_manager.cpp
-            //void Deserialize(std::istream & is,       Item & item);   //   定义在raw_manager.cpp
+            //void Serialize(  std::ostream & os, const Texture & texture);   //   定义在raw_manager.cpp
+            //void Deserialize(std::istream & is,       Texture & texture);   //   定义在raw_manager.cpp
         };
 
         std::string mMesh;
         std::string mProgram;
-        std::vector<Item> mItems;
+        std::vector<Texture> mTextures;
 
         virtual void Serialize(  std::ofstream & os) override;
         virtual void Deserialize(std::ifstream & is) override;
@@ -121,9 +120,12 @@ public:
 
 public:
     void Init();
-    void BegImport(bool   clear = false);
     void Import(const std::string & url);
+    void BegImport(bool   clear = false);
     void EndImport();
+
+    //  
+    //void Generate(const std::string & url, const ImportTypeEnum type);
 
     //  将原始数据加载到内存
     Raw * LoadRaw(const std::string & name);

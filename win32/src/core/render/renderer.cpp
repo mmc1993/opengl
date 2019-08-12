@@ -257,13 +257,13 @@ void Renderer::Post(const glm::mat4 * model)
 
 void Renderer::Post(const GLMaterial * material)
 {
-    for (auto i = 0; i != material->GetItems().size(); ++i)
+    for (auto i = 0; i != material->GetTextures().size(); ++i)
     {
-        const auto & item = material->GetItems().at(i);
-        const auto & key  = SFormat(UNIFORM_MATERIAL, item.mKey);
-        if (item.mTex2D != nullptr)
+        const auto & val = material->GetTextures().at(i);
+        const auto & key = SFormat(UNIFORM_MATERIAL, val.mKey);
+        if (val.mTex2D != nullptr)
         {
-            _state->mRenderTime.mProgram->BindUniformTex2D(key.c_str(), item.mTex2D->GetID(), 
+            _state->mRenderTime.mProgram->BindUniformTex2D(key.c_str(), val.mTex2D->GetID(), 
                                                            _state->mRenderTime.mTexBase + i);
         }
     }

@@ -7,7 +7,7 @@
 
 class GLMaterial : public GLRes {
 public:
-    struct Item {
+    struct Texture {
         enum TypeEnum {
             kTEX2D,
             kTEX3D,
@@ -16,10 +16,10 @@ public:
         std::string         mKey;
         const GLTexture2D * mTex2D;
         
-        Item() : mTex2D(nullptr) 
+        Texture() : mTex2D(nullptr) 
         { }
 
-        Item(const std::string & key, const GLTexture2D * tex2D)
+        Texture(const std::string & key, const GLTexture2D * tex2D)
             : mKey(key), mTex2D(tex2D)
         { }
 
@@ -54,20 +54,20 @@ public:
     }
 
     template <class T>
-    void SetItem(const std::string & key, const T & val)
+    void SetTexture(const std::string & key, const T & val)
     {
-        auto it = std::find(_items.begin(), _items.end(), key);
-        if (it != _items.end()) { *it = Item(key, val); }
-        else { _items.emplace_back(key, val); }
+        auto it = std::find(_textures.begin(), _textures.end(), key);
+        if (it != _textures.end()) { *it = Texture(key, val); }
+        else { _textures.emplace_back(key, val); }
     }
 
-    const std::vector<Item> & GetItems() const
+    const std::vector<Texture> & GetTextures() const
     {
-        return _items;
+        return _textures;
     }
 
 private:
-    const GLProgram *       _glProgram;
     const GLMesh    *       _glMesh;
-    std::vector<Item>       _items;
+    const GLProgram *       _glProgram;
+    std::vector<Texture>    _textures;
 };

@@ -131,8 +131,13 @@ public:
 
         iint ret;
         glLinkProgram( _passs.back().mID);
+#ifdef ENABLE_DEBUG
         glGetProgramiv(_passs.back().mID, GL_LINK_STATUS, &ret);
-        ASSERT_LOG(ret != 0, "Pass GLProgram Error.");
+        GLsizei size      = 0;
+        GLchar error[256] = { 0 };
+        glGetProgramInfoLog(_passs.back().mID, sizeof(error), &size, error);
+        ASSERT_LOG(ret != 0, "Pass GLProgram Error. {0}", error);
+#endif
     }
 
     bool UsePass(uint i, bool force = false) const

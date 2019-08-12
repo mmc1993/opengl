@@ -26,20 +26,18 @@ inline void Deserialize(std::istream & is, RawManager::ManifestSlot & slot)
     Deserialize(is, slot.mByteLength);
 }
 
-inline void Serialize(std::ostream & os, const RawManager::RawMaterial::Item & item)
+inline void Serialize(std::ostream & os, const RawManager::RawMaterial::Texture & texture)
 {
-    Serialize(os, item.mKey);
-    Serialize(os, item.mType);
-    Serialize(os, item.mValStr);
-    Serialize(os, item.mValNum);
+    Serialize(os, texture.mType);
+    Serialize(os, texture.mKey);
+    Serialize(os, texture.mVal);
 }
 
-inline void Deserialize(std::istream & is, RawManager::RawMaterial::Item & item)
+inline void Deserialize(std::istream & is, RawManager::RawMaterial::Texture & texture)
 {
-    Deserialize(is, item.mKey);
-    Deserialize(is, item.mType);
-    Deserialize(is, item.mValStr);
-    Deserialize(is, item.mValNum);
+    Deserialize(is, texture.mType);
+    Deserialize(is, texture.mKey);
+    Deserialize(is, texture.mVal);
 }
 
 //  RawMesh
@@ -95,14 +93,14 @@ void RawManager::RawProgram::Deserialize(std::ifstream & is)
 void RawManager::RawMaterial::Serialize(std::ofstream & os)
 {
     ::Serialize(os, mMesh);
-    ::Serialize(os, mItems);
+    ::Serialize(os, mTextures);
     ::Serialize(os, mProgram);
 }
 
 void RawManager::RawMaterial::Deserialize(std::ifstream & is)
 {
     ::Deserialize(is, mMesh);
-    ::Deserialize(is, mItems);
+    ::Deserialize(is, mTextures);
     ::Deserialize(is, mProgram);
 }
 
@@ -151,6 +149,29 @@ void RawManager::Init()
     _resObjectMap.clear();
 }
 
+void RawManager::Import(const std::string & url)
+{
+    ImportTypeEnum type = kImportTypeEnum;
+    auto name = string_tool::QueryFileSuffix(url);
+    for (auto i = 0u; i != SUFFIX_MAP.size(); ++i)
+    {
+        if (std::find(SUFFIX_MAP.at(i).begin(),
+            SUFFIX_MAP.at(i).end(), name)
+            != SUFFIX_MAP.at(i).end())
+        {
+            type = (ImportTypeEnum)i;
+        }
+    }
+    ASSERT_LOG(type != kImportTypeEnum, "Import Error. {0}", url);
+    switch (type)
+    {
+    case RawManager::kIMPORT_MODEL: ImportModel(url); break;
+    case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
+    case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
+    case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
+    }
+}
+
 void RawManager::BegImport(bool clear)
 {
     if (clear)
@@ -173,29 +194,6 @@ void RawManager::EndImport()
     std::ofstream os(MANIFEST_SLOT_URL, std::ios::binary);
     Serialize(os, _manifest);
     os.close();
-}
-
-void RawManager::Import(const std::string & url)
-{
-    ImportTypeEnum type = kImportTypeEnum;
-    auto name = string_tool::QueryFileSuffix(url);
-    for (auto i = 0u; i != SUFFIX_MAP.size(); ++i)
-    {
-        if (std::find(SUFFIX_MAP.at(i).begin(),
-                      SUFFIX_MAP.at(i).end(), name)
-                   != SUFFIX_MAP.at(i).end())
-        {
-            type = (ImportTypeEnum)i;
-        }
-    }
-    ASSERT_LOG(type != kImportTypeEnum, "Import Error. {0}", url);
-    switch (type)
-    {
-    case RawManager::kIMPORT_MODEL: ImportModel(url); break;
-    case RawManager::kIMPORT_IMAGE: ImportImage(url); break;
-    case RawManager::kIMPORT_PROGRAM: ImportProgram(url); break;
-    case RawManager::kIMPORT_MATERIAL: ImportMaterial(url); break;
-    }
 }
 
 RawManager::Raw * RawManager::LoadRaw(const std::string & name)
@@ -744,21 +742,21 @@ void RawManager::ImportMaterial(const std::string & url)
     RawMaterial rawMaterial;
     rawMaterial.mMesh       = json->At("mesh")->ToString();
     rawMaterial.mProgram    = json->At("program")->ToString();
-    for (auto jitem : json->At("items"))
+    for (auto value : json->At("textures"))
     {
-        RawMaterial::Item item;
-        item.mKey = jitem.mValue->At("key")->ToString();
-        if      (jitem.mValue->At("type")->ToString() == "tex2d")
+        RawMaterial::Texture texture;
+        texture.mKey = value.mValue->At("key")->ToString();
+        if (value.mValue->At("type")->ToString() == "tex2d")
         {
-            item.mType = GLMaterial::Item::kTEX2D;
-            item.mValStr = jitem.mValue->At("val")->ToString();
+            texture.mType = GLMaterial::Texture::kTEX2D;
+            texture.mVal = value.mValue->At("val")->ToString();
         }
-        else if (jitem.mValue->At("type")->ToString() == "tex3d")
+        else if (value.mValue->At("type")->ToString() == "tex3d")
         {
-            item.mType = GLMaterial::Item::kTEX3D;
-            item.mValStr = jitem.mValue->At("val")->ToString();
+            texture.mType = GLMaterial::Texture::kTEX3D;
+            texture.mVal = value.mValue->At("val")->ToString();
         }
-        rawMaterial.mItems.push_back(item);
+        rawMaterial.mTextures.push_back(texture);
     }
 
     //  Write File
@@ -826,15 +824,11 @@ GLRes * RawManager::LoadResMaterial(const std::string & name)
     auto res = new GLMaterial();
     res->SetMesh(   LoadRes<GLMesh>      (raw->mMesh));
     res->SetProgram(LoadRes<GLProgram>(raw->mProgram));
-    for (auto & item : raw->mItems)
+    for (auto & texture : raw->mTextures)
     {
-        switch (item.mType)
+        switch (texture.mType)
         {
-        case GLMaterial::Item::kTEX2D:
-            {
-                res->SetItem(item.mKey, LoadRes<GLTexture2D>(item.mValStr));
-            }
-            break;
+        case GLMaterial::Texture::kTEX2D: { res->SetTexture(texture.mKey, LoadRes<GLTexture2D>(texture.mVal)); } break;
         }
     }
     _resObjectMap.insert(std::make_pair(name, res));
